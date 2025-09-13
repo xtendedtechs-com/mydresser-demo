@@ -160,10 +160,20 @@ export const useUserPreferences = () => {
   const updatePreferences = async (updates: Partial<UserPreferences>) => {
     if (!user) return;
 
-    const newPreferences = { ...preferences, ...updates };
-    setPreferences(newPreferences);
-
     try {
+      // Merge updates with current preferences
+      const newPreferences = {
+        theme: { ...preferences.theme, ...(updates.theme || {}) },
+        notifications: { ...preferences.notifications, ...(updates.notifications || {}) },
+        privacy: { ...preferences.privacy, ...(updates.privacy || {}) },
+        app_behavior: { ...preferences.app_behavior, ...(updates.app_behavior || {}) },
+        suggestion_settings: { ...preferences.suggestion_settings, ...(updates.suggestion_settings || {}) },
+      };
+
+      // Update state optimistically
+      setPreferences(newPreferences);
+
+      // Save to database
       const { error } = await supabase
         .from('user_preferences')
         .upsert({
@@ -194,8 +204,8 @@ export const useUserPreferences = () => {
         description: "Please try again.",
         variant: "destructive",
       });
-      // Revert optimistic update
-      fetchPreferences();
+      // Revert optimistic update on error
+      await fetchPreferences();
     }
   };
 

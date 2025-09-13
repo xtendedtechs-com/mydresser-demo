@@ -250,4 +250,94 @@
   .hover-glow {
     @apply transition-[var(--transition-smooth)] hover:shadow-[var(--shadow-glow)];
   }
+
+  /* Responsive Design Utilities */
+  .responsive-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .responsive-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6;
+  }
+
+  .responsive-flex {
+    @apply flex flex-col sm:flex-row items-start sm:items-center gap-4;
+  }
+
+  /* Profile Photo Styles */
+  .profile-photo-upload {
+    @apply relative overflow-hidden rounded-full;
+  }
+
+  .profile-photo-upload:hover .upload-overlay {
+    @apply opacity-100;
+  }
+
+  .upload-overlay {
+    @apply absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 transition-opacity;
+  }
+
+  /* Wardrobe Item Hover Effects */
+  .wardrobe-item-card {
+    @apply transition-all duration-200 hover:scale-105 hover:shadow-lg;
+  }
+
+  /* Enhanced Buttons */
+  .btn-gradient {
+    background: var(--gradient-primary);
+    @apply text-white border-0 hover:opacity-90;
+  }
+
+  /* Mobile Optimizations */
+  @media (max-width: 640px) {
+    .mobile-padding {
+      @apply px-4;
+    }
+    
+    .mobile-stack {
+      @apply flex-col space-y-2;
+    }
+    
+    .mobile-full-width {
+      @apply w-full;
+    }
+  }
+
+  /* Desktop Optimizations */
+  @media (min-width: 1024px) {
+    .desktop-grid {
+      @apply grid-cols-3;
+    }
+    
+    .desktop-sidebar {
+      @apply col-span-1;
+    }
+    
+    .desktop-main {
+      @apply col-span-2;
+    }
+  }
+
+  /* Storage and Upload Indicators */
+  .upload-progress {
+    @apply absolute bottom-2 left-2 right-2 bg-primary/20 rounded-full h-1;
+  }
+
+  .upload-progress::after {
+    content: '';
+    @apply absolute left-0 top-0 h-full bg-primary rounded-full transition-all duration-300;
+    width: var(--progress, 0%);
+  }
+
+  /* Accessibility Improvements */
+  .focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2;
+  }
+
+  /* Print Styles */
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+  }
 }

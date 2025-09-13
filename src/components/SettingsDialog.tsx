@@ -39,8 +39,20 @@ const SettingsDialog = ({ open, onOpenChange, settingType, title, description }:
   const { toast } = useToast();
 
   const handleSave = async () => {
-    await updatePreferences(preferences);
-    onOpenChange(false);
+    try {
+      await updatePreferences(preferences);
+      toast({
+        title: "Settings saved",
+        description: "Your preferences have been updated successfully.",
+      });
+      onOpenChange(false);
+    } catch (error) {
+      toast({
+        title: "Error saving settings",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const renderAccountSettings = () => (

@@ -2,13 +2,15 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Search, Palette, ChevronRight } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, Palette, ChevronRight, Shirt } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import ProfileHeader from "@/components/ProfileHeader";
 import SettingsSection from "@/components/SettingsSection";
 import ProfileEditDialog from "@/components/ProfileEditDialog";
 import SettingsDialog from "@/components/SettingsDialog";
 import ServiceSettingsDialog from "@/components/ServiceSettingsDialog";
+import WardrobeManager from "@/components/WardrobeManager";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -225,11 +227,11 @@ const Account = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="px-4 py-6 space-y-6">
+    <div className="min-h-screen bg-background pb-20 lg:pb-0">
+      <div className="max-w-4xl mx-auto px-4 py-6 lg:py-8 space-y-6">
         {/* Header */}
-        <div className="text-center">
-          <h1 className="text-2xl font-bold fashion-text-gradient flex items-center justify-center gap-2">
+        <div className="text-center lg:text-left">
+          <h1 className="text-2xl lg:text-3xl font-bold fashion-text-gradient flex items-center justify-center lg:justify-start gap-2">
             <span>👤</span>
             MYDRESSER ACCOUNT
           </h1>
@@ -238,38 +240,69 @@ const Account = () => {
         {/* Profile Header */}
         <ProfileHeader profile={profile} />
 
-        {/* Search Bar */}
-        <Card className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="What would you like to do?"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-              <Palette className="w-4 h-4 mr-2" />
-              MY STYLE
-            </Button>
-          </div>
-        </Card>
+        {/* Desktop Layout */}
+        <div className="lg:grid lg:grid-cols-3 lg:gap-8 space-y-6 lg:space-y-0">
+          {/* Left Column - Profile & Quick Actions */}
+          <div className="lg:col-span-1 space-y-6">
+            <ProfileHeader profile={profile} />
+            
+            {/* Search Bar */}
+            <Card className="p-4">
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <div className="relative flex-1 w-full">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                  <Input
+                    placeholder="What would you like to do?"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <Button className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90">
+                  <Palette className="w-4 h-4 mr-2" />
+                  MY STYLE
+                </Button>
+              </div>
+            </Card>
 
-        {/* Data Collection Notice */}
-        <Card className="p-4 bg-accent/30">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Data collection & processing</span>
-            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            {/* Data Collection Notice */}
+            <Card className="p-4 bg-accent/30">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Data collection & processing</span>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </div>
+            </Card>
           </div>
-        </Card>
 
-        {/* Settings Sections */}
-        <SettingsSection title="Account" items={accountSettings} />
-        <SettingsSection title="App" items={appSettings} />
-        <SettingsSection title="Personalization" items={personalizationSettings} />
-        <SettingsSection title="Services settings" items={serviceSettings} />
+          {/* Right Column - Settings & Wardrobe */}
+          <div className="lg:col-span-2 space-y-6">
+            <Tabs defaultValue="settings" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="settings" className="flex items-center gap-2">
+                  <Palette className="w-4 h-4" />
+                  Settings
+                </TabsTrigger>
+                <TabsTrigger value="wardrobe" className="flex items-center gap-2">
+                  <Shirt className="w-4 h-4" />
+                  Wardrobe
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="settings" className="space-y-6 mt-6">
+                <div className="grid gap-6">
+                  <SettingsSection title="Account" items={accountSettings} />
+                  <SettingsSection title="App" items={appSettings} />
+                  <SettingsSection title="Personalization" items={personalizationSettings} />
+                  <SettingsSection title="Services settings" items={serviceSettings} />
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="wardrobe" className="mt-6">
+                <WardrobeManager />
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
 
         {/* Sign Out */}
         <div className="pt-6">

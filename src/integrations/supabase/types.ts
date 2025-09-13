@@ -1049,6 +1049,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      create_sample_wardrobe_items: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_merchant_profile_public: {
         Args: { profile_user_id?: string }
         Returns: {

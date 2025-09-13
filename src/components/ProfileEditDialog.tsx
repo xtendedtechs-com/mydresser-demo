@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,10 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useProfile, UserProfile } from "@/hooks/useProfile";
 import { useContactInfo } from "@/hooks/useContactInfo";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, User, Mail, MapPin, Instagram, Facebook } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2, User, Mail, MapPin, Instagram, Facebook, Camera, Upload } from "lucide-react";
 
 interface ProfileEditDialogProps {
   open: boolean;
@@ -21,6 +23,8 @@ const ProfileEditDialog = ({ open, onOpenChange }: ProfileEditDialogProps) => {
   const { contactInfo, updateContactInfo } = useContactInfo();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Profile form state
   const [formData, setFormData] = useState({
@@ -38,6 +42,69 @@ const ProfileEditDialog = ({ open, onOpenChange }: ProfileEditDialogProps) => {
     social_facebook: contactInfo?.social_facebook || "",
     social_tiktok: contactInfo?.social_tiktok || "",
   });
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !profile) return;
+
+    // Validate file size (10MB max)
+    if (file.size > 10485760) {
+      toast({
+        title: "File too large",
+        description: "Please select an image smaller than 10MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file type
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select a JPEG, PNG, or WebP image.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      // Create a unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${profile.user_id}/avatar.${fileExt}`;
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('profile-photos')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('profile-photos')
+        .getPublicUrl(fileName);
+
+      // Update form data with new avatar URL
+      setFormData({ ...formData, avatar_url: urlData.publicUrl });
+
+      toast({
+        title: "Photo uploaded successfully",
+        description: "Your profile photo has been updated.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error uploading photo",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!profile) return;
@@ -91,6 +158,56 @@ const ProfileEditDialog = ({ open, onOpenChange }: ProfileEditDialogProps) => {
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Basic Information</h3>
             
+            {/* Profile Photo Section */}
+            <div className="space-y-4">
+              <Label>Profile Photo</Label>
+              <div className="flex items-center gap-4">
+                <Avatar className="w-20 h-20">
+                  <AvatarImage src={formData.avatar_url} />
+                  <AvatarFallback>
+                    <User className="w-8 h-8" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="space-y-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                  >
+                    {uploading ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Camera className="w-4 h-4 mr-2" />
+                    )}
+                    {uploading ? "Uploading..." : "Upload Photo"}
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    JPEG, PNG, or WebP. Max 10MB.
+                  </p>
+                </div>
+              </div>
+              
+              {/* Alternative URL input */}
+              <div className="space-y-2">
+                <Label htmlFor="avatar_url">Or enter image URL</Label>
+                <Input
+                  id="avatar_url"
+                  value={formData.avatar_url}
+                  onChange={(e) => setFormData({ ...formData, avatar_url: e.target.value })}
+                  placeholder="https://example.com/avatar.jpg"
+                />
+              </div>
+            </div>
+            
             <div className="space-y-2">
               <Label htmlFor="full_name">Full Name</Label>
               <Input
@@ -124,16 +241,6 @@ const ProfileEditDialog = ({ open, onOpenChange }: ProfileEditDialogProps) => {
                   className="pl-10"
                 />
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="avatar_url">Avatar URL</Label>
-              <Input
-                id="avatar_url"
-                value={formData.avatar_url}
-                onChange={(e) => setFormData({ ...formData, avatar_url: e.target.value })}
-                placeholder="https://example.com/avatar.jpg"
-              />
             </div>
 
             <div className="flex items-center space-x-2">
