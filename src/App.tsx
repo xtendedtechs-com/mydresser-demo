@@ -3,12 +3,14 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Home from "@/pages/Home";
 import Wardrobe from "@/pages/Wardrobe";
 import Account from "@/pages/Account";
+import Auth from "@/pages/Auth";
 import NotFound from "./pages/NotFound";
+import { useProfile } from "@/hooks/useProfile";
 
 const queryClient = new QueryClient();
 
@@ -29,8 +31,29 @@ const Add = () => (
 
 const App = () => {
   const [activeTab, setActiveTab] = useState("home");
+  const { isAuthenticated, loading } = useProfile();
+
+  // Check for auth route
+  const isAuthRoute = window.location.pathname === '/auth';
+
+  useEffect(() => {
+    // Redirect to home if authenticated and on auth page
+    if (isAuthenticated && isAuthRoute) {
+      window.location.href = '/';
+    }
+  }, [isAuthenticated, isAuthRoute]);
 
   const renderContent = () => {
+    // Show auth page if not authenticated and trying to access account
+    if (!isAuthenticated && activeTab === "account") {
+      return <Auth />;
+    }
+
+    // Show auth page if on auth route
+    if (isAuthRoute) {
+      return <Auth />;
+    }
+
     switch (activeTab) {
       case "home":
         return <Home />;

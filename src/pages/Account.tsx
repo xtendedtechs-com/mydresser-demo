@@ -55,7 +55,7 @@ const Account = () => {
         <div className="text-center space-y-4">
           <h1 className="text-2xl font-bold">Please sign in</h1>
           <p className="text-muted-foreground">You need to be signed in to view your account.</p>
-          <Button onClick={() => supabase.auth.signInWithOAuth({ provider: 'google' })}>
+          <Button onClick={() => window.location.href = '/auth'}>
             Sign In
           </Button>
         </div>
