@@ -373,6 +373,7 @@ export type Database = {
           business_type: string | null
           contact_info: Json | null
           created_at: string
+          encryption_salt: string | null
           id: string
           tax_id: string | null
           updated_at: string
@@ -385,6 +386,7 @@ export type Database = {
           business_type?: string | null
           contact_info?: Json | null
           created_at?: string
+          encryption_salt?: string | null
           id?: string
           tax_id?: string | null
           updated_at?: string
@@ -397,6 +399,7 @@ export type Database = {
           business_type?: string | null
           contact_info?: Json | null
           created_at?: string
+          encryption_salt?: string | null
           id?: string
           tax_id?: string | null
           updated_at?: string
@@ -1053,8 +1056,16 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      decrypt_business_data: {
+        Args: { business_salt?: string; encrypted_text: string }
+        Returns: string
+      }
       decrypt_mfa_secret: {
         Args: { encrypted_text: string; user_salt?: string }
+        Returns: string
+      }
+      encrypt_business_data: {
+        Args: { business_salt?: string; data_text: string }
         Returns: string
       }
       encrypt_mfa_secret: {
@@ -1155,6 +1166,16 @@ export type Database = {
         Args: { code: string }
         Returns: string
       }
+      insert_encrypted_merchant_profile: {
+        Args: {
+          business_address_param?: Json
+          business_name_param: string
+          business_type_param?: string
+          contact_info_param?: Json
+          tax_id_param?: string
+        }
+        Returns: string
+      }
       log_merchant_sensitive_access: {
         Args: { accessed_fields: string[]; merchant_profile_id: string }
         Returns: boolean
@@ -1167,6 +1188,17 @@ export type Database = {
           setup_type: string
         }
         Returns: Json
+      }
+      update_encrypted_merchant_profile: {
+        Args: {
+          business_address_param?: Json
+          business_name_param?: string
+          business_type_param?: string
+          contact_info_param?: Json
+          profile_id_param: string
+          tax_id_param?: string
+        }
+        Returns: boolean
       }
       update_mfa_status: {
         Args: { enable_totp?: boolean; verify_phone?: boolean }
