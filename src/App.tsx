@@ -37,17 +37,38 @@ const App = () => {
     }
   }, [isAuthenticated, isAuthRoute]);
 
+  // Show loading spinner while checking authentication
+  if (loading) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <div className="min-h-screen bg-background flex items-center justify-center">
+            <div className="text-center space-y-4">
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+              <p className="text-muted-foreground">Loading...</p>
+            </div>
+          </div>
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  }
+
+  // Show auth page if not authenticated (except for auth route itself)
+  if (!isAuthenticated) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Auth />
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  }
+
   const renderContent = () => {
-    // Show auth page if not authenticated and trying to access account
-    if (!isAuthenticated && activeTab === "account") {
-      return <Auth />;
-    }
-
-    // Show auth page if on auth route
-    if (isAuthRoute) {
-      return <Auth />;
-    }
-
     switch (activeTab) {
       case "home":
         return <Home />;
