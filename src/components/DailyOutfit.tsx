@@ -15,35 +15,25 @@ import {
   Star,
   Edit3,
   MapPin,
-  Sparkles
+  Sparkles,
+  Loader2,
+  RefreshCw
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSocial } from "@/hooks/useSocial";
 import ReactionButton from "@/components/ReactionButton";
+import { useWardrobe, WardrobeItem } from "@/hooks/useWardrobe";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { outfitGenerator, OutfitContext, GeneratedOutfit } from "@/services/outfitGenerator";
+import { weatherService, WeatherData } from "@/services/weatherService";
 
-interface OutfitItem {
-  id: string;
-  name: string;
-  category: string;
-  brand?: string;
-  color?: string;
-  image?: string;
-  type: 'top' | 'bottom' | 'shoes' | 'accessory' | 'outerwear';
+interface OutfitItem extends WardrobeItem {
+  // Additional properties specific to outfit display can be added here
 }
 
-interface DailyOutfitData {
-  id: string;
-  name: string;
-  occasion: string;
+interface DailyOutfitData extends GeneratedOutfit {
   timeSlot: string;
-  weatherConditions: {
-    temperature: number;
-    condition: string;
-    humidity?: number;
-  };
-  items: OutfitItem[];
-  confidence: number;
-  reasoning: string;
+  weatherConditions: WeatherData;
   nextUpdate: string;
   photo?: string;
 }
@@ -53,84 +43,116 @@ const DailyOutfit = () => {
   const [showDetails, setShowDetails] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
+  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [dislikedOutfits, setDislikedOutfits] = useState<string[]>([]);
   const { toast } = useToast();
   const { addReaction, removeReaction } = useSocial();
+  const { items, loading: wardrobeLoading } = useWardrobe();
+  const { preferences, loading: preferencesLoading } = useUserPreferences();
 
   useEffect(() => {
-    // Load user photo and initial outfit
-    loadUserPhoto();
-    generateOutfit();
+    initializeOutfit();
   }, []);
 
+  useEffect(() => {
+    if (!wardrobeLoading && !preferencesLoading && items.length > 0) {
+      generateOutfit();
+    }
+  }, [wardrobeLoading, preferencesLoading, items]);
+
+  const initializeOutfit = async () => {
+    await loadWeather();
+    loadUserPhoto();
+    
+    // Load disliked outfits from localStorage
+    const saved = localStorage.getItem('dislikedOutfits');
+    if (saved) {
+      setDislikedOutfits(JSON.parse(saved));
+    }
+  };
+
   const loadUserPhoto = async () => {
-    // In a real implementation, this would load from user profile
-    // For now, we'll use a placeholder
+    // Load from user profile or use placeholder
     setUserPhoto("/api/placeholder/300/400");
   };
 
+  const loadWeather = async () => {
+    try {
+      const weatherData = await weatherService.getCurrentWeather();
+      setWeather(weatherData);
+    } catch (error) {
+      console.warn('Failed to load weather:', error);
+    }
+  };
+
   const generateOutfit = async () => {
+    if (!items || items.length === 0) {
+      toast({
+        title: "No wardrobe items found",
+        description: "Add some clothes to your wardrobe to get outfit suggestions!",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsGenerating(true);
     try {
-      // Simulate AI outfit generation
-      // In production, this would call your AI service
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const mockOutfit: DailyOutfitData = {
-        id: `outfit-${Date.now()}`,
-        name: "Professional Chic",
-        occasion: "Work Meeting",
-        timeSlot: "9:00 AM - 5:00 PM",
-        weatherConditions: {
-          temperature: 22,
-          condition: "Partly Cloudy",
-          humidity: 65
+      // Determine current context
+      const currentHour = new Date().getHours();
+      let timeOfDay: 'morning' | 'afternoon' | 'evening' | 'night';
+      if (currentHour < 12) timeOfDay = 'morning';
+      else if (currentHour < 17) timeOfDay = 'afternoon';
+      else if (currentHour < 22) timeOfDay = 'evening';
+      else timeOfDay = 'night';
+
+      // Get occasion from preferences or default to casual
+      const occasion = preferences?.notifications?.outfit_suggestions ? 'work' : 'casual';
+
+      const context: OutfitContext = {
+        weather: weather || {
+          temperature: 20,
+          condition: 'mild',
+          humidity: 60
         },
-        items: [
-          {
-            id: "1",
-            name: "Classic White Button-Down",
-            category: "Shirts",
-            brand: "COS",
-            color: "White",
-            type: "top",
-            image: "/api/placeholder/200/250"
-          },
-          {
-            id: "2", 
-            name: "High-Waisted Trousers",
-            category: "Pants",
-            brand: "Zara",
-            color: "Navy",
-            type: "bottom",
-            image: "/api/placeholder/200/250"
-          },
-          {
-            id: "3",
-            name: "Leather Pumps",
-            category: "Shoes",
-            brand: "Cole Haan",
-            color: "Black",
-            type: "shoes",
-            image: "/api/placeholder/200/250"
-          },
-          {
-            id: "4",
-            name: "Structured Blazer",
-            category: "Jackets",
-            brand: "Massimo Dutti",
-            color: "Navy",
-            type: "outerwear",
-            image: "/api/placeholder/200/250"
-          }
-        ],
-        confidence: 92,
-        reasoning: "Perfect for your 2 PM client presentation. The structured blazer adds authority while the classic pieces ensure comfort throughout your busy day.",
-        nextUpdate: "7:00 PM (Evening Casual)",
+        occasion,
+        timeOfDay,
+        userPreferences: {
+          favoriteColors: [], // Could be extracted from wardrobe analysis
+          preferredBrands: [], // Could be extracted from item analysis
+          styleProfile: preferences?.theme?.mode || 'casual',
+        },
+        previousOutfits: dislikedOutfits
+      };
+
+      // Generate outfit using the intelligent service
+      const generatedOutfit = outfitGenerator.generateOutfit(items, context);
+      
+      // Convert to DailyOutfitData format
+      const outfitData: DailyOutfitData = {
+        ...generatedOutfit,
+        timeSlot: getTimeSlot(timeOfDay),
+        weatherConditions: weather || {
+          temperature: 20,
+          condition: 'Mild',
+          humidity: 60,
+          windSpeed: 5,
+          description: 'Pleasant weather',
+          icon: '🌤️',
+          feelsLike: 20,
+          location: 'Current Location'
+        },
+        nextUpdate: getNextUpdate(timeOfDay),
         photo: "/api/placeholder/300/400"
       };
 
-      setOutfit(mockOutfit);
+      setOutfit(outfitData);
+      
+      toast({
+        title: "New outfit ready!",
+        description: `${outfitData.confidence}% match - ${outfitData.name}`,
+      });
     } catch (error) {
+      console.error('Outfit generation error:', error);
       toast({
         title: "Error generating outfit",
         description: "Failed to create your daily outfit. Please try again.",
@@ -139,6 +161,26 @@ const DailyOutfit = () => {
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  const getTimeSlot = (timeOfDay: string): string => {
+    const slots = {
+      morning: '6:00 AM - 12:00 PM',
+      afternoon: '12:00 PM - 5:00 PM', 
+      evening: '5:00 PM - 10:00 PM',
+      night: '10:00 PM - 6:00 AM'
+    };
+    return slots[timeOfDay as keyof typeof slots] || '6:00 AM - 10:00 PM';
+  };
+
+  const getNextUpdate = (timeOfDay: string): string => {
+    const nextUpdates = {
+      morning: '12:00 PM (Lunch Break)',
+      afternoon: '6:00 PM (Evening Out)',
+      evening: '10:00 PM (Night In)',
+      night: '6:00 AM (New Day)'
+    };
+    return nextUpdates[timeOfDay as keyof typeof nextUpdates] || 'Later Today';
   };
 
   const handleLike = async () => {
@@ -159,11 +201,17 @@ const DailyOutfit = () => {
     if (!outfit) return;
     
     try {
+      // Add to disliked outfits to avoid in future
+      const newDisliked = [...dislikedOutfits, ...outfit.items.map(item => item.id)];
+      setDislikedOutfits(newDisliked);
+      localStorage.setItem('dislikedOutfits', JSON.stringify(newDisliked));
+      
       await addReaction("outfit", outfit.id, "dislike");
       toast({
         title: "Thanks for the feedback",
         description: "We'll avoid similar combinations in the future.",
       });
+      
       // Auto-generate new outfit after dislike
       generateOutfit();
     } catch (error) {
@@ -179,7 +227,7 @@ const DailyOutfit = () => {
     generateOutfit();
   };
 
-  const handleItemAction = (action: string, item?: OutfitItem) => {
+  const handleItemAction = (action: string, item?: WardrobeItem) => {
     const target = item ? item.name : "entire outfit";
     toast({
       title: `${action} ${target}`,
@@ -188,26 +236,70 @@ const DailyOutfit = () => {
   };
 
   const getWeatherIcon = (condition: string) => {
+    // Use weather service icon if available
+    if (weather?.icon) return weather.icon;
+    
     switch (condition.toLowerCase()) {
-      case 'sunny': return '☀️';
-      case 'cloudy': return '☁️';
-      case 'partly cloudy': return '⛅';
-      case 'rainy': return '🌧️';
-      case 'snowy': return '❄️';
+      case 'sunny': case 'clear': return '☀️';
+      case 'cloudy': case 'overcast': return '☁️';
+      case 'partly cloudy': case 'mainly clear': return '⛅';
+      case 'rainy': case 'rain': case 'shower': return '🌧️';
+      case 'snowy': case 'snow': return '❄️';
+      case 'thunderstorm': return '⛈️';
+      case 'foggy': case 'fog': return '🌫️';
       default: return '🌤️';
     }
   };
+
+  if (wardrobeLoading || preferencesLoading) {
+    return (
+      <Card className="p-6 bg-gradient-to-r from-primary/10 to-accent/10">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+          <div>
+            <h3 className="font-semibold">Loading Your Wardrobe</h3>
+            <p className="text-sm text-muted-foreground">
+              Preparing your personalized outfit suggestions...
+            </p>
+          </div>
+        </div>
+      </Card>
+    );
+  }
 
   if (!outfit) {
     return (
       <Card className="p-6 bg-gradient-to-r from-primary/10 to-accent/10">
         <div className="text-center space-y-4">
-          <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <div>
-            <h3 className="font-semibold">Generating Your Perfect Outfit</h3>
-            <p className="text-sm text-muted-foreground">
-              Analyzing your schedule, weather, and style preferences...
-            </p>
+          <div className="text-center space-y-4">
+            {isGenerating ? (
+              <>
+                <RefreshCw className="w-8 h-8 animate-spin mx-auto text-primary" />
+                <div>
+                  <h3 className="font-semibold">Creating Your Perfect Outfit</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Analyzing weather, occasion, and your style preferences...
+                  </p>
+                </div>
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-8 h-8 mx-auto text-primary" />
+                <div>
+                  <h3 className="font-semibold">Ready to Style You</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {items.length === 0 
+                      ? "Add some clothes to your wardrobe to get started!"
+                      : "Click generate to create your perfect outfit"}
+                  </p>
+                </div>
+                {items.length > 0 && (
+                  <Button onClick={generateOutfit} className="mt-4">
+                    Generate My Outfit
+                  </Button>
+                )}
+              </>
+            )}
           </div>
         </div>
       </Card>
@@ -238,10 +330,11 @@ const DailyOutfit = () => {
                   <Thermometer className="w-3 h-3" />
                   <span>{outfit.weatherConditions.temperature}°C</span>
                   <span>{getWeatherIcon(outfit.weatherConditions.condition)}</span>
+                  <span className="text-xs">feels {outfit.weatherConditions.feelsLike}°C</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <MapPin className="w-3 h-3" />
-                  <span>{outfit.occasion}</span>
+                  <span>{outfit.tags?.slice(0, 2).join(', ') || outfit.name}</span>
                 </div>
               </div>
             </div>
@@ -335,12 +428,16 @@ const DailyOutfit = () => {
                   <Card key={item.id} className="p-3 hover:shadow-md transition-shadow">
                     <div className="flex gap-3">
                       <div className="w-12 h-16 bg-muted rounded overflow-hidden flex-shrink-0">
-                        {item.image && (
+                        {item.photos && Array.isArray(item.photos) && item.photos[0] ? (
                           <img
-                            src={item.image}
+                            src={item.photos[0]}
                             alt={item.name}
                             className="w-full h-full object-cover"
                           />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
+                            {item.category.charAt(0).toUpperCase()}
+                          </div>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
