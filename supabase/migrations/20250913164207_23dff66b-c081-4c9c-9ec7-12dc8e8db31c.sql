@@ -1,0 +1,30 @@
+-- Create public wardrobe storage bucket and policies
+insert into storage.buckets (id, name, public)
+values ('wardrobe', 'wardrobe', true)
+on conflict (id) do nothing;
+
+-- Public read access to wardrobe bucket
+create policy if not exists "Public can read wardrobe images"
+on storage.objects
+for select
+using (bucket_id = 'wardrobe');
+
+-- Authenticated users can upload to their own folder (first path segment = user_id)
+create policy if not exists "Users can upload wardrobe images to their own folder"
+on storage.objects
+for insert
+with check (
+  bucket_id = 'wardrobe'
+  and auth.uid()::text = (storage.foldername(name))[1]
+);
+
+-- Authenticated users can update images in their own folder
+create policy if not exists "Users can update their own wardrobe images"
+on storage.objects
+for update
+using (
+  bucket_id = 'wardrobe' and auth.uid()::text = (storage.foldername(name))[1]
+)
+with check (
+  bucket_id = 'wardrobe' and auth.uid()::text = (storage.foldername(name))[1]
+);
