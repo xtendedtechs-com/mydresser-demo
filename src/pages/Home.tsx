@@ -61,11 +61,7 @@ const Home = () => {
       </header>
 
       <main className="px-4 py-6 space-y-8">
-        <DailyOutfit 
-          onRegenerate={() => handleOutfitAction("regenerate")}
-          onLike={() => handleOutfitAction("like")}
-          onDislike={() => handleOutfitAction("dislike")}
-        />
+        <DailyOutfit />
 
         <section>
           <h2 className="text-lg font-semibold mb-4">My Favorites</h2>
