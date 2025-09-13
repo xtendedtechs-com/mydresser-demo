@@ -8,7 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { useToast } from "@/hooks/use-toast";
+import EnhancedThemeSelector from "@/components/EnhancedThemeSelector";
 import { 
   Settings, 
   Shield, 
@@ -33,42 +35,11 @@ interface SettingsDialogProps {
 }
 
 const SettingsDialog = ({ open, onOpenChange, settingType, title, description }: SettingsDialogProps) => {
+  const { preferences, updatePreferences, loading } = useUserPreferences();
   const { toast } = useToast();
-  const [settings, setSettings] = useState({
-    notifications: {
-      email: true,
-      push: false,
-      outfit_suggestions: true,
-      new_items: false,
-      social_interactions: true,
-    },
-    privacy: {
-      profile_visibility: 'public',
-      show_wardrobe: false,
-      allow_messages: true,
-      show_activity: false,
-    },
-    theme: {
-      mode: 'system',
-      accent_color: 'default',
-      compact_mode: false,
-    },
-    data: {
-      export_format: 'json',
-      auto_backup: true,
-    },
-    behavior: {
-      auto_save: true,
-      show_tips: true,
-      compact_navigation: false,
-    }
-  });
 
-  const handleSave = () => {
-    toast({
-      title: "Settings saved",
-      description: `Your ${title.toLowerCase()} have been updated successfully.`,
-    });
+  const handleSave = async () => {
+    await updatePreferences(preferences);
     onOpenChange(false);
   };
 
@@ -129,10 +100,9 @@ const SettingsDialog = ({ open, onOpenChange, settingType, title, description }:
           <div className="space-y-2">
             <Label>Profile Visibility</Label>
             <Select 
-              value={settings.privacy.profile_visibility}
-              onValueChange={(value) => setSettings({
-                ...settings,
-                privacy: { ...settings.privacy, profile_visibility: value }
+              value={preferences.privacy.profile_visibility as "public" | "friends" | "private"}
+              onValueChange={(value: "public" | "friends" | "private") => updatePreferences({
+                privacy: { ...preferences.privacy, profile_visibility: value }
               })}
             >
               <SelectTrigger>
@@ -151,10 +121,9 @@ const SettingsDialog = ({ open, onOpenChange, settingType, title, description }:
               <p className="text-sm text-muted-foreground">Allow others to see your wardrobe items</p>
             </div>
             <Switch 
-              checked={settings.privacy.show_wardrobe}
-              onCheckedChange={(checked) => setSettings({
-                ...settings,
-                privacy: { ...settings.privacy, show_wardrobe: checked }
+              checked={preferences.privacy.show_wardrobe}
+              onCheckedChange={(checked) => updatePreferences({
+                privacy: { ...preferences.privacy, show_wardrobe: checked }
               })}
             />
           </div>
@@ -164,10 +133,9 @@ const SettingsDialog = ({ open, onOpenChange, settingType, title, description }:
               <p className="text-sm text-muted-foreground">Let other users send you messages</p>
             </div>
             <Switch 
-              checked={settings.privacy.allow_messages}
-              onCheckedChange={(checked) => setSettings({
-                ...settings,
-                privacy: { ...settings.privacy, allow_messages: checked }
+              checked={preferences.privacy.allow_messages}
+              onCheckedChange={(checked) => updatePreferences({
+                privacy: { ...preferences.privacy, allow_messages: checked }
               })}
             />
           </div>
@@ -193,10 +161,9 @@ const SettingsDialog = ({ open, onOpenChange, settingType, title, description }:
               <p className="text-sm text-muted-foreground">Receive notifications via email</p>
             </div>
             <Switch 
-              checked={settings.notifications.email}
-              onCheckedChange={(checked) => setSettings({
-                ...settings,
-                notifications: { ...settings.notifications, email: checked }
+              checked={preferences.notifications.email}
+              onCheckedChange={(checked) => updatePreferences({
+                notifications: { ...preferences.notifications, email: checked }
               })}
             />
           </div>
@@ -206,10 +173,9 @@ const SettingsDialog = ({ open, onOpenChange, settingType, title, description }:
               <p className="text-sm text-muted-foreground">Get push notifications on your device</p>
             </div>
             <Switch 
-              checked={settings.notifications.push}
-              onCheckedChange={(checked) => setSettings({
-                ...settings,
-                notifications: { ...settings.notifications, push: checked }
+              checked={preferences.notifications.push}
+              onCheckedChange={(checked) => updatePreferences({
+                notifications: { ...preferences.notifications, push: checked }
               })}
             />
           </div>
@@ -219,10 +185,9 @@ const SettingsDialog = ({ open, onOpenChange, settingType, title, description }:
               <p className="text-sm text-muted-foreground">Get personalized outfit recommendations</p>
             </div>
             <Switch 
-              checked={settings.notifications.outfit_suggestions}
-              onCheckedChange={(checked) => setSettings({
-                ...settings,
-                notifications: { ...settings.notifications, outfit_suggestions: checked }
+              checked={preferences.notifications.outfit_suggestions}
+              onCheckedChange={(checked) => updatePreferences({
+                notifications: { ...preferences.notifications, outfit_suggestions: checked }
               })}
             />
           </div>
@@ -232,10 +197,9 @@ const SettingsDialog = ({ open, onOpenChange, settingType, title, description }:
               <p className="text-sm text-muted-foreground">Notify when new items match your style</p>
             </div>
             <Switch 
-              checked={settings.notifications.new_items}
-              onCheckedChange={(checked) => setSettings({
-                ...settings,
-                notifications: { ...settings.notifications, new_items: checked }
+              checked={preferences.notifications.new_items}
+              onCheckedChange={(checked) => updatePreferences({
+                notifications: { ...preferences.notifications, new_items: checked }
               })}
             />
           </div>
@@ -244,74 +208,7 @@ const SettingsDialog = ({ open, onOpenChange, settingType, title, description }:
     </div>
   );
 
-  const renderThemeSettings = () => (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Palette className="w-4 h-4" />
-            Appearance
-          </CardTitle>
-          <CardDescription>Customize how the app looks and feels</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Theme Mode</Label>
-            <Select 
-              value={settings.theme.mode}
-              onValueChange={(value) => setSettings({
-                ...settings,
-                theme: { ...settings.theme, mode: value }
-              })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="light">Light</SelectItem>
-                <SelectItem value="dark">Dark</SelectItem>
-                <SelectItem value="system">System Default</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>Accent Color</Label>
-            <Select 
-              value={settings.theme.accent_color}
-              onValueChange={(value) => setSettings({
-                ...settings,
-                theme: { ...settings.theme, accent_color: value }
-              })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="default">Default</SelectItem>
-                <SelectItem value="purple">Purple</SelectItem>
-                <SelectItem value="blue">Blue</SelectItem>
-                <SelectItem value="green">Green</SelectItem>
-                <SelectItem value="orange">Orange</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <Label>Compact Mode</Label>
-              <p className="text-sm text-muted-foreground">Use more compact interface</p>
-            </div>
-            <Switch 
-              checked={settings.theme.compact_mode}
-              onCheckedChange={(checked) => setSettings({
-                ...settings,
-                theme: { ...settings.theme, compact_mode: checked }
-              })}
-            />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
+  const renderThemeSettings = () => <EnhancedThemeSelector />;
 
   const renderBehaviorSettings = () => (
     <div className="space-y-6">
@@ -330,10 +227,9 @@ const SettingsDialog = ({ open, onOpenChange, settingType, title, description }:
               <p className="text-sm text-muted-foreground">Automatically save your changes</p>
             </div>
             <Switch 
-              checked={settings.behavior.auto_save}
-              onCheckedChange={(checked) => setSettings({
-                ...settings,
-                behavior: { ...settings.behavior, auto_save: checked }
+              checked={preferences.app_behavior.auto_save}
+              onCheckedChange={(checked) => updatePreferences({
+                app_behavior: { ...preferences.app_behavior, auto_save: checked }
               })}
             />
           </div>
@@ -343,10 +239,9 @@ const SettingsDialog = ({ open, onOpenChange, settingType, title, description }:
               <p className="text-sm text-muted-foreground">Display helpful tips and tutorials</p>
             </div>
             <Switch 
-              checked={settings.behavior.show_tips}
-              onCheckedChange={(checked) => setSettings({
-                ...settings,
-                behavior: { ...settings.behavior, show_tips: checked }
+              checked={preferences.app_behavior.show_tips}
+              onCheckedChange={(checked) => updatePreferences({
+                app_behavior: { ...preferences.app_behavior, show_tips: checked }
               })}
             />
           </div>
@@ -356,10 +251,9 @@ const SettingsDialog = ({ open, onOpenChange, settingType, title, description }:
               <p className="text-sm text-muted-foreground">Use a more compact navigation bar</p>
             </div>
             <Switch 
-              checked={settings.behavior.compact_navigation}
-              onCheckedChange={(checked) => setSettings({
-                ...settings,
-                behavior: { ...settings.behavior, compact_navigation: checked }
+              checked={preferences.app_behavior.compact_navigation}
+              onCheckedChange={(checked) => updatePreferences({
+                app_behavior: { ...preferences.app_behavior, compact_navigation: checked }
               })}
             />
           </div>
@@ -382,11 +276,7 @@ const SettingsDialog = ({ open, onOpenChange, settingType, title, description }:
           <div className="space-y-2">
             <Label>Export Format</Label>
             <Select 
-              value={settings.data.export_format}
-              onValueChange={(value) => setSettings({
-                ...settings,
-                data: { ...settings.data, export_format: value }
-              })}
+              defaultValue="json"
             >
               <SelectTrigger>
                 <SelectValue />
@@ -403,13 +293,7 @@ const SettingsDialog = ({ open, onOpenChange, settingType, title, description }:
               <Label>Auto Backup</Label>
               <p className="text-sm text-muted-foreground">Automatically backup your data</p>
             </div>
-            <Switch 
-              checked={settings.data.auto_backup}
-              onCheckedChange={(checked) => setSettings({
-                ...settings,
-                data: { ...settings.data, auto_backup: checked }
-              })}
-            />
+            <Switch defaultChecked />
           </div>
           <div className="flex justify-between pt-4">
             <Button variant="outline">Export Data</Button>

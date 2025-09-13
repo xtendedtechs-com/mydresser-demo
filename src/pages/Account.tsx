@@ -8,6 +8,7 @@ import ProfileHeader from "@/components/ProfileHeader";
 import SettingsSection from "@/components/SettingsSection";
 import ProfileEditDialog from "@/components/ProfileEditDialog";
 import SettingsDialog from "@/components/SettingsDialog";
+import ServiceSettingsDialog from "@/components/ServiceSettingsDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -25,6 +26,7 @@ const Account = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [profileEditOpen, setProfileEditOpen] = useState(false);
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
+  const [serviceDialogOpen, setServiceDialogOpen] = useState(false);
   const [currentSetting, setCurrentSetting] = useState({ type: '', title: '', description: '' });
 
   const handleSignOut = async () => {
@@ -156,42 +158,47 @@ const Account = () => {
     }
   ];
 
+  const openServiceDialog = (type: string, title: string, description: string) => {
+    setCurrentSetting({ type, title, description });
+    setServiceDialogOpen(true);
+  };
+
   const serviceSettings: SettingItem[] = [
     {
       id: 'weather',
       label: 'Weather settings',
       description: 'Configure weather-based recommendations',
-      onClick: () => toast({ title: "Coming soon", description: "Weather settings will be available soon." })
+      onClick: () => openServiceDialog('weather', 'Weather Settings', 'Configure weather-based outfit recommendations')
     },
     {
       id: 'outfit',
       label: "Today's Outfit",
       description: 'Daily outfit generation settings',
-      onClick: () => toast({ title: "Coming soon", description: "Outfit settings will be available soon." })
+      onClick: () => openServiceDialog('outfit', 'Outfit Settings', 'Customize your daily outfit recommendations')
     },
     {
       id: 'wardrobe',
       label: 'My Wardrobe',
       description: 'Wardrobe management settings',
-      onClick: () => toast({ title: "Coming soon", description: "Wardrobe settings will be available soon." })
+      onClick: () => openServiceDialog('wardrobe', 'Wardrobe Settings', 'Configure your wardrobe organization and preferences')
     },
     {
       id: 'inventory',
       label: 'Inventory',
       description: 'Manage your clothing inventory',
-      onClick: () => toast({ title: "Coming soon", description: "Inventory settings will be available soon." })
+      onClick: () => openServiceDialog('wardrobe', 'Inventory Management', 'Organize and track your clothing items')
     },
     {
       id: 'market',
       label: 'Market & 2ndDresser',
       description: 'Marketplace and second-hand settings',
-      onClick: () => toast({ title: "Coming soon", description: "Market settings will be available soon." })
+      onClick: () => openServiceDialog('market', 'Market Settings', 'Configure marketplace and second-hand preferences')
     },
     {
       id: 'assistant',
       label: 'AI Assistant',
       description: 'AI styling assistant settings',
-      onClick: () => toast({ title: "Coming soon", description: "AI Assistant settings will be available soon." })
+      onClick: () => openServiceDialog('assistant', 'AI Assistant', 'Customize your AI styling assistant preferences')
     }
   ];
 
@@ -285,6 +292,13 @@ const Account = () => {
         open={settingsDialogOpen}
         onOpenChange={setSettingsDialogOpen}
         settingType={currentSetting.type}
+        title={currentSetting.title}
+        description={currentSetting.description}
+      />
+      <ServiceSettingsDialog
+        open={serviceDialogOpen}
+        onOpenChange={setServiceDialogOpen}
+        serviceType={currentSetting.type}
         title={currentSetting.title}
         description={currentSetting.description}
       />

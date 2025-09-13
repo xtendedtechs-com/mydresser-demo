@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* MyDresser Design System - Fashion-forward colors and styles */
+/* MyDresser Design System - Enhanced Fashion-forward colors and styles */
 
 @layer base {
   :root {
@@ -34,23 +34,51 @@
     --input: 0 0% 90%;
     --ring: 0 0% 9%;
 
-    /* Fashion-specific design tokens */
+    /* Enhanced Fashion-specific design tokens */
     --fashion-orange: 25 95% 53%;
     --fashion-orange-light: 25 95% 65%;
     --fashion-neutral: 0 0% 96%;
     --fashion-dark: 0 0% 9%;
     --fashion-gray: 0 0% 45%;
     
-    /* Gradients */
+    /* Enhanced Gradient System */
+    --gradient-primary: linear-gradient(135deg, #fd7c2b, #ff9d5c);
     --gradient-warm: linear-gradient(135deg, hsl(var(--fashion-orange)), hsl(var(--fashion-orange-light)));
+    --gradient-cool: linear-gradient(135deg, #667eea, #764ba2);
+    --gradient-nature: linear-gradient(135deg, #56ab2f, #a8e6cf);
+    --gradient-sunset: linear-gradient(135deg, #ff6b6b, #ffd93d);
+    --gradient-ocean: linear-gradient(135deg, #74b9ff, #0984e3);
+    --gradient-royal: linear-gradient(135deg, #8e2de2, #4a00e0);
+    --gradient-forest: linear-gradient(135deg, #134e5e, #71b280);
+    --gradient-fire: linear-gradient(135deg, #f12711, #f5af19);
     --gradient-neutral: linear-gradient(180deg, hsl(var(--background)), hsl(var(--fashion-neutral)));
     
-    /* Shadows */
+    /* Blur Effects */
+    --blur-subtle: blur(8px);
+    --blur-medium: blur(16px);
+    --blur-strong: blur(24px);
+    --backdrop-blur: blur(12px) saturate(180%);
+    
+    /* Enhanced Shadows with Color */
     --shadow-card: 0 2px 10px hsl(0 0% 0% / 0.1);
     --shadow-elevated: 0 8px 25px hsl(0 0% 0% / 0.15);
+    --shadow-glow: 0 0 40px hsl(var(--fashion-orange) / 0.3);
+    --shadow-colored: 0 8px 32px hsl(var(--accent) / 0.2);
+    --shadow-deep: 0 20px 60px hsl(0 0% 0% / 0.2);
     
-    /* Transitions */
+    /* Advanced Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-spring: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    /* Glass Morphism */
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    
+    /* Dynamic Colors (customizable) */
+    --color-dynamic-1: #fd7c2b;
+    --color-dynamic-2: #ff9d5c;
+    --color-dynamic-3: #667eea;
 
     --radius: 0.5rem;
 
@@ -104,6 +132,12 @@
     --fashion-neutral: 0 0% 15%;
     --shadow-card: 0 2px 10px hsl(0 0% 0% / 0.3);
     --shadow-elevated: 0 8px 25px hsl(0 0% 0% / 0.5);
+    --shadow-glow: 0 0 40px hsl(var(--fashion-orange) / 0.4);
+    --shadow-colored: 0 8px 32px hsl(var(--accent) / 0.3);
+    
+    /* Dark Glass Morphism */
+    --glass-bg: rgba(0, 0, 0, 0.2);
+    --glass-border: rgba(255, 255, 255, 0.1);
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -126,8 +160,15 @@
 }
 
 @layer components {
+  /* Enhanced Component System */
   .fashion-card {
     @apply bg-card rounded-xl border border-border p-0 shadow-[var(--shadow-card)] transition-[var(--transition-smooth)] hover:shadow-[var(--shadow-elevated)];
+  }
+  
+  .fashion-card-glass {
+    @apply rounded-xl border border-[var(--glass-border)] p-0 shadow-[var(--shadow-card)] transition-[var(--transition-smooth)];
+    background: var(--glass-bg);
+    backdrop-filter: var(--backdrop-blur);
   }
   
   .fashion-button-primary {
@@ -138,11 +179,75 @@
     @apply bg-[hsl(var(--fashion-orange))] text-white rounded-lg px-6 py-3 font-medium transition-[var(--transition-smooth)] hover:bg-[hsl(var(--fashion-orange-light))];
   }
   
+  .fashion-button-gradient {
+    @apply text-white rounded-lg px-6 py-3 font-medium transition-[var(--transition-bounce)] hover:scale-105;
+    background: var(--gradient-primary);
+    box-shadow: var(--shadow-glow);
+  }
+  
   .fashion-grid {
     @apply grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4;
   }
   
   .fashion-text-gradient {
-    @apply bg-[var(--gradient-warm)] bg-clip-text text-transparent;
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-primary);
+  }
+  
+  /* Gradient Variations */
+  .gradient-warm { background: var(--gradient-warm); }
+  .gradient-cool { background: var(--gradient-cool); }
+  .gradient-nature { background: var(--gradient-nature); }
+  .gradient-sunset { background: var(--gradient-sunset); }
+  .gradient-ocean { background: var(--gradient-ocean); }
+  .gradient-royal { background: var(--gradient-royal); }
+  .gradient-forest { background: var(--gradient-forest); }
+  .gradient-fire { background: var(--gradient-fire); }
+  
+  /* Blur Effects */
+  .blur-effects .fashion-card-glass {
+    backdrop-filter: var(--backdrop-blur);
+  }
+  
+  .blur-effects .blur-bg {
+    backdrop-filter: var(--blur-medium);
+  }
+  
+  /* Compact Mode */
+  .compact-mode .fashion-card {
+    @apply p-2;
+  }
+  
+  .compact-mode .fashion-button-primary,
+  .compact-mode .fashion-button-accent {
+    @apply px-4 py-2 text-sm;
+  }
+  
+  /* Animation Classes */
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+  
+  @keyframes glow {
+    from { box-shadow: var(--shadow-card); }
+    to { box-shadow: var(--shadow-glow); }
+  }
+  
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  /* Hover Effects */
+  .hover-lift {
+    @apply transition-[var(--transition-smooth)] hover:scale-105 hover:shadow-[var(--shadow-elevated)];
+  }
+  
+  .hover-glow {
+    @apply transition-[var(--transition-smooth)] hover:shadow-[var(--shadow-glow)];
   }
 }
