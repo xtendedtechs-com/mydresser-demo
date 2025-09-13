@@ -1,7 +1,7 @@
-import MarketPlace from "@/components/MarketPlace";
+import UnifiedMarketplace from "@/components/UnifiedMarketplace";
 
 const Market = () => {
-  return <MarketPlace />;
+  return <UnifiedMarketplace />;
 };
 
 export default Market;
