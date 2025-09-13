@@ -1,4 +1,5 @@
 import AddItemWithMatching from "@/components/AddItemWithMatching";
+import ImportFromLink from "@/components/ImportFromLink";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,11 +28,14 @@ import { useToast } from "@/hooks/use-toast";
 const Add = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   const { toast } = useToast();
 
   const handleAddOption = (optionName: string) => {
     if (optionName === "Manual Item Entry") {
       setShowAddDialog(true);
+    } else if (optionName === "Link Import") {
+      setShowImportDialog(true);
     } else {
       toast({
         title: `${optionName} - Coming Soon!`,
@@ -262,6 +266,11 @@ const Add = () => {
         <AddItemWithMatching 
           open={showAddDialog} 
           onOpenChange={setShowAddDialog}
+        />
+        
+        <ImportFromLink 
+          open={showImportDialog} 
+          onOpenChange={setShowImportDialog}
         />
       </div>
     </div>
