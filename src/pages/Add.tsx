@@ -1,3 +1,4 @@
+import AddItemWithMatching from "@/components/AddItemWithMatching";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,13 +26,18 @@ import { useToast } from "@/hooks/use-toast";
 
 const Add = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [showAddDialog, setShowAddDialog] = useState(false);
   const { toast } = useToast();
 
   const handleAddOption = (optionName: string) => {
-    toast({
-      title: `${optionName} - Coming Soon!`,
-      description: `The ${optionName} feature will be available in a future update.`,
-    });
+    if (optionName === "Manual Item Entry") {
+      setShowAddDialog(true);
+    } else {
+      toast({
+        title: `${optionName} - Coming Soon!`,
+        description: `The ${optionName} feature will be available in a future update.`,
+      });
+    }
   };
 
   const itemOptions = [
@@ -252,6 +258,11 @@ const Add = () => {
             <p className="text-muted-foreground text-xs mt-1">Items you add will appear here for quick access</p>
           </div>
         </Card>
+
+        <AddItemWithMatching 
+          open={showAddDialog} 
+          onOpenChange={setShowAddDialog}
+        />
       </div>
     </div>
   );

@@ -60,19 +60,19 @@ export interface UserPreferences {
 const defaultPreferences: UserPreferences = {
   theme: {
     mode: 'system',
-    accent_color: 'default',
-    gradient_preset: 'warm',
+    accent_color: '#3b82f6',
+    gradient_preset: 'default',
     blur_effects: true,
     compact_mode: false,
     custom_colors: {
-      primary: '#000000',
-      secondary: '#f5f5f5', 
-      accent: '#fd7c2b',
+      primary: '#3b82f6',
+      secondary: '#64748b',
+      accent: '#8b5cf6',
     },
   },
   notifications: {
     email: true,
-    push: false,
+    push: true,
     outfit_suggestions: true,
     new_items: false,
     social_interactions: true,
@@ -116,40 +116,58 @@ export const useUserPreferences = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    // Apply theme on component mount and when theme changes
+    if (preferences.theme) {
+      applyTheme(preferences.theme);
+    }
+  }, [preferences.theme]);
+
   const fetchPreferences = async () => {
     if (!user) return;
     
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('user_preferences')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
-        throw error;
-      }
+      if (error) throw error;
 
       if (data) {
-        const safeTheme = data.theme && typeof data.theme === 'string' ? JSON.parse(data.theme) : {};
-        const safeNotifications = data.notifications && typeof data.notifications === 'object' && !Array.isArray(data.notifications) ? data.notifications : {};
-        const safePrivacy = data.privacy_settings && typeof data.privacy_settings === 'object' && !Array.isArray(data.privacy_settings) ? data.privacy_settings : {};
-        const safeBehavior = data.app_behavior && typeof data.app_behavior === 'object' && !Array.isArray(data.app_behavior) ? data.app_behavior : {};
-        const safeSuggestions = data.suggestion_settings && typeof data.suggestion_settings === 'object' && !Array.isArray(data.suggestion_settings) ? data.suggestion_settings : {};
+        // Parse the theme data properly
+        let parsedTheme = defaultPreferences.theme;
+        if (data.theme) {
+          try {
+            parsedTheme = typeof data.theme === 'string' ? JSON.parse(data.theme) : data.theme;
+          } catch (e) {
+            console.warn('Failed to parse theme data:', e);
+          }
+        }
 
-        setPreferences({
-          theme: { ...defaultPreferences.theme, ...safeTheme },
-          notifications: { ...defaultPreferences.notifications, ...safeNotifications },
-          privacy: { ...defaultPreferences.privacy, ...safePrivacy },
-          app_behavior: { ...defaultPreferences.app_behavior, ...safeBehavior },
-          suggestion_settings: { ...defaultPreferences.suggestion_settings, ...safeSuggestions },
-        });
+        const loadedPreferences: UserPreferences = {
+          theme: parsedTheme,
+          notifications: (data.notifications as any) || defaultPreferences.notifications,
+          privacy: (data.privacy_settings as any) || defaultPreferences.privacy,
+          app_behavior: (data.app_behavior as any) || defaultPreferences.app_behavior,
+          suggestion_settings: (data.suggestion_settings as any) || defaultPreferences.suggestion_settings,
+        };
+        
+        setPreferences(loadedPreferences);
+        
+        // Apply theme immediately after loading
+        applyTheme(loadedPreferences.theme);
+      } else {
+        // Create default preferences for new user
+        await createDefaultPreferences();
       }
     } catch (error) {
       console.error('Error fetching preferences:', error);
       toast({
         title: "Error loading preferences",
-        description: "Using default settings",
+        description: "Using default settings.",
         variant: "destructive",
       });
     } finally {
@@ -157,28 +175,44 @@ export const useUserPreferences = () => {
     }
   };
 
+  const createDefaultPreferences = async () => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('user_preferences')
+        .insert({
+          user_id: user.id,
+          theme: JSON.stringify(defaultPreferences.theme),
+          notifications: defaultPreferences.notifications,
+          privacy_settings: defaultPreferences.privacy,
+          app_behavior: defaultPreferences.app_behavior,
+          suggestion_settings: defaultPreferences.suggestion_settings,
+        });
+
+      if (error) throw error;
+      
+      setPreferences(defaultPreferences);
+      applyTheme(defaultPreferences.theme);
+    } catch (error) {
+      console.error('Error creating default preferences:', error);
+    }
+  };
+
   const updatePreferences = async (updates: Partial<UserPreferences>) => {
     if (!user) return;
 
     try {
-      // Merge updates with current preferences
-      const newPreferences = {
-        theme: { ...preferences.theme, ...(updates.theme || {}) },
-        notifications: { ...preferences.notifications, ...(updates.notifications || {}) },
-        privacy: { ...preferences.privacy, ...(updates.privacy || {}) },
-        app_behavior: { ...preferences.app_behavior, ...(updates.app_behavior || {}) },
-        suggestion_settings: { ...preferences.suggestion_settings, ...(updates.suggestion_settings || {}) },
-      };
-
-      // Update state optimistically
+      // Optimistically update local state
+      const newPreferences = { ...preferences, ...updates };
       setPreferences(newPreferences);
 
-      // Save to database
+      // Save to database with proper format
       const { error } = await supabase
         .from('user_preferences')
         .upsert({
           user_id: user.id,
-          theme: JSON.stringify(newPreferences.theme),
+          theme: JSON.stringify(newPreferences.theme), // Keep as JSON string for compatibility
           notifications: newPreferences.notifications,
           privacy_settings: newPreferences.privacy,
           app_behavior: newPreferences.app_behavior,
@@ -256,40 +290,46 @@ export const useUserPreferences = () => {
       root.style.setProperty('--accent', hexToHsl(theme.custom_colors.accent));
     }
 
-    // Apply gradient preset
-    const gradients: Record<string, string> = {
-      warm: 'linear-gradient(135deg, #fd7c2b, #ff9d5c)',
-      cool: 'linear-gradient(135deg, #667eea, #764ba2)',
-      nature: 'linear-gradient(135deg, #56ab2f, #a8e6cf)',
-      sunset: 'linear-gradient(135deg, #ff6b6b, #ffd93d)',
-      ocean: 'linear-gradient(135deg, #74b9ff, #0984e3)',
-      royal: 'linear-gradient(135deg, #8e2de2, #4a00e0)',
-      forest: 'linear-gradient(135deg, #134e5e, #71b280)',
-      fire: 'linear-gradient(135deg, #f12711, #f5af19)',
-    };
-    
-    if (gradients[theme.gradient_preset]) {
-      root.style.setProperty('--gradient-primary', gradients[theme.gradient_preset]);
+    // Apply blur effects
+    if (theme.blur_effects) {
+      root.classList.add('blur-effects');
+    } else {
+      root.classList.remove('blur-effects');
     }
 
-    // Apply blur effects
-    root.classList.toggle('blur-effects', theme.blur_effects);
-    
     // Apply compact mode
-    root.classList.toggle('compact-mode', theme.compact_mode);
+    if (theme.compact_mode) {
+      root.classList.add('compact-mode');
+    } else {
+      root.classList.remove('compact-mode');
+    }
+
+    // Store theme preference in localStorage as backup
+    localStorage.setItem('user-theme-preference', JSON.stringify(theme));
   };
 
-  // Initialize theme on load
+  // Load theme from localStorage on first render if user is not logged in
   useEffect(() => {
-    if (!loading) {
-      applyTheme(preferences.theme);
+    if (!user) {
+      const savedTheme = localStorage.getItem('user-theme-preference');
+      if (savedTheme) {
+        try {
+          const parsedTheme = JSON.parse(savedTheme);
+          setPreferences(prev => ({ ...prev, theme: parsedTheme }));
+          applyTheme(parsedTheme);
+        } catch (e) {
+          // Ignore parsing errors
+        }
+      } else {
+        applyTheme(defaultPreferences.theme);
+      }
     }
-  }, [loading, preferences.theme]);
+  }, [user]);
 
   return {
     preferences,
-    loading,
     updatePreferences,
+    loading,
     applyTheme,
   };
 };
