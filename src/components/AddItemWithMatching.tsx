@@ -145,9 +145,12 @@ const AddItemWithMatching = ({ open, onOpenChange }: AddItemWithMatchingProps) =
     onOpenChange(false);
   };
 
+  if (!open) return null;
+
   return (
     <>
-      <Card className="w-full max-w-2xl mx-auto">
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <CardHeader>
           <CardTitle>Add New Item</CardTitle>
         </CardHeader>
@@ -332,7 +335,8 @@ const AddItemWithMatching = ({ open, onOpenChange }: AddItemWithMatchingProps) =
             </div>
           </form>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
 
       {/* Match Dialog */}
       {showMatchDialog && potentialMatch && (

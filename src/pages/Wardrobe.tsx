@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Grid3X3, List, Search, Filter } from "lucide-react";
+import { Grid3X3, List, Search, Filter, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ClothingItem from "@/components/ClothingItem";
+import WardrobeVector from "@/components/WardrobeVector";
+import AddItemWithMatching from "@/components/AddItemWithMatching";
 import { toast } from "sonner";
 
 // Import fashion images
@@ -13,8 +15,9 @@ import blackJacket from "@/assets/black-jacket.jpg";
 import graySweater from "@/assets/gray-sweater.jpg";
 
 const Wardrobe = () => {
-  const [viewMode, setViewMode] = useState<"grid" | "wardrobe">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "wardrobe" | "vector">("grid");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showAddDialog, setShowAddDialog] = useState(false);
   
   const wardrobeItems = [
     { id: "1", name: "Orange Bomber Jacket", brand: "Nike", image: orangeJacket, category: "Jackets", lastWorn: "2 days ago" },
@@ -93,13 +96,22 @@ const Wardrobe = () => {
               >
                 <List size={16} />
               </Button>
+              <Button
+                variant={viewMode === "vector" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setViewMode("vector")}
+              >
+                <Home size={16} />
+              </Button>
             </div>
           </div>
         </div>
       </header>
 
       <main className="px-4 py-6">
-        {viewMode === "grid" ? (
+        {viewMode === "vector" ? (
+          <WardrobeVector onAddItem={() => setShowAddDialog(true)} />
+        ) : viewMode === "grid" ? (
           <div className="fashion-grid">
             {filteredItems.map((item) => (
               <ClothingItem
@@ -152,12 +164,17 @@ const Wardrobe = () => {
           </div>
         )}
 
-        {filteredItems.length === 0 && (
+        {filteredItems.length === 0 && viewMode !== "vector" && (
           <div className="text-center py-12">
             <p className="text-muted-foreground">No items found matching your search.</p>
           </div>
         )}
       </main>
+
+      <AddItemWithMatching 
+        open={showAddDialog} 
+        onOpenChange={setShowAddDialog}
+      />
     </div>
   );
 };

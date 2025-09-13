@@ -237,9 +237,6 @@ const Account = () => {
           </h1>
         </div>
 
-        {/* Profile Header */}
-        <ProfileHeader profile={profile} />
-
         {/* Desktop Layout */}
         <div className="lg:grid lg:grid-cols-3 lg:gap-8 space-y-6 lg:space-y-0">
           {/* Left Column - Profile & Quick Actions */}
