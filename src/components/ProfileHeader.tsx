@@ -40,7 +40,7 @@ const ProfileHeader = ({ profile }: ProfileHeaderProps) => {
           <Avatar className="w-16 h-16">
             <AvatarImage src={profile.avatar_url || undefined} />
             <AvatarFallback className="text-lg font-semibold">
-              {profile.full_name?.charAt(0) || profile.email?.charAt(0) || 'U'}
+              {profile.full_name?.charAt(0) || 'U'}
             </AvatarFallback>
           </Avatar>
           

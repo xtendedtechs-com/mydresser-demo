@@ -5,21 +5,24 @@ import { User } from '@supabase/supabase-js';
 export interface UserProfile {
   id: string;
   user_id: string;
-  email: string | null;
   full_name: string | null;
   avatar_url: string | null;
   role: 'private' | 'professional' | 'merchant' | 'admin';
   auth_level: 'base' | 'intermediate' | 'advanced';
   bio: string | null;
   location: string | null;
-  social_instagram: string | null;
-  social_facebook: string | null;
-  social_tiktok: string | null;
   is_profile_public: boolean;
   privacy_settings: any;
   style_score: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface UserContactInfo {
+  email: string | null;
+  social_instagram: string | null;
+  social_facebook: string | null;
+  social_tiktok: string | null;
 }
 
 export const useProfile = () => {

@@ -396,22 +396,51 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_contact_info: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          social_facebook: string | null
+          social_instagram: string | null
+          social_tiktok: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          social_facebook?: string | null
+          social_instagram?: string | null
+          social_tiktok?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          social_facebook?: string | null
+          social_instagram?: string | null
+          social_tiktok?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           auth_level: Database["public"]["Enums"]["auth_level"]
           avatar_url: string | null
           bio: string | null
           created_at: string
-          email: string | null
           full_name: string | null
           id: string
           is_profile_public: boolean | null
           location: string | null
           privacy_settings: Json | null
           role: Database["public"]["Enums"]["user_role"]
-          social_facebook: string | null
-          social_instagram: string | null
-          social_tiktok: string | null
           style_score: number | null
           updated_at: string
           user_id: string
@@ -421,16 +450,12 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
-          email?: string | null
           full_name?: string | null
           id?: string
           is_profile_public?: boolean | null
           location?: string | null
           privacy_settings?: Json | null
           role?: Database["public"]["Enums"]["user_role"]
-          social_facebook?: string | null
-          social_instagram?: string | null
-          social_tiktok?: string | null
           style_score?: number | null
           updated_at?: string
           user_id: string
@@ -440,16 +465,12 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
-          email?: string | null
           full_name?: string | null
           id?: string
           is_profile_public?: boolean | null
           location?: string | null
           privacy_settings?: Json | null
           role?: Database["public"]["Enums"]["user_role"]
-          social_facebook?: string | null
-          social_instagram?: string | null
-          social_tiktok?: string | null
           style_score?: number | null
           updated_at?: string
           user_id?: string
@@ -825,6 +846,15 @@ export type Database = {
           role: Database["public"]["Enums"]["user_role"]
           style_score: number
           user_id: string
+        }[]
+      }
+      get_user_contact_info: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          email: string
+          social_facebook: string
+          social_instagram: string
+          social_tiktok: string
         }[]
       }
       log_merchant_sensitive_access: {
