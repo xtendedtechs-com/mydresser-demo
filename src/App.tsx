@@ -7,6 +7,7 @@ import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Home from "@/pages/Home";
 import Wardrobe from "@/pages/Wardrobe";
+import Account from "@/pages/Account";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,13 +23,6 @@ const Marketplace = () => (
 const Add = () => (
   <div className="min-h-screen bg-background pb-20 px-4 py-6">
     <h1 className="text-2xl font-bold fashion-text-gradient mb-4">Add Items</h1>
-    <p className="text-muted-foreground">Coming soon...</p>
-  </div>
-);
-
-const Account = () => (
-  <div className="min-h-screen bg-background pb-20 px-4 py-6">
-    <h1 className="text-2xl font-bold fashion-text-gradient mb-4">Account</h1>
     <p className="text-muted-foreground">Coming soon...</p>
   </div>
 );
