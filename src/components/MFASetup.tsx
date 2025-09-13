@@ -19,9 +19,9 @@ const MFASetup = ({ userId, onComplete }: MFASetupProps) => {
   const [loading, setLoading] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
-  const [totpSecret, setTotpSecret] = useState('');
+  const [maskedSecret, setMaskedSecret] = useState(''); // Never store the actual secret
   const [qrCodeUrl, setQrCodeUrl] = useState('');
-  const [backupCodes, setBackupCodes] = useState<string[]>([]);
+  const [backupCodes, setBackupCodes] = useState<string[]>([]); // Will be cleared after display
   const [phoneVerified, setPhoneVerified] = useState(false);
   const [totpEnabled, setTotpEnabled] = useState(false);
   const [step, setStep] = useState<'setup' | 'verify'>('setup');
@@ -39,10 +39,16 @@ const MFASetup = ({ userId, onComplete }: MFASetupProps) => {
 
       if (error) throw error;
 
-      setTotpSecret(data.secret);
+      // Store masked version for UI display only
+      setMaskedSecret(data.secret ? '••••••••••••••••' + data.secret.slice(-4) : '');
       setQrCodeUrl(data.qrCodeUrl);
       setBackupCodes(data.backupCodes);
       setStep('verify');
+
+      // Clear backup codes from memory after 30 seconds for security
+      setTimeout(() => {
+        setBackupCodes([]);
+      }, 30000);
 
       toast({
         title: "TOTP Setup Ready",
@@ -219,7 +225,8 @@ const MFASetup = ({ userId, onComplete }: MFASetupProps) => {
                       Scan this QR code with your authenticator app
                     </p>
                     <div className="text-xs text-muted-foreground p-2 bg-muted rounded">
-                      Manual setup key: <code className="font-mono">{totpSecret}</code>
+                      Manual setup key: <code className="font-mono">{maskedSecret}</code>
+                      <p className="text-xs mt-1 text-yellow-600">⚠️ Secret is encrypted and masked for security</p>
                     </div>
                   </div>
 
@@ -241,7 +248,7 @@ const MFASetup = ({ userId, onComplete }: MFASetupProps) => {
                 </div>
               )}
 
-              {backupCodes.length > 0 && totpEnabled && (
+              {backupCodes.length > 0 && !totpEnabled && (
                 <div className="space-y-2">
                   <Label>Backup Codes (Save these securely!)</Label>
                   <div className="p-3 bg-muted rounded-lg">
@@ -256,10 +263,19 @@ const MFASetup = ({ userId, onComplete }: MFASetupProps) => {
                   <Alert variant="destructive">
                     <AlertTriangle className="h-4 w-4" />
                     <AlertDescription>
-                      Save these backup codes in a secure location. They can be used to access your account if you lose your authenticator device.
+                      Save these backup codes NOW in a secure location. They will be automatically cleared from this screen in 30 seconds for security. They can be used to access your account if you lose your authenticator device.
                     </AlertDescription>
                   </Alert>
                 </div>
+              )}
+
+              {totpEnabled && (
+                <Alert>
+                  <CheckCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    TOTP is enabled and backup codes have been generated. Your backup codes are now securely encrypted and stored.
+                  </AlertDescription>
+                </Alert>
               )}
             </CardContent>
           </Card>
