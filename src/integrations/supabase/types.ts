@@ -1053,6 +1053,14 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      decrypt_mfa_secret: {
+        Args: { encrypted_text: string; user_salt?: string }
+        Returns: string
+      }
+      encrypt_mfa_secret: {
+        Args: { secret_text: string; user_salt?: string }
+        Returns: string
+      }
       get_merchant_profile_public: {
         Args: { profile_user_id?: string }
         Returns: {
@@ -1143,6 +1151,10 @@ export type Database = {
           social_tiktok: string
         }[]
       }
+      hash_backup_code: {
+        Args: { code: string }
+        Returns: string
+      }
       log_merchant_sensitive_access: {
         Args: { accessed_fields: string[]; merchant_profile_id: string }
         Returns: boolean
@@ -1162,6 +1174,10 @@ export type Database = {
       }
       use_backup_code: {
         Args: { input_code: string }
+        Returns: boolean
+      }
+      verify_backup_code_hash: {
+        Args: { code: string; hash: string }
         Returns: boolean
       }
       verify_totp_secret: {
