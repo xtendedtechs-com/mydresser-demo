@@ -405,6 +405,33 @@ export type Database = {
         }
         Relationships: []
       }
+      mfa_rate_limits: {
+        Row: {
+          action: string
+          attempt_count: number | null
+          created_at: string | null
+          id: string
+          user_id: string
+          window_start: string | null
+        }
+        Insert: {
+          action: string
+          attempt_count?: number | null
+          created_at?: string | null
+          id?: string
+          user_id: string
+          window_start?: string | null
+        }
+        Update: {
+          action?: string
+          attempt_count?: number | null
+          created_at?: string | null
+          id?: string
+          user_id?: string
+          window_start?: string | null
+        }
+        Relationships: []
+      }
       outfit_items: {
         Row: {
           created_at: string
@@ -1088,6 +1115,14 @@ export type Database = {
       }
     }
     Functions: {
+      check_mfa_rate_limit: {
+        Args: {
+          action_type: string
+          max_attempts?: number
+          window_minutes?: number
+        }
+        Returns: boolean
+      }
       get_merchant_profile_public: {
         Args: { profile_user_id?: string }
         Returns: {
@@ -1180,6 +1215,27 @@ export type Database = {
       }
       log_merchant_sensitive_access: {
         Args: { accessed_fields: string[]; merchant_profile_id: string }
+        Returns: boolean
+      }
+      setup_user_mfa: {
+        Args: {
+          backup_codes_data?: string[]
+          phone_data?: string
+          secret_data?: string
+          setup_type: string
+        }
+        Returns: Json
+      }
+      update_mfa_status: {
+        Args: { enable_totp?: boolean; verify_phone?: boolean }
+        Returns: boolean
+      }
+      use_backup_code: {
+        Args: { input_code: string }
+        Returns: boolean
+      }
+      verify_totp_secret: {
+        Args: { input_code: string }
         Returns: boolean
       }
     }

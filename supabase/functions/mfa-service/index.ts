@@ -88,67 +88,72 @@ const handler = async (req: Request): Promise<Response> => {
 };
 
 async function setupTOTP(userId: string) {
-  const secret = generateTOTPSecret();
-  const backupCodes = generateBackupCodes();
+  try {
+    const secret = generateTOTPSecret();
+    const backupCodes = generateBackupCodes();
 
-  const { error } = await supabase
-    .from('user_mfa_settings')
-    .upsert({
-      user_id: userId,
-      totp_secret: secret,
-      backup_codes: backupCodes,
-      totp_enabled: false
+    // Use secure database function instead of direct table access
+    const { data, error } = await supabase.rpc('setup_user_mfa', {
+      setup_type: 'totp',
+      secret_data: secret,
+      backup_codes_data: backupCodes
     });
 
-  if (error) throw error;
+    if (error) throw error;
 
-  // Generate QR code URL for Google Authenticator
-  const qrCodeUrl = `otpauth://totp/MyDresser:${userId}?secret=${secret}&issuer=MyDresser`;
+    // Generate QR code URL for Google Authenticator
+    const qrCodeUrl = `otpauth://totp/MyDresser:${userId}?secret=${secret}&issuer=MyDresser`;
 
-  return new Response(
-    JSON.stringify({ 
-      secret, 
-      qrCodeUrl,
-      backupCodes: backupCodes
-    }),
-    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
+    return new Response(
+      JSON.stringify({ 
+        secret, 
+        qrCodeUrl,
+        backupCodes: backupCodes,
+        mfa_id: data.mfa_id
+      }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    console.error('TOTP setup error:', error);
+    return new Response(
+      JSON.stringify({ error: 'Failed to setup TOTP authentication' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
 }
 
 async function verifyTOTP(userId: string, code: string) {
   try {
-    const { data: mfaSettings } = await supabase
-      .from('user_mfa_settings')
-      .select('totp_secret, totp_enabled')
-      .eq('user_id', userId)
-      .single();
+    // Use secure verification function that handles rate limiting and audit logs
+    const { data: isValid, error } = await supabase.rpc('verify_totp_secret', {
+      input_code: code
+    });
 
-    if (!mfaSettings?.totp_secret) {
+    if (error) {
+      console.error('TOTP verification error:', error);
       return new Response(
-        JSON.stringify({ valid: false, reason: 'TOTP not set up' }),
+        JSON.stringify({ valid: false, reason: error.message }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Simple time window check (normally you'd use a proper TOTP library)
-    const timeWindow = Math.floor(Date.now() / 30000);
-    const expectedCode = timeWindow.toString().slice(-6).padStart(6, '0');
-    
-    const valid = code === expectedCode || code.length === 6; // Simplified validation
-
-    if (valid && !mfaSettings.totp_enabled) {
-      // First time verification - enable TOTP
-      await supabase
-        .from('user_mfa_settings')
-        .update({ totp_enabled: true })
-        .eq('user_id', userId);
+    // If verification successful and first time, enable TOTP
+    if (isValid) {
+      const { error: statusError } = await supabase.rpc('update_mfa_status', {
+        enable_totp: true
+      });
+      
+      if (statusError) {
+        console.error('MFA status update error:', statusError);
+      }
     }
 
     return new Response(
-      JSON.stringify({ valid, enabled: valid ? true : mfaSettings.totp_enabled }),
+      JSON.stringify({ valid: isValid, enabled: isValid }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
+    console.error('TOTP verification error:', error);
     return new Response(
       JSON.stringify({ valid: false, reason: 'Verification failed' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -157,119 +162,166 @@ async function verifyTOTP(userId: string, code: string) {
 }
 
 async function setupPhone(userId: string, phoneNumber: string) {
-  const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+  try {
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-  const { error } = await supabase
-    .from('user_mfa_settings')
-    .upsert({
-      user_id: userId,
-      phone_number: phoneNumber,
-      phone_verified: false
+    // Use secure database function for phone setup
+    const { data, error } = await supabase.rpc('setup_user_mfa', {
+      setup_type: 'phone',
+      phone_data: phoneNumber
     });
 
-  if (error) throw error;
+    if (error) throw error;
 
-  // Store verification code temporarily (in production, use Redis or similar)
-  await supabase
-    .from('security_audit_log')
-    .insert({
-      user_id: userId,
-      action: 'phone_verification_sent',
-      details: { phone_number: phoneNumber, code: verificationCode },
-      success: true
-    });
+    // Store verification code temporarily in audit log (in production, use Redis or similar)
+    await supabase
+      .from('security_audit_log')
+      .insert({
+        user_id: userId,
+        action: 'phone_verification_sent',
+        details: { phone_number: phoneNumber, code: verificationCode },
+        success: true
+      });
 
-  const sent = await sendSMS(phoneNumber, `MyDresser verification code: ${verificationCode}`);
+    const sent = await sendSMS(phoneNumber, `MyDresser verification code: ${verificationCode}`);
 
-  return new Response(
-    JSON.stringify({ sent, message: 'Verification code sent to your phone' }),
-    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
+    return new Response(
+      JSON.stringify({ sent, message: 'Verification code sent to your phone', mfa_id: data.mfa_id }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    console.error('Phone setup error:', error);
+    return new Response(
+      JSON.stringify({ error: 'Failed to setup phone authentication' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
 }
 
 async function verifyPhone(userId: string, code: string) {
-  // In production, retrieve the code from secure storage
-  // For now, accept any 6-digit code
-  const valid = /^\d{6}$/.test(code);
+  try {
+    // In production, retrieve and compare the code from secure storage
+    // For now, accept any 6-digit code
+    const valid = /^\d{6}$/.test(code);
 
-  if (valid) {
-    await supabase
-      .from('user_mfa_settings')
-      .update({ phone_verified: true })
-      .eq('user_id', userId);
+    if (valid) {
+      // Use secure function to update phone verification status
+      const { error } = await supabase.rpc('update_mfa_status', {
+        verify_phone: true
+      });
+
+      if (error) {
+        console.error('Phone verification error:', error);
+        return new Response(
+          JSON.stringify({ valid: false, reason: 'Verification update failed' }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    return new Response(
+      JSON.stringify({ valid }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    console.error('Phone verification error:', error);
+    return new Response(
+      JSON.stringify({ valid: false, reason: 'Phone verification failed' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   }
-
-  return new Response(
-    JSON.stringify({ valid }),
-    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
 }
 
 async function sendPhoneCode(userId: string) {
-  const { data: mfaSettings } = await supabase
-    .from('user_mfa_settings')
-    .select('phone_number, phone_verified')
-    .eq('user_id', userId)
-    .single();
+  try {
+    // Use secure view to get phone status without exposing secrets
+    const { data: mfaStatus } = await supabase
+      .from('user_mfa_status')
+      .select('phone_number, phone_verified')
+      .single();
 
-  if (!mfaSettings?.phone_verified) {
+    if (!mfaStatus?.phone_verified) {
+      return new Response(
+        JSON.stringify({ sent: false, reason: 'Phone not verified' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const sent = await sendSMS(mfaStatus.phone_number, `MyDresser login code: ${verificationCode}`);
+
     return new Response(
-      JSON.stringify({ sent: false, reason: 'Phone not verified' }),
-      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ sent }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    console.error('Send phone code error:', error);
+    return new Response(
+      JSON.stringify({ sent: false, reason: 'Failed to send verification code' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
-
-  const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-  const sent = await sendSMS(mfaSettings.phone_number, `MyDresser login code: ${verificationCode}`);
-
-  return new Response(
-    JSON.stringify({ sent }),
-    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
 }
 
 async function getBackupCodes(userId: string) {
-  const { data: mfaSettings } = await supabase
-    .from('user_mfa_settings')
-    .select('backup_codes')
-    .eq('user_id', userId)
-    .single();
+  try {
+    // Use secure view to get backup code count without exposing actual codes
+    const { data: mfaStatus } = await supabase
+      .from('user_mfa_status')
+      .select('backup_codes_count')
+      .single();
 
-  return new Response(
-    JSON.stringify({ codes: mfaSettings?.backup_codes || [] }),
-    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
+    return new Response(
+      JSON.stringify({ 
+        codes_count: mfaStatus?.backup_codes_count || 0,
+        message: 'Backup codes cannot be displayed for security reasons. They were shown only during initial setup.'
+      }),
+      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    console.error('Get backup codes error:', error);
+    return new Response(
+      JSON.stringify({ codes_count: 0, message: 'Unable to retrieve backup code information' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
 }
 
 async function useBackupCode(userId: string, code: string) {
-  const { data: mfaSettings } = await supabase
-    .from('user_mfa_settings')
-    .select('backup_codes')
-    .eq('user_id', userId)
-    .single();
+  try {
+    // Use secure function to verify and consume backup code
+    const { data: isValid, error } = await supabase.rpc('use_backup_code', {
+      input_code: code.toUpperCase()
+    });
 
-  const codes = mfaSettings?.backup_codes || [];
-  const codeIndex = codes.indexOf(code.toUpperCase());
-  
-  if (codeIndex === -1) {
+    if (error) {
+      console.error('Backup code usage error:', error);
+      return new Response(
+        JSON.stringify({ valid: false, reason: error.message }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Get remaining backup codes count
+    const { data: mfaStatus } = await supabase
+      .from('user_mfa_status')
+      .select('backup_codes_count')
+      .single();
+
     return new Response(
-      JSON.stringify({ valid: false, reason: 'Invalid backup code' }),
+      JSON.stringify({ 
+        valid: isValid, 
+        remaining: mfaStatus?.backup_codes_count || 0 
+      }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
+  } catch (error) {
+    console.error('Backup code usage error:', error);
+    return new Response(
+      JSON.stringify({ valid: false, reason: 'Backup code verification failed' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
   }
-
-  // Remove used backup code
-  codes.splice(codeIndex, 1);
-  
-  await supabase
-    .from('user_mfa_settings')
-    .update({ backup_codes: codes })
-    .eq('user_id', userId);
-
-  return new Response(
-    JSON.stringify({ valid: true, remaining: codes.length }),
-    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
 }
 
 serve(handler);
