@@ -198,6 +198,39 @@ export type Database = {
           },
         ]
       }
+      merchant_profile_access_log: {
+        Row: {
+          accessed_fields: string[] | null
+          action: string
+          created_at: string | null
+          id: string
+          ip_address: unknown | null
+          merchant_profile_id: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          accessed_fields?: string[] | null
+          action: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          merchant_profile_id: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          accessed_fields?: string[] | null
+          action?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          merchant_profile_id?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       merchant_profiles: {
         Row: {
           business_address: Json | null
@@ -696,6 +729,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_merchant_profile_safe: {
+        Args: { profile_user_id: string }
+        Returns: {
+          business_name: string
+          business_type: string
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+          verification_status: string
+        }[]
+      }
+      get_merchant_sensitive_data: {
+        Args: { profile_user_id: string }
+        Returns: {
+          business_address: Json
+          contact_info: Json
+          tax_id: string
+        }[]
+      }
       get_public_profiles: {
         Args: Record<PropertyKey, never>
         Returns: {
