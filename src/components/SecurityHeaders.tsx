@@ -12,7 +12,7 @@ const SecurityHeaders = () => {
       img-src 'self' data: https: blob:;
       font-src 'self' https://fonts.gstatic.com;
       connect-src 'self' https://*.supabase.co wss://*.supabase.co;
-      frame-ancestors 'none';
+      frame-ancestors 'self';
       base-uri 'self';
       form-action 'self';
     `.replace(/\s+/g, ' ').trim();
@@ -20,7 +20,7 @@ const SecurityHeaders = () => {
 
     // Set additional security headers via meta tags
     const securityHeaders = [
-      { name: 'X-Frame-Options', content: 'DENY' },
+      { name: 'X-Frame-Options', content: 'SAMEORIGIN' }, // Allow iframe embedding for Lovable compatibility
       { name: 'X-Content-Type-Options', content: 'nosniff' },
       { name: 'X-XSS-Protection', content: '1; mode=block' },
       { name: 'Referrer-Policy', content: 'strict-origin-when-cross-origin' },
