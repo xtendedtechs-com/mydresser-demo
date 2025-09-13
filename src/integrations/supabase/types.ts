@@ -1113,6 +1113,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_mfa_status: {
+        Row: {
+          backup_codes_count: number | null
+          created_at: string | null
+          id: string | null
+          phone_number: string | null
+          phone_verified: boolean | null
+          totp_enabled: boolean | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          backup_codes_count?: never
+          created_at?: string | null
+          id?: string | null
+          phone_number?: string | null
+          phone_verified?: boolean | null
+          totp_enabled?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          backup_codes_count?: never
+          created_at?: string | null
+          id?: string | null
+          phone_number?: string | null
+          phone_verified?: boolean | null
+          totp_enabled?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       check_mfa_rate_limit: {
