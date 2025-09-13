@@ -166,6 +166,7 @@ class OutfitGeneratorService {
       };
       
       return generatedOutfit;
+  }
 
   private filterAvailableItems(items: WardrobeItem[], context: OutfitContext): WardrobeItem[] {
     return items.filter(item => {

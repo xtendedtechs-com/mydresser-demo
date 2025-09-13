@@ -192,7 +192,7 @@ export const SmartOutfitMatcher = () => {
       const allSuggestions: OutfitSuggestion[] = [];
 
       for (const context of contexts) {
-        const outfit = outfitGenerator.generateOutfit(items, context);
+        const outfit = await outfitGenerator.generateOutfit(items, context);
         const enhancedSuggestion = await enhanceOutfitSuggestion(outfit, context);
         allSuggestions.push(enhancedSuggestion);
       }

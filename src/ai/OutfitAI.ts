@@ -427,7 +427,9 @@ export class OutfitAI {
   }
 
   private generateLayeringLogic(layers: any): string {
-    const totalLayers = Object.values(layers).reduce((sum: number, layer: any) => sum + (layer?.length || 0), 0);
+    const totalLayers = Object.values(layers).reduce((sum: number, layer: any) => {
+      return sum + (Array.isArray(layer) ? layer.length : 0);
+    }, 0) as number;
     
     if (totalLayers <= 2) return 'Minimal layering for simplicity and comfort';
     if (totalLayers <= 4) return 'Light layering for versatility and style';
