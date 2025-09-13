@@ -10,18 +10,11 @@ import Wardrobe from "@/pages/Wardrobe";
 import Account from "@/pages/Account";
 import Add from "@/pages/Add";
 import Auth from "@/pages/Auth";
+import Market from "@/pages/Market";
 import NotFound from "./pages/NotFound";
 import { useProfile } from "@/hooks/useProfile";
 
 const queryClient = new QueryClient();
-
-// Placeholder components for now
-const Marketplace = () => (
-  <div className="min-h-screen bg-background pb-20 px-4 py-6">
-    <h1 className="text-2xl font-bold fashion-text-gradient mb-4">Marketplace</h1>
-    <p className="text-muted-foreground">Coming soon...</p>
-  </div>
-);
 
 const App = () => {
   const [activeTab, setActiveTab] = useState("home");
@@ -73,7 +66,7 @@ const App = () => {
       case "home":
         return <Home />;
       case "marketplace":
-        return <Marketplace />;
+        return <Market />;
       case "wardrobe":
         return <Wardrobe />;
       case "add":
