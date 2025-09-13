@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,6 +54,7 @@ interface MarketItem {
 }
 
 const UnifiedMarketplace = () => {
+  const navigate = useNavigate();
   const [activeMarket, setActiveMarket] = useState<"merchant" | "2nddresser">("merchant");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -273,7 +275,11 @@ const UnifiedMarketplace = () => {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
                   {featuredItems.map((item) => (
-                    <Card key={item.id} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                    <Card 
+                      key={item.id} 
+                      className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+                      onClick={() => navigate(`/market/item/${item.id}`)}
+                    >
                       <CardContent className="p-0">
                         <div className="aspect-square bg-muted relative overflow-hidden rounded-t-lg">
                           {item.photos?.main ? (
@@ -352,7 +358,11 @@ const UnifiedMarketplace = () => {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {premiumItems.map((item) => (
-                    <Card key={item.id} className="group hover:shadow-lg transition-all duration-300">
+                    <Card 
+                      key={item.id} 
+                      className="group hover:shadow-lg transition-all duration-300 cursor-pointer"
+                      onClick={() => navigate(`/market/item/${item.id}`)}
+                    >
                       <CardContent className="p-0">
                         <div className="aspect-[4/5] bg-muted relative overflow-hidden rounded-t-lg">
                           {item.photos?.main ? (
@@ -397,7 +407,11 @@ const UnifiedMarketplace = () => {
               <h2 className="text-2xl font-bold mb-6">All Items</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {getFilteredMerchantItems().map((item) => (
-                  <Card key={item.id} className="group hover:shadow-lg transition-all duration-300">
+                  <Card 
+                    key={item.id} 
+                    className="group hover:shadow-lg transition-all duration-300 cursor-pointer"
+                    onClick={() => navigate(`/market/item/${item.id}`)}
+                  >
                     <CardContent className="p-0">
                       <div className="aspect-square bg-muted relative overflow-hidden rounded-t-lg">
                         {item.photos?.main ? (
@@ -518,7 +532,11 @@ const UnifiedMarketplace = () => {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {getFiltered2ndDresserItems().map((item) => (
-                    <Card key={item.id} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                    <Card 
+                      key={item.id} 
+                      className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+                      onClick={() => navigate(`/market/item/${item.id}`)}
+                    >
                       <CardContent className="p-0">
                         <div className="aspect-square bg-muted relative overflow-hidden rounded-t-lg">
                           <img
