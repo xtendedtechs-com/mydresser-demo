@@ -13,6 +13,7 @@ import Add from "@/pages/Add";
 import Auth from "@/pages/Auth";
 import Market from "@/pages/Market";
 import ItemDetail from "@/pages/ItemDetail";
+import WardrobeItemDetail from "@/pages/WardrobeItemDetail";
 import ProfileSetup from "@/pages/ProfileSetup";
 import NotFound from "./pages/NotFound";
 import { useProfile } from "@/hooks/useProfile";
@@ -82,6 +83,7 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/item/:id" element={<ItemDetail />} />
+            <Route path="/wardrobe-item/:id" element={<WardrobeItemDetail />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
             <Route path="/*" element={
               <div className="relative">

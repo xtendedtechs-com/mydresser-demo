@@ -96,7 +96,10 @@ const WardrobeItemCard = ({
           <Button 
             variant="secondary" 
             size="sm"
-            onClick={() => onView(item)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onView(item);
+            }}
           >
             <Eye className="w-4 h-4 mr-2" />
             View Details

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,7 @@ interface WardrobeManagerProps {
 }
 
 const WardrobeManager = ({ className }: WardrobeManagerProps) => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -111,25 +113,29 @@ const WardrobeManager = ({ className }: WardrobeManagerProps) => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredItems.map((item) => (
-            <Card key={item.id} className="p-4 hover:shadow-md transition-shadow">
-              <div className="space-y-3">
-                {/* Item Image */}
-                <div className="aspect-square bg-muted rounded-lg overflow-hidden">
-                  {item.photos && typeof item.photos === 'object' && item.photos.main ? (
-                    <img
-                      src={item.photos.main}
-                      alt={item.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                      <div className="text-center">
-                        <div className="text-2xl mb-2">👔</div>
-                        <p className="text-xs">No photo</p>
+              <Card 
+                key={item.id} 
+                className="p-4 hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => navigate(`/wardrobe-item/${item.id}`)}
+              >
+                <div className="space-y-3">
+                  {/* Item Image */}
+                  <div className="aspect-square bg-muted rounded-lg overflow-hidden">
+                    {item.photos && typeof item.photos === 'object' && item.photos.main ? (
+                      <img
+                        src={item.photos.main}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                        <div className="text-center">
+                          <div className="text-2xl mb-2">👔</div>
+                          <p className="text-xs">No photo</p>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
 
                 {/* Item Details */}
                 <div className="space-y-2">
