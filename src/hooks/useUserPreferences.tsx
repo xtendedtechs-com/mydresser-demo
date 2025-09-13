@@ -184,6 +184,8 @@ export const useUserPreferences = () => {
           app_behavior: newPreferences.app_behavior,
           suggestion_settings: newPreferences.suggestion_settings,
           updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id'
         });
 
       if (error) throw error;
