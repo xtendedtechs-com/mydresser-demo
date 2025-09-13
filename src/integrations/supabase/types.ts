@@ -157,7 +157,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_public_profiles: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          avatar_url: string
+          bio: string
+          created_at: string
+          full_name: string
+          id: string
+          location: string
+          role: Database["public"]["Enums"]["user_role"]
+          social_facebook: string
+          social_instagram: string
+          social_tiktok: string
+          style_score: number
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       auth_level: "base" | "intermediate" | "advanced"
