@@ -780,6 +780,48 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_subscription_view: {
+        Row: {
+          auto_renew: boolean | null
+          created_at: string | null
+          expires_at: string | null
+          id: string | null
+          plan_name: string | null
+          provider_id: string | null
+          started_at: string | null
+          status: string | null
+          subscriber_id: string | null
+          subscription_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          auto_renew?: boolean | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string | null
+          plan_name?: string | null
+          provider_id?: string | null
+          started_at?: string | null
+          status?: string | null
+          subscriber_id?: string | null
+          subscription_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          auto_renew?: boolean | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string | null
+          plan_name?: string | null
+          provider_id?: string | null
+          started_at?: string | null
+          status?: string | null
+          subscriber_id?: string | null
+          subscription_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_merchant_profile_public: {
@@ -820,6 +862,21 @@ export type Database = {
           business_address: Json
           contact_info: Json
           tax_id: string
+        }[]
+      }
+      get_provider_subscriptions: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          auto_renew: boolean
+          created_at: string
+          expires_at: string
+          id: string
+          plan_name: string
+          started_at: string
+          status: string
+          subscriber_id: string
+          subscription_type: string
+          updated_at: string
         }[]
       }
       get_public_profile_by_user_id: {
