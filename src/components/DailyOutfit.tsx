@@ -26,12 +26,14 @@ import { useWardrobe, WardrobeItem } from "@/hooks/useWardrobe";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { outfitGenerator, OutfitContext, GeneratedOutfit } from "@/services/outfitGenerator";
 import { weatherService, WeatherData } from "@/services/weatherService";
+import { supabase } from "@/integrations/supabase/client";
 
 interface OutfitItem extends WardrobeItem {
   // Additional properties specific to outfit display can be added here
 }
 
 interface DailyOutfitData extends GeneratedOutfit {
+  id: string;
   timeSlot: string;
   weatherConditions: WeatherData;
   nextUpdate: string;
@@ -47,6 +49,7 @@ const DailyOutfit = () => {
   const [dislikedOutfits, setDislikedOutfits] = useState<string[]>([]);
   const { toast } = useToast();
   const { addReaction, removeReaction } = useSocial();
+  const { updateItem } = useWardrobe();
   const { items, loading: wardrobeLoading } = useWardrobe();
   const { preferences, loading: preferencesLoading } = useUserPreferences();
 
@@ -130,6 +133,7 @@ const DailyOutfit = () => {
       // Convert to DailyOutfitData format
       const outfitData: DailyOutfitData = {
         ...generatedOutfit,
+        id: `outfit-${Date.now()}`, // Generate unique ID
         timeSlot: getTimeSlot(timeOfDay),
         weatherConditions: weather || {
           temperature: 20,
@@ -227,12 +231,138 @@ const DailyOutfit = () => {
     generateOutfit();
   };
 
-  const handleItemAction = (action: string, item?: WardrobeItem) => {
-    const target = item ? item.name : "entire outfit";
-    toast({
-      title: `${action} ${target}`,
-      description: `Successfully ${action.toLowerCase()}ed ${target}!`,
-    });
+  const handleItemAction = async (action: string, item?: WardrobeItem) => {
+    if (!outfit) return;
+
+    try {
+      switch (action) {
+        case "Like":
+          if (item) {
+            await updateItem(item.id, { is_favorite: true });
+            toast({
+              title: "Item liked!",
+              description: `${item.name} added to favorites`,
+            });
+          } else {
+            await handleLike();
+          }
+          break;
+        
+        case "Star":
+          if (item) {
+            await addReaction("wardrobe_item", item.id, "star");
+            toast({
+              title: "Item starred!",
+              description: `${item.name} added to starred items`,
+            });
+          }
+          break;
+        
+        case "Add":
+        case "Add to Collection":
+          await saveOutfitToCollection();
+          break;
+        
+        case "Share":
+          await handleShare();
+          break;
+        
+        case "Edit":
+          toast({
+            title: "Edit outfit",
+            description: "Outfit editing coming soon!",
+          });
+          break;
+        
+        default:
+          toast({
+            title: `${action} ${item ? item.name : "entire outfit"}`,
+            description: `Successfully ${action.toLowerCase()}ed!`,
+          });
+      }
+    } catch (error) {
+      console.error('Action failed:', error);
+      toast({
+        title: "Action failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const saveOutfitToCollection = async () => {
+    if (!outfit) return;
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Save outfit to database
+      const { data: savedOutfit, error: outfitError } = await supabase
+        .from('outfits')
+        .insert({
+          user_id: user.id,
+          name: outfit.name,
+          occasion: 'casual',
+          season: 'all-season',
+          is_ai_generated: true,
+          ai_generation_prompt: outfit.reasoning,
+          weather_conditions: outfit.weatherConditions as any,
+          notes: `Generated on ${new Date().toLocaleDateString()} with ${outfit.confidence}% confidence`,
+          is_favorite: false
+        })
+        .select()
+        .single();
+
+      if (outfitError) throw outfitError;
+
+      // Save outfit items
+      for (const item of outfit.items) {
+        await supabase
+          .from('outfit_items')
+          .insert({
+            outfit_id: savedOutfit.id,
+            wardrobe_item_id: item.id,
+            item_type: item.category
+          });
+      }
+
+      toast({
+        title: "Outfit saved!",
+        description: `${outfit.name} saved to your collection`,
+      });
+    } catch (error: any) {
+      console.error('Save outfit error:', error);
+      toast({
+        title: "Save failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleShare = async () => {
+    if (!outfit) return;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `My ${outfit.name}`,
+          text: `Check out my ${outfit.name} outfit! ${outfit.reasoning}`,
+          url: window.location.href
+        });
+      } catch (error) {
+        console.log('Share cancelled');
+      }
+    } else {
+      // Fallback: copy to clipboard
+      const shareText = `Check out my ${outfit.name} outfit! ${outfit.reasoning}`;
+      await navigator.clipboard.writeText(shareText);
+      toast({
+        title: "Copied to clipboard!",
+        description: "Share this outfit with your friends",
+      });
+    }
   };
 
   const getWeatherIcon = (condition: string) => {
@@ -428,9 +558,9 @@ const DailyOutfit = () => {
                   <Card key={item.id} className="p-3 hover:shadow-md transition-shadow">
                     <div className="flex gap-3">
                       <div className="w-12 h-16 bg-muted rounded overflow-hidden flex-shrink-0">
-                        {item.photos && Array.isArray(item.photos) && item.photos[0] ? (
+                        {item.photos && typeof item.photos === 'object' && item.photos.main ? (
                           <img
-                            src={item.photos[0]}
+                            src={item.photos.main}
                             alt={item.name}
                             className="w-full h-full object-cover"
                           />

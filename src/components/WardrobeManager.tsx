@@ -1,168 +1,142 @@
 import { useState, useEffect } from "react";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Search, Filter, Heart } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Heart, Search, Plus, Loader2 } from "lucide-react";
 import { useWardrobe } from "@/hooks/useWardrobe";
+import AddItemWithMatching from "./AddItemWithMatching";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import AddItemWithMatching from "@/components/AddItemWithMatching";
 
 interface WardrobeManagerProps {
   className?: string;
 }
 
 const WardrobeManager = ({ className }: WardrobeManagerProps) => {
-  const { items, loading, refetch } = useWardrobe();
-  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
-  const [addItemOpen, setAddItemOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const { items, loading, refetch } = useWardrobe();
 
+  const categories = ["all", "tops", "bottoms", "dresses", "outerwear", "shoes", "accessories"];
+
+  // Initialize sample data if wardrobe is empty
   useEffect(() => {
-    // Create sample items if none exist
     const initializeSampleData = async () => {
-      if (items.length === 0 && !loading) {
+      if (!loading && items.length === 0) {
         try {
-          const { error } = await supabase.rpc('create_sample_wardrobe_items');
-          if (error) {
-            console.error('Error creating sample items:', error);
-          } else {
-            toast({
-              title: "Welcome to your wardrobe!",
-              description: "We've added some sample items to get you started.",
-            });
-            refetch(); // Refresh the items
-          }
+          await supabase.rpc('create_sample_wardrobe_items');
+          refetch();
         } catch (error) {
-          console.error('Error initializing sample data:', error);
+          console.error('Error creating sample items:', error);
         }
       }
     };
 
     initializeSampleData();
-  }, [items.length, loading, refetch, toast]);
+  }, [loading, items.length, refetch]);
 
-  const categories = ["all", "tops", "bottoms", "dresses", "outerwear", "shoes", "accessories"];
-  
   const filteredItems = items.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         item.brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         item.category.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || item.category === selectedCategory;
+    const matchesSearch = searchQuery === "" || 
+      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    const matchesCategory = selectedCategory === "all" || 
+      item.category.toLowerCase() === selectedCategory.toLowerCase();
+    
     return matchesSearch && matchesCategory;
   });
 
   if (loading) {
     return (
-      <div className={`flex items-center justify-center h-64 ${className}`}>
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading your wardrobe...</p>
+      <div className={`space-y-4 ${className}`}>
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`space-y-6 ${className}`}>
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold">My Wardrobe</h2>
-          <p className="text-muted-foreground">{items.length} items in your collection</p>
-        </div>
-        
-        <Button 
-          className="w-full sm:w-auto"
-          onClick={() => setAddItemOpen(true)}
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Item
-        </Button>
-        
-        <AddItemWithMatching 
-          open={addItemOpen} 
-          onOpenChange={setAddItemOpen} 
-        />
-      </div>
-
-      {/* Search and Filter */}
-      <div className="flex flex-col sm:flex-row gap-4">
+    <div className={`space-y-4 ${className}`}>
+      {/* Search and Filters */}
+      <div className="flex gap-4 mb-6">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input
-            placeholder="Search your wardrobe..."
+            placeholder="Search wardrobe items..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
           />
         </div>
-        
-        <div className="flex gap-2 overflow-x-auto pb-2">
-          {categories.map((category) => (
-            <Button
-              key={category}
-              variant={selectedCategory === category ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedCategory(category)}
-              className="whitespace-nowrap"
-            >
-              {category === "all" ? "All" : category.charAt(0).toUpperCase() + category.slice(1)}
-            </Button>
-          ))}
-        </div>
+        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Category" />
+          </SelectTrigger>
+          <SelectContent>
+            {categories.map(category => (
+              <SelectItem key={category} value={category}>
+                {category === "all" ? "All Categories" : category.charAt(0).toUpperCase() + category.slice(1)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Items Grid */}
       {filteredItems.length === 0 ? (
-        <Card className="p-8">
-          <div className="text-center space-y-4">
-            <div className="text-4xl">👗</div>
-            <h3 className="text-lg font-semibold">
-              {searchQuery || selectedCategory !== "all" 
-                ? "No items found" 
-                : "Your wardrobe is empty"}
-            </h3>
-            <p className="text-muted-foreground">
-              {searchQuery || selectedCategory !== "all"
-                ? "Try adjusting your search or filter criteria"
-                : "Add some clothing items to get started with your digital wardrobe"}
-            </p>
-            {!searchQuery && selectedCategory === "all" && (
-              <Button onClick={() => setAddItemOpen(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Your First Item
-              </Button>
+        <div className="text-center py-12 space-y-4">
+          <div className="text-muted-foreground">
+            {items.length === 0 ? (
+              <>
+                <p className="text-lg font-medium">Your wardrobe is empty</p>
+                <p className="text-sm">Add your first clothing item to get started!</p>
+              </>
+            ) : (
+              <>
+                <p className="text-lg font-medium">No items found</p>
+                <p className="text-sm">Try adjusting your search or category filter</p>
+              </>
             )}
           </div>
-        </Card>
+          <Button onClick={() => setShowAddDialog(true)} className="gap-2">
+            <Plus className="w-4 h-4" />
+            Add Item
+          </Button>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredItems.map((item) => (
-            <Card key={item.id} className="group hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="aspect-square bg-muted rounded-lg mb-3 overflow-hidden">
-                  {item.photos && typeof item.photos === 'object' && 'main' in item.photos ? (
+            <Card key={item.id} className="p-4 hover:shadow-md transition-shadow">
+              <div className="space-y-3">
+                {/* Item Image */}
+                <div className="aspect-square bg-muted rounded-lg overflow-hidden">
+                  {item.photos && typeof item.photos === 'object' && item.photos.main ? (
                     <img
-                      src={item.photos.main as string}
+                      src={item.photos.main}
                       alt={item.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-4xl">
-                      👕
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                      <div className="text-center">
+                        <div className="text-2xl mb-2">👔</div>
+                        <p className="text-xs">No photo</p>
+                      </div>
                     </div>
                   )}
                 </div>
-                
+
+                {/* Item Details */}
                 <div className="space-y-2">
                   <div className="flex items-start justify-between">
-                    <h3 className="font-semibold text-sm leading-tight">{item.name}</h3>
+                    <h3 className="font-medium text-sm leading-tight">{item.name}</h3>
                     {item.is_favorite && (
-                      <Heart className="w-4 h-4 text-red-500 fill-current" />
+                      <Heart className="w-4 h-4 text-red-500 fill-current flex-shrink-0" />
                     )}
                   </div>
                   
@@ -172,7 +146,7 @@ const WardrobeManager = ({ className }: WardrobeManagerProps) => {
                   
                   <div className="flex flex-wrap gap-1">
                     <Badge variant="secondary" className="text-xs">
-                      {item.category}
+                      {item.category.charAt(0).toUpperCase() + item.category.slice(1)}
                     </Badge>
                     {item.color && (
                       <Badge variant="outline" className="text-xs">
@@ -180,16 +154,29 @@ const WardrobeManager = ({ className }: WardrobeManagerProps) => {
                       </Badge>
                     )}
                   </div>
-                  
+
                   {item.purchase_price && (
-                    <p className="text-xs font-medium">${item.purchase_price}</p>
+                    <p className="text-xs font-medium text-primary">
+                      ${item.purchase_price}
+                    </p>
+                  )}
+
+                  {item.notes && (
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                      {item.notes}
+                    </p>
                   )}
                 </div>
-              </CardContent>
+              </div>
             </Card>
           ))}
         </div>
       )}
+
+      <AddItemWithMatching 
+        open={showAddDialog} 
+        onOpenChange={setShowAddDialog}
+      />
     </div>
   );
 };

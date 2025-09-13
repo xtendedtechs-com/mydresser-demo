@@ -92,9 +92,24 @@ export const useWardrobe = () => {
 
   const addItem = async (itemData: Omit<WardrobeItem, 'id' | 'created_at' | 'updated_at'>) => {
     try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Prepare item data with user_id and normalized category
+      const itemToInsert = {
+        ...itemData,
+        user_id: user.id,
+        category: itemData.category.toLowerCase(),
+        // Ensure required fields have defaults
+        condition: itemData.condition || 'excellent',
+        wear_count: 0,
+        is_favorite: false
+      };
+
       const { data, error } = await supabase
         .from('wardrobe_items')
-        .insert(itemData)
+        .insert(itemToInsert)
         .select()
         .single();
 
@@ -235,6 +250,14 @@ export const useWardrobe = () => {
     if (!item.photos) return [];
     if (Array.isArray(item.photos)) return item.photos;
     if (typeof item.photos === 'string') return [item.photos];
+    if (typeof item.photos === 'object' && item.photos.main) {
+      // Handle { main: "url" } format
+      return [item.photos.main];
+    }
+    if (typeof item.photos === 'object' && item.photos.urls) {
+      // Handle { urls: ["url1", "url2"] } format
+      return Array.isArray(item.photos.urls) ? item.photos.urls : [];
+    }
     return [];
   };
 
