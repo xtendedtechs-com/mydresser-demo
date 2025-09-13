@@ -729,6 +729,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_merchant_profile_public: {
+        Args: { profile_user_id?: string }
+        Returns: {
+          business_name: string
+          business_type: string
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+          verification_status: string
+        }[]
+      }
       get_merchant_profile_safe: {
         Args: Record<PropertyKey, never> | { profile_user_id: string }
         Returns: {
@@ -742,7 +754,7 @@ export type Database = {
         }[]
       }
       get_merchant_sensitive_data: {
-        Args: { profile_user_id: string }
+        Args: { profile_user_id?: string }
         Returns: {
           business_address: Json
           contact_info: Json
@@ -773,6 +785,10 @@ export type Database = {
           style_score: number
           user_id: string
         }[]
+      }
+      log_merchant_sensitive_access: {
+        Args: { accessed_fields: string[]; merchant_profile_id: string }
+        Returns: boolean
       }
     }
     Enums: {
