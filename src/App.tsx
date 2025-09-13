@@ -8,6 +8,7 @@ import Navigation from "@/components/Navigation";
 import Home from "@/pages/Home";
 import Wardrobe from "@/pages/Wardrobe";
 import Account from "@/pages/Account";
+import Add from "@/pages/Add";
 import Auth from "@/pages/Auth";
 import NotFound from "./pages/NotFound";
 import { useProfile } from "@/hooks/useProfile";
@@ -18,13 +19,6 @@ const queryClient = new QueryClient();
 const Marketplace = () => (
   <div className="min-h-screen bg-background pb-20 px-4 py-6">
     <h1 className="text-2xl font-bold fashion-text-gradient mb-4">Marketplace</h1>
-    <p className="text-muted-foreground">Coming soon...</p>
-  </div>
-);
-
-const Add = () => (
-  <div className="min-h-screen bg-background pb-20 px-4 py-6">
-    <h1 className="text-2xl font-bold fashion-text-gradient mb-4">Add Items</h1>
     <p className="text-muted-foreground">Coming soon...</p>
   </div>
 );
