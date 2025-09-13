@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Search, Filter, Heart } from "lucide-react";
 import { useWardrobe } from "@/hooks/useWardrobe";
 import { supabase } from "@/integrations/supabase/client";
@@ -75,20 +75,18 @@ const WardrobeManager = ({ className }: WardrobeManagerProps) => {
           <p className="text-muted-foreground">{items.length} items in your collection</p>
         </div>
         
-        <Dialog open={addItemOpen} onOpenChange={setAddItemOpen}>
-          <DialogTrigger asChild>
-            <Button className="w-full sm:w-auto">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Item
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Add New Item</DialogTitle>
-            </DialogHeader>
-            <AddItemWithMatching onClose={() => setAddItemOpen(false)} />
-          </DialogContent>
-        </Dialog>
+        <Button 
+          className="w-full sm:w-auto"
+          onClick={() => setAddItemOpen(true)}
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Add Item
+        </Button>
+        
+        <AddItemWithMatching 
+          open={addItemOpen} 
+          onOpenChange={setAddItemOpen} 
+        />
       </div>
 
       {/* Search and Filter */}

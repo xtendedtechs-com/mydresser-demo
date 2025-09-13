@@ -13,7 +13,8 @@ import { useItemMatches } from '@/hooks/useItemMatches';
 import ItemMatchDialog from './ItemMatchDialog';
 
 interface AddItemWithMatchingProps {
-  onClose?: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 const categories = [
@@ -25,7 +26,7 @@ const conditions = ['Excellent', 'Good', 'Fair', 'Poor'];
 const seasons = ['Spring', 'Summer', 'Fall', 'Winter', 'All Seasons'];
 const occasions = ['Casual', 'Work', 'Formal', 'Party', 'Sport', 'Travel'];
 
-const AddItemWithMatching = ({ onClose }: AddItemWithMatchingProps) => {
+const AddItemWithMatching = ({ open, onOpenChange }: AddItemWithMatchingProps) => {
   const { toast } = useToast();
   const { addItem } = useWardrobe();
   const { items: merchantItems } = useMerchantItems();
@@ -126,7 +127,7 @@ const AddItemWithMatching = ({ onClose }: AddItemWithMatchingProps) => {
           title: "Item added successfully!",
           description: `${formData.name} has been added to your wardrobe.`,
         });
-        onClose?.();
+        onOpenChange(false);
       }
 
     } catch (error) {
@@ -137,11 +138,11 @@ const AddItemWithMatching = ({ onClose }: AddItemWithMatchingProps) => {
   };
 
   const handleMatchAccept = () => {
-    onClose?.();
+    onOpenChange(false);
   };
 
   const handleMatchReject = () => {
-    onClose?.();
+    onOpenChange(false);
   };
 
   return (
@@ -322,11 +323,9 @@ const AddItemWithMatching = ({ onClose }: AddItemWithMatchingProps) => {
 
             {/* Actions */}
             <div className="flex gap-3 pt-4">
-              {onClose && (
-                <Button type="button" variant="outline" onClick={onClose}>
-                  Cancel
-                </Button>
-              )}
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
               <Button type="submit" disabled={isSubmitting} className="flex-1">
                 {isSubmitting ? 'Adding Item...' : 'Add Item'}
               </Button>
