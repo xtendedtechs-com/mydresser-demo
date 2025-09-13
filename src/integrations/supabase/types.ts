@@ -726,7 +726,39 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      profiles_public_safe: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string | null
+          role: Database["public"]["Enums"]["user_role"] | null
+          style_score: number | null
+          user_id: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+          style_score?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+          style_score?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_merchant_profile_public: {
@@ -769,6 +801,19 @@ export type Database = {
           tax_id: string
         }[]
       }
+      get_public_profile_by_user_id: {
+        Args: { target_user_id: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          created_at: string
+          full_name: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          style_score: number
+          user_id: string
+        }[]
+      }
       get_public_profiles: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -777,11 +822,7 @@ export type Database = {
           created_at: string
           full_name: string
           id: string
-          location: string
           role: Database["public"]["Enums"]["user_role"]
-          social_facebook: string
-          social_instagram: string
-          social_tiktok: string
           style_score: number
           user_id: string
         }[]
