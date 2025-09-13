@@ -18,6 +18,7 @@ interface ProductItem {
   originalPrice?: number;
   discount?: number;
   image: string;
+  brand?: string;
   merchant?: string;
   seller?: string;
   rating: number;
@@ -33,7 +34,7 @@ interface ProductItem {
 
 interface ProductCardProps {
   item: ProductItem;
-  onAction: (action: string) => void;
+  onAction: (action: string, itemId: number) => void;
 }
 
 const ProductCard = ({ item, onAction }: ProductCardProps) => {
@@ -76,7 +77,7 @@ const ProductCard = ({ item, onAction }: ProductCardProps) => {
             variant="secondary"
             size="icon"
             className="h-7 w-7 bg-background/80 hover:bg-background"
-            onClick={() => onAction("Like")}
+            onClick={() => onAction("Like", item.id)}
           >
             <Heart className="w-3 h-3" />
           </Button>
@@ -85,7 +86,7 @@ const ProductCard = ({ item, onAction }: ProductCardProps) => {
               variant="secondary"
               size="icon"
               className="h-7 w-7 bg-background/80 hover:bg-background"
-              onClick={() => onAction("Try")}
+              onClick={() => onAction("Try", item.id)}
             >
               <Eye className="w-3 h-3" />
             </Button>
@@ -97,7 +98,7 @@ const ProductCard = ({ item, onAction }: ProductCardProps) => {
           <Button 
             variant="secondary" 
             size="sm"
-            onClick={() => onAction("View")}
+            onClick={() => onAction("View", item.id)}
           >
             <Eye className="w-4 h-4 mr-2" />
             Quick View
@@ -162,7 +163,7 @@ const ProductCard = ({ item, onAction }: ProductCardProps) => {
           <Button 
             size="sm" 
             className="flex-1 h-8 text-xs"
-            onClick={() => onAction("Add to Cart")}
+            onClick={() => onAction("Add to Cart", item.id)}
           >
             <ShoppingCart className="w-3 h-3 mr-1" />
             {item.isSecondHand ? "Buy" : "Add"}
@@ -171,7 +172,7 @@ const ProductCard = ({ item, onAction }: ProductCardProps) => {
             variant="outline" 
             size="icon" 
             className="h-8 w-8"
-            onClick={() => onAction("More")}
+            onClick={() => onAction("More", item.id)}
           >
             <MoreHorizontal className="w-3 h-3" />
           </Button>

@@ -29,6 +29,16 @@ const Market = () => {
   const [activeFilter, setActiveFilter] = useState("all");
   const [selectedTab, setSelectedTab] = useState("mydresser");
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { 
+    items: merchantItems, 
+    loading, 
+    getFeaturedItems, 
+    getPremiumItems,
+    getItemsByCategory,
+    searchItems,
+    getPhotoUrls 
+  } = useMerchantItems();
 
   // Sample data for demonstration
   const featuredOutfits = [

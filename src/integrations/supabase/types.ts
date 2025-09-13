@@ -126,6 +126,42 @@ export type Database = {
         }
         Relationships: []
       }
+      item_matches: {
+        Row: {
+          created_at: string
+          id: string
+          match_reasons: string[] | null
+          match_score: number | null
+          merchant_item_id: string
+          status: string | null
+          updated_at: string
+          user_id: string
+          user_item_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          match_reasons?: string[] | null
+          match_score?: number | null
+          merchant_item_id: string
+          status?: string | null
+          updated_at?: string
+          user_id: string
+          user_item_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          match_reasons?: string[] | null
+          match_score?: number | null
+          merchant_item_id?: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+          user_item_id?: string
+        }
+        Relationships: []
+      }
       laundry_batches: {
         Row: {
           completed_at: string | null
@@ -197,6 +233,81 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      merchant_items: {
+        Row: {
+          brand: string | null
+          category: string
+          color: string | null
+          condition: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_featured: boolean | null
+          is_premium: boolean | null
+          material: string | null
+          merchant_id: string
+          name: string
+          occasion: string | null
+          original_price: number | null
+          photos: Json | null
+          price: number
+          season: string | null
+          size: string[] | null
+          stock_quantity: number | null
+          style_tags: string[] | null
+          tags: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          brand?: string | null
+          category: string
+          color?: string | null
+          condition?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_premium?: boolean | null
+          material?: string | null
+          merchant_id: string
+          name: string
+          occasion?: string | null
+          original_price?: number | null
+          photos?: Json | null
+          price: number
+          season?: string | null
+          size?: string[] | null
+          stock_quantity?: number | null
+          style_tags?: string[] | null
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          brand?: string | null
+          category?: string
+          color?: string | null
+          condition?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_featured?: boolean | null
+          is_premium?: boolean | null
+          material?: string | null
+          merchant_id?: string
+          name?: string
+          occasion?: string | null
+          original_price?: number | null
+          photos?: Json | null
+          price?: number
+          season?: string | null
+          size?: string[] | null
+          stock_quantity?: number | null
+          style_tags?: string[] | null
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       merchant_profile_access_log: {
         Row: {
