@@ -78,7 +78,7 @@ const MerchantProfileForm = ({ onComplete }: MerchantProfileFormProps) => {
     
     try {
       if (profile) {
-        await updateProfile(formData);
+        await updateProfile(profile.id, formData);
       } else {
         await createProfile(formData);
       }

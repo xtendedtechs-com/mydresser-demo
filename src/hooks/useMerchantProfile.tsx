@@ -6,20 +6,32 @@ interface MerchantProfile {
   id: string;
   user_id: string;
   business_name: string;
-  business_type?: string;
-  verification_status?: string;
+  business_type: string | null;
+  verification_status: string | null;
   created_at: string;
   updated_at: string;
+  // Sensitive data indicators (not the actual data)
+  tax_id_status?: 'VERIFIED' | 'HIDDEN';
+  address_status?: 'PROVIDED' | 'NOT_PROVIDED';
+  contact_status?: 'PROVIDED' | 'NOT_PROVIDED';
 }
 
-interface MerchantSensitiveData {
+interface SensitiveMerchantData {
+  tax_id: string | null;
+  business_address: any | null;
+  contact_info: any | null;
+}
+
+interface CreateMerchantProfileData {
+  business_name: string;
+  business_type?: string;
   tax_id?: string;
   business_address?: any;
   contact_info?: any;
 }
 
-interface MerchantProfileInput {
-  business_name: string;
+interface UpdateMerchantProfileData {
+  business_name?: string;
   business_type?: string;
   tax_id?: string;
   business_address?: any;
@@ -28,170 +40,209 @@ interface MerchantProfileInput {
 
 export const useMerchantProfile = () => {
   const [profile, setProfile] = useState<MerchantProfile | null>(null);
-  const [sensitiveData, setSensitiveData] = useState<MerchantSensitiveData | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [sensitiveData, setSensitiveData] = useState<SensitiveMerchantData | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
+  // Fetch merchant profile (safe view - no sensitive data)
   const fetchProfile = async () => {
-    setLoading(true);
-    setError(null);
-    
     try {
-      // Fetch public merchant profile data using secure function
-      const { data: profileData, error: profileError } = await supabase
-        .rpc('get_merchant_profile_safe');
+      setLoading(true);
+      setError(null);
 
-      if (profileError) {
-        if (profileError.code === 'PGRST116') {
-          // No merchant profile found
-          setProfile(null);
-          return;
-        }
-        throw profileError;
+      const { data, error } = await supabase
+        .from('merchant_profiles_safe')
+        .select('*')
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // Not found is OK
+        throw error;
       }
 
-      if (profileData && profileData.length > 0) {
-        setProfile(profileData[0]);
-      }
+      setProfile(data as MerchantProfile);
     } catch (err: any) {
       console.error('Error fetching merchant profile:', err);
-      setError(err.message || 'Failed to fetch merchant profile');
-      toast({
-        title: "Error",
-        description: "Failed to load merchant profile",
-        variant: "destructive"
-      });
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchSensitiveData = async () => {
-    if (!profile) return;
-    
-    setLoading(true);
-    setError(null);
-    
+  // Fetch sensitive data (requires special permissions and rate limiting)
+  const fetchSensitiveData = async (): Promise<SensitiveMerchantData | null> => {
     try {
-      // Fetch encrypted sensitive data using secure function
-      const { data: sensitiveDataResult, error: sensitiveError } = await supabase
-        .rpc('get_merchant_sensitive_data');
+      const { data, error } = await supabase.rpc('get_merchant_sensitive_data');
 
-      if (sensitiveError) {
-        throw sensitiveError;
+      if (error) {
+        if (error.message.includes('Rate limit exceeded')) {
+          toast({
+            title: "Rate Limit Exceeded",
+            description: "Too many sensitive data requests. Please try again later.",
+            variant: "destructive",
+          });
+        }
+        throw error;
       }
 
-      if (sensitiveDataResult && sensitiveDataResult.length > 0) {
-        setSensitiveData(sensitiveDataResult[0]);
-      }
+      // The RPC returns an array, get the first result
+      const sensitiveResult = data && data.length > 0 ? data[0] : null;
+      setSensitiveData(sensitiveResult);
+      return sensitiveResult;
     } catch (err: any) {
       console.error('Error fetching sensitive merchant data:', err);
-      setError(err.message || 'Failed to fetch sensitive data');
       toast({
-        title: "Error",
-        description: "Failed to load sensitive business data",
-        variant: "destructive"
+        title: "Access Error",
+        description: "Failed to access sensitive business data.",
+        variant: "destructive",
       });
-    } finally {
-      setLoading(false);
+      return null;
     }
   };
 
-  const createProfile = async (profileData: MerchantProfileInput) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      // Use secure encrypted insertion function
-      const { data: profileId, error: createError } = await supabase
-        .rpc('insert_encrypted_merchant_profile', {
-          business_name_param: profileData.business_name,
-          business_type_param: profileData.business_type,
-          tax_id_param: profileData.tax_id,
-          business_address_param: profileData.business_address,
-          contact_info_param: profileData.contact_info
-        });
-
-      if (createError) {
-        throw createError;
-      }
-
-      toast({
-        title: "Success",
-        description: "Merchant profile created successfully with encrypted sensitive data",
-      });
-
-      // Refresh profile data
-      await fetchProfile();
-      
-      return profileId;
-    } catch (err: any) {
-      console.error('Error creating merchant profile:', err);
-      setError(err.message || 'Failed to create merchant profile');
-      toast({
-        title: "Error", 
-        description: "Failed to create merchant profile",
-        variant: "destructive"
-      });
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateProfile = async (profileData: Partial<MerchantProfileInput>) => {
-    if (!profile?.id) return;
-    
-    setLoading(true);
-    setError(null);
-    
-    try {
-      // Use secure encrypted update function
-      const { data: success, error: updateError } = await supabase
-        .rpc('update_encrypted_merchant_profile', {
-          profile_id_param: profile.id,
-          business_name_param: profileData.business_name,
-          business_type_param: profileData.business_type,
-          tax_id_param: profileData.tax_id,
-          business_address_param: profileData.business_address,
-          contact_info_param: profileData.contact_info
-        });
-
-      if (updateError) {
-        throw updateError;
-      }
-
-      toast({
-        title: "Success",
-        description: "Merchant profile updated successfully with encrypted sensitive data",
-      });
-
-      // Refresh profile data
-      await fetchProfile();
-      
-      // Clear sensitive data from memory for security
-      setSensitiveData(null);
-      
-      return success;
-    } catch (err: any) {
-      console.error('Error updating merchant profile:', err);
-      setError(err.message || 'Failed to update merchant profile');
-      toast({
-        title: "Error",
-        description: "Failed to update merchant profile", 
-        variant: "destructive"
-      });
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Clear sensitive data from memory for security
   const clearSensitiveData = () => {
     setSensitiveData(null);
+    toast({
+      title: "Data Cleared",
+      description: "Sensitive business data has been cleared from memory.",
+    });
   };
 
+  // Create merchant profile with encryption
+  const createProfile = async (profileData: CreateMerchantProfileData): Promise<boolean> => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const { data, error } = await supabase.rpc('insert_encrypted_merchant_profile', {
+        business_name_param: profileData.business_name,
+        business_type_param: profileData.business_type || null,
+        tax_id_param: profileData.tax_id || null,
+        business_address_param: profileData.business_address || null,
+        contact_info_param: profileData.contact_info || null
+      });
+
+      if (error) {
+        if (error.message.includes('Rate limit exceeded')) {
+          toast({
+            title: "Rate Limit Exceeded",
+            description: "Too many profile creation attempts. Please try again later.",
+            variant: "destructive",
+          });
+        }
+        throw error;
+      }
+
+      toast({
+        title: "Profile Created",
+        description: "Your merchant profile has been created with encrypted sensitive data.",
+      });
+
+      // Refresh profile data
+      await fetchProfile();
+      return true;
+    } catch (err: any) {
+      console.error('Error creating merchant profile:', err);
+      setError(err.message);
+      toast({
+        title: "Creation Failed",
+        description: err.message,
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Update merchant profile with encryption
+  const updateProfile = async (
+    profileId: string,
+    updates: UpdateMerchantProfileData
+  ): Promise<boolean> => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const { data, error } = await supabase.rpc('update_encrypted_merchant_profile', {
+        profile_id_param: profileId,
+        business_name_param: updates.business_name || null,
+        business_type_param: updates.business_type || null,
+        tax_id_param: updates.tax_id || null,
+        business_address_param: updates.business_address || null,
+        contact_info_param: updates.contact_info || null
+      });
+
+      if (error) {
+        if (error.message.includes('Rate limit exceeded')) {
+          toast({
+            title: "Rate Limit Exceeded",
+            description: "Too many profile updates. Please try again later.",
+            variant: "destructive",
+          });
+        }
+        throw error;
+      }
+
+      toast({
+        title: "Profile Updated",
+        description: "Your merchant profile has been updated with encrypted sensitive data.",
+      });
+
+      // Refresh profile data
+      await fetchProfile();
+      return true;
+    } catch (err: any) {
+      console.error('Error updating merchant profile:', err);
+      setError(err.message);
+      toast({
+        title: "Update Failed",
+        description: err.message,
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Delete merchant profile (only for non-verified profiles)
+  const deleteProfile = async (profileId: string): Promise<boolean> => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const { error } = await supabase
+        .from('merchant_profiles')
+        .delete()
+        .eq('id', profileId)
+        .eq('user_id', (await supabase.auth.getUser()).data.user?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Profile Deleted",
+        description: "Your merchant profile has been deleted.",
+      });
+
+      setProfile(null);
+      return true;
+    } catch (err: any) {
+      console.error('Error deleting merchant profile:', err);
+      setError(err.message);
+      toast({
+        title: "Deletion Failed",
+        description: err.message,
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load profile on mount
   useEffect(() => {
     fetchProfile();
   }, []);
@@ -203,8 +254,12 @@ export const useMerchantProfile = () => {
     error,
     fetchProfile,
     fetchSensitiveData,
+    clearSensitiveData,
     createProfile,
     updateProfile,
-    clearSensitiveData,
+    deleteProfile,
+    refetch: fetchProfile
   };
 };
+
+export default useMerchantProfile;
