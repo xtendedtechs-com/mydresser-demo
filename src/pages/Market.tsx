@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate as useRRNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -31,7 +31,7 @@ const Market = () => {
   const [activeFilter, setActiveFilter] = useState("all");
   const [selectedTab, setSelectedTab] = useState("mydresser");
   const { toast } = useToast();
-  const navigate = useNavigate();
+  const navigate = useRRNavigate();
   const { 
     items: merchantItems, 
     loading, 
