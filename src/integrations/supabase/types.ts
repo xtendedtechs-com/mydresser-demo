@@ -14,7 +14,144 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      merchant_profiles: {
+        Row: {
+          business_address: Json | null
+          business_name: string
+          business_type: string | null
+          contact_info: Json | null
+          created_at: string
+          id: string
+          tax_id: string | null
+          updated_at: string
+          user_id: string
+          verification_status: string | null
+        }
+        Insert: {
+          business_address?: Json | null
+          business_name: string
+          business_type?: string | null
+          contact_info?: Json | null
+          created_at?: string
+          id?: string
+          tax_id?: string | null
+          updated_at?: string
+          user_id: string
+          verification_status?: string | null
+        }
+        Update: {
+          business_address?: Json | null
+          business_name?: string
+          business_type?: string | null
+          contact_info?: Json | null
+          created_at?: string
+          id?: string
+          tax_id?: string | null
+          updated_at?: string
+          user_id?: string
+          verification_status?: string | null
+        }
+        Relationships: []
+      }
+      professional_applications: {
+        Row: {
+          application_status: string | null
+          experience_years: number | null
+          id: string
+          portfolio_url: string | null
+          qualifications: string | null
+          reviewed_at: string | null
+          reviewer_notes: string | null
+          social_verification: Json | null
+          submitted_at: string
+          user_id: string
+        }
+        Insert: {
+          application_status?: string | null
+          experience_years?: number | null
+          id?: string
+          portfolio_url?: string | null
+          qualifications?: string | null
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          social_verification?: Json | null
+          submitted_at?: string
+          user_id: string
+        }
+        Update: {
+          application_status?: string | null
+          experience_years?: number | null
+          id?: string
+          portfolio_url?: string | null
+          qualifications?: string | null
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          social_verification?: Json | null
+          submitted_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          auth_level: Database["public"]["Enums"]["auth_level"]
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          is_profile_public: boolean | null
+          location: string | null
+          privacy_settings: Json | null
+          role: Database["public"]["Enums"]["user_role"]
+          social_facebook: string | null
+          social_instagram: string | null
+          social_tiktok: string | null
+          style_score: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auth_level?: Database["public"]["Enums"]["auth_level"]
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          is_profile_public?: boolean | null
+          location?: string | null
+          privacy_settings?: Json | null
+          role?: Database["public"]["Enums"]["user_role"]
+          social_facebook?: string | null
+          social_instagram?: string | null
+          social_tiktok?: string | null
+          style_score?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auth_level?: Database["public"]["Enums"]["auth_level"]
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          is_profile_public?: boolean | null
+          location?: string | null
+          privacy_settings?: Json | null
+          role?: Database["public"]["Enums"]["user_role"]
+          social_facebook?: string | null
+          social_instagram?: string | null
+          social_tiktok?: string | null
+          style_score?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +160,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      auth_level: "base" | "intermediate" | "advanced"
+      user_role: "private" | "professional" | "merchant" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +288,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      auth_level: ["base", "intermediate", "advanced"],
+      user_role: ["private", "professional", "merchant", "admin"],
+    },
   },
 } as const
