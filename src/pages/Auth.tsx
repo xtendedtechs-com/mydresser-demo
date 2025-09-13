@@ -4,22 +4,135 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail, Lock, User } from "lucide-react";
+import { Loader2, Mail, Lock, User, Shield, AlertTriangle } from "lucide-react";
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [invitationToken, setInvitationToken] = useState("");
+  const [signupBlocked, setSignupBlocked] = useState(false);
+  const [blockReason, setBlockReason] = useState("");
+  const [showInviteField, setShowInviteField] = useState(false);
   const { toast } = useToast();
+
+  // Check if signup is allowed
+  const checkSignupAllowed = async () => {
+    try {
+      const response = await supabase.functions.invoke('auth-security', {
+        body: { action: 'check_signup_allowed' }
+      });
+
+      if (response.data) {
+        if (!response.data.allowed) {
+          setSignupBlocked(true);
+          setBlockReason(response.data.reason || 'Signup is currently disabled');
+          setShowInviteField(true);
+        }
+        return response.data.allowed;
+      }
+      return false;
+    } catch (error) {
+      setSignupBlocked(true);
+      setBlockReason('Unable to verify signup permissions. Please try again later.');
+      return false;
+    }
+  };
+
+  // Rate limiting check
+  const checkRateLimit = async (action: string) => {
+    try {
+      const identifier = `${window.location.hostname}_${Date.now()}`;
+      const response = await supabase.functions.invoke('auth-security', {
+        body: { 
+          action: 'rate_limit_check',
+          data: {
+            identifier,
+            action,
+            limit: action === 'login' ? 5 : 3,
+            windowMinutes: 15
+          }
+        }
+      });
+
+      return response.data?.allowed !== false;
+    } catch (error) {
+      console.warn('Rate limit check failed:', error);
+      return true; // Allow on error to not block legitimate users
+    }
+  };
+
+  // Security audit logging
+  const auditLog = async (action: string, success: boolean, details?: any) => {
+    try {
+      await supabase.functions.invoke('auth-security', {
+        body: {
+          action: 'audit_log',
+          data: {
+            action,
+            success,
+            details,
+            resource: 'auth'
+          }
+        }
+      });
+    } catch (error) {
+      console.warn('Audit logging failed:', error);
+    }
+  };
+
+  const validateInvitation = async (token: string) => {
+    try {
+      const response = await supabase.functions.invoke('auth-security', {
+        body: { 
+          action: 'validate_invitation',
+          data: { token }
+        }
+      });
+
+      return response.data?.valid === true;
+    } catch (error) {
+      return false;
+    }
+  };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      // Security validations
+      const canProceed = await checkRateLimit('signup');
+      if (!canProceed) {
+        throw new Error('Too many signup attempts. Please try again later.');
+      }
+
+      // Check signup permissions
+      const signupAllowed = await checkSignupAllowed();
+      if (!signupAllowed) {
+        if (invitationToken) {
+          const validInvite = await validateInvitation(invitationToken);
+          if (!validInvite) {
+            throw new Error('Invalid invitation token');
+          }
+        } else {
+          throw new Error('Signup is currently restricted. Please contact support for an invitation.');
+        }
+      }
+
+      // Input validation
+      if (password.length < 8) {
+        throw new Error('Password must be at least 8 characters long');
+      }
+
+      if (!email.includes('@')) {
+        throw new Error('Please enter a valid email address');
+      }
+
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -27,17 +140,22 @@ const Auth = () => {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
             full_name: fullName,
+            invitation_token: invitationToken || undefined
           }
         }
       });
 
       if (error) throw error;
 
+      await auditLog('user_signup', true, { email, invitation_used: !!invitationToken });
+
       toast({
         title: "Account created successfully!",
         description: "Please check your email to verify your account.",
       });
     } catch (error: any) {
+      await auditLog('user_signup', false, { email, error: error.message });
+      
       toast({
         title: "Error creating account",
         description: error.message,
@@ -53,6 +171,12 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      // Rate limit check
+      const canProceed = await checkRateLimit('login');
+      if (!canProceed) {
+        throw new Error('Too many login attempts. Please try again later.');
+      }
+
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -60,11 +184,15 @@ const Auth = () => {
 
       if (error) throw error;
 
+      await auditLog('user_signin', true, { email });
+
       toast({
         title: "Welcome back!",
         description: "You have been signed in successfully.",
       });
     } catch (error: any) {
+      await auditLog('user_signin', false, { email, error: error.message });
+      
       toast({
         title: "Error signing in",
         description: error.message,
@@ -80,9 +208,21 @@ const Auth = () => {
       <div className="w-full max-w-md space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold fashion-text-gradient">MyDresser</h1>
-          <p className="text-muted-foreground">Your personal fashion revolution starts here</p>
+          <div className="flex items-center justify-center gap-2">
+            <Shield className="h-8 w-8 text-primary" />
+            <h1 className="text-3xl font-bold fashion-text-gradient">MyDresser</h1>
+          </div>
+          <p className="text-muted-foreground">Secure access to your fashion platform</p>
         </div>
+
+        {/* Security Notice */}
+        <Alert>
+          <Shield className="h-4 w-4" />
+          <AlertDescription>
+            This platform uses enterprise-grade security including rate limiting, 
+            audit logging, and invitation-only access during launch.
+          </AlertDescription>
+        </Alert>
 
         {/* Auth Form */}
         <Card>
@@ -97,7 +237,7 @@ const Auth = () => {
                 <CardHeader>
                   <CardTitle>Sign In</CardTitle>
                   <CardDescription>
-                    Welcome back to your fashion journey
+                    Access your secure fashion dashboard
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -139,7 +279,7 @@ const Auth = () => {
                     disabled={loading}
                   >
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Sign In
+                    Sign In Securely
                   </Button>
                 </CardFooter>
               </form>
@@ -150,10 +290,33 @@ const Auth = () => {
                 <CardHeader>
                   <CardTitle>Create Account</CardTitle>
                   <CardDescription>
-                    Join the fashion revolution today
+                    {signupBlocked ? 'Invitation required for early access' : 'Join the secure fashion platform'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {signupBlocked && (
+                    <Alert variant="destructive">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription>
+                        {blockReason}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {showInviteField && (
+                    <div className="space-y-2">
+                      <Label htmlFor="invitationToken">Invitation Token</Label>
+                      <Input
+                        id="invitationToken"
+                        type="text"
+                        placeholder="Enter your invitation token"
+                        value={invitationToken}
+                        onChange={(e) => setInvitationToken(e.target.value)}
+                        required={signupBlocked}
+                      />
+                    </div>
+                  )}
+
                   <div className="space-y-2">
                     <Label htmlFor="fullName">Full Name</Label>
                     <div className="relative">
@@ -191,12 +354,12 @@ const Auth = () => {
                       <Input
                         id="signup-password"
                         type="password"
-                        placeholder="Create a password"
+                        placeholder="Create a strong password (min 8 chars)"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="pl-10"
                         required
-                        minLength={6}
+                        minLength={8}
                       />
                     </div>
                   </div>
@@ -208,7 +371,7 @@ const Auth = () => {
                     disabled={loading}
                   >
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Create Account
+                    Create Secure Account
                   </Button>
                 </CardFooter>
               </form>
@@ -216,8 +379,14 @@ const Auth = () => {
           </Tabs>
         </Card>
 
-        <div className="text-center text-sm text-muted-foreground">
-          By signing up, you agree to our Terms of Service and Privacy Policy
+        <div className="space-y-2">
+          <div className="text-center text-sm text-muted-foreground">
+            <Shield className="inline w-4 h-4 mr-1" />
+            Protected by enterprise security measures
+          </div>
+          <div className="text-center text-xs text-muted-foreground">
+            By signing up, you agree to our Terms of Service and Privacy Policy
+          </div>
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
+import SecurityHeaders from "@/components/SecurityHeaders";
 import Home from "@/pages/Home";
 import Wardrobe from "@/pages/Wardrobe";
 import Account from "@/pages/Account";
@@ -82,6 +83,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        <SecurityHeaders />
         <Toaster />
         <Sonner />
         <BrowserRouter>

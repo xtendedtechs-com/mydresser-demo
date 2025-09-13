@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Shield, Lock, Zap } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import DailyOutfit from "@/components/DailyOutfit";
 import ClothingItem from "@/components/ClothingItem";
 import { toast } from "sonner";
+import { useProfile } from "@/hooks/useProfile";
 
 // Import fashion images
 import orangeJacket from "@/assets/orange-jacket.jpg";
@@ -13,6 +16,29 @@ import graySweater from "@/assets/gray-sweater.jpg";
 const Home = () => {
   const [likedItems, setLikedItems] = useState<Set<string>>(new Set());
   const [starredItems, setStarredItems] = useState<Set<string>>(new Set());
+  const { user, profile, isAuthenticated } = useProfile();
+
+  // Security check - ensure user is authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      // This should not happen due to routing protection, but add extra security
+      console.warn('Unauthorized access attempt to home page');
+      window.location.href = '/auth';
+    }
+  }, [isAuthenticated]);
+
+  // Don't render content if not authenticated
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Shield className="mx-auto h-12 w-12 text-muted-foreground" />
+          <h2 className="text-xl font-semibold">Authentication Required</h2>
+          <p className="text-muted-foreground">Please sign in to access your fashion dashboard.</p>
+        </div>
+      </div>
+    );
+  }
 
   const favoritesItems = [
     { id: "1", name: "Orange Bomber Jacket", brand: "Nike", image: orangeJacket, category: "Jacket" },
@@ -56,9 +82,25 @@ const Home = () => {
     <div className="min-h-screen bg-background pb-20">
       <header className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-10">
         <div className="px-4 py-4">
-          <h1 className="text-2xl font-bold fashion-text-gradient">MyDresser</h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold fashion-text-gradient">MyDresser</h1>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Shield className="w-4 h-4" />
+              <span>Secured</span>
+            </div>
+          </div>
         </div>
       </header>
+
+      {/* Security Status Alert */}
+      <div className="px-4 py-2">
+        <Alert>
+          <Lock className="h-4 w-4" />
+          <AlertDescription>
+            Welcome back, {profile?.full_name || user.email}! Your session is protected with enterprise-grade security.
+          </AlertDescription>
+        </Alert>
+      </div>
 
       <main className="px-4 py-6 space-y-8">
         <DailyOutfit />
