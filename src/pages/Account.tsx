@@ -6,6 +6,8 @@ import { Search, Palette, ChevronRight } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import ProfileHeader from "@/components/ProfileHeader";
 import SettingsSection from "@/components/SettingsSection";
+import ProfileEditDialog from "@/components/ProfileEditDialog";
+import SettingsDialog from "@/components/SettingsDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -21,6 +23,9 @@ const Account = () => {
   const { profile, loading } = useProfile();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
+  const [profileEditOpen, setProfileEditOpen] = useState(false);
+  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
+  const [currentSetting, setCurrentSetting] = useState({ type: '', title: '', description: '' });
 
   const handleSignOut = async () => {
     try {
@@ -36,6 +41,11 @@ const Account = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const openSettingsDialog = (type: string, title: string, description: string) => {
+    setCurrentSetting({ type, title, description });
+    setSettingsDialogOpen(true);
   };
 
   if (loading) {
@@ -68,38 +78,38 @@ const Account = () => {
       id: 'account',
       label: 'Account',
       description: 'Manage your account settings',
-      onClick: () => toast({ title: "Coming soon", description: "Account settings will be available soon." })
+      onClick: () => openSettingsDialog('account', 'Account Settings', 'Manage your account details and security')
     },
     {
       id: 'authentication',
       label: 'Authentication',
       description: `Current level: ${profile.auth_level}`,
-      onClick: () => toast({ title: "Coming soon", description: "Authentication settings will be available soon." }),
+      onClick: () => openSettingsDialog('authentication', 'Authentication Settings', 'Manage your security and authentication preferences'),
       highlighted: profile.auth_level === 'base'
     },
     {
       id: 'profile',
       label: 'My profile',
       description: 'Edit your profile information',
-      onClick: () => toast({ title: "Coming soon", description: "Profile editing will be available soon." })
+      onClick: () => setProfileEditOpen(true)
     },
     {
       id: 'privacy',
       label: 'Privacy',
       description: 'Control your privacy settings',
-      onClick: () => toast({ title: "Coming soon", description: "Privacy settings will be available soon." })
+      onClick: () => openSettingsDialog('privacy', 'Privacy Settings', 'Control who can see your profile and content')
     },
     {
       id: 'data',
       label: 'My data',
       description: 'Manage your personal data',
-      onClick: () => toast({ title: "Coming soon", description: "Data management will be available soon." })
+      onClick: () => openSettingsDialog('data', 'Data Management', 'Export, backup, or delete your personal data')
     },
     {
       id: 'preferences',
       label: 'My preferences',
       description: 'Customize your preferences',
-      onClick: () => toast({ title: "Coming soon", description: "Preferences will be available soon." })
+      onClick: () => openSettingsDialog('preferences', 'App Preferences', 'Customize how the app works for you')
     }
   ];
 
@@ -108,19 +118,19 @@ const Account = () => {
       id: 'general',
       label: 'General',
       description: 'General app settings',
-      onClick: () => toast({ title: "Coming soon", description: "General settings will be available soon." })
+      onClick: () => openSettingsDialog('general', 'General Settings', 'Configure general app behavior and preferences')
     },
     {
       id: 'permissions',
       label: 'Permissions',
       description: 'App permissions',
-      onClick: () => toast({ title: "Coming soon", description: "Permissions will be available soon." })
+      onClick: () => openSettingsDialog('permissions', 'App Permissions', 'Manage what the app can access on your device')
     },
     {
-      id: 'app-privacy',
-      label: 'Privacy',
-      description: 'App privacy settings',
-      onClick: () => toast({ title: "Coming soon", description: "App privacy will be available soon." })
+      id: 'notifications',
+      label: 'Notifications',
+      description: 'Notification preferences',
+      onClick: () => openSettingsDialog('notifications', 'Notification Settings', 'Control what notifications you receive')
     }
   ];
 
@@ -129,19 +139,19 @@ const Account = () => {
       id: 'behavior',
       label: 'Modify app behaviour',
       description: 'Customize how the app works for you',
-      onClick: () => toast({ title: "Coming soon", description: "Behavior settings will be available soon." })
+      onClick: () => openSettingsDialog('behavior', 'App Behavior', 'Customize how the app behaves and responds')
     },
     {
       id: 'suggestions',
       label: 'Personalize suggestions',
       description: 'Tailor recommendations to your style',
-      onClick: () => toast({ title: "Coming soon", description: "Suggestion settings will be available soon." })
+      onClick: () => openSettingsDialog('suggestions', 'Suggestion Settings', 'Customize your personalized recommendations')
     },
     {
       id: 'theme',
       label: 'Customize theme',
       description: 'Change the app appearance',
-      onClick: () => toast({ title: "Coming soon", description: "Theme customization will be available soon." }),
+      onClick: () => openSettingsDialog('theme', 'Theme Settings', 'Customize the app appearance and colors'),
       highlighted: true
     }
   ];
@@ -265,6 +275,19 @@ const Account = () => {
           </Button>
         </div>
       </div>
+
+      {/* Dialogs */}
+      <ProfileEditDialog 
+        open={profileEditOpen} 
+        onOpenChange={setProfileEditOpen} 
+      />
+      <SettingsDialog
+        open={settingsDialogOpen}
+        onOpenChange={setSettingsDialogOpen}
+        settingType={currentSetting.type}
+        title={currentSetting.title}
+        description={currentSetting.description}
+      />
     </div>
   );
 };

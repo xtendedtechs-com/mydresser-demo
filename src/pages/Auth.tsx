@@ -7,13 +7,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail, Lock, User, Shield, AlertTriangle } from "lucide-react";
+import { Loader2, Mail, Lock, User, Shield, AlertTriangle, Phone } from "lucide-react";
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
   const [invitationToken, setInvitationToken] = useState("");
   const [signupBlocked, setSignupBlocked] = useState(false);
   const [blockReason, setBlockReason] = useState("");
@@ -137,9 +138,10 @@ const Auth = () => {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: `${window.location.origin}/profile-setup`,
           data: {
             full_name: fullName,
+            phone: phone,
             invitation_token: invitationToken || undefined
           }
         }
@@ -329,6 +331,20 @@ const Auth = () => {
                         onChange={(e) => setFullName(e.target.value)}
                         className="pl-10"
                         required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="Enter your phone number"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="pl-10"
                       />
                     </div>
                   </div>
