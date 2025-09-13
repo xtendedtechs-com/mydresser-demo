@@ -79,9 +79,15 @@ const MFASetup = ({ userId, onComplete }: MFASetupProps) => {
 
       if (data.valid) {
         setTotpEnabled(true);
+        
+        // Clear sensitive data from frontend state for security
+        setMaskedSecret('');
+        setQrCodeUrl('');
+        setBackupCodes([]);
+        
         toast({
           title: "TOTP Enabled",
-          description: "Two-factor authentication is now active on your account.",
+          description: "Two-factor authentication is now active on your account. Save your backup codes securely!",
         });
         onComplete?.();
       } else {
