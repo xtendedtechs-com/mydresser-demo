@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useWardrobe, WardrobeItem } from '@/hooks/useWardrobe';
+import ItemLists from '@/components/ItemLists';
 
 const WardrobeItemDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -362,8 +363,13 @@ const WardrobeItemDetail = () => {
           </div>
         </div>
 
-        {/* Related Items Sections */}
-        <div className="space-y-8">
+      {/* Related Items Sections */}
+      <div className="space-y-8">
+        <ItemLists 
+          excludeCurrentItem={item.id}
+          limit={4}
+        />
+      </div>
           {/* My Favorites */}
           {items.filter(item => item.is_favorite).length > 0 && (
             <section>

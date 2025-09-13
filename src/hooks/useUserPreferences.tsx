@@ -18,6 +18,27 @@ export interface UserPreferences {
     };
   };
   
+  // Extended theme options
+  extended_theme: {
+    gradient_backgrounds: boolean;
+    animated_transitions: boolean;
+    card_style: 'default' | 'minimal' | 'elevated' | 'outlined';
+    border_radius: 'none' | 'small' | 'medium' | 'large' | 'full';
+    shadow_intensity: 'none' | 'subtle' | 'medium' | 'strong';
+  };
+  
+  // Accessibility settings
+  accessibility_settings: {
+    high_contrast: boolean;
+    large_text: boolean;
+    reduce_motion: boolean;
+    screen_reader_support: boolean;
+    keyboard_navigation: boolean;
+    color_blind_friendly: boolean;
+    font_size_multiplier: number;
+    voice_navigation: boolean;
+  };
+  
   // Notification preferences
   notifications: {
     email: boolean;
@@ -55,6 +76,23 @@ export interface UserPreferences {
     style_preferences: string[];
     budget_range: [number, number];
   };
+  
+  // Laundry settings
+  laundry_settings: {
+    auto_sort_by_color: boolean;
+    reminder_notifications: boolean;
+    smart_suggestions: boolean;
+    care_label_warnings: boolean;
+  };
+  
+  // 2ndDresser marketplace settings
+  marketplace_settings: {
+    allow_selling: boolean;
+    show_price_history: boolean;
+    auto_suggest_prices: boolean;
+    shipping_preferences: Record<string, any>;
+    payment_methods: string[];
+  };
 }
 
 const defaultPreferences: UserPreferences = {
@@ -69,6 +107,23 @@ const defaultPreferences: UserPreferences = {
       secondary: '#64748b',
       accent: '#8b5cf6',
     },
+  },
+  extended_theme: {
+    gradient_backgrounds: true,
+    animated_transitions: true,
+    card_style: 'default',
+    border_radius: 'medium',
+    shadow_intensity: 'medium',
+  },
+  accessibility_settings: {
+    high_contrast: false,
+    large_text: false,
+    reduce_motion: false,
+    screen_reader_support: false,
+    keyboard_navigation: false,
+    color_blind_friendly: false,
+    font_size_multiplier: 1.0,
+    voice_navigation: false,
   },
   notifications: {
     email: true,
@@ -99,6 +154,19 @@ const defaultPreferences: UserPreferences = {
     brand_preferences: [],
     style_preferences: [],
     budget_range: [0, 1000],
+  },
+  laundry_settings: {
+    auto_sort_by_color: true,
+    reminder_notifications: true,
+    smart_suggestions: true,
+    care_label_warnings: true,
+  },
+  marketplace_settings: {
+    allow_selling: false,
+    show_price_history: true,
+    auto_suggest_prices: true,
+    shipping_preferences: {},
+    payment_methods: [],
   },
 };
 
@@ -149,10 +217,14 @@ export const useUserPreferences = () => {
 
         const loadedPreferences: UserPreferences = {
           theme: parsedTheme,
+          extended_theme: (data.extended_theme as any) || defaultPreferences.extended_theme,
+          accessibility_settings: (data.accessibility_settings as any) || defaultPreferences.accessibility_settings,
           notifications: (data.notifications as any) || defaultPreferences.notifications,
           privacy: (data.privacy_settings as any) || defaultPreferences.privacy,
           app_behavior: (data.app_behavior as any) || defaultPreferences.app_behavior,
           suggestion_settings: (data.suggestion_settings as any) || defaultPreferences.suggestion_settings,
+          laundry_settings: (data.laundry_settings as any) || defaultPreferences.laundry_settings,
+          marketplace_settings: (data.marketplace_settings as any) || defaultPreferences.marketplace_settings,
         };
         
         setPreferences(loadedPreferences);
@@ -184,10 +256,14 @@ export const useUserPreferences = () => {
         .insert({
           user_id: user.id,
           theme: JSON.stringify(defaultPreferences.theme),
+          extended_theme: defaultPreferences.extended_theme,
+          accessibility_settings: defaultPreferences.accessibility_settings,
           notifications: defaultPreferences.notifications,
           privacy_settings: defaultPreferences.privacy,
           app_behavior: defaultPreferences.app_behavior,
           suggestion_settings: defaultPreferences.suggestion_settings,
+          laundry_settings: defaultPreferences.laundry_settings,
+          marketplace_settings: defaultPreferences.marketplace_settings,
         });
 
       if (error) throw error;
@@ -207,20 +283,23 @@ export const useUserPreferences = () => {
       const newPreferences = { ...preferences, ...updates };
       setPreferences(newPreferences);
 
-      // Save to database with proper format
-      const { error } = await supabase
-        .from('user_preferences')
-        .upsert({
-          user_id: user.id,
-          theme: JSON.stringify(newPreferences.theme), // Keep as JSON string for compatibility
-          notifications: newPreferences.notifications,
-          privacy_settings: newPreferences.privacy,
-          app_behavior: newPreferences.app_behavior,
-          suggestion_settings: newPreferences.suggestion_settings,
-          updated_at: new Date().toISOString(),
-        }, {
-          onConflict: 'user_id'
-        });
+        const { error } = await supabase
+          .from('user_preferences')
+          .upsert({
+            user_id: user.id,
+            theme: JSON.stringify(newPreferences.theme), // Keep as JSON string for compatibility
+            extended_theme: newPreferences.extended_theme,
+            accessibility_settings: newPreferences.accessibility_settings,
+            notifications: newPreferences.notifications,
+            privacy_settings: newPreferences.privacy,
+            app_behavior: newPreferences.app_behavior,
+            suggestion_settings: newPreferences.suggestion_settings,
+            laundry_settings: newPreferences.laundry_settings,
+            marketplace_settings: newPreferences.marketplace_settings,
+            updated_at: new Date().toISOString(),
+          }, {
+            onConflict: 'user_id'
+          });
 
       if (error) throw error;
 

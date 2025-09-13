@@ -868,6 +868,7 @@ export type Database = {
           accessibility_settings: Json | null
           app_behavior: Json | null
           created_at: string
+          extended_theme: Json | null
           id: string
           language: string | null
           laundry_settings: Json | null
@@ -883,6 +884,7 @@ export type Database = {
           accessibility_settings?: Json | null
           app_behavior?: Json | null
           created_at?: string
+          extended_theme?: Json | null
           id?: string
           language?: string | null
           laundry_settings?: Json | null
@@ -898,6 +900,7 @@ export type Database = {
           accessibility_settings?: Json | null
           app_behavior?: Json | null
           created_at?: string
+          extended_theme?: Json | null
           id?: string
           language?: string | null
           laundry_settings?: Json | null
