@@ -1,4 +1,4 @@
-import { Home, ShoppingBag, Shirt, Plus, User, Sparkles } from "lucide-react";
+import { Home, ShoppingBag, Shirt, Plus, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -18,16 +18,22 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
       id: "home"
     },
     { 
+      name: "Market", 
+      href: "/marketplace", 
+      icon: ShoppingBag,
+      id: "market"
+    },
+    { 
       name: "Wardrobe", 
       href: "/wardrobe/enhanced", 
       icon: Shirt,
       id: "wardrobe"
     },
     { 
-      name: "AI Stylist", 
-      href: "/smart-matcher", 
-      icon: Sparkles,
-      id: "smart-matcher"
+      name: "Add", 
+      href: "/add", 
+      icon: Plus,
+      id: "add"
     },
     { 
       name: "Account", 
