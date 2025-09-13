@@ -258,6 +258,39 @@ export type Database = {
           },
         ]
       }
+      laundry_schedules: {
+        Row: {
+          auto_schedule: boolean | null
+          created_at: string
+          frequency_days: number
+          id: string
+          next_due_date: string
+          schedule_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_schedule?: boolean | null
+          created_at?: string
+          frequency_days?: number
+          id?: string
+          next_due_date?: string
+          schedule_name?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_schedule?: boolean | null
+          created_at?: string
+          frequency_days?: number
+          id?: string
+          next_due_date?: string
+          schedule_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       merchant_items: {
         Row: {
           brand: string | null
@@ -832,10 +865,13 @@ export type Database = {
       }
       user_preferences: {
         Row: {
+          accessibility_settings: Json | null
           app_behavior: Json | null
           created_at: string
           id: string
           language: string | null
+          laundry_settings: Json | null
+          marketplace_settings: Json | null
           notifications: Json | null
           privacy_settings: Json | null
           suggestion_settings: Json | null
@@ -844,10 +880,13 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          accessibility_settings?: Json | null
           app_behavior?: Json | null
           created_at?: string
           id?: string
           language?: string | null
+          laundry_settings?: Json | null
+          marketplace_settings?: Json | null
           notifications?: Json | null
           privacy_settings?: Json | null
           suggestion_settings?: Json | null
@@ -856,10 +895,13 @@ export type Database = {
           user_id: string
         }
         Update: {
+          accessibility_settings?: Json | null
           app_behavior?: Json | null
           created_at?: string
           id?: string
           language?: string | null
+          laundry_settings?: Json | null
+          marketplace_settings?: Json | null
           notifications?: Json | null
           privacy_settings?: Json | null
           suggestion_settings?: Json | null
