@@ -26,6 +26,7 @@ import { useWardrobe, WardrobeItem } from "@/hooks/useWardrobe";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { outfitGenerator, OutfitContext, GeneratedOutfit } from "@/services/outfitGenerator";
 import { weatherService, WeatherData } from "@/services/weatherService";
+import { calendarService, CalendarEvent } from "@/services/calendarService";
 import { supabase } from "@/integrations/supabase/client";
 
 interface OutfitItem extends WardrobeItem {
@@ -46,6 +47,7 @@ const DailyOutfit = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
   const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [dislikedOutfits, setDislikedOutfits] = useState<string[]>([]);
   const { toast } = useToast();
   const { addReaction, removeReaction } = useSocial();
@@ -64,7 +66,10 @@ const DailyOutfit = () => {
   }, [wardrobeLoading, preferencesLoading, items]);
 
   const initializeOutfit = async () => {
-    await loadWeather();
+    await Promise.all([
+      loadWeather(),
+      loadCalendarEvents()
+    ]);
     loadUserPhoto();
     
     // Load disliked outfits from localStorage
@@ -81,10 +86,36 @@ const DailyOutfit = () => {
 
   const loadWeather = async () => {
     try {
-      const weatherData = await weatherService.getCurrentWeather();
-      setWeather(weatherData);
+      // Try to get user's location
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const { latitude, longitude } = position.coords;
+            const weatherData = await weatherService.getCurrentWeather(latitude, longitude);
+            setWeather(weatherData);
+          },
+          async () => {
+            // Fallback to mock weather
+            const weatherData = await weatherService.getCurrentWeather(0, 0);
+            setWeather(weatherData);
+          }
+        );
+      } else {
+        // Fallback for browsers without geolocation
+        const weatherData = await weatherService.getCurrentWeather(0, 0);
+        setWeather(weatherData);
+      }
     } catch (error) {
       console.warn('Failed to load weather:', error);
+    }
+  };
+
+  const loadCalendarEvents = async () => {
+    try {
+      const events = await calendarService.getTodaysEvents();
+      setCalendarEvents(events);
+    } catch (error) {
+      console.warn('Failed to load calendar events:', error);
     }
   };
 
