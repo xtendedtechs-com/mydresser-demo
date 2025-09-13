@@ -135,7 +135,7 @@ const DailyOutfit = () => {
         throw new Error('No wardrobe items available for outfit generation');
       }
       
-      const generatedOutfit = outfitGenerator.generateOutfit(sourceItems, context);
+      const generatedOutfit = await outfitGenerator.generateOutfit(sourceItems, context);
       
       // Convert to DailyOutfitData format
       const baseOutfitData: DailyOutfitData = {

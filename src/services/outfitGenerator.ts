@@ -1,3 +1,5 @@
+import { outfitAI } from '@/ai/OutfitAI';
+import type { AIOutfitContext } from '@/ai/types';
 import { WardrobeItem } from '@/hooks/useWardrobe';
 
 export interface OutfitContext {
@@ -105,33 +107,65 @@ class OutfitGeneratorService {
     }
   };
 
-  generateOutfit(items: WardrobeItem[], context: OutfitContext): GeneratedOutfit {
+  async generateOutfit(items: WardrobeItem[], context: OutfitContext): Promise<GeneratedOutfit> {
     if (!items || items.length === 0) {
       throw new Error('No items provided for outfit generation');
     }
     
-    const availableItems = this.filterAvailableItems(items, context);
-    const weatherCondition = this.getWeatherCondition(context.weather.temperature);
-    const outfitCombinations = this.generateCombinations(availableItems, context, weatherCondition);
-    
-    const scoredOutfits = outfitCombinations.map(combo => ({
-      ...combo,
-      ...this.scoreOutfit(combo, context, weatherCondition)
-    }));
-
-    // Sort by total score and pick the best
-    const bestOutfit = scoredOutfits.sort((a, b) => b.confidence - a.confidence)[0];
-    
-    return {
-      id: `outfit-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      name: this.generateOutfitName(bestOutfit.items, context),
-      items: bestOutfit.items,
-      confidence: bestOutfit.confidence,
-      reasoning: this.generateReasoning(bestOutfit, context, weatherCondition),
-      tags: this.generateTags(bestOutfit.items, context),
-      suitabilityScore: bestOutfit.suitabilityScore
+    // Convert to AI context
+    const aiContext: AIOutfitContext = {
+      weather: {
+        temperature: context.weather.temperature,
+        humidity: context.weather.humidity || 60,
+        windSpeed: context.weather.windSpeed || 5,
+        condition: context.weather.condition,
+        feelsLike: context.weather.temperature
+      },
+      occasion: context.occasion,
+      timeOfDay: context.timeOfDay,
+      season: this.getCurrentSeason() as 'spring' | 'summer' | 'fall' | 'winter',
+      userPreferences: {
+        favoriteColors: context.userPreferences?.favoriteColors || [],
+        preferredBrands: context.userPreferences?.preferredBrands || [],
+        stylePersonality: {
+          primary: 'minimalist' as const,
+          confidence: 70,
+          experimentalness: 50,
+          formality: 50,
+          colorfulness: 50
+        },
+        lifestyleFactors: {
+          workEnvironment: 'mixed',
+          socialLife: 'moderate',
+          exerciseFrequency: 'regular',
+          travelFrequency: 'moderate',
+          sustainabilityImportance: 70
+        },
+        fashionGoals: [],
+        avoidedItems: context.previousOutfits || []
+      }
     };
-  }
+
+    // Use the sophisticated AI engine
+    const aiRecommendation = await outfitAI.generateOutfitRecommendation(items, aiContext);
+    
+      // Convert back to the expected format
+      const generatedOutfit = {
+      id: aiRecommendation.outfit.id,
+      name: aiRecommendation.outfit.name,
+      items: aiRecommendation.outfit.items,
+      confidence: Math.round(aiRecommendation.confidence.overall),
+      reasoning: this.generateReasoning(aiRecommendation),
+      tags: this.generateTags(aiRecommendation.outfit.items, context),
+      suitabilityScore: {
+        weather: aiRecommendation.aiAnalysis.weatherAppropriatenss.score,
+        occasion: aiRecommendation.aiAnalysis.occasionFit.score,
+        style: aiRecommendation.aiAnalysis.styleConsistency.score,
+        comfort: aiRecommendation.aiAnalysis.comfortLevel.score
+      }
+      };
+      
+      return generatedOutfit;
 
   private filterAvailableItems(items: WardrobeItem[], context: OutfitContext): WardrobeItem[] {
     return items.filter(item => {
@@ -458,33 +492,28 @@ class OutfitGeneratorService {
     return `${weatherDesc} ${baseName}`;
   }
 
-  private generateReasoning(outfit: any, context: OutfitContext, weatherCondition: string): string {
-    const reasons = [];
+  private generateReasoning(aiRecommendation: any): string {
+    const analysis = aiRecommendation.aiAnalysis;
+    const insights = aiRecommendation.personalizedInsights;
     
-    // Weather reasoning
-    if (context.weather.temperature < 15) {
-      reasons.push(`Layered for ${context.weather.temperature}°C weather`);
-    } else if (context.weather.temperature > 25) {
-      reasons.push(`Light fabrics perfect for ${context.weather.temperature}°C`);
+    let reasoning = `This outfit scores ${Math.round(aiRecommendation.confidence.overall)}% overall. `;
+    
+    // Add key strengths
+    const strengths = [];
+    if (analysis.colorHarmony.harmony.score > 75) strengths.push('excellent color harmony');
+    if (analysis.styleConsistency.score > 75) strengths.push('strong style consistency');
+    if (analysis.weatherAppropriatenss.score > 75) strengths.push('perfect weather match');
+    
+    if (strengths.length > 0) {
+      reasoning += `It excels in ${strengths.join(' and ')}. `;
     }
-
-    // Occasion reasoning
-    reasons.push(`Ideal for ${context.occasion}`);
-
-    // Style reasoning
-    const favoriteItems = outfit.items.filter((item: WardrobeItem) => item.is_favorite);
-    if (favoriteItems.length > 0) {
-      reasons.push(`Features ${favoriteItems.length} of your favorite pieces`);
+    
+    // Add personalized note
+    if (insights.recommendations.immediate.length > 0) {
+      reasoning += insights.recommendations.immediate[0].description;
     }
-
-    // Time reasoning
-    if (context.timeOfDay === 'morning') {
-      reasons.push('Comfortable for your busy morning');
-    } else if (context.timeOfDay === 'evening') {
-      reasons.push('Stylish for evening activities');
-    }
-
-    return reasons.join('. ') + '.';
+    
+    return reasoning;
   }
 
   private generateTags(items: WardrobeItem[], context: OutfitContext): string[] {
