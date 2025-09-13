@@ -1038,39 +1038,6 @@ export type Database = {
       }
     }
     Views: {
-      profiles_public_safe: {
-        Row: {
-          avatar_url: string | null
-          bio: string | null
-          created_at: string | null
-          full_name: string | null
-          id: string | null
-          role: Database["public"]["Enums"]["user_role"] | null
-          style_score: number | null
-          user_id: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          id?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
-          style_score?: number | null
-          user_id?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          id?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
-          style_score?: number | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       provider_subscription_view: {
         Row: {
           auto_renew: boolean | null
