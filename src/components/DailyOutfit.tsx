@@ -131,9 +131,9 @@ const DailyOutfit = () => {
       const generatedOutfit = outfitGenerator.generateOutfit(items, context);
       
       // Convert to DailyOutfitData format
-      const outfitData: DailyOutfitData = {
+      const baseOutfitData: DailyOutfitData = {
         ...generatedOutfit,
-        id: `outfit-${Date.now()}`, // Generate unique ID
+        id: `temp-${crypto?.randomUUID?.() || Date.now()}`,
         timeSlot: getTimeSlot(timeOfDay),
         weatherConditions: weather || {
           temperature: 20,
@@ -149,11 +149,48 @@ const DailyOutfit = () => {
         photo: "/api/placeholder/300/400"
       };
 
-      setOutfit(outfitData);
+      // Persist the generated outfit immediately so reactions/lists work with real UUID
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const { data: savedOutfit, error: outfitInsertError } = await supabase
+        .from('outfits')
+        .insert({
+          user_id: user.id,
+          name: baseOutfitData.name,
+          occasion: 'casual',
+          season: 'all-season',
+          is_ai_generated: true,
+          ai_generation_prompt: baseOutfitData.reasoning,
+          weather_conditions: baseOutfitData.weatherConditions as any,
+          notes: `Auto-generated at ${new Date().toISOString()}`,
+          is_favorite: false
+        })
+        .select()
+        .maybeSingle();
+
+      if (outfitInsertError) throw outfitInsertError;
+
+      // Link items to the saved outfit
+      if (savedOutfit) {
+        for (const item of baseOutfitData.items) {
+          await supabase.from('outfit_items').insert({
+            outfit_id: savedOutfit.id,
+            wardrobe_item_id: item.id,
+            item_type: item.category
+          });
+        }
+      }
+
+      const finalOutfit: DailyOutfitData = savedOutfit 
+        ? { ...baseOutfitData, id: savedOutfit.id }
+        : baseOutfitData;
+
+      setOutfit(finalOutfit);
       
       toast({
         title: "New outfit ready!",
-        description: `${outfitData.confidence}% match - ${outfitData.name}`,
+        description: `${finalOutfit.confidence}% match - ${finalOutfit.name}`,
       });
     } catch (error) {
       console.error('Outfit generation error:', error);
@@ -297,46 +334,78 @@ const DailyOutfit = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      // Save outfit to database
-      const { data: savedOutfit, error: outfitError } = await supabase
-        .from('outfits')
-        .insert({
-          user_id: user.id,
-          name: outfit.name,
-          occasion: 'casual',
-          season: 'all-season',
-          is_ai_generated: true,
-          ai_generation_prompt: outfit.reasoning,
-          weather_conditions: outfit.weatherConditions as any,
-          notes: `Generated on ${new Date().toLocaleDateString()} with ${outfit.confidence}% confidence`,
-          is_favorite: false
-        })
-        .select()
-        .single();
-
-      if (outfitError) throw outfitError;
-
-      // Save outfit items
-      for (const item of outfit.items) {
-        await supabase
-          .from('outfit_items')
+      // Ensure outfit exists in DB
+      let outfitId = outfit.id;
+      if (String(outfitId).startsWith('temp-')) {
+        const { data: savedOutfit, error: outfitError } = await supabase
+          .from('outfits')
           .insert({
-            outfit_id: savedOutfit.id,
+            user_id: user.id,
+            name: outfit.name,
+            occasion: 'casual',
+            season: 'all-season',
+            is_ai_generated: true,
+            ai_generation_prompt: outfit.reasoning,
+            weather_conditions: outfit.weatherConditions as any,
+            notes: `Generated on ${new Date().toLocaleDateString()} with ${outfit.confidence}% confidence`,
+            is_favorite: false
+          })
+          .select()
+          .single();
+        if (outfitError) throw outfitError;
+        outfitId = savedOutfit.id;
+        // Also persist items
+        for (const item of outfit.items) {
+          await supabase.from('outfit_items').insert({
+            outfit_id: outfitId,
             wardrobe_item_id: item.id,
             item_type: item.category
           });
+        }
       }
 
+      // Get or create 'Outfit History' collection
+      const { data: existingCollection } = await supabase
+        .from('collections')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('name', 'Outfit History')
+        .maybeSingle();
+
+      let collectionId = existingCollection?.id;
+      if (!collectionId) {
+        const { data: newCollection, error: collectionError } = await supabase
+          .from('collections')
+          .insert({
+            user_id: user.id,
+            name: 'Outfit History',
+            description: 'Automatically saved outfits',
+            type: 'outfit',
+            is_public: false
+          })
+          .select()
+          .single();
+        if (collectionError) throw collectionError;
+        collectionId = newCollection.id;
+      }
+
+      // Add outfit and items to the collection
+      const inserts = [
+        { collection_id: collectionId, outfit_id: outfitId },
+        ...outfit.items.map(i => ({ collection_id: collectionId!, wardrobe_item_id: i.id }))
+      ];
+      await supabase.from('collection_items').insert(inserts);
+
       toast({
-        title: "Outfit saved!",
-        description: `${outfit.name} saved to your collection`,
+        title: 'Saved to Outfit History',
+        description: `${outfit.name} and its items were saved to your collection`,
       });
     } catch (error: any) {
       console.error('Save outfit error:', error);
       toast({
-        title: "Save failed",
+        title: 'Save failed',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
     }
   };

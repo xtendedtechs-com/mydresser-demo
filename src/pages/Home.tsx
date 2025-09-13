@@ -3,6 +3,7 @@ import { Shield, Lock, Zap } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import DailyOutfit from "@/components/DailyOutfit";
 import ClothingItem from "@/components/ClothingItem";
+import CollectionsLists from "@/components/CollectionsLists";
 import { toast } from "sonner";
 import { useProfile } from "@/hooks/useProfile";
 
