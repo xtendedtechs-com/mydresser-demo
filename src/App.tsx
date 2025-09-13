@@ -17,7 +17,6 @@ import WardrobeItemDetail from "@/pages/WardrobeItemDetail";
 import ProfileSetup from "@/pages/ProfileSetup";
 import NotFound from "./pages/NotFound";
 import EnhancedWardrobeManager from "@/components/EnhancedWardrobeManager";
-import SocialPlatform from "@/components/SocialPlatform";
 import EnhancedMarketplace from "@/components/EnhancedMarketplace";
 import SmartOutfitMatcher from "@/components/SmartOutfitMatcher";
 import { useProfile } from "@/hooks/useProfile";
@@ -75,7 +74,7 @@ const App = () => {
             <Route path="/wardrobe/enhanced" element={<EnhancedWardrobeManager />} />
             <Route path="/market" element={<Market />} />
             <Route path="/marketplace" element={<EnhancedMarketplace />} />
-            <Route path="/social" element={<SocialPlatform />} />
+            
             <Route path="/smart-matcher" element={<SmartOutfitMatcher />} />
             <Route path="/account" element={<Account />} />
             <Route path="/add" element={<Add />} />

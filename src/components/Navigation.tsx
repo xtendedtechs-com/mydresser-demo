@@ -1,4 +1,4 @@
-import { Home, ShoppingBag, Shirt, Plus, User, Sparkles, Users } from "lucide-react";
+import { Home, ShoppingBag, Shirt, Plus, User, Sparkles } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -28,12 +28,6 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
       href: "/smart-matcher", 
       icon: Sparkles,
       id: "smart-matcher"
-    },
-    { 
-      name: "Social", 
-      href: "/social", 
-      icon: Users,
-      id: "social"
     },
     { 
       name: "Account", 
