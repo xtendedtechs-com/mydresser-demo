@@ -45,22 +45,22 @@ export const useMerchantProfile = () => {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Fetch merchant profile (safe view - no sensitive data)
+  // Fetch merchant profile (safe function - no sensitive data)
   const fetchProfile = async () => {
     try {
       setLoading(true);
       setError(null);
 
       const { data, error } = await supabase
-        .from('merchant_profiles_safe')
-        .select('*')
-        .single();
+        .rpc('get_merchant_profiles_safe');
 
       if (error && error.code !== 'PGRST116') { // Not found is OK
         throw error;
       }
 
-      setProfile(data as MerchantProfile);
+      // Get first result since function returns array
+      const profileData = data && data.length > 0 ? data[0] : null;
+      setProfile(profileData as MerchantProfile);
     } catch (err: any) {
       console.error('Error fetching merchant profile:', err);
       setError(err.message);

@@ -1041,45 +1041,7 @@ export type Database = {
       }
     }
     Views: {
-      merchant_profiles_safe: {
-        Row: {
-          address_status: string | null
-          business_name: string | null
-          business_type: string | null
-          contact_status: string | null
-          created_at: string | null
-          id: string | null
-          tax_id_status: string | null
-          updated_at: string | null
-          user_id: string | null
-          verification_status: string | null
-        }
-        Insert: {
-          address_status?: never
-          business_name?: string | null
-          business_type?: string | null
-          contact_status?: never
-          created_at?: string | null
-          id?: string | null
-          tax_id_status?: never
-          updated_at?: string | null
-          user_id?: string | null
-          verification_status?: string | null
-        }
-        Update: {
-          address_status?: never
-          business_name?: string | null
-          business_type?: string | null
-          contact_status?: never
-          created_at?: string | null
-          id?: string | null
-          tax_id_status?: never
-          updated_at?: string | null
-          user_id?: string | null
-          verification_status?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       check_merchant_rate_limit: {
@@ -1137,6 +1099,21 @@ export type Database = {
           business_type: string
           created_at: string
           id: string
+          updated_at: string
+          user_id: string
+          verification_status: string
+        }[]
+      }
+      get_merchant_profiles_safe: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          address_status: string
+          business_name: string
+          business_type: string
+          contact_status: string
+          created_at: string
+          id: string
+          tax_id_status: string
           updated_at: string
           user_id: string
           verification_status: string
