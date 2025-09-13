@@ -11,6 +11,7 @@ import Account from "@/pages/Account";
 import Add from "@/pages/Add";
 import Auth from "@/pages/Auth";
 import Market from "@/pages/Market";
+import ItemDetail from "@/pages/ItemDetail";
 import NotFound from "./pages/NotFound";
 import { useProfile } from "@/hooks/useProfile";
 
@@ -84,10 +85,15 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <div className="relative">
-            {renderContent()}
-            <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-          </div>
+          <Routes>
+            <Route path="/item/:id" element={<ItemDetail />} />
+            <Route path="/*" element={
+              <div className="relative">
+                {renderContent()}
+                <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+              </div>
+            } />
+          </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
