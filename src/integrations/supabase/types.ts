@@ -154,70 +154,10 @@ export type Database = {
       }
     }
     Views: {
-      public_profiles_safe: {
-        Row: {
-          avatar_url: string | null
-          bio: string | null
-          created_at: string | null
-          full_name: string | null
-          id: string | null
-          location: string | null
-          role: Database["public"]["Enums"]["user_role"] | null
-          social_facebook: string | null
-          social_instagram: string | null
-          social_tiktok: string | null
-          style_score: number | null
-          user_id: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          id?: string | null
-          location?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
-          social_facebook?: string | null
-          social_instagram?: string | null
-          social_tiktok?: string | null
-          style_score?: number | null
-          user_id?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string | null
-          full_name?: string | null
-          id?: string | null
-          location?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
-          social_facebook?: string | null
-          social_instagram?: string | null
-          social_tiktok?: string | null
-          style_score?: number | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
-      get_public_profile_safe: {
-        Args: { profile_user_id: string }
-        Returns: {
-          avatar_url: string
-          bio: string
-          created_at: string
-          full_name: string
-          id: string
-          location: string
-          role: Database["public"]["Enums"]["user_role"]
-          social_facebook: string
-          social_instagram: string
-          social_tiktok: string
-          style_score: number
-          user_id: string
-        }[]
-      }
+      [_ in never]: never
     }
     Enums: {
       auth_level: "base" | "intermediate" | "advanced"
