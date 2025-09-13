@@ -1041,9 +1041,51 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      merchant_profiles_safe: {
+        Row: {
+          address_status: string | null
+          business_name: string | null
+          business_type: string | null
+          contact_status: string | null
+          created_at: string | null
+          id: string | null
+          tax_id_status: string | null
+          updated_at: string | null
+          user_id: string | null
+          verification_status: string | null
+        }
+        Insert: {
+          address_status?: never
+          business_name?: string | null
+          business_type?: string | null
+          contact_status?: never
+          created_at?: string | null
+          id?: string | null
+          tax_id_status?: never
+          updated_at?: string | null
+          user_id?: string | null
+          verification_status?: string | null
+        }
+        Update: {
+          address_status?: never
+          business_name?: string | null
+          business_type?: string | null
+          contact_status?: never
+          created_at?: string | null
+          id?: string | null
+          tax_id_status?: never
+          updated_at?: string | null
+          user_id?: string | null
+          verification_status?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      check_merchant_rate_limit: {
+        Args: { operation: string }
+        Returns: boolean
+      }
       check_mfa_rate_limit: {
         Args: {
           action_type: string
