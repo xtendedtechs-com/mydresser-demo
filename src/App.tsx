@@ -16,12 +16,15 @@ import ItemDetail from "@/pages/ItemDetail";
 import WardrobeItemDetail from "@/pages/WardrobeItemDetail";
 import ProfileSetup from "@/pages/ProfileSetup";
 import NotFound from "./pages/NotFound";
+import EnhancedWardrobeManager from "@/components/EnhancedWardrobeManager";
+import SocialPlatform from "@/components/SocialPlatform";
+import EnhancedMarketplace from "@/components/EnhancedMarketplace";
+import SmartOutfitMatcher from "@/components/SmartOutfitMatcher";
 import { useProfile } from "@/hooks/useProfile";
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [activeTab, setActiveTab] = useState("home");
   const { isAuthenticated, loading } = useProfile();
 
   // Avoid hard reload redirects; routing/guards handled below
@@ -57,22 +60,7 @@ const App = () => {
     );
   }
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case "home":
-        return <Home />;
-      case "marketplace":
-        return <Market />;
-      case "wardrobe":
-        return <Wardrobe />;
-      case "add":
-        return <Add />;
-      case "account":
-        return <Account />;
-      default:
-        return <Home />;
-    }
-  };
+  // Remove old tab system - no longer needed
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -82,16 +70,21 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/wardrobe" element={<Wardrobe />} />
+            <Route path="/wardrobe/enhanced" element={<EnhancedWardrobeManager />} />
+            <Route path="/market" element={<Market />} />
+            <Route path="/marketplace" element={<EnhancedMarketplace />} />
+            <Route path="/social" element={<SocialPlatform />} />
+            <Route path="/smart-matcher" element={<SmartOutfitMatcher />} />
+            <Route path="/account" element={<Account />} />
+            <Route path="/add" element={<Add />} />
             <Route path="/item/:id" element={<ItemDetail />} />
-            <Route path="/wardrobe-item/:id" element={<WardrobeItemDetail />} />
+            <Route path="/wardrobe/item/:id" element={<WardrobeItemDetail />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
-            <Route path="/*" element={
-              <div className="relative">
-                {renderContent()}
-                <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-              </div>
-            } />
+            <Route path="*" element={<NotFound />} />
           </Routes>
+          <Navigation />
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

@@ -285,7 +285,7 @@ export const SocialPlatform = () => {
       user_id: profile?.id || "current-user",
       user: {
         id: profile?.id || "current-user",
-        display_name: profile?.display_name || profile?.full_name || "You",
+        display_name: profile?.full_name || "You",
         avatar_url: profile?.avatar_url,
         style_badge: "Style Explorer"
       },

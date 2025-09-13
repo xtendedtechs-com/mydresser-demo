@@ -456,9 +456,18 @@ export const EnhancedWardrobeManager = () => {
           <WardrobeItemCard 
             key={item.id} 
             item={item} 
-            viewMode={viewMode}
-            onUpdate={updateItem}
+            onToggleFavorite={(id, isFavorite) => updateItem(id, { is_favorite: isFavorite })}
+            onMarkAsWorn={(id) => updateItem(id, { 
+              last_worn: new Date().toISOString(),
+              wear_count: item.wear_count + 1 
+            })}
+            onEdit={(item) => {
+              toast({ title: "Edit functionality", description: "Item editing coming soon!" });
+            }}
             onDelete={deleteItem}
+            onView={(item) => {
+              toast({ title: "View details", description: `Viewing ${item.name}` });
+            }}
           />
         ))}
       </div>

@@ -1,38 +1,71 @@
-import { Home, ShoppingBag, Shirt, Plus, User } from "lucide-react";
+import { Home, ShoppingBag, Shirt, Plus, User, Sparkles, Users } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 interface NavigationProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
 }
 
 const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
-  const tabs = [
-    { id: "home", icon: Home, label: "Home" },
-    { id: "marketplace", icon: ShoppingBag, label: "Market" },
-    { id: "wardrobe", icon: Shirt, label: "Wardrobe" },
-    { id: "add", icon: Plus, label: "Add" },
-    { id: "account", icon: User, label: "Account" },
+  const location = useLocation();
+  
+  const navItems = [
+    { 
+      name: "Home", 
+      href: "/", 
+      icon: Home,
+      id: "home"
+    },
+    { 
+      name: "Wardrobe", 
+      href: "/wardrobe/enhanced", 
+      icon: Shirt,
+      id: "wardrobe"
+    },
+    { 
+      name: "AI Stylist", 
+      href: "/smart-matcher", 
+      icon: Sparkles,
+      id: "smart-matcher"
+    },
+    { 
+      name: "Social", 
+      href: "/social", 
+      icon: Users,
+      id: "social"
+    },
+    { 
+      name: "Account", 
+      href: "/account", 
+      icon: User,
+      id: "account"
+    }
   ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border px-4 py-2 z-50">
       <div className="flex justify-around items-center max-w-md mx-auto">
-        {tabs.map(({ id, icon: Icon, label }) => (
-          <button
-            key={id}
-            onClick={() => onTabChange(id)}
-            className={cn(
-              "flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition-all duration-200",
-              activeTab === id
-                ? "text-fashion-orange"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <Icon size={20} />
-            <span className="text-xs font-medium">{label}</span>
-          </button>
-        ))}
+        {navItems.map(({ name, href, icon: Icon, id }) => {
+          const isActive = location.pathname === href || 
+                          (href !== "/" && location.pathname.startsWith(href));
+          
+          return (
+            <Link
+              key={id}
+              to={href}
+              className={cn(
+                "flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition-all duration-200",
+                isActive
+                  ? "text-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Icon size={20} />
+              <span className="text-xs font-medium">{name}</span>
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );
