@@ -22,15 +22,7 @@ const App = () => {
   const [activeTab, setActiveTab] = useState("home");
   const { isAuthenticated, loading } = useProfile();
 
-  // Check for auth route
-  const isAuthRoute = window.location.pathname === '/auth';
-
-  useEffect(() => {
-    // Redirect to home if authenticated and on auth page
-    if (isAuthenticated && isAuthRoute) {
-      window.location.href = '/';
-    }
-  }, [isAuthenticated, isAuthRoute]);
+  // Avoid hard reload redirects; routing/guards handled below
 
   // Show loading spinner while checking authentication
   if (loading) {

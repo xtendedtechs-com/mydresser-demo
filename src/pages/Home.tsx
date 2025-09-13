@@ -18,14 +18,7 @@ const Home = () => {
   const [starredItems, setStarredItems] = useState<Set<string>>(new Set());
   const { user, profile, isAuthenticated } = useProfile();
 
-  // Security check - ensure user is authenticated
-  useEffect(() => {
-    if (!isAuthenticated) {
-      // This should not happen due to routing protection, but add extra security
-      console.warn('Unauthorized access attempt to home page');
-      window.location.href = '/auth';
-    }
-  }, [isAuthenticated]);
+  // Auth guard handled at App level; avoid hard reload redirects
 
   // Don't render content if not authenticated
   if (!isAuthenticated || !user) {
