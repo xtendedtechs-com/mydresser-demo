@@ -146,9 +146,14 @@ const Home = () => {
               <h3 className="font-medium text-sm">Casual Wear</h3>
               <p className="text-xs text-muted-foreground">8 items</p>
             </div>
-          </div>
-        </section>
-      </main>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-semibold mb-4">Collections & Lists</h2>
+            <CollectionsLists />
+          </section>
+        </main>
     </div>
   );
 };

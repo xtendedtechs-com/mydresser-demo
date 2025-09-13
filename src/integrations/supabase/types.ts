@@ -1114,6 +1114,10 @@ export type Database = {
         Args: { secret_text: string; user_salt?: string }
         Returns: string
       }
+      ensure_minimum_sample_wardrobe_items: {
+        Args: { min_count?: number }
+        Returns: undefined
+      }
       get_merchant_profile_public: {
         Args: { profile_user_id?: string }
         Returns: {

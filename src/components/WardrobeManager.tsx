@@ -21,15 +21,15 @@ const WardrobeManager = ({ className }: WardrobeManagerProps) => {
 
   const categories = ["all", "tops", "bottoms", "dresses", "outerwear", "shoes", "accessories"];
 
-  // Initialize sample data if wardrobe is empty
+  // Seed sample data if wardrobe appears too small
   useEffect(() => {
     const initializeSampleData = async () => {
-      if (!loading && items.length === 0) {
+      if (!loading && items.length < 8) {
         try {
-          await supabase.rpc('create_sample_wardrobe_items');
+          await supabase.rpc('ensure_minimum_sample_wardrobe_items', { min_count: 10 });
           refetch();
         } catch (error) {
-          console.error('Error creating sample items:', error);
+          console.error('Error ensuring sample items:', error);
         }
       }
     };
