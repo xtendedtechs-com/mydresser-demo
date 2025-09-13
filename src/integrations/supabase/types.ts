@@ -1250,6 +1250,10 @@ export type Database = {
         Args: { input_code: string }
         Returns: boolean
       }
+      validate_merchant_security: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       verify_backup_code_hash: {
         Args: { code: string; hash: string }
         Returns: boolean
