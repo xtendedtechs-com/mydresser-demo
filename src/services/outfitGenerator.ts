@@ -106,6 +106,10 @@ class OutfitGeneratorService {
   };
 
   generateOutfit(items: WardrobeItem[], context: OutfitContext): GeneratedOutfit {
+    if (!items || items.length === 0) {
+      throw new Error('No items provided for outfit generation');
+    }
+    
     const availableItems = this.filterAvailableItems(items, context);
     const weatherCondition = this.getWeatherCondition(context.weather.temperature);
     const outfitCombinations = this.generateCombinations(availableItems, context, weatherCondition);

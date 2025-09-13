@@ -129,6 +129,12 @@ const DailyOutfit = () => {
 
       // Generate outfit using the intelligent service (augment with placeholders if needed)
       const sourceItems = items.length < 6 ? [...items, ...getLocalPlaceholderItems()] : items;
+      
+      // Ensure we have valid items before generation
+      if (!sourceItems || sourceItems.length === 0) {
+        throw new Error('No wardrobe items available for outfit generation');
+      }
+      
       const generatedOutfit = outfitGenerator.generateOutfit(sourceItems, context);
       
       // Convert to DailyOutfitData format
