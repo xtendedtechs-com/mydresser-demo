@@ -345,6 +345,7 @@ export type Database = {
           style_tags: string[] | null
           tags: string[] | null
           updated_at: string
+          videos: Json | null
         }
         Insert: {
           brand?: string | null
@@ -369,6 +370,7 @@ export type Database = {
           style_tags?: string[] | null
           tags?: string[] | null
           updated_at?: string
+          videos?: Json | null
         }
         Update: {
           brand?: string | null
@@ -393,6 +395,7 @@ export type Database = {
           style_tags?: string[] | null
           tags?: string[] | null
           updated_at?: string
+          videos?: Json | null
         }
         Relationships: []
       }
