@@ -183,7 +183,7 @@ export const DailyOutfitGenerator = ({ date = new Date() }: DailyOutfitProps) =>
         {outfit.reasoning && (
           <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
             <h4 className="font-medium text-sm mb-2">Why this outfit works:</h4>
-            <p className="text-sm text-muted-foreground">{outfit.reasoning}</p>
+            <div className="text-sm text-muted-foreground">{outfit.reasoning}</div>
           </div>
         )}
 

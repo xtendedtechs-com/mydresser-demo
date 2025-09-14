@@ -14,6 +14,8 @@ import MerchantTerminal from "@/pages/MerchantTerminal";
 import MerchantPage from "@/pages/MerchantPage";
 import Auth from "@/pages/Auth";
 import NotFound from "../pages/NotFound";
+import SettingsPage from "@/pages/SettingsPage";
+import ServiceSettingsPage from "@/pages/ServiceSettingsPage";
 import EnhancedWardrobeManager from "@/components/EnhancedWardrobeManager";
 import EnhancedMarketplace from "@/components/EnhancedMarketplace";
 import SmartOutfitMatcher from "@/components/SmartOutfitMatcher";
@@ -42,6 +44,8 @@ const AppContent = () => {
         <Route path="/laundry" element={<SmartLaundryTracker />} />
         <Route path="/outfit-generator" element={<DailyOutfitGenerator />} />
         <Route path="/account" element={<Account />} />
+        <Route path="/settings/:category" element={<SettingsPage />} />
+        <Route path="/service-settings/:service" element={<ServiceSettingsPage />} />
         <Route path="/item/:id" element={<ItemDetail />} />
         <Route path="/wardrobe/item/:id" element={<WardrobeItemDetail />} />
         <Route path="/profile-setup" element={<ProfileSetup />} />

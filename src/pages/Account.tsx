@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -8,8 +9,6 @@ import { useProfile } from "@/hooks/useProfile";
 import ProfileHeader from "@/components/ProfileHeader";
 import SettingsSection from "@/components/SettingsSection";
 import ProfileEditDialog from "@/components/ProfileEditDialog";
-import SettingsDialog from "@/components/SettingsDialog";
-import ServiceSettingsDialog from "@/components/ServiceSettingsDialog";
 import WardrobeManager from "@/components/WardrobeManager";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -23,13 +22,11 @@ interface SettingItem {
 }
 
 const Account = () => {
+  const navigate = useNavigate();
   const { profile, loading } = useProfile();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [profileEditOpen, setProfileEditOpen] = useState(false);
-  const [settingsDialogOpen, setSettingsDialogOpen] = useState(false);
-  const [serviceDialogOpen, setServiceDialogOpen] = useState(false);
-  const [currentSetting, setCurrentSetting] = useState({ type: '', title: '', description: '' });
 
   const handleSignOut = async () => {
     try {
@@ -47,9 +44,8 @@ const Account = () => {
     }
   };
 
-  const openSettingsDialog = (type: string, title: string, description: string) => {
-    setCurrentSetting({ type, title, description });
-    setSettingsDialogOpen(true);
+  const navigateToSettings = (category: string) => {
+    navigate(`/settings/${category}`);
   };
 
   if (loading) {
@@ -82,39 +78,39 @@ const Account = () => {
       id: 'account',
       label: 'Account',
       description: 'Manage your account settings',
-      onClick: () => openSettingsDialog('account', 'Account Settings', 'Manage your account details and security')
+      onClick: () => navigateToSettings('account')
     },
     {
       id: 'authentication',
       label: 'Authentication',
       description: `Current level: ${profile.auth_level}`,
-      onClick: () => openSettingsDialog('authentication', 'Authentication Settings', 'Manage your security and authentication preferences'),
+      onClick: () => navigateToSettings('authentication'),
       highlighted: profile.auth_level === 'base'
     },
     {
       id: 'profile',
       label: 'My profile',
       description: 'Edit your profile information',
-      onClick: () => setProfileEditOpen(true)
+      onClick: () => navigateToSettings('profile')
     },
     {
       id: 'privacy',
       label: 'Privacy & Data Rights',
       description: 'GDPR/CCPA compliance & data management',
-      onClick: () => openSettingsDialog('privacy', 'Privacy & Data Rights', 'Exercise your data rights under GDPR, CCPA and other privacy laws'),
+      onClick: () => navigateToSettings('privacy'),
       highlighted: true
     },
     {
       id: 'data',
       label: 'My data',
       description: 'Export or delete your personal data',
-      onClick: () => openSettingsDialog('data', 'Data Management', 'Export, backup, or delete your personal data')
+      onClick: () => navigateToSettings('data')
     },
     {
       id: 'preferences',
       label: 'My preferences',
       description: 'Customize your preferences',
-      onClick: () => openSettingsDialog('preferences', 'App Preferences', 'Customize how the app works for you')
+      onClick: () => navigateToSettings('preferences')
     }
   ];
 
@@ -123,19 +119,19 @@ const Account = () => {
       id: 'general',
       label: 'General',
       description: 'General app settings',
-      onClick: () => openSettingsDialog('general', 'General Settings', 'Configure general app behavior and preferences')
+      onClick: () => navigateToSettings('general')
     },
     {
       id: 'permissions',
       label: 'Permissions',
       description: 'App permissions',
-      onClick: () => openSettingsDialog('permissions', 'App Permissions', 'Manage what the app can access on your device')
+      onClick: () => navigateToSettings('permissions')
     },
     {
       id: 'notifications',
       label: 'Notifications',
       description: 'Notification preferences',
-      onClick: () => openSettingsDialog('notifications', 'Notification Settings', 'Control what notifications you receive')
+      onClick: () => navigateToSettings('notifications')
     }
   ];
 
@@ -144,26 +140,25 @@ const Account = () => {
       id: 'behavior',
       label: 'Modify app behaviour',
       description: 'Customize how the app works for you',
-      onClick: () => openSettingsDialog('behavior', 'App Behavior', 'Customize how the app behaves and responds')
+      onClick: () => navigateToSettings('behavior')
     },
     {
       id: 'suggestions',
       label: 'Personalize suggestions',
       description: 'Tailor recommendations to your style',
-      onClick: () => openSettingsDialog('suggestions', 'Suggestion Settings', 'Customize your personalized recommendations')
+      onClick: () => navigateToSettings('suggestions')
     },
     {
       id: 'theme',
       label: 'Customize theme',
       description: 'Change the app appearance',
-      onClick: () => openSettingsDialog('theme', 'Theme Settings', 'Customize the app appearance and colors'),
+      onClick: () => navigateToSettings('theme'),
       highlighted: true
     }
   ];
 
-  const openServiceDialog = (type: string, title: string, description: string) => {
-    setCurrentSetting({ type, title, description });
-    setServiceDialogOpen(true);
+  const navigateToServiceSettings = (service: string) => {
+    navigate(`/service-settings/${service}`);
   };
 
   const serviceSettings: SettingItem[] = [
@@ -171,37 +166,37 @@ const Account = () => {
       id: 'weather',
       label: 'Weather settings',
       description: 'Configure weather-based recommendations',
-      onClick: () => openServiceDialog('weather', 'Weather Settings', 'Configure weather-based outfit recommendations')
+      onClick: () => navigateToServiceSettings('weather')
     },
     {
       id: 'outfit',
       label: "Today's Outfit",
       description: 'Daily outfit generation settings',
-      onClick: () => openServiceDialog('outfit', 'Outfit Settings', 'Customize your daily outfit recommendations')
+      onClick: () => navigateToServiceSettings('outfit')
     },
     {
       id: 'wardrobe',
       label: 'My Wardrobe',
       description: 'Wardrobe management settings',
-      onClick: () => openServiceDialog('wardrobe', 'Wardrobe Settings', 'Configure your wardrobe organization and preferences')
+      onClick: () => navigateToServiceSettings('wardrobe')
     },
     {
       id: 'inventory',
       label: 'Inventory',
       description: 'Manage your clothing inventory',
-      onClick: () => openServiceDialog('wardrobe', 'Inventory Management', 'Organize and track your clothing items')
+      onClick: () => navigateToServiceSettings('wardrobe')
     },
     {
       id: 'market',
       label: 'Market & 2ndDresser',
       description: 'Marketplace and second-hand settings',
-      onClick: () => openServiceDialog('market', 'Market Settings', 'Configure marketplace and second-hand preferences')
+      onClick: () => navigateToServiceSettings('market')
     },
     {
       id: 'assistant',
       label: 'AI Assistant',
       description: 'AI styling assistant settings',
-      onClick: () => openServiceDialog('assistant', 'AI Assistant', 'Customize your AI styling assistant preferences')
+      onClick: () => navigateToServiceSettings('assistant')
     }
   ];
 
@@ -211,7 +206,7 @@ const Account = () => {
       id: 'security',
       label: 'Security Dashboard',
       description: 'Manage platform security and invitations',
-      onClick: () => openServiceDialog('security', 'Security Dashboard', 'Monitor security and manage user invitations'),
+      onClick: () => navigateToServiceSettings('security'),
       highlighted: true
     });
   }
@@ -222,7 +217,7 @@ const Account = () => {
       id: 'merchants',
       label: 'Merchant Tools',
       description: 'Access merchant dashboard and tools',
-      onClick: () => toast({ title: "Coming soon", description: "Merchant tools will be available soon." }),
+      onClick: () => navigate('/merchant-terminal'),
       highlighted: true
     });
   }
@@ -329,18 +324,6 @@ const Account = () => {
       <ProfileEditDialog 
         open={profileEditOpen} 
         onOpenChange={setProfileEditOpen} 
-      />
-      <SettingsDialog
-        open={settingsDialogOpen}
-        onOpenChange={setSettingsDialogOpen}
-        initialTabType={currentSetting.type}
-      />
-      <ServiceSettingsDialog
-        open={serviceDialogOpen}
-        onOpenChange={setServiceDialogOpen}
-        serviceType={currentSetting.type}
-        title={currentSetting.title}
-        description={currentSetting.description}
       />
     </div>
   );
