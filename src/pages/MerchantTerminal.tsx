@@ -144,6 +144,44 @@ const MerchantTerminal = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   
+  // Check authentication on component mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: 'Authentication Required',
+          description: 'Please sign in as a merchant to access this terminal.',
+          variant: 'destructive'
+        });
+        navigate('/auth');
+        return;
+      }
+
+      // Ensure merchant profile exists
+      const { data: profile } = await supabase
+        .from('merchant_profiles')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .single();
+
+      if (!profile) {
+        // Create merchant profile from user metadata
+        const businessName = session.user.user_metadata?.business_name || 'My Business';
+        await supabase
+          .from('merchant_profiles')
+          .insert({
+            user_id: session.user.id,
+            business_name: businessName,
+            business_type: 'retail',
+            verification_status: 'verified'
+          });
+      }
+    };
+
+    checkAuth();
+  }, [navigate, toast]);
+  
   // Additional state for functionality
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [editingItem, setEditingItem] = useState<MerchantItem | null>(null);
