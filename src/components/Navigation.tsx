@@ -1,4 +1,4 @@
-import { Home, ShoppingBag, Shirt, Plus, User } from "lucide-react";
+import { Home, ShoppingBag, Shirt, Plus, User, Store } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -30,10 +30,10 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
       id: "wardrobe"
     },
     { 
-      name: "Add", 
-      href: "/add", 
-      icon: Plus,
-      id: "add"
+      name: "Terminal", 
+      href: "/merchant-terminal", 
+      icon: Store,
+      id: "terminal"
     },
     { 
       name: "Account", 

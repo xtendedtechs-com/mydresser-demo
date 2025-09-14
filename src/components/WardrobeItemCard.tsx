@@ -53,6 +53,18 @@ const WardrobeItemCard = ({
             src={item.photos[0]}
             alt={item.name}
             className="w-full h-full object-cover"
+            onError={(e) => {
+              e.currentTarget.src = '/placeholder.svg';
+            }}
+          />
+        ) : item.photos && typeof item.photos === 'object' && item.photos.main ? (
+          <img
+            src={item.photos.main}
+            alt={item.name}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.currentTarget.src = '/placeholder.svg';
+            }}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground">
@@ -98,7 +110,7 @@ const WardrobeItemCard = ({
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              onView(item);
+              window.location.href = `/wardrobe/item/${item.id}`;
             }}
           >
             <Eye className="w-4 h-4 mr-2" />

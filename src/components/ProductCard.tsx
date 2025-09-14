@@ -98,7 +98,7 @@ const ProductCard = ({ item, onAction }: ProductCardProps) => {
           <Button 
             variant="secondary" 
             size="sm"
-            onClick={() => onAction("View", item.id)}
+            onClick={() => window.location.href = `/market/item/${item.id}`}
           >
             <Eye className="w-4 h-4 mr-2" />
             Quick View

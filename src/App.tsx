@@ -16,6 +16,7 @@ import MarketItemDetail from "@/pages/MarketItemDetail";
 import ItemDetail from "@/pages/ItemDetail";
 import WardrobeItemDetail from "@/pages/WardrobeItemDetail";
 import ProfileSetup from "@/pages/ProfileSetup";
+import MerchantTerminal from "@/pages/MerchantTerminal";
 import NotFound from "./pages/NotFound";
 import EnhancedWardrobeManager from "@/components/EnhancedWardrobeManager";
 import EnhancedMarketplace from "@/components/EnhancedMarketplace";
@@ -76,6 +77,7 @@ const App = () => {
             <Route path="/market" element={<Market />} />
             <Route path="/market/item/:id" element={<MarketItemDetail />} />
             <Route path="/marketplace" element={<EnhancedMarketplace />} />
+            <Route path="/merchant-terminal" element={<MerchantTerminal />} />
             
             <Route path="/smart-matcher" element={<SmartOutfitMatcher />} />
             <Route path="/account" element={<Account />} />

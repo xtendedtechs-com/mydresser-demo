@@ -116,7 +116,7 @@ const WardrobeManager = ({ className }: WardrobeManagerProps) => {
               <Card 
                 key={item.id} 
                 className="p-4 hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => navigate(`/wardrobe-item/${item.id}`)}
+                onClick={() => navigate(`/wardrobe/item/${item.id}`)}
               >
                 <div className="space-y-3">
                   {/* Item Image */}
@@ -126,6 +126,18 @@ const WardrobeManager = ({ className }: WardrobeManagerProps) => {
                         src={item.photos.main}
                         alt={item.name}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = '/placeholder.svg';
+                        }}
+                      />
+                    ) : item.photos && Array.isArray(item.photos) && item.photos.length > 0 ? (
+                      <img
+                        src={item.photos[0]}
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = '/placeholder.svg';
+                        }}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground">
