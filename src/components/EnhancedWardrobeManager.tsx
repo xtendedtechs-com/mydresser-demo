@@ -29,7 +29,8 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useWardrobe, WardrobeItem } from "@/hooks/useWardrobe";
-import WardrobeItemCard from "@/components/WardrobeItemCard";
+import WardrobeItemCard from "./WardrobeItemCard";
+import { SmartItemMatcher } from './SmartItemMatcher';
 
 interface WardrobeAnalytics {
   totalItems: number;
@@ -212,6 +213,15 @@ export const EnhancedWardrobeManager = () => {
 
   return (
     <div className="space-y-6 p-6">
+      {/* Smart Item Matcher */}
+      <SmartItemMatcher 
+        wardrobeItems={items}
+        onMatchFound={(wardrobeItem, matches) => {
+          // Optional: Handle match notifications
+          console.log('Matches found for:', wardrobeItem.name, matches);
+        }}
+      />
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>

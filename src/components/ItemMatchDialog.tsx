@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, X, ExternalLink } from 'lucide-react';
+import { Check, X, ExternalLink, Sparkles } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
