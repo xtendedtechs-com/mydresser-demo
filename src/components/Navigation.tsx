@@ -19,7 +19,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
     },
     { 
       name: "Market", 
-      href: "/marketplace", 
+      href: "/market", 
       icon: ShoppingBag,
       id: "market"
     },
