@@ -8,9 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Plus, X, Upload, Image } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { FileUpload } from './FileUpload';
 
 interface AddItemDialogProps {
   onItemAdded: () => void;
@@ -23,7 +24,8 @@ export const AddItemDialog = ({ onItemAdded }: AddItemDialogProps) => {
   const [tagInput, setTagInput] = useState('');
   const [sizes, setSizes] = useState<string[]>([]);
   const [sizeInput, setSizeInput] = useState('');
-  const [photos, setPhotos] = useState<string[]>([]);
+  const [uploadedPhotos, setUploadedPhotos] = useState<any[]>([]);
+  const [uploadedVideos, setUploadedVideos] = useState<any[]>([]);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -85,17 +87,6 @@ export const AddItemDialog = ({ onItemAdded }: AddItemDialogProps) => {
     setSizes(sizes.filter(s => s !== size));
   };
 
-  const addPhotoUrl = () => {
-    const url = prompt('Enter photo URL:');
-    if (url && !photos.includes(url)) {
-      setPhotos([...photos, url]);
-    }
-  };
-
-  const removePhoto = (index: number) => {
-    setPhotos(photos.filter((_, i) => i !== index));
-  };
-
   const resetForm = () => {
     setFormData({
       name: '',
@@ -115,7 +106,8 @@ export const AddItemDialog = ({ onItemAdded }: AddItemDialogProps) => {
     });
     setTags([]);
     setSizes([]);
-    setPhotos([]);
+    setUploadedPhotos([]);
+    setUploadedVideos([]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -126,7 +118,17 @@ export const AddItemDialog = ({ onItemAdded }: AddItemDialogProps) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      const photosObject = photos.length > 0 ? { main: photos[0], additional: photos.slice(1) } : null;
+      // Prepare photos object from uploaded files
+      const photosObject = uploadedPhotos.length > 0 ? {
+        main: uploadedPhotos[0]?.url,
+        additional: uploadedPhotos.slice(1).map(file => file.url),
+        files: uploadedPhotos
+      } : null;
+
+      // Prepare videos object from uploaded files
+      const videosObject = uploadedVideos.length > 0 ? {
+        files: uploadedVideos
+      } : null;
 
       const { error } = await supabase
         .from('merchant_items')
@@ -149,6 +151,7 @@ export const AddItemDialog = ({ onItemAdded }: AddItemDialogProps) => {
           is_premium: formData.is_premium,
           tags: tags.length > 0 ? tags : null,
           photos: photosObject,
+          videos: videosObject,
         });
 
       if (error) throw error;
@@ -364,36 +367,16 @@ export const AddItemDialog = ({ onItemAdded }: AddItemDialogProps) => {
             </CardContent>
           </Card>
 
-          {/* Photos */}
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Product Photos</h3>
-              <Button type="button" onClick={addPhotoUrl} variant="outline" className="gap-2 mb-4">
-                <Upload className="w-4 h-4" />
-                Add Photo URL
-              </Button>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {photos.map((photo, index) => (
-                  <div key={index} className="relative group">
-                    <img 
-                      src={photo} 
-                      alt={`Product ${index + 1}`} 
-                      className="w-full aspect-square object-cover rounded-lg"
-                    />
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="destructive"
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => removePhoto(index)}
-                    >
-                      <X className="w-3 h-3" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          {/* Media Upload */}
+          <FileUpload
+            photos={uploadedPhotos}
+            videos={uploadedVideos}
+            onPhotosChange={setUploadedPhotos}
+            onVideosChange={setUploadedVideos}
+            maxPhotos={20}
+            maxVideos={2}
+            disabled={loading}
+          />
 
           {/* Tags & Settings */}
           <Card>

@@ -8,10 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { X, Upload } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { MerchantItem } from '@/hooks/useMerchantItems';
+import { FileUpload } from './FileUpload';
 
 interface EditItemDialogProps {
   item: MerchantItem | null;
@@ -26,7 +27,8 @@ export const EditItemDialog = ({ item, open, onClose, onItemUpdated }: EditItemD
   const [tagInput, setTagInput] = useState('');
   const [sizes, setSizes] = useState<string[]>([]);
   const [sizeInput, setSizeInput] = useState('');
-  const [photos, setPhotos] = useState<string[]>([]);
+  const [uploadedPhotos, setUploadedPhotos] = useState<any[]>([]);
+  const [uploadedVideos, setUploadedVideos] = useState<any[]>([]);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -84,19 +86,42 @@ export const EditItemDialog = ({ item, open, onClose, onItemUpdated }: EditItemD
       setTags(item.tags || []);
       setSizes(Array.isArray(item.size) ? item.size : (item.size ? [item.size] : []));
       
-      // Extract photos from the photos object
+      // Convert existing photos to new format
       if (item.photos) {
-        const photoArray = [];
+        const existingPhotos = [];
         if (typeof item.photos === 'object') {
-          if (item.photos.main) photoArray.push(item.photos.main);
+          if (item.photos.main) {
+            existingPhotos.push({
+              id: 'existing-main',
+              name: 'Main Photo',
+              url: item.photos.main,
+              type: 'photo',
+              size: 0
+            });
+          }
           if (item.photos.additional && Array.isArray(item.photos.additional)) {
-            photoArray.push(...item.photos.additional);
+            item.photos.additional.forEach((url, index) => {
+              existingPhotos.push({
+                id: `existing-${index}`,
+                name: `Photo ${index + 2}`,
+                url,
+                type: 'photo',
+                size: 0
+              });
+            });
           }
         }
-        setPhotos(photoArray);
+        setUploadedPhotos(existingPhotos);
       } else {
-        setPhotos([]);
+        setUploadedPhotos([]);
       }
+
+      // Handle existing videos if any (if the field exists)
+      const existingVideos = [];
+      if ((item as any).videos && (item as any).videos.files) {
+        existingVideos.push(...(item as any).videos.files);
+      }
+      setUploadedVideos(existingVideos);
     }
   }, [item, open]);
 
@@ -126,17 +151,6 @@ export const EditItemDialog = ({ item, open, onClose, onItemUpdated }: EditItemD
     setSizes(sizes.filter(s => s !== size));
   };
 
-  const addPhotoUrl = () => {
-    const url = prompt('Enter photo URL:');
-    if (url && !photos.includes(url)) {
-      setPhotos([...photos, url]);
-    }
-  };
-
-  const removePhoto = (index: number) => {
-    setPhotos(photos.filter((_, i) => i !== index));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!item) return;
@@ -144,7 +158,17 @@ export const EditItemDialog = ({ item, open, onClose, onItemUpdated }: EditItemD
     setLoading(true);
 
     try {
-      const photosObject = photos.length > 0 ? { main: photos[0], additional: photos.slice(1) } : null;
+      // Prepare photos object from uploaded files
+      const photosObject = uploadedPhotos.length > 0 ? {
+        main: uploadedPhotos[0]?.url,
+        additional: uploadedPhotos.slice(1).map(file => file.url),
+        files: uploadedPhotos
+      } : null;
+
+      // Prepare videos object from uploaded files
+      const videosObject = uploadedVideos.length > 0 ? {
+        files: uploadedVideos
+      } : null;
 
       const { error } = await supabase
         .from('merchant_items')
@@ -166,6 +190,7 @@ export const EditItemDialog = ({ item, open, onClose, onItemUpdated }: EditItemD
           is_premium: formData.is_premium,
           tags: tags.length > 0 ? tags : null,
           photos: photosObject,
+          videos: videosObject,
         })
         .eq('id', item.id);
 
@@ -377,36 +402,16 @@ export const EditItemDialog = ({ item, open, onClose, onItemUpdated }: EditItemD
             </CardContent>
           </Card>
 
-          {/* Photos */}
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-semibold mb-4">Product Photos</h3>
-              <Button type="button" onClick={addPhotoUrl} variant="outline" className="gap-2 mb-4">
-                <Upload className="w-4 h-4" />
-                Add Photo URL
-              </Button>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {photos.map((photo, index) => (
-                  <div key={index} className="relative group">
-                    <img 
-                      src={photo} 
-                      alt={`Product ${index + 1}`} 
-                      className="w-full aspect-square object-cover rounded-lg"
-                    />
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="destructive"
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => removePhoto(index)}
-                    >
-                      <X className="w-3 h-3" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          {/* Media Upload */}
+          <FileUpload
+            photos={uploadedPhotos}
+            videos={uploadedVideos}
+            onPhotosChange={setUploadedPhotos}
+            onVideosChange={setUploadedVideos}
+            maxPhotos={20}
+            maxVideos={2}
+            disabled={loading}
+          />
 
           {/* Tags & Settings */}
           <Card>
