@@ -170,15 +170,64 @@ export const useSocial = () => {
   };
 
   const addReaction = async (targetId: string, targetType: string, reactionType: string = 'like') => {
-    return true; // Simplified for now
+    if (!user) {
+      toast.error('Please sign in to react');
+      return false;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('reactions')
+        .insert({
+          user_id: user.id,
+          target_id: targetId,
+          target_type: targetType,
+          reaction_type: reactionType
+        });
+
+      if (error) throw error;
+      return true;
+    } catch (error: any) {
+      console.error('Error adding reaction:', error);
+      toast.error('Failed to add reaction');
+      return false;
+    }
   };
 
   const removeReaction = async (targetId: string, targetType: string) => {
-    return true; // Simplified for now
+    if (!user) return false;
+
+    try {
+      const { error } = await supabase
+        .from('reactions')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('target_id', targetId)
+        .eq('target_type', targetType);
+
+      if (error) throw error;
+      return true;
+    } catch (error: any) {
+      console.error('Error removing reaction:', error);
+      toast.error('Failed to remove reaction');
+      return false;
+    }
   };
 
-  const getReactions = (targetId: string, targetType: string = 'outfit') => {
-    return []; // Simplified for now
+  const getReactions = async (targetId: string, targetType: string = 'outfit'): Promise<Reaction[]> => {
+    try {
+      const { data, error } = await supabase
+        .from('reactions')
+        .select('*')
+        .eq('target_id', targetId)
+        .eq('target_type', targetType);
+
+      if (error) throw error;
+      return data || [];
+    } catch (error: any) {
+      console.error('Error fetching reactions:', error);
+      return [];
+    }
   };
 
   return {

@@ -52,7 +52,7 @@ export const useMerchantProfile = () => {
       setError(null);
 
       const { data, error } = await supabase
-        .rpc('get_merchant_profiles_safe');
+        .rpc('get_merchant_profile_safe');
 
       if (error && error.code !== 'PGRST116') { // Not found is OK
         throw error;

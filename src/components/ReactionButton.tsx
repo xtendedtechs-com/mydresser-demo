@@ -29,14 +29,16 @@ const ReactionButton = ({
   }, [targetType, targetId, reactionType]);
 
   const fetchReactions = async () => {
-    const allReactions = getReactions(targetId, targetType);
-    const typeReactions = allReactions.filter(r => r.reaction_type === reactionType);
-    setReactions(typeReactions);
-    
-    // Check if current user has reacted
-    // This would need the current user ID from auth context
-    // For now, we'll assume false
-    setUserReacted(false);
+    try {
+      const allReactions = await getReactions(targetId, targetType);
+      const typeReactions = allReactions.filter(r => r.reaction_type === reactionType);
+      setReactions(typeReactions);
+      
+      // Check if current user has reacted (would need auth context)
+      setUserReacted(typeReactions.some(r => r.user_id === 'current_user_id'));
+    } catch (error) {
+      console.error('Error fetching reactions:', error);
+    }
   };
 
   const handleReaction = async () => {
