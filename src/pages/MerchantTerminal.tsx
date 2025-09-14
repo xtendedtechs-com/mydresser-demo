@@ -46,6 +46,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useMerchantItems, type MerchantItem } from '@/hooks/useMerchantItems';
+import { useOrders, type Order as DBOrder, type OrderStatus } from '@/hooks/useOrders';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 
@@ -103,37 +104,6 @@ const MerchantTerminal = () => {
     totalOrders: 1601
   });
 
-  // Mock data for orders
-  const [orders] = useState<Order[]>([
-    {
-      id: 'ORD-001',
-      customerName: 'James Rostinberg',
-      customerEmail: 'james@example.com',
-      items: [
-        { id: '1', name: 'Tommy Jeans Medium Blue', price: 99.90, quantity: 1 },
-        { id: '2', name: 'New Age Ripped Blue Jeans', price: 119.90, quantity: 1 }
-      ],
-      total: 192.85,
-      status: 'pending',
-      date: '2024-01-20',
-      paymentMethod: 'Credit Card',
-      shippingAddress: '123 Main St, City, State'
-    },
-    {
-      id: 'ORD-002',
-      customerName: 'Sarah Wilson',
-      customerEmail: 'sarah@example.com',
-      items: [
-        { id: '3', name: 'Classic White Shirt', price: 79.99, quantity: 2 }
-      ],
-      total: 159.98,
-      status: 'shipped',
-      date: '2024-01-19',
-      paymentMethod: 'PayPal',
-      shippingAddress: '456 Oak Ave, City, State'
-    }
-  ]);
-
   // Mock inventory alerts
   const [inventoryAlerts] = useState<InventoryAlert[]>([
     { id: '1', itemName: 'Tommy Jeans Medium Blue', currentStock: 3, threshold: 10, severity: 'low' },
@@ -143,6 +113,10 @@ const MerchantTerminal = () => {
   const { items: inventoryItems, loading, refetch } = useMerchantItems();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { orders: realOrders, loading: ordersLoading, createOrder, updateOrderStatus, updateTrackingNumber } = useOrders();
+  
+  // Use real orders from database
+  const orders = realOrders;
   
   // Check authentication on component mount
   useEffect(() => {
@@ -283,7 +257,7 @@ const MerchantTerminal = () => {
     }
   };
 
-  const processPayment = () => {
+  const processPayment = async () => {
     if (checkoutItems.length === 0) {
       toast({
         title: 'No Items',
@@ -293,17 +267,48 @@ const MerchantTerminal = () => {
       return;
     }
 
-    // Simulate payment processing
-    toast({
-      title: 'Payment Processed',
-      description: `Order for $${total.toFixed(2)} completed successfully`
-    });
+    if (!customerInfo.name || !customerInfo.email) {
+      toast({
+        title: 'Customer Info Required',
+        description: 'Please enter customer name and email',
+        variant: 'destructive'
+      });
+      return;
+    }
 
-    // Clear cart
-    setCheckoutItems([]);
-    setCustomerInfo({ name: '', email: '', orderId: '' });
-    setDiscountCode('');
-    setDiscountAmount(0);
+    try {
+      // Create order in database
+      await createOrder({
+        customer_name: customerInfo.name,
+        customer_email: customerInfo.email,
+        items: checkoutItems,
+        subtotal,
+        tax_amount: tax,
+        shipping_amount: shipping,
+        discount_amount: discount,
+        total_amount: total,
+        payment_method: 'POS Terminal',
+        payment_status: 'paid',
+        status: 'processing'
+      });
+
+      toast({
+        title: 'Payment Processed',
+        description: `Order for $${total.toFixed(2)} completed successfully`
+      });
+
+      // Clear cart
+      setCheckoutItems([]);
+      setCustomerInfo({ name: '', email: '', orderId: '' });
+      setDiscountCode('');
+      setDiscountAmount(0);
+    } catch (error: any) {
+      toast({
+        title: 'Payment Failed',
+        description: error.message,
+        variant: 'destructive'
+      });
+    }
   };
 
   const generateReceipt = (type: 'email' | 'print') => {
@@ -901,26 +906,26 @@ const MerchantTerminal = () => {
                       {orders.map((order) => (
                         <TableRow key={order.id}>
                           <TableCell className="font-medium">{order.id}</TableCell>
-                          <TableCell>
-                            <div>
-                              <div className="font-medium">{order.customerName}</div>
-                              <div className="text-sm text-muted-foreground">{order.customerEmail}</div>
-                            </div>
-                          </TableCell>
-                          <TableCell>{order.items.length} items</TableCell>
-                          <TableCell>${order.total.toFixed(2)}</TableCell>
-                          <TableCell>
-                            <Badge variant={
-                              order.status === 'pending' ? 'secondary' :
-                              order.status === 'processing' ? 'default' :
-                              order.status === 'shipped' ? 'outline' :
-                              order.status === 'delivered' ? 'default' :
-                              'destructive'
-                            }>
-                              {order.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{order.date}</TableCell>
+                           <TableCell>
+                             <div>
+                               <div className="font-medium">{order.customer_name}</div>
+                               <div className="text-sm text-muted-foreground">{order.customer_email}</div>
+                             </div>
+                           </TableCell>
+                           <TableCell>{Array.isArray(order.items) ? order.items.length : Object.keys(order.items || {}).length} items</TableCell>
+                           <TableCell>${order.total_amount.toFixed(2)}</TableCell>
+                           <TableCell>
+                             <Badge variant={
+                               order.status === 'pending' ? 'secondary' :
+                               order.status === 'processing' ? 'default' :
+                               order.status === 'shipped' ? 'outline' :
+                               order.status === 'delivered' ? 'default' :
+                               'destructive'
+                             }>
+                               {order.status}
+                             </Badge>
+                           </TableCell>
+                           <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
                           <TableCell>
                             <div className="flex gap-2">
                               <Button size="sm" variant="ghost">
