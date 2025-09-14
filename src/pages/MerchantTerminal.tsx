@@ -49,6 +49,7 @@ import { useMerchantItems, type MerchantItem } from '@/hooks/useMerchantItems';
 import { useOrders, type Order as DBOrder, type OrderStatus } from '@/hooks/useOrders';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import MerchantPageTab from '@/components/MerchantPageTab';
 
 interface CheckoutItem {
   id: string;
@@ -525,6 +526,14 @@ const MerchantTerminal = () => {
                 >
                   <TrendingUp className="w-4 h-4 mr-2" />
                   Financial Reports
+                </Button>
+                <Button
+                  variant={activeTab === 'merchant-page' ? 'secondary' : 'ghost'}
+                  className="w-full justify-start"
+                  onClick={() => setActiveTab('merchant-page')}
+                >
+                  <Store className="w-4 h-4 mr-2" />
+                  Merchant Page
                 </Button>
                 <Button
                   variant={activeTab === 'support' ? 'secondary' : 'ghost'}
@@ -1340,6 +1349,13 @@ const MerchantTerminal = () => {
                   </Table>
                 </CardContent>
               </Card>
+            </div>
+          )}
+
+          {/* Merchant Page */}
+          {activeTab === 'merchant-page' && (
+            <div className="flex-1 p-6">
+              <MerchantPageTab />
             </div>
           )}
 
