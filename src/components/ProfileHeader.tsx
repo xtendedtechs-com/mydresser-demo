@@ -3,12 +3,23 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Share2, Users, UserPlus } from "lucide-react";
 import { UserProfile } from "@/hooks/useProfile";
+import { useSocial } from "@/hooks/useSocial";
+import { useState, useEffect } from "react";
 
 interface ProfileHeaderProps {
   profile: UserProfile;
 }
 
 const ProfileHeader = ({ profile }: ProfileHeaderProps) => {
+  const { getFollowCounts } = useSocial();
+  const [followCounts, setFollowCounts] = useState({ followers_count: 0, following_count: 0 });
+
+  useEffect(() => {
+    if (profile.user_id) {
+      getFollowCounts(profile.user_id).then(setFollowCounts);
+    }
+  }, [profile.user_id, getFollowCounts]);
+
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case 'professional':
@@ -72,12 +83,12 @@ const ProfileHeader = ({ profile }: ProfileHeaderProps) => {
         <div className="flex items-center space-x-6 text-sm">
           <div className="flex items-center gap-1">
             <Users className="w-4 h-4" />
-            <span className="font-medium">0</span>
+            <span className="font-medium">{followCounts.followers_count}</span>
             <span className="text-muted-foreground">followers</span>
           </div>
           <div className="flex items-center gap-1">
             <UserPlus className="w-4 h-4" />
-            <span className="font-medium">0</span>
+            <span className="font-medium">{followCounts.following_count}</span>
             <span className="text-muted-foreground">following</span>
           </div>
         </div>

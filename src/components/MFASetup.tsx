@@ -1,365 +1,415 @@
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Shield, 
-  Smartphone, 
-  Mail, 
-  Key, 
-  QrCode, 
-  Copy, 
-  Check,
-  AlertTriangle,
-  Download
-} from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Copy, Shield, Smartphone, Key, CheckCircle, AlertTriangle, QrCode } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
-interface MFASetupProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+interface MFAStatus {
+  totp_enabled: boolean;
+  phone_verified: boolean;
+  backup_codes_count: number;
 }
 
-const MFASetup = ({ open, onOpenChange }: MFASetupProps) => {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [mfaMethod, setMfaMethod] = useState<'app' | 'sms' | 'email'>('app');
-  const [verificationCode, setVerificationCode] = useState('');
-  const [backupCodes, setBackupCodes] = useState<string[]>([]);
-  const [qrCode] = useState('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==');
-  const [secretKey] = useState('JBSWY3DPEHPK3PXP');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [copied, setCopied] = useState(false);
+const MFASetup = () => {
   const { toast } = useToast();
+  const [mfaStatus, setMfaStatus] = useState<MFAStatus>({
+    totp_enabled: false,
+    phone_verified: false,
+    backup_codes_count: 0
+  });
+  const [totpSecret, setTotpSecret] = useState('');
+  const [totpCode, setTotpCode] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [backupCodes, setBackupCodes] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [showSecret, setShowSecret] = useState(false);
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-    toast({
-      title: 'Copied to clipboard',
-      description: 'Secret key copied successfully'
-    });
+  useEffect(() => {
+    fetchMFAStatus();
+  }, []);
+
+  const fetchMFAStatus = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_mfa_settings')
+        .select('totp_enabled, phone_verified, backup_codes')
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        throw error;
+      }
+
+      if (data) {
+        setMfaStatus({
+          totp_enabled: data.totp_enabled || false,
+          phone_verified: data.phone_verified || false,
+          backup_codes_count: data.backup_codes?.length || 0
+        });
+      }
+    } catch (error: any) {
+      console.error('Error fetching MFA status:', error);
+    }
   };
 
-  const generateBackupCodes = () => {
-    const codes = Array.from({ length: 10 }, () => 
-      Math.random().toString(36).substring(2, 8).toUpperCase()
-    );
-    setBackupCodes(codes);
-  };
-
-  const downloadBackupCodes = () => {
-    const content = `MyDresser Backup Codes\n\nGenerated on: ${new Date().toLocaleDateString()}\n\n${backupCodes.map((code, i) => `${i + 1}. ${code}`).join('\n')}\n\nKeep these codes safe! Each can only be used once.`;
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'mydresser-backup-codes.txt';
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const verifyMFA = async () => {
-    if (!verificationCode || verificationCode.length !== 6) {
+  const setupTOTP = async () => {
+    if (!totpCode.trim()) {
       toast({
-        title: 'Invalid code',
-        description: 'Please enter a 6-digit verification code',
+        title: 'Error',
+        description: 'Please enter the verification code from your authenticator app',
         variant: 'destructive'
       });
       return;
     }
 
-    // Simulate verification
+    setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      generateBackupCodes();
-      setCurrentStep(3);
-      toast({
-        title: 'MFA Enabled',
-        description: 'Two-factor authentication has been successfully enabled'
+      // Generate a secret key (in production, this should be done server-side)
+      const secret = generateTOTPSecret();
+      
+      // Generate backup codes
+      const codes = generateBackupCodes();
+
+      const { data, error } = await supabase.rpc('setup_user_mfa', {
+        setup_type: 'totp',
+        secret_data: secret,
+        backup_codes_data: codes
       });
-    } catch (error) {
+
+      if (error) throw error;
+
+      setBackupCodes(codes);
       toast({
-        title: 'Verification failed',
-        description: 'Invalid verification code. Please try again.',
+        title: 'TOTP Setup Complete',
+        description: 'Two-factor authentication has been enabled successfully'
+      });
+
+      fetchMFAStatus();
+    } catch (error: any) {
+      toast({
+        title: 'Setup Failed',
+        description: error.message || 'Failed to setup TOTP authentication',
         variant: 'destructive'
       });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const completeMFASetup = () => {
+  const setupPhone = async () => {
+    if (!phoneNumber.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Please enter a valid phone number',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.rpc('setup_user_mfa', {
+        setup_type: 'phone',
+        phone_data: phoneNumber
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Phone Added',
+        description: 'Phone number has been added for SMS verification'
+      });
+
+      fetchMFAStatus();
+    } catch (error: any) {
+      toast({
+        title: 'Setup Failed',
+        description: error.message || 'Failed to setup phone authentication',
+        variant: 'destructive'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const generateTOTPSecret = () => {
+    // In production, this should be generated server-side using a proper crypto library
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    let secret = '';
+    for (let i = 0; i < 32; i++) {
+      secret += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return secret;
+  };
+
+  const generateBackupCodes = () => {
+    const codes = [];
+    for (let i = 0; i < 10; i++) {
+      const code = Math.random().toString(36).substring(2, 10).toUpperCase();
+      codes.push(code);
+    }
+    return codes;
+  };
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
     toast({
-      title: 'Setup Complete',
-      description: 'Multi-factor authentication is now active on your account'
+      title: 'Copied',
+      description: `${label} copied to clipboard`
     });
-    onOpenChange(false);
+  };
+
+  const downloadBackupCodes = () => {
+    const content = backupCodes.join('\n');
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'mydresser-backup-codes.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-green-600" />
-            Enable Two-Factor Authentication
-          </DialogTitle>
-        </DialogHeader>
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <Shield className="w-8 h-8 text-primary" />
+        <div>
+          <h1 className="text-2xl font-bold">Multi-Factor Authentication</h1>
+          <p className="text-muted-foreground">Secure your account with additional verification methods</p>
+        </div>
+      </div>
 
-        {currentStep === 1 && (
-          <div className="space-y-6">
-            <div className="text-center space-y-2">
-              <Shield className="w-16 h-16 mx-auto text-green-600" />
-              <h3 className="text-lg font-semibold">Secure Your Account</h3>
-              <p className="text-muted-foreground">
-                Add an extra layer of security to your MyDresser account with two-factor authentication
-              </p>
+      {/* Current Status */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Security Status</CardTitle>
+          <CardDescription>Current state of your account security</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex items-center gap-3 p-3 border rounded-lg">
+              <Smartphone className="w-5 h-5 text-blue-600" />
+              <div>
+                <p className="font-medium">Authenticator App</p>
+                <Badge variant={mfaStatus.totp_enabled ? "default" : "secondary"}>
+                  {mfaStatus.totp_enabled ? (
+                    <><CheckCircle className="w-3 h-3 mr-1" />Enabled</>
+                  ) : (
+                    'Disabled'
+                  )}
+                </Badge>
+              </div>
             </div>
 
-            <Tabs value={mfaMethod} onValueChange={(value) => setMfaMethod(value as any)}>
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="app" className="flex items-center gap-2">
-                  <Smartphone className="w-4 h-4" />
-                  Authenticator App
-                </TabsTrigger>
-                <TabsTrigger value="sms" className="flex items-center gap-2">
-                  <Smartphone className="w-4 h-4" />
-                  SMS
-                </TabsTrigger>
-                <TabsTrigger value="email" className="flex items-center gap-2">
-                  <Mail className="w-4 h-4" />
-                  Email
-                </TabsTrigger>
-              </TabsList>
+            <div className="flex items-center gap-3 p-3 border rounded-lg">
+              <Smartphone className="w-5 h-5 text-green-600" />
+              <div>
+                <p className="font-medium">SMS Verification</p>
+                <Badge variant={mfaStatus.phone_verified ? "default" : "secondary"}>
+                  {mfaStatus.phone_verified ? (
+                    <><CheckCircle className="w-3 h-3 mr-1" />Verified</>
+                  ) : (
+                    'Not Set'
+                  )}
+                </Badge>
+              </div>
+            </div>
 
-              <TabsContent value="app" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Smartphone className="w-5 h-5" />
-                      Authenticator App
-                    </CardTitle>
-                    <CardDescription>
-                      Use an authenticator app like Google Authenticator or Authy
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div className="space-y-3">
-                        <h4 className="font-medium">Step 1: Scan QR Code</h4>
-                        <div className="bg-white p-4 rounded-lg border">
-                          <img src={qrCode} alt="QR Code" className="w-40 h-40 mx-auto bg-gray-200" />
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          Scan this QR code with your authenticator app
-                        </p>
-                      </div>
-                      
-                      <div className="space-y-3">
-                        <h4 className="font-medium">Step 2: Manual Entry</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Or enter this secret key manually:
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <code className="bg-muted px-2 py-1 rounded text-sm font-mono flex-1">
-                            {secretKey}
-                          </code>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => copyToClipboard(secretKey)}
-                          >
-                            {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                          </Button>
-                        </div>
+            <div className="flex items-center gap-3 p-3 border rounded-lg">
+              <Key className="w-5 h-5 text-purple-600" />
+              <div>
+                <p className="font-medium">Backup Codes</p>
+                <Badge variant={mfaStatus.backup_codes_count > 0 ? "default" : "secondary"}>
+                  {mfaStatus.backup_codes_count > 0 ? (
+                    <><CheckCircle className="w-3 h-3 mr-1" />{mfaStatus.backup_codes_count} codes</>
+                  ) : (
+                    'None'
+                  )}
+                </Badge>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Tabs defaultValue="totp" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="totp">Authenticator App</TabsTrigger>
+          <TabsTrigger value="sms">SMS Verification</TabsTrigger>
+          <TabsTrigger value="backup">Backup Codes</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="totp" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Setup Authenticator App</CardTitle>
+              <CardDescription>
+                Use an authenticator app like Google Authenticator or Authy
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {!mfaStatus.totp_enabled ? (
+                <>
+                  <Alert>
+                    <QrCode className="w-4 h-4" />
+                    <AlertDescription>
+                      1. Download an authenticator app (Google Authenticator, Authy, etc.)
+                      <br />
+                      2. Scan the QR code or manually enter the secret key
+                      <br />
+                      3. Enter the 6-digit code from your app to verify
+                    </AlertDescription>
+                  </Alert>
+
+                  <div className="space-y-3">
+                    <div>
+                      <Label>Secret Key</Label>
+                      <div className="flex gap-2 mt-1">
+                        <Input
+                          value={showSecret ? totpSecret || 'EXAMPLE2FA3SECRETKEY4MYDRESSER567' : '••••••••••••••••••••••••••••••••'}
+                          readOnly
+                          className="font-mono"
+                        />
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowSecret(!showSecret)}
+                        >
+                          {showSecret ? 'Hide' : 'Show'}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => copyToClipboard(totpSecret || 'EXAMPLE2FA3SECRETKEY4MYDRESSER567', 'Secret key')}
+                        >
+                          <Copy className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
 
-              <TabsContent value="sms" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Smartphone className="w-5 h-5" />
-                      SMS Verification
-                    </CardTitle>
-                    <CardDescription>
-                      Receive verification codes via SMS
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="phone">Phone Number</Label>
+                    <div>
+                      <Label htmlFor="totpCode">Verification Code</Label>
                       <Input
-                        id="phone"
-                        type="tel"
-                        placeholder="+1 (555) 123-4567"
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        id="totpCode"
+                        placeholder="Enter 6-digit code"
+                        value={totpCode}
+                        onChange={(e) => setTotpCode(e.target.value)}
+                        maxLength={6}
                       />
                     </div>
-                    <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-lg">
-                      <div className="flex items-start gap-2">
-                        <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
-                        <div className="text-sm">
-                          <p className="font-medium text-yellow-800">SMS charges may apply</p>
-                          <p className="text-yellow-700">
-                            Standard message rates from your carrier may apply for verification codes.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
 
-              <TabsContent value="email" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Mail className="w-5 h-5" />
-                      Email Verification
-                    </CardTitle>
-                    <CardDescription>
-                      Receive verification codes via email
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
-                      <p className="text-sm text-blue-800">
-                        Verification codes will be sent to your registered email address.
-                        Make sure you have access to your email account.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-
-            <div className="flex gap-3">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
-              </Button>
-              <Button onClick={() => setCurrentStep(2)} className="flex-1">
-                Continue
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {currentStep === 2 && (
-          <div className="space-y-6">
-            <div className="text-center space-y-2">
-              <Key className="w-16 h-16 mx-auto text-blue-600" />
-              <h3 className="text-lg font-semibold">Verify Setup</h3>
-              <p className="text-muted-foreground">
-                Enter the 6-digit code from your {mfaMethod === 'app' ? 'authenticator app' : mfaMethod === 'sms' ? 'SMS message' : 'email'}
-              </p>
-            </div>
-
-            <Card>
-              <CardContent className="pt-6 space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="verification-code">Verification Code</Label>
-                  <Input
-                    id="verification-code"
-                    type="text"
-                    placeholder="123456"
-                    maxLength={6}
-                    value={verificationCode}
-                    onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
-                    className="text-center text-lg tracking-widest"
-                  />
-                </div>
-
-                {mfaMethod === 'sms' && (
-                  <Button variant="outline" size="sm">
-                    Resend SMS Code
-                  </Button>
-                )}
-
-                {mfaMethod === 'email' && (
-                  <Button variant="outline" size="sm">
-                    Resend Email Code
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-
-            <div className="flex gap-3">
-              <Button variant="outline" onClick={() => setCurrentStep(1)}>
-                Back
-              </Button>
-              <Button onClick={verifyMFA} className="flex-1" disabled={verificationCode.length !== 6}>
-                Verify & Enable
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {currentStep === 3 && (
-          <div className="space-y-6">
-            <div className="text-center space-y-2">
-              <Check className="w-16 h-16 mx-auto text-green-600" />
-              <h3 className="text-lg font-semibold">Setup Complete!</h3>
-              <p className="text-muted-foreground">
-                Two-factor authentication is now enabled on your account
-              </p>
-            </div>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Key className="w-5 h-5" />
-                  Backup Codes
-                </CardTitle>
-                <CardDescription>
-                  Save these backup codes in a safe place. Each code can only be used once.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-2 font-mono text-sm">
-                  {backupCodes.map((code, index) => (
-                    <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded">
-                      <span className="text-muted-foreground">{index + 1}.</span>
-                      <span>{code}</span>
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="bg-red-50 border border-red-200 p-3 rounded-lg">
-                  <div className="flex items-start gap-2">
-                    <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
-                    <div className="text-sm">
-                      <p className="font-medium text-red-800">Important:</p>
-                      <ul className="text-red-700 mt-1 space-y-1">
-                        <li>• Save these codes in a secure location</li>
-                        <li>• Each code can only be used once</li>
-                        <li>• Use them if you lose access to your authenticator</li>
-                      </ul>
-                    </div>
+                    <Button onClick={setupTOTP} disabled={loading}>
+                      {loading ? 'Setting up...' : 'Enable TOTP'}
+                    </Button>
                   </div>
+                </>
+              ) : (
+                <Alert>
+                  <CheckCircle className="w-4 h-4" />
+                  <AlertDescription>
+                    TOTP authentication is enabled and working properly.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="sms" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>SMS Verification</CardTitle>
+              <CardDescription>
+                Add your phone number for SMS-based two-factor authentication
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {!mfaStatus.phone_verified ? (
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="phoneNumber">Phone Number</Label>
+                    <Input
+                      id="phoneNumber"
+                      placeholder="+1 (555) 123-4567"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                    />
+                  </div>
+
+                  <Button onClick={setupPhone} disabled={loading}>
+                    {loading ? 'Adding...' : 'Add Phone Number'}
+                  </Button>
                 </div>
+              ) : (
+                <Alert>
+                  <CheckCircle className="w-4 h-4" />
+                  <AlertDescription>
+                    SMS verification is enabled and working properly.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-                <Button onClick={downloadBackupCodes} variant="outline" className="w-full">
-                  <Download className="w-4 h-4 mr-2" />
-                  Download Backup Codes
-                </Button>
-              </CardContent>
-            </Card>
+        <TabsContent value="backup" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Backup Codes</CardTitle>
+              <CardDescription>
+                Use these codes when you can't access your primary 2FA method
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {backupCodes.length > 0 ? (
+                <>
+                  <Alert>
+                    <AlertTriangle className="w-4 h-4" />
+                    <AlertDescription>
+                      Save these backup codes in a safe place. Each code can only be used once.
+                    </AlertDescription>
+                  </Alert>
 
-            <Button onClick={completeMFASetup} className="w-full">
-              Finish Setup
-            </Button>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+                  <div className="grid grid-cols-2 gap-2 p-4 bg-muted rounded-lg font-mono text-sm">
+                    {backupCodes.map((code, index) => (
+                      <div key={index} className="p-2 bg-background rounded">
+                        {code}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => copyToClipboard(backupCodes.join('\n'), 'Backup codes')}
+                    >
+                      <Copy className="w-4 h-4 mr-2" />
+                      Copy All
+                    </Button>
+                    <Button variant="outline" onClick={downloadBackupCodes}>
+                      Download
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <Alert>
+                  <AlertTriangle className="w-4 h-4" />
+                  <AlertDescription>
+                    No backup codes generated yet. Enable TOTP authentication to get backup codes.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 

@@ -1,192 +1,198 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useProfile } from './useProfile';
+import { toast } from 'sonner';
+
+export interface UserFollow {
+  id: string;
+  follower_id: string;
+  following_id: string;
+  created_at: string;
+}
 
 export interface Reaction {
   id: string;
   user_id: string;
-  post_id: string;
-  type: string;
+  target_id: string;
+  target_type: string;
+  reaction_type: string;
   created_at: string;
-  target_type?: string;
-  target_id?: string;
-  reaction_type?: string;
 }
 
-interface SocialUser {
+export interface SocialProfile {
   id: string;
-  display_name: string;
-  avatar_url?: string;
-  bio?: string;
-  followers_count: number;
-  following_count: number;
+  user_id: string;
+  full_name: string;
+  avatar_url: string;
+  role: string;
+  bio: string;
+  style_score: number;
+  created_at: string;
+  followers_count?: number;
+  following_count?: number;
   is_following?: boolean;
 }
 
-interface SocialPost {
-  id: string;
-  user_id: string;
-  content: string;
-  image_urls: string[];
-  likes_count: number;
-  comments_count: number;
-  created_at: string;
-  user: SocialUser;
-  is_liked?: boolean;
-}
-
-interface SocialComment {
-  id: string;
-  post_id: string;
-  user_id: string;
-  content: string;
-  created_at: string;
-  user: SocialUser;
-}
-
 export const useSocial = () => {
-  const [posts, setPosts] = useState<SocialPost[]>([]);
-  const [followers, setFollowers] = useState<SocialUser[]>([]);
-  const [following, setFollowing] = useState<SocialUser[]>([]);
+  const { user } = useProfile();
+  const [followers, setFollowers] = useState<SocialProfile[]>([]);
+  const [following, setFollowing] = useState<SocialProfile[]>([]);
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
 
-  const fetchPosts = async () => {
+  useEffect(() => {
+    if (user) {
+      fetchSocialData();
+    }
+  }, [user]);
+
+  const fetchSocialData = async () => {
+    if (!user) return;
+
     setLoading(true);
     try {
-      // Mock data for now - in real implementation, fetch from Supabase
-      const mockPosts: SocialPost[] = [
-        {
-          id: '1',
-          user_id: 'user1',
-          content: 'Love this new outfit combination! Perfect for the office.',
-          image_urls: ['/api/placeholder/400/500'],
-          likes_count: 24,
-          comments_count: 5,
-          created_at: new Date().toISOString(),
-          user: {
-            id: 'user1',
-            display_name: 'Sarah Johnson',
-            avatar_url: '/api/placeholder/40/40',
-            bio: 'Fashion enthusiast',
-            followers_count: 120,
-            following_count: 95
-          }
-        }
-      ];
-      setPosts(mockPosts);
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch posts',
-        variant: 'destructive'
-      });
+      // Simple fetch for now - avoiding complex joins
+      setFollowers([]);
+      setFollowing([]);
+    } catch (error: any) {
+      console.error('Error fetching social data:', error);
+      toast.error('Failed to load social data');
     } finally {
       setLoading(false);
     }
   };
 
-  const likePost = async (postId: string) => {
+  const followUser = async (targetUserId: string) => {
+    if (!user) {
+      toast.error('Please sign in to follow users');
+      return false;
+    }
+
     try {
-      setPosts(prev => prev.map(post => 
-        post.id === postId 
-          ? { ...post, is_liked: !post.is_liked, likes_count: post.is_liked ? post.likes_count - 1 : post.likes_count + 1 }
-          : post
-      ));
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to like post',
-        variant: 'destructive'
-      });
+      const { error } = await supabase
+        .from('user_follows')
+        .insert({
+          follower_id: user.id,
+          following_id: targetUserId
+        });
+
+      if (error) throw error;
+
+      toast.success('User followed successfully');
+      fetchSocialData();
+      return true;
+    } catch (error: any) {
+      console.error('Error following user:', error);
+      toast.error('Failed to follow user');
+      return false;
     }
   };
 
-  const followUser = async (userId: string) => {
+  const unfollowUser = async (targetUserId: string) => {
+    if (!user) return false;
+
     try {
-      // Implementation for following/unfollowing users
-      toast({
-        title: 'Success',
-        description: 'Following status updated'
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to update following status',
-        variant: 'destructive'
-      });
+      const { error } = await supabase
+        .from('user_follows')
+        .delete()
+        .eq('follower_id', user.id)
+        .eq('following_id', targetUserId);
+
+      if (error) throw error;
+
+      toast.success('User unfollowed');
+      fetchSocialData();
+      return true;
+    } catch (error: any) {
+      console.error('Error unfollowing user:', error);
+      toast.error('Failed to unfollow user');
+      return false;
     }
   };
 
-  const createPost = async (content: string, images: File[]) => {
+  const isFollowing = (targetUserId: string) => {
+    return following.some(f => f.user_id === targetUserId);
+  };
+
+  const getPublicProfiles = async () => {
     try {
-      // Implementation for creating posts
-      toast({
-        title: 'Success',
-        description: 'Post created successfully'
-      });
-      fetchPosts();
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to create post',
-        variant: 'destructive'
-      });
+      const { data, error } = await supabase.rpc('get_public_profiles');
+      if (error) throw error;
+      return data || [];
+    } catch (error: any) {
+      console.error('Error fetching public profiles:', error);
+      return [];
     }
   };
 
-  useEffect(() => {
-    fetchPosts();
-  }, []);
-
-  const addReaction = async (postId: string, type: string, targetType: string = 'post') => {
-    // Implementation for adding reactions
+  const getFollowCounts = async (userId: string) => {
     try {
-      toast({
-        title: 'Success',
-        description: 'Reaction added'
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to add reaction',
-        variant: 'destructive'
-      });
+      const [followersRes, followingRes] = await Promise.all([
+        supabase
+          .from('user_follows')
+          .select('id', { count: 'exact', head: true })
+          .eq('following_id', userId),
+        supabase
+          .from('user_follows')
+          .select('id', { count: 'exact', head: true })
+          .eq('follower_id', userId)
+      ]);
+
+      return {
+        followers_count: followersRes.count || 0,
+        following_count: followingRes.count || 0
+      };
+    } catch (error: any) {
+      console.error('Error fetching follow counts:', error);
+      return { followers_count: 0, following_count: 0 };
     }
   };
 
-  const removeReaction = async (postId: string, type: string, targetType: string = 'post') => {
-    // Implementation for removing reactions
+  const suggestUsers = async (limit = 10) => {
     try {
-      toast({
-        title: 'Success',
-        description: 'Reaction removed'
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to remove reaction',
-        variant: 'destructive'
-      });
+      // Get users that current user is NOT following
+      const { data: publicProfiles, error } = await supabase.rpc('get_public_profiles');
+      if (error) throw error;
+
+      // Filter out current user and users already being followed
+      const followingIds = following.map(f => f.user_id);
+      const suggestions = (publicProfiles || [])
+        .filter(profile => 
+          profile.user_id !== user?.id && 
+          !followingIds.includes(profile.user_id)
+        )
+        .slice(0, limit);
+
+      return suggestions;
+    } catch (error: any) {
+      console.error('Error getting user suggestions:', error);
+      return [];
     }
   };
 
-  const getReactions = (postId: string, targetType: string = 'post') => {
-    // Implementation for getting reactions
-    return [];
+  const addReaction = async (targetId: string, targetType: string, reactionType: string = 'like') => {
+    return true; // Simplified for now
+  };
+
+  const removeReaction = async (targetId: string, targetType: string) => {
+    return true; // Simplified for now
+  };
+
+  const getReactions = (targetId: string, targetType: string = 'outfit') => {
+    return []; // Simplified for now
   };
 
   return {
-    posts,
     followers,
     following,
     loading,
-    likePost,
     followUser,
-    createPost,
-    fetchPosts,
+    unfollowUser,
+    isFollowing,
+    getFollowCounts,
+    suggestUsers,
     addReaction,
     removeReaction,
-    getReactions
+    getReactions,
+    refreshSocialData: fetchSocialData
   };
 };
