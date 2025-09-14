@@ -120,6 +120,8 @@ const ProfileSetup = () => {
             budgetRange: stylePreferences.budgetRange,
             shoppingSources: stylePreferences.shoppingSources
           }
+        }, {
+          onConflict: 'user_id'
         });
 
       if (error) throw error;
@@ -153,10 +155,8 @@ const ProfileSetup = () => {
 
       if (wardrobeError) throw wardrobeError;
 
-      // Create sample wardrobe items if requested
-      if (wardrobeSetup.createSampleItems) {
-        await supabase.rpc('create_sample_wardrobe_items');
-      }
+      // Create sample wardrobe items if requested - REMOVED to avoid fake data
+      // Users should add their own real items instead
 
       toast.success('Wardrobe setup complete!');
       navigate('/');
@@ -391,23 +391,9 @@ const ProfileSetup = () => {
           </Select>
         </div>
 
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            id="createSample"
-            checked={wardrobeSetup.createSampleItems}
-            onChange={(e) => setWardrobeSetup(prev => ({ ...prev, createSampleItems: e.target.checked }))}
-            className="w-4 h-4"
-          />
-          <Label htmlFor="createSample" className="text-sm">
-            Add sample items to get started (recommended)
-          </Label>
-        </div>
-
         <div className="p-4 bg-muted rounded-lg">
           <p className="text-sm text-muted-foreground">
-            We'll create some sample wardrobe items to help you explore MyDresser's features. 
-            You can always delete or modify these later.
+            Your wardrobe is ready! Start by adding your first clothing items to begin organizing your fashion collection.
           </p>
         </div>
 

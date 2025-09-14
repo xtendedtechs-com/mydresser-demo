@@ -373,7 +373,7 @@ export const useUserPreferences = () => {
     try {
       const { error } = await supabase
         .from('user_preferences')
-        .insert({
+        .upsert({
           user_id: user.id,
           theme: JSON.stringify(defaultPreferences.theme),
           extended_theme: defaultPreferences.extended_theme,
@@ -384,6 +384,8 @@ export const useUserPreferences = () => {
           suggestion_settings: defaultPreferences.suggestion_settings,
           laundry_settings: defaultPreferences.laundry_settings,
           marketplace_settings: defaultPreferences.marketplace_settings,
+        }, {
+          onConflict: 'user_id'
         });
 
       if (error) throw error;

@@ -1619,6 +1619,10 @@ export type Database = {
         }
         Returns: string
       }
+      is_merchant: {
+        Args: { _user_id?: string }
+        Returns: boolean
+      }
       list_invitations_admin: {
         Args: Record<PropertyKey, never>
         Returns: {

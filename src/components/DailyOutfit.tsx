@@ -80,8 +80,8 @@ const DailyOutfit = () => {
   };
 
   const loadUserPhoto = async () => {
-    // Load from user profile or use placeholder
-    setUserPhoto("/api/placeholder/300/400");
+    // Load from user profile - will be available after profile is loaded
+    setUserPhoto(null);
   };
 
   const loadWeather = async () => {
@@ -158,8 +158,8 @@ const DailyOutfit = () => {
         previousOutfits: dislikedOutfits
       };
 
-      // Generate outfit using the intelligent service (augment with placeholders if needed)
-      const sourceItems = items.length < 6 ? [...items, ...getLocalPlaceholderItems()] : items;
+      // Generate outfit using real wardrobe items only
+      const sourceItems = items;
       
       // Ensure we have valid items before generation
       if (!sourceItems || sourceItems.length === 0) {
@@ -262,15 +262,7 @@ const DailyOutfit = () => {
     return nextUpdates[timeOfDay as keyof typeof nextUpdates] || 'Later Today';
   };
 
-  const getLocalPlaceholderItems = (): WardrobeItem[] => {
-    const now = new Date().toISOString();
-    return [
-      { id: 'ph-top', user_id: 'placeholder', name: 'Basic Tee', category: 'tops', brand: 'Uniqlo', color: 'White', size: 'M', material: 'Cotton', season: 'all-season', occasion: 'casual', condition: 'good', wear_count: 0, is_favorite: false, notes: 'placeholder', created_at: now, updated_at: now, photos: { main: '/placeholder.svg' } } as unknown as WardrobeItem,
-      { id: 'ph-bottom', user_id: 'placeholder', name: 'Dark Jeans', category: 'bottoms', brand: 'Levis', color: 'Dark Blue', size: '32', material: 'Denim', season: 'all-season', occasion: 'casual', condition: 'good', wear_count: 0, is_favorite: false, notes: 'placeholder', created_at: now, updated_at: now, photos: { main: '/placeholder.svg' } } as unknown as WardrobeItem,
-      { id: 'ph-outer', user_id: 'placeholder', name: 'Black Jacket', category: 'outerwear', brand: 'Zara', color: 'Black', size: 'M', material: 'Wool Blend', season: 'fall', occasion: 'casual', condition: 'excellent', wear_count: 0, is_favorite: false, notes: 'placeholder', created_at: now, updated_at: now, photos: { main: '/placeholder.svg' } } as unknown as WardrobeItem,
-      { id: 'ph-shoes', user_id: 'placeholder', name: 'White Sneakers', category: 'shoes', brand: 'Nike', color: 'White', size: '10', material: 'Synthetic', season: 'all-season', occasion: 'casual', condition: 'good', wear_count: 0, is_favorite: false, notes: 'placeholder', created_at: now, updated_at: now, photos: { main: '/placeholder.svg' } } as unknown as WardrobeItem,
-    ];
-  };
+  // Removed placeholder items - only use real user wardrobe data
   const handleLike = async () => {
     if (!outfit) return;
     

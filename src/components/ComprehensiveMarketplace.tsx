@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -36,34 +37,27 @@ export const ComprehensiveMarketplace = () => {
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const [filteredItems, setFilteredItems] = useState<any[]>([]);
 
-  // Mock data for demonstration - in production, this would come from APIs
-  const trendingItems = [
-    {
-      id: '1',
-      name: 'Vintage Denim Jacket',
-      price: 89.99,
-      originalPrice: 129.99,
-      brand: 'Levi\'s',
-      image: '/placeholder.svg',
-      merchant: 'StyleHub',
-      rating: 4.8,
-      reviews: 142,
-      condition: 'excellent',
-      tags: ['vintage', 'denim', 'casual']
-    },
-    {
-      id: '2',
-      name: 'Silk Scarf Collection',
-      price: 45.00,
-      brand: 'Hermès',
-      image: '/placeholder.svg',
-      merchant: 'LuxuryResale',
-      rating: 4.9,
-      reviews: 89,
-      condition: 'new',
-      tags: ['luxury', 'silk', 'accessories']
-    }
-  ];
+  // Get real trending items from the database
+  const [trendingItems, setTrendingItems] = useState([]);
+  
+  useEffect(() => {
+    const fetchTrendingItems = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('merchant_items')
+          .select('*')
+          .eq('is_featured', true)
+          .limit(6);
+        
+        if (error) throw error;
+        setTrendingItems(data || []);
+      } catch (error) {
+        console.error('Error fetching trending items:', error);
+      }
+    };
+    
+    fetchTrendingItems();
+  }, []);
 
   const socialPosts = [
     {
