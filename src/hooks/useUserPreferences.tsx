@@ -303,9 +303,11 @@ export const useUserPreferences = () => {
 
       if (error) throw error;
 
-      // Apply theme changes immediately
-      if (updates.theme) {
+  // Apply theme changes immediately
+      if (updates.theme || updates.accessibility_settings || updates.extended_theme) {
         applyTheme(newPreferences.theme);
+        applyAccessibilitySettings(newPreferences.accessibility_settings);
+        applyExtendedTheme(newPreferences.extended_theme);
       }
 
       toast({
@@ -383,8 +385,54 @@ export const useUserPreferences = () => {
       root.classList.remove('compact-mode');
     }
 
-    // Store theme preference in localStorage as backup
+    // Store preferences in localStorage as backup
     localStorage.setItem('user-theme-preference', JSON.stringify(theme));
+    localStorage.setItem('user-accessibility-preference', JSON.stringify(preferences.accessibility_settings));
+    localStorage.setItem('user-extended-theme-preference', JSON.stringify(preferences.extended_theme));
+  };
+
+  const applyAccessibilitySettings = (accessibility: UserPreferences['accessibility_settings']) => {
+    const root = document.documentElement;
+    
+    // Apply font size multiplier
+    root.style.setProperty('--font-size-multiplier', accessibility.font_size_multiplier.toString());
+    
+    // Apply high contrast
+    root.classList.toggle('high-contrast', accessibility.high_contrast);
+    
+    // Apply large text
+    root.classList.toggle('large-text', accessibility.large_text);
+    
+    // Apply reduced motion
+    root.classList.toggle('reduce-motion', accessibility.reduce_motion);
+    
+    // Apply color blind friendly
+    root.classList.toggle('color-blind-friendly', accessibility.color_blind_friendly);
+    
+    // Apply keyboard navigation
+    root.classList.toggle('keyboard-navigation', accessibility.keyboard_navigation);
+    
+    // Apply screen reader optimizations
+    root.classList.toggle('screen-reader', accessibility.screen_reader_support);
+  };
+
+  const applyExtendedTheme = (extendedTheme: UserPreferences['extended_theme']) => {
+    const root = document.documentElement;
+    
+    // Apply gradient backgrounds
+    root.classList.toggle('gradient-backgrounds', extendedTheme.gradient_backgrounds);
+    
+    // Apply animated transitions
+    root.classList.toggle('animated-transitions', extendedTheme.animated_transitions);
+    
+    // Apply card style
+    root.setAttribute('data-card-style', extendedTheme.card_style);
+    
+    // Apply border radius
+    root.setAttribute('data-border-radius', extendedTheme.border_radius);
+    
+    // Apply shadow intensity
+    root.setAttribute('data-shadow-intensity', extendedTheme.shadow_intensity);
   };
 
   // Load theme from localStorage on first render if user is not logged in
@@ -410,5 +458,7 @@ export const useUserPreferences = () => {
     updatePreferences,
     loading,
     applyTheme,
+    applyAccessibilitySettings,
+    applyExtendedTheme,
   };
 };
