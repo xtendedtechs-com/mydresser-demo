@@ -328,7 +328,12 @@ const MarketItemDetail = () => {
                 <p className="text-sm text-muted-foreground mt-2">
                   Premium fashion retailer specializing in high-quality clothing and accessories.
                 </p>
-                <Button variant="outline" size="sm" className="mt-3">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-3"
+                  onClick={() => navigate(`/merchant/${item.merchant_id}`)}
+                >
                   View Store
                 </Button>
               </div>

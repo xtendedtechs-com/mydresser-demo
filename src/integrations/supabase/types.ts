@@ -399,6 +399,60 @@ export type Database = {
         }
         Relationships: []
       }
+      merchant_pages: {
+        Row: {
+          brand_story: string | null
+          business_hours: Json | null
+          business_name: string
+          contact_info: Json | null
+          created_at: string
+          featured_collections: string[] | null
+          hero_image: string | null
+          id: string
+          is_published: boolean | null
+          logo: string | null
+          merchant_id: string
+          social_links: Json | null
+          specialties: string[] | null
+          theme_color: string | null
+          updated_at: string
+        }
+        Insert: {
+          brand_story?: string | null
+          business_hours?: Json | null
+          business_name: string
+          contact_info?: Json | null
+          created_at?: string
+          featured_collections?: string[] | null
+          hero_image?: string | null
+          id?: string
+          is_published?: boolean | null
+          logo?: string | null
+          merchant_id: string
+          social_links?: Json | null
+          specialties?: string[] | null
+          theme_color?: string | null
+          updated_at?: string
+        }
+        Update: {
+          brand_story?: string | null
+          business_hours?: Json | null
+          business_name?: string
+          contact_info?: Json | null
+          created_at?: string
+          featured_collections?: string[] | null
+          hero_image?: string | null
+          id?: string
+          is_published?: boolean | null
+          logo?: string | null
+          merchant_id?: string
+          social_links?: Json | null
+          specialties?: string[] | null
+          theme_color?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       merchant_profile_access_log: {
         Row: {
           accessed_fields: string[] | null

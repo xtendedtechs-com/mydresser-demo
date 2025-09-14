@@ -107,8 +107,39 @@ const MerchantPageEditor = ({ onSave, onPreview }: MerchantPageEditorProps) => {
 
   const loadPageSettings = async () => {
     try {
-      // Load existing page settings from merchant_profiles or a separate merchant_pages table
-      // For now, we'll use default settings and let merchants customize
+      if (!merchantProfile?.user_id) return;
+
+      const { data, error } = await supabase
+        .from('merchant_pages')
+        .select('*')
+        .eq('merchant_id', merchantProfile.user_id)
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') throw error;
+
+      if (data) {
+        setSettings(prev => ({
+          ...prev,
+          business_name: data.business_name || merchantProfile.business_name,
+          brand_story: data.brand_story || '',
+          specialties: data.specialties || [],
+          featured_collections: data.featured_collections || [],
+          social_links: (data.social_links as any) || { instagram: '', website: '', facebook: '' },
+          hero_image: data.hero_image || '',
+          logo: data.logo || '',
+          theme_color: data.theme_color || '#000000',
+          business_hours: (data.business_hours as any) || {
+            monday: '9:00 AM - 6:00 PM',
+            tuesday: '9:00 AM - 6:00 PM',
+            wednesday: '9:00 AM - 6:00 PM',
+            thursday: '9:00 AM - 6:00 PM',
+            friday: '9:00 AM - 6:00 PM',
+            saturday: '10:00 AM - 4:00 PM',
+            sunday: 'Closed'
+          },
+          contact_info: (data.contact_info as any) || { email: '', phone: '', address: '' }
+        }));
+      }
     } catch (error) {
       console.error('Error loading page settings:', error);
     }
@@ -118,16 +149,36 @@ const MerchantPageEditor = ({ onSave, onPreview }: MerchantPageEditorProps) => {
     try {
       setSaving(true);
 
-      // Save page settings to database
+      if (!merchantProfile?.user_id) {
+        throw new Error('Merchant profile required');
+      }
+
+      // Save to merchant_pages table with upsert
       const { error } = await supabase
-        .from('merchant_profiles')
-        .update({
-          // Store customization data in a JSON field or separate table
-          business_name: settings.business_name
-        })
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id);
+        .from('merchant_pages')
+        .upsert({
+          merchant_id: merchantProfile.user_id,
+          business_name: settings.business_name,
+          brand_story: settings.brand_story,
+          specialties: settings.specialties,
+          featured_collections: settings.featured_collections,
+          social_links: settings.social_links,
+          hero_image: settings.hero_image,
+          logo: settings.logo,
+          theme_color: settings.theme_color,
+          business_hours: settings.business_hours,
+          contact_info: settings.contact_info
+        }, {
+          onConflict: 'merchant_id'
+        });
 
       if (error) throw error;
+
+      // Also update business_name in merchant_profiles for consistency
+      await supabase
+        .from('merchant_profiles')
+        .update({ business_name: settings.business_name })
+        .eq('user_id', merchantProfile.user_id);
 
       toast({
         title: "Page Settings Saved",

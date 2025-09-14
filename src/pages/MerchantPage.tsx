@@ -70,8 +70,8 @@ const MerchantPage = () => {
     try {
       setLoading(true);
 
-      // Fetch public merchant profile data
-      const { data, error } = await supabase
+      // Fetch merchant profile data
+      const { data: profileData, error: profileError } = await supabase
         .from('merchant_profiles')
         .select(`
           id,
@@ -82,19 +82,28 @@ const MerchantPage = () => {
           user_id
         `)
         .eq('user_id', merchantId)
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      if (profileError && profileError.code !== 'PGRST116') throw profileError;
+      if (!profileData) throw new Error('Merchant not found');
+
+      // Fetch merchant page customization data
+      const { data: pageData, error: pageError } = await supabase
+        .from('merchant_pages')
+        .select('*')
+        .eq('merchant_id', merchantId)
+        .maybeSingle();
+
+      if (pageError && pageError.code !== 'PGRST116') throw pageError;
 
       setMerchantData({
-        ...data,
-        featured_collections: ['Featured Outfits', 'Business Attire', 'Casual Wear'],
-        brand_story: "Curating exceptional fashion pieces for the modern professional. Our collection combines timeless elegance with contemporary style.",
-        specialties: ['Business Attire', 'Luxury Fashion', 'Sustainable Materials'],
-        social_links: {
-          instagram: '@merchant_style',
-          website: 'www.merchantstore.com'
-        }
+        ...profileData,
+        featured_collections: pageData?.featured_collections || ['Featured Items'],
+        brand_story: pageData?.brand_story || "Welcome to our store! We offer quality fashion items and exceptional service.",
+        specialties: pageData?.specialties || ['Fashion', 'Quality', 'Service'],
+        social_links: (pageData?.social_links as any) || {},
+        hero_image: pageData?.hero_image,
+        logo: pageData?.logo
       });
     } catch (error: any) {
       console.error('Error fetching merchant data:', error);
