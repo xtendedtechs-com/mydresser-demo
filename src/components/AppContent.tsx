@@ -1,5 +1,6 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import Navigation from "@/components/Navigation";
+import Index from "@/pages/Index";
 import Home from "@/pages/Home";
 import Wardrobe from "@/pages/Wardrobe";
 import Account from "@/pages/Account";
@@ -23,7 +24,7 @@ const AppContent = () => {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Index />} />
         <Route path="/wardrobe" element={<Wardrobe />} />
         <Route path="/wardrobe/enhanced" element={<EnhancedWardrobeManager />} />
         <Route path="/market" element={<Market />} />

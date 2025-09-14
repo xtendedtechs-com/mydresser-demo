@@ -1,328 +1,447 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { useProfile } from "@/hooks/useProfile";
-import { useContactInfo } from "@/hooks/useContactInfo";
-import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
-import { Loader2, User, Mail, MapPin, Instagram, Facebook, Sparkles } from "lucide-react";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Camera, Sparkles, CheckCircle } from 'lucide-react';
+import { useProfile } from '@/hooks/useProfile';
+import { useWardrobe } from '@/hooks/useWardrobe';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const ProfileSetup = () => {
-  const { profile, updateProfile, loading: profileLoading } = useProfile();
-  const { updateContactInfo } = useContactInfo();
-  const { toast } = useToast();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const { profile, updateProfile } = useProfile();
+  const { } = useWardrobe();
+  
   const [step, setStep] = useState(1);
-
+  const [loading, setLoading] = useState(false);
+  
   // Profile form state
-  const [formData, setFormData] = useState({
-    full_name: "",
-    bio: "",
-    location: "",
-    avatar_url: "",
-    is_profile_public: false,
+  const [profileData, setProfileData] = useState({
+    full_name: profile?.full_name || '',
+    bio: profile?.bio || '',
+    location: profile?.location || '',
+    avatar_url: profile?.avatar_url || ''
   });
 
-  // Contact info form state
-  const [contactData, setContactData] = useState({
-    email: "",
-    social_instagram: "",
-    social_facebook: "",
-    social_tiktok: "",
+  // Style preferences state
+  const [stylePreferences, setStylePreferences] = useState({
+    favoriteColors: [] as string[],
+    stylePersonality: '',
+    preferredBrands: [] as string[],
+    budgetRange: '',
+    shoppingSources: [] as string[]
   });
 
-  useEffect(() => {
-    if (profile && !profileLoading) {
-      // If profile is already set up, redirect to home
-      if (profile.full_name && profile.bio) {
-        navigate("/");
-        return;
-      }
-      // Pre-populate form with existing data
-      setFormData({
-        full_name: profile.full_name || "",
-        bio: profile.bio || "",
-        location: profile.location || "",
-        avatar_url: profile.avatar_url || "",
-        is_profile_public: profile.is_profile_public || false,
-      });
-    }
-  }, [profile, profileLoading, navigate]);
+  // Wardrobe setup state
+  const [wardrobeSetup, setWardrobeSetup] = useState({
+    createSampleItems: true,
+    wardrobeName: 'My Wardrobe',
+    wardrobeType: 'closet'
+  });
 
-  const handleNext = () => {
-    if (step < 3) {
-      setStep(step + 1);
-    }
+  const colorOptions = ['Black', 'White', 'Navy', 'Gray', 'Beige', 'Brown', 'Red', 'Pink', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple'];
+  const personalityOptions = ['Minimalist', 'Bohemian', 'Classic', 'Trendy', 'Edgy', 'Romantic', 'Sporty', 'Professional'];
+  const brandOptions = ['Zara', 'H&M', 'Uniqlo', 'Nike', 'Adidas', 'Levi\'s', 'Gap', 'Target', 'Mango', 'COS'];
+  const sourceOptions = ['Online Shopping', 'Department Stores', 'Boutiques', 'Thrift Stores', 'Outlet Malls', 'Luxury Retailers'];
+
+  const handleColorToggle = (color: string) => {
+    setStylePreferences(prev => ({
+      ...prev,
+      favoriteColors: prev.favoriteColors.includes(color)
+        ? prev.favoriteColors.filter(c => c !== color)
+        : [...prev.favoriteColors, color]
+    }));
   };
 
-  const handleBack = () => {
-    if (step > 1) {
-      setStep(step - 1);
-    }
+  const handleBrandToggle = (brand: string) => {
+    setStylePreferences(prev => ({
+      ...prev,
+      preferredBrands: prev.preferredBrands.includes(brand)
+        ? prev.preferredBrands.filter(b => b !== brand)
+        : [...prev.preferredBrands, brand]
+    }));
   };
 
-  const handleComplete = async () => {
-    if (!profile) return;
-    
-    setLoading(true);
+  const handleSourceToggle = (source: string) => {
+    setStylePreferences(prev => ({
+      ...prev,
+      shoppingSources: prev.shoppingSources.includes(source)
+        ? prev.shoppingSources.filter(s => s !== source)
+        : [...prev.shoppingSources, source]
+    }));
+  };
+
+  const handleProfileSubmit = async () => {
     try {
-      // Update profile
-      await updateProfile({
-        full_name: formData.full_name,
-        bio: formData.bio,
-        location: formData.location,
-        avatar_url: formData.avatar_url,
-        is_profile_public: formData.is_profile_public,
-      });
-
-      // Update contact info if provided
-      if (contactData.email || contactData.social_instagram || contactData.social_facebook || contactData.social_tiktok) {
-        await updateContactInfo(contactData);
-      }
-
-      toast({
-        title: "Welcome to MyDresser! 🎉",
-        description: "Your profile has been set up successfully.",
-      });
+      setLoading(true);
       
-      navigate("/");
-    } catch (error: any) {
-      toast({
-        title: "Error setting up profile",
-        description: error.message,
-        variant: "destructive",
+      await updateProfile({
+        full_name: profileData.full_name,
+        bio: profileData.bio,
+        location: profileData.location,
+        avatar_url: profileData.avatar_url
       });
+
+      toast.success('Profile information saved!');
+      setStep(2);
+    } catch (error: any) {
+      toast.error('Failed to save profile: ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const canProceedStep1 = formData.full_name.trim().length > 0;
-  const canProceedStep2 = formData.bio.trim().length > 0;
+  const handleStyleSubmit = async () => {
+    try {
+      setLoading(true);
+      
+      // Save style preferences to user_preferences table
+      const { error } = await supabase
+        .from('user_preferences')
+        .upsert({
+          user_id: profile?.user_id,
+          suggestion_settings: {
+            favoriteColors: stylePreferences.favoriteColors,
+            stylePersonality: stylePreferences.stylePersonality,
+            preferredBrands: stylePreferences.preferredBrands,
+            budgetRange: stylePreferences.budgetRange,
+            shoppingSources: stylePreferences.shoppingSources
+          }
+        });
 
-  if (profileLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading...</p>
+      if (error) throw error;
+
+      toast.success('Style preferences saved!');
+      setStep(3);
+    } catch (error: any) {
+      toast.error('Failed to save preferences: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleWardrobeSubmit = async () => {
+    try {
+      setLoading(true);
+
+      // Create initial wardrobe
+      const { error: wardrobeError } = await supabase
+        .from('wardrobes')
+        .insert({
+          user_id: profile?.user_id,
+          name: wardrobeSetup.wardrobeName,
+          type: wardrobeSetup.wardrobeType
+        });
+
+      if (wardrobeError) throw wardrobeError;
+
+      // Create sample wardrobe items if requested
+      if (wardrobeSetup.createSampleItems) {
+        await supabase.rpc('create_sample_wardrobe_items');
+      }
+
+      toast.success('Wardrobe setup complete!');
+      navigate('/');
+    } catch (error: any) {
+      toast.error('Failed to setup wardrobe: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderStep1 = () => (
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardHeader className="text-center">
+        <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+          <Camera className="w-8 h-8 text-primary" />
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-6">
-      <div className="w-full max-w-2xl space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <div className="flex items-center justify-center gap-2">
-            <Sparkles className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold fashion-text-gradient">Welcome to MyDresser</h1>
+        <CardTitle>Let's Set Up Your Profile</CardTitle>
+        <CardDescription>
+          Tell us about yourself to personalize your fashion experience
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="flex justify-center">
+          <div className="relative">
+            <Avatar className="w-24 h-24">
+              <AvatarImage src={profileData.avatar_url} />
+              <AvatarFallback>
+                {profileData.full_name.split(' ').map(n => n[0]).join('').toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <Button 
+              size="icon" 
+              className="absolute -bottom-2 -right-2 rounded-full w-8 h-8"
+              onClick={() => toast.info('Avatar upload coming soon!')}
+            >
+              <Camera className="w-4 h-4" />
+            </Button>
           </div>
-          <p className="text-muted-foreground">Let's set up your fashion profile</p>
         </div>
 
-        {/* Progress indicator */}
-        <div className="flex items-center justify-center space-x-2">
-          {[1, 2, 3].map((stepNumber) => (
-            <div
-              key={stepNumber}
-              className={`w-3 h-3 rounded-full ${
-                stepNumber <= step ? "bg-primary" : "bg-muted"
-              }`}
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="name">Full Name</Label>
+            <Input
+              id="name"
+              value={profileData.full_name}
+              onChange={(e) => setProfileData(prev => ({ ...prev, full_name: e.target.value }))}
+              placeholder="Enter your full name"
             />
-          ))}
+          </div>
+
+          <div>
+            <Label htmlFor="bio">Bio</Label>
+            <Textarea
+              id="bio"
+              value={profileData.bio}
+              onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
+              placeholder="Tell us about your style or interests (optional)"
+              rows={3}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="location">Location</Label>
+            <Input
+              id="location"
+              value={profileData.location}
+              onChange={(e) => setProfileData(prev => ({ ...prev, location: e.target.value }))}
+              placeholder="City, Country (optional)"
+            />
+          </div>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {step === 1 && "Basic Information"}
-              {step === 2 && "Tell us about your style"}
-              {step === 3 && "Contact & Social"}
-            </CardTitle>
-            <CardDescription>
-              {step === 1 && "Let's start with the basics"}
-              {step === 2 && "Help us understand your fashion preferences"}
-              {step === 3 && "Connect with the fashion community (optional)"}
-            </CardDescription>
-          </CardHeader>
+        <Button 
+          onClick={handleProfileSubmit} 
+          className="w-full" 
+          disabled={loading || !profileData.full_name.trim()}
+        >
+          {loading ? 'Saving...' : 'Continue'}
+        </Button>
+      </CardContent>
+    </Card>
+  );
 
-          <CardContent className="space-y-6">
-            {/* Step 1: Basic Information */}
-            {step === 1 && (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="full_name">Full Name *</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input
-                      id="full_name"
-                      value={formData.full_name}
-                      onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                      placeholder="Enter your full name"
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="location">Location</Label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input
-                      id="location"
-                      value={formData.location}
-                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                      placeholder="City, Country"
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="avatar_url">Profile Picture URL</Label>
-                  <Input
-                    id="avatar_url"
-                    value={formData.avatar_url}
-                    onChange={(e) => setFormData({ ...formData, avatar_url: e.target.value })}
-                    placeholder="https://example.com/avatar.jpg"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Step 2: Style Bio */}
-            {step === 2 && (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="bio">Tell us about your style *</Label>
-                  <Textarea
-                    id="bio"
-                    value={formData.bio}
-                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                    placeholder="Describe your fashion style, favorite brands, occasions you dress for, or anything that represents your fashion identity..."
-                    rows={6}
-                  />
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="is_profile_public"
-                    checked={formData.is_profile_public}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_profile_public: checked })}
-                  />
-                  <Label htmlFor="is_profile_public">Make my profile public</Label>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Public profiles can be discovered by other users and help build the fashion community.
-                </p>
-              </div>
-            )}
-
-            {/* Step 3: Contact & Social */}
-            {step === 3 && (
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground mb-4">
-                  Connect your social profiles to share your style and discover others. All fields are optional.
-                </p>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">Contact Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input
-                      id="email"
-                      type="email"
-                      value={contactData.email}
-                      onChange={(e) => setContactData({ ...contactData, email: e.target.value })}
-                      placeholder="your.email@example.com"
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="instagram">Instagram</Label>
-                  <div className="relative">
-                    <Instagram className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input
-                      id="instagram"
-                      value={contactData.social_instagram}
-                      onChange={(e) => setContactData({ ...contactData, social_instagram: e.target.value })}
-                      placeholder="@yourusername"
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="facebook">Facebook</Label>
-                  <div className="relative">
-                    <Facebook className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input
-                      id="facebook"
-                      value={contactData.social_facebook}
-                      onChange={(e) => setContactData({ ...contactData, social_facebook: e.target.value })}
-                      placeholder="facebook.com/yourprofile"
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="tiktok">TikTok</Label>
-                  <Input
-                    id="tiktok"
-                    value={contactData.social_tiktok}
-                    onChange={(e) => setContactData({ ...contactData, social_tiktok: e.target.value })}
-                    placeholder="@yourtiktok"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Navigation buttons */}
-            <div className="flex justify-between pt-6">
-              <Button 
-                variant="outline" 
-                onClick={handleBack}
-                disabled={step === 1}
+  const renderStep2 = () => (
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardHeader className="text-center">
+        <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+          <Sparkles className="w-8 h-8 text-primary" />
+        </div>
+        <CardTitle>Your Style Preferences</CardTitle>
+        <CardDescription>
+          Help us understand your fashion taste for better recommendations
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div>
+          <Label>Favorite Colors</Label>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {colorOptions.map(color => (
+              <Badge
+                key={color}
+                variant={stylePreferences.favoriteColors.includes(color) ? "default" : "outline"}
+                className="cursor-pointer"
+                onClick={() => handleColorToggle(color)}
               >
-                Back
-              </Button>
-              
-              {step < 3 ? (
-                <Button 
-                  onClick={handleNext}
-                  disabled={
-                    (step === 1 && !canProceedStep1) ||
-                    (step === 2 && !canProceedStep2)
-                  }
-                >
-                  Next
-                </Button>
-              ) : (
-                <Button onClick={handleComplete} disabled={loading}>
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Complete Setup
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                {color}
+              </Badge>
+            ))}
+          </div>
+        </div>
 
-        <div className="text-center">
-          <Button variant="ghost" onClick={() => navigate("/")} className="text-sm">
-            Skip setup for now
+        <div>
+          <Label>Style Personality</Label>
+          <Select 
+            value={stylePreferences.stylePersonality} 
+            onValueChange={(value) => setStylePreferences(prev => ({ ...prev, stylePersonality: value }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Choose your style personality" />
+            </SelectTrigger>
+            <SelectContent>
+              {personalityOptions.map(personality => (
+                <SelectItem key={personality} value={personality.toLowerCase()}>
+                  {personality}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label>Preferred Brands</Label>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {brandOptions.map(brand => (
+              <Badge
+                key={brand}
+                variant={stylePreferences.preferredBrands.includes(brand) ? "default" : "outline"}
+                className="cursor-pointer"
+                onClick={() => handleBrandToggle(brand)}
+              >
+                {brand}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <Label>Budget Range</Label>
+          <Select 
+            value={stylePreferences.budgetRange} 
+            onValueChange={(value) => setStylePreferences(prev => ({ ...prev, budgetRange: value }))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select your typical budget range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="budget">Budget-friendly ($0-50)</SelectItem>
+              <SelectItem value="mid">Mid-range ($50-200)</SelectItem>
+              <SelectItem value="premium">Premium ($200-500)</SelectItem>
+              <SelectItem value="luxury">Luxury ($500+)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label>Shopping Sources</Label>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {sourceOptions.map(source => (
+              <Badge
+                key={source}
+                variant={stylePreferences.shoppingSources.includes(source) ? "default" : "outline"}
+                className="cursor-pointer"
+                onClick={() => handleSourceToggle(source)}
+              >
+                {source}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
+            Back
+          </Button>
+          <Button onClick={handleStyleSubmit} disabled={loading} className="flex-1">
+            {loading ? 'Saving...' : 'Continue'}
           </Button>
         </div>
+      </CardContent>
+    </Card>
+  );
+
+  const renderStep3 = () => (
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardHeader className="text-center">
+        <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+          <CheckCircle className="w-8 h-8 text-primary" />
+        </div>
+        <CardTitle>Setup Your Wardrobe</CardTitle>
+        <CardDescription>
+          Let's create your digital wardrobe to get started
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div>
+          <Label htmlFor="wardrobeName">Wardrobe Name</Label>
+          <Input
+            id="wardrobeName"
+            value={wardrobeSetup.wardrobeName}
+            onChange={(e) => setWardrobeSetup(prev => ({ ...prev, wardrobeName: e.target.value }))}
+            placeholder="Give your wardrobe a name"
+          />
+        </div>
+
+        <div>
+          <Label>Wardrobe Type</Label>
+          <Select 
+            value={wardrobeSetup.wardrobeType} 
+            onValueChange={(value) => setWardrobeSetup(prev => ({ ...prev, wardrobeType: value }))}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="closet">Closet</SelectItem>
+              <SelectItem value="dresser">Dresser</SelectItem>
+              <SelectItem value="armoire">Armoire</SelectItem>
+              <SelectItem value="walk-in">Walk-in Closet</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            id="createSample"
+            checked={wardrobeSetup.createSampleItems}
+            onChange={(e) => setWardrobeSetup(prev => ({ ...prev, createSampleItems: e.target.checked }))}
+            className="w-4 h-4"
+          />
+          <Label htmlFor="createSample" className="text-sm">
+            Add sample items to get started (recommended)
+          </Label>
+        </div>
+
+        <div className="p-4 bg-muted rounded-lg">
+          <p className="text-sm text-muted-foreground">
+            We'll create some sample wardrobe items to help you explore MyDresser's features. 
+            You can always delete or modify these later.
+          </p>
+        </div>
+
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={() => setStep(2)} className="flex-1">
+            Back
+          </Button>
+          <Button onClick={handleWardrobeSubmit} disabled={loading} className="flex-1">
+            {loading ? 'Setting up...' : 'Complete Setup'}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  return (
+    <div className="min-h-screen bg-background p-4 flex items-center justify-center">
+      <div className="w-full">
+        {/* Progress indicator */}
+        <div className="flex justify-center mb-8">
+          <div className="flex items-center space-x-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex items-center">
+                <div 
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                    step >= i ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                  }`}
+                >
+                  {i}
+                </div>
+                {i < 3 && (
+                  <div 
+                    className={`w-12 h-1 ml-2 ${
+                      step > i ? 'bg-primary' : 'bg-muted'
+                    }`}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {step === 1 && renderStep1()}
+        {step === 2 && renderStep2()}
+        {step === 3 && renderStep3()}
       </div>
     </div>
   );
