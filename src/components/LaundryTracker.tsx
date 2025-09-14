@@ -1,386 +1,448 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Plus, Shirt, Droplets, Clock, Settings, CheckCircle, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { useWardrobe } from '@/hooks/useWardrobe';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Shirt, 
+  Clock, 
+  Droplets, 
+  Thermometer, 
+  RotateCcw, 
+  CheckCircle, 
+  AlertCircle,
+  Plus,
+  Timer,
+  Play,
+  Pause,
+  Square
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
-interface LaundryBatch {
+interface LaundryItem {
   id: string;
-  user_id: string;
   name: string;
-  status: 'dirty' | 'washing' | 'drying' | 'clean' | 'completed';
-  started_at: string;
-  completed_at?: string | null;
-  notes?: string | null;
-  created_at: string;
-  updated_at: string;
+  category: string;
+  color: string;
+  fabric: string;
+  washTemp: 'cold' | 'warm' | 'hot';
+  dryMethod: 'air' | 'low' | 'medium' | 'high';
+  lastWashed: Date;
+  timesWorn: number;
+  maxWears: number;
+  status: 'clean' | 'dirty' | 'washing' | 'drying';
+  careInstructions: string[];
 }
 
-interface LaundrySchedule {
+interface LaundryLoad {
   id: string;
-  schedule_name: string;
-  frequency_days: number;
-  next_due_date: string;
-  auto_schedule: boolean;
+  items: LaundryItem[];
+  type: 'wash' | 'dry';
+  status: 'pending' | 'running' | 'completed';
+  startTime?: Date;
+  duration: number; // in minutes
+  temperature: string;
+  cycle: string;
 }
 
 const LaundryTracker = () => {
-  const { items } = useWardrobe();
+  const [laundryItems, setLaundryItems] = useState<LaundryItem[]>([]);
+  const [loads, setLoads] = useState<LaundryLoad[]>([]);
+  const [activeTab, setActiveTab] = useState('items');
+  const [runningTimers, setRunningTimers] = useState<{ [key: string]: number }>({});
   const { toast } = useToast();
-  const [batches, setBatches] = useState<LaundryBatch[]>([]);
-  const [schedules, setSchedules] = useState<LaundrySchedule[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchLaundryData();
+    // Load mock data
+    const mockItems: LaundryItem[] = [
+      {
+        id: '1',
+        name: 'White Cotton Shirt',
+        category: 'shirts',
+        color: 'white',
+        fabric: 'cotton',
+        washTemp: 'warm',
+        dryMethod: 'medium',
+        lastWashed: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+        timesWorn: 2,
+        maxWears: 3,
+        status: 'dirty',
+        careInstructions: ['Machine wash warm', 'Tumble dry medium', 'Iron if needed']
+      },
+      {
+        id: '2',
+        name: 'Blue Jeans',
+        category: 'pants',
+        color: 'blue',
+        fabric: 'denim',
+        washTemp: 'cold',
+        dryMethod: 'air',
+        lastWashed: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+        timesWorn: 1,
+        maxWears: 5,
+        status: 'clean',
+        careInstructions: ['Machine wash cold', 'Air dry', 'Do not bleach']
+      }
+    ];
+    setLaundryItems(mockItems);
   }, []);
 
-  const fetchLaundryData = async () => {
-    try {
-      setLoading(true);
-      
-      // Fetch laundry batches
-      const { data: batchData, error: batchError } = await supabase
-        .from('laundry_batches')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (batchError) throw batchError;
-
-      // Fetch laundry schedules
-      const { data: scheduleData, error: scheduleError } = await supabase
-        .from('laundry_schedules')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (scheduleError) throw scheduleError;
-
-      setBatches((batchData || []) as LaundryBatch[]);
-      setSchedules(scheduleData || []);
-    } catch (error) {
-      console.error('Error fetching laundry data:', error);
-      toast({
-        title: "Error loading laundry data",
-        description: "Please try again.",
-        variant: "destructive",
+  useEffect(() => {
+    // Update timers every second
+    const interval = setInterval(() => {
+      setRunningTimers(prev => {
+        const updated = { ...prev };
+        Object.keys(updated).forEach(loadId => {
+          if (updated[loadId] > 0) {
+            updated[loadId] -= 1;
+          } else {
+            delete updated[loadId];
+            // Load completed
+            setLoads(currentLoads => 
+              currentLoads.map(load => 
+                load.id === loadId 
+                  ? { ...load, status: 'completed' as const }
+                  : load
+              )
+            );
+            toast({
+              title: 'Laundry Complete!',
+              description: 'Your laundry cycle has finished.',
+            });
+          }
+        });
+        return updated;
       });
-    } finally {
-      setLoading(false);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [toast]);
+
+  const needsWashing = laundryItems.filter(item => 
+    item.status === 'dirty' || item.timesWorn >= item.maxWears
+  );
+
+  const formatTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
+    return `${minutes}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const createNewBatch = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const newBatch = {
-        user_id: user.id,
-        name: `Laundry Batch ${new Date().toLocaleDateString()}`,
-        status: 'dirty'
-      };
-
-      const { data, error } = await supabase
-        .from('laundry_batches')
-        .insert(newBatch)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      setBatches(prev => [data as LaundryBatch, ...prev]);
-      toast({
-        title: "New laundry batch created",
-        description: "You can now add items to this batch.",
-      });
-    } catch (error) {
-      console.error('Error creating batch:', error);
-      toast({
-        title: "Error creating batch",
-        description: "Please try again.",
-        variant: "destructive",
-      });
-    }
+  const startLoad = (load: LaundryLoad) => {
+    const updatedLoad = {
+      ...load,
+      status: 'running' as const,
+      startTime: new Date()
+    };
+    
+    setLoads(prev => prev.map(l => l.id === load.id ? updatedLoad : l));
+    setRunningTimers(prev => ({ ...prev, [load.id]: load.duration * 60 }));
+    
+    toast({
+      title: 'Load Started',
+      description: `${load.type === 'wash' ? 'Washing' : 'Drying'} cycle started`
+    });
   };
 
-  const updateBatchStatus = async (batchId: string, status: string) => {
-    try {
-      const updates: any = { status };
-      if (status === 'completed') {
-        updates.completed_at = new Date().toISOString();
-      }
-
-      const { error } = await supabase
-        .from('laundry_batches')
-        .update(updates)
-        .eq('id', batchId);
-
-      if (error) throw error;
-
-      setBatches(prev => 
-        prev.map(batch => 
-          batch.id === batchId 
-            ? { ...batch, status: status as LaundryBatch['status'], completed_at: updates.completed_at }
-            : batch
-        )
-      );
-
-      toast({
-        title: "Batch status updated",
-        description: `Batch marked as ${status}.`,
-      });
-    } catch (error) {
-      console.error('Error updating batch:', error);
-      toast({
-        title: "Error updating batch",
-        description: "Please try again.",
-        variant: "destructive",
-      });
-    }
+  const createNewLoad = () => {
+    const newLoad: LaundryLoad = {
+      id: Date.now().toString(),
+      items: needsWashing.slice(0, 5), // Take first 5 items
+      type: 'wash',
+      status: 'pending',
+      duration: 45, // 45 minutes
+      temperature: 'warm',
+      cycle: 'normal'
+    };
+    
+    setLoads(prev => [...prev, newLoad]);
+    toast({
+      title: 'Load Created',
+      description: 'New wash load ready to start'
+    });
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: LaundryItem['status']) => {
     switch (status) {
+      case 'clean': return 'bg-green-500';
       case 'dirty': return 'bg-red-500';
       case 'washing': return 'bg-blue-500';
       case 'drying': return 'bg-yellow-500';
-      case 'clean': return 'bg-green-500';
-      case 'completed': return 'bg-gray-500';
-      default: return 'bg-muted';
+      default: return 'bg-gray-500';
     }
   };
 
-  const getStatusProgress = (status: string) => {
-    switch (status) {
-      case 'dirty': return 10;
-      case 'washing': return 40;
-      case 'drying': return 70;
-      case 'clean': return 90;
-      case 'completed': return 100;
-      default: return 0;
-    }
+  const getWearProgress = (item: LaundryItem) => {
+    return (item.timesWorn / item.maxWears) * 100;
   };
-
-  const dirtyItems = items.filter(item => 
-    item.tags && item.tags.includes('dirty')
-  );
-
-  if (loading) {
-    return (
-      <div className="p-6 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading laundry data...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
-      {/* Header */}
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Laundry Tracker</h1>
-          <p className="text-muted-foreground">Manage your laundry batches and schedules</p>
+          <h2 className="text-2xl font-bold">Laundry Tracker</h2>
+          <p className="text-muted-foreground">Keep track of your laundry and care schedules</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm">
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
-          </Button>
-          <Button onClick={createNewBatch}>
-            <Plus className="mr-2 h-4 w-4" />
-            New Batch
-          </Button>
-        </div>
+        <Button onClick={createNewLoad} className="flex items-center gap-2">
+          <Plus className="w-4 h-4" />
+          New Load
+        </Button>
       </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <Shirt className="h-4 w-4 text-red-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Dirty Items</p>
-                <p className="text-2xl font-bold">{dirtyItems.length}</p>
-              </div>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="p-2 bg-red-100 rounded-lg">
+              <Shirt className="w-5 h-5 text-red-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{needsWashing.length}</p>
+              <p className="text-sm text-muted-foreground">Need Washing</p>
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Droplets className="h-4 w-4 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Active Batches</p>
-                <p className="text-2xl font-bold">
-                  {batches.filter(b => b.status !== 'completed').length}
-                </p>
-              </div>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <Droplets className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{loads.filter(l => l.status === 'running').length}</p>
+              <p className="text-sm text-muted-foreground">Running</p>
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Completed Today</p>
-                <p className="text-2xl font-bold">
-                  {batches.filter(b => 
-                    b.status === 'completed' && 
-                    b.completed_at && 
-                    new Date(b.completed_at).toDateString() === new Date().toDateString()
-                  ).length}
-                </p>
-              </div>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="p-2 bg-green-100 rounded-lg">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">
+                {laundryItems.filter(i => i.status === 'clean').length}
+              </p>
+              <p className="text-sm text-muted-foreground">Clean Items</p>
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <Clock className="h-4 w-4 text-yellow-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Next Schedule</p>
-                <p className="text-sm font-medium">
-                  {schedules.length > 0 
-                    ? new Date(schedules[0].next_due_date).toLocaleDateString()
-                    : 'None set'
-                  }
-                </p>
-              </div>
+          <CardContent className="flex items-center gap-3 p-4">
+            <div className="p-2 bg-yellow-100 rounded-lg">
+              <Timer className="w-5 h-5 text-yellow-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{Object.keys(runningTimers).length}</p>
+              <p className="text-sm text-muted-foreground">Active Timers</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Active Batches */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Active Batches</h2>
-        
-        {batches.filter(batch => batch.status !== 'completed').length === 0 ? (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <Shirt className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No Active Batches</h3>
-              <p className="text-muted-foreground mb-4">
-                Create a new laundry batch to get started
-              </p>
-              <Button onClick={createNewBatch}>
-                <Plus className="mr-2 h-4 w-4" />
-                Create First Batch
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {batches.filter(batch => batch.status !== 'completed').map((batch) => (
-              <Card key={batch.id}>
-                <CardHeader className="pb-3">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="items">Items</TabsTrigger>
+          <TabsTrigger value="loads">Active Loads</TabsTrigger>
+          <TabsTrigger value="schedule">Schedule</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="items" className="space-y-4">
+          <div className="grid gap-4">
+            {laundryItems.map((item) => (
+              <Card key={item.id}>
+                <CardContent className="p-4">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{batch.name}</CardTitle>
-                    <Badge className={getStatusColor(batch.status)}>
-                      {batch.status}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span>Progress</span>
-                      <span>{getStatusProgress(batch.status)}%</span>
+                    <div className="flex items-center gap-3">
+                      <div className={`w-3 h-3 rounded-full ${getStatusColor(item.status)}`} />
+                      <div>
+                        <h3 className="font-medium">{item.name}</h3>
+                        <p className="text-sm text-muted-foreground capitalize">
+                          {item.category} • {item.fabric} • {item.color}
+                        </p>
+                      </div>
                     </div>
-                    <Progress value={getStatusProgress(batch.status)} />
+                    <div className="text-right">
+                      <Badge variant={item.status === 'clean' ? 'default' : 'secondary'}>
+                        {item.status}
+                      </Badge>
+                      <div className="mt-1 space-y-1">
+                        <p className="text-xs text-muted-foreground">
+                          Worn {item.timesWorn}/{item.maxWears} times
+                        </p>
+                        <Progress 
+                          value={getWearProgress(item)} 
+                          className="w-20 h-1"
+                        />
+                      </div>
+                    </div>
                   </div>
                   
-                  <div className="flex gap-2">
-                    {batch.status === 'dirty' && (
-                      <Button 
-                        size="sm" 
-                        onClick={() => updateBatchStatus(batch.id, 'washing')}
-                      >
-                        Start Washing
-                      </Button>
-                    )}
-                    {batch.status === 'washing' && (
-                      <Button 
-                        size="sm" 
-                        onClick={() => updateBatchStatus(batch.id, 'drying')}
-                      >
-                        Start Drying
-                      </Button>
-                    )}
-                    {batch.status === 'drying' && (
-                      <Button 
-                        size="sm" 
-                        onClick={() => updateBatchStatus(batch.id, 'clean')}
-                      >
-                        Mark Clean
-                      </Button>
-                    )}
-                    {batch.status === 'clean' && (
-                      <Button 
-                        size="sm" 
-                        onClick={() => updateBatchStatus(batch.id, 'completed')}
-                      >
-                        Complete
-                      </Button>
-                    )}
+                  <div className="mt-3 flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Thermometer className="w-3 h-3" />
+                      <span className="capitalize">{item.washTemp}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <RotateCcw className="w-3 h-3" />
+                      <span className="capitalize">{item.dryMethod} dry</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      <span>
+                        Last washed {Math.floor((Date.now() - item.lastWashed.getTime()) / (1000 * 60 * 60 * 24))} days ago
+                      </span>
+                    </div>
                   </div>
+                  
+                  {item.careInstructions.length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-xs font-medium text-muted-foreground mb-1">Care Instructions:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {item.careInstructions.map((instruction, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {instruction}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
           </div>
-        )}
-      </div>
+        </TabsContent>
 
-      {/* Dirty Items Queue */}
-      {dirtyItems.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Items Needing Wash</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {dirtyItems.slice(0, 12).map((item) => (
-              <Card key={item.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                <div className="aspect-square bg-muted overflow-hidden">
-                  {item.photos && typeof item.photos === 'object' && item.photos.main ? (
-                    <img
-                      src={item.photos.main}
-                      alt={item.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Shirt className="h-8 w-8 text-muted-foreground" />
+        <TabsContent value="loads" className="space-y-4">
+          {loads.length === 0 ? (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <Droplets className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="font-medium mb-2">No Active Loads</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Create a new load to start tracking your laundry
+                </p>
+                <Button onClick={createNewLoad}>Create Load</Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid gap-4">
+              {loads.map((load) => (
+                <Card key={load.id}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        {load.type === 'wash' ? <Droplets className="w-5 h-5" /> : <Thermometer className="w-5 h-5" />}
+                        {load.type === 'wash' ? 'Wash' : 'Dry'} Load
+                      </CardTitle>
+                      <Badge 
+                        variant={
+                          load.status === 'running' ? 'default' : 
+                          load.status === 'completed' ? 'secondary' : 'outline'
+                        }
+                      >
+                        {load.status}
+                      </Badge>
                     </div>
-                  )}
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm text-muted-foreground">
+                          {load.items.length} items • {load.cycle} cycle • {load.temperature}
+                        </div>
+                        {runningTimers[load.id] && (
+                          <div className="text-lg font-mono">
+                            {formatTime(runningTimers[load.id])}
+                          </div>
+                        )}
+                      </div>
+
+                      {load.status === 'running' && runningTimers[load.id] && (
+                        <Progress 
+                          value={((load.duration * 60 - runningTimers[load.id]) / (load.duration * 60)) * 100}
+                        />
+                      )}
+
+                      <div className="flex flex-wrap gap-2">
+                        {load.items.slice(0, 3).map((item) => (
+                          <Badge key={item.id} variant="outline" className="text-xs">
+                            {item.name}
+                          </Badge>
+                        ))}
+                        {load.items.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{load.items.length - 3} more
+                          </Badge>
+                        )}
+                      </div>
+
+                      <div className="flex gap-2">
+                        {load.status === 'pending' && (
+                          <Button size="sm" onClick={() => startLoad(load)}>
+                            <Play className="w-4 h-4 mr-1" />
+                            Start
+                          </Button>
+                        )}
+                        {load.status === 'running' && (
+                          <Button size="sm" variant="outline">
+                            <Pause className="w-4 h-4 mr-1" />
+                            Pause
+                          </Button>
+                        )}
+                        {load.status === 'completed' && (
+                          <Button size="sm" variant="outline">
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Mark Items Clean
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="schedule" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Laundry Schedule</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                  <AlertCircle className="w-5 h-5 text-yellow-500" />
+                  <div>
+                    <p className="font-medium">Laundry Day Reminder</p>
+                    <p className="text-sm text-muted-foreground">Every Sunday at 9:00 AM</p>
+                  </div>
                 </div>
-                <div className="p-2">
-                  <h3 className="text-sm font-medium truncate">{item.name}</h3>
-                  <p className="text-xs text-muted-foreground truncate">{item.brand}</p>
+                
+                <div className="space-y-2">
+                  <h4 className="font-medium">Upcoming Items to Wash</h4>
+                  {needsWashing.slice(0, 5).map((item) => (
+                    <div key={item.id} className="flex items-center justify-between p-2 border rounded">
+                      <span className="text-sm">{item.name}</span>
+                      <Badge variant="outline" className="text-xs">
+                        {item.timesWorn >= item.maxWears ? 'Needs wash' : 'Almost due'}
+                      </Badge>
+                    </div>
+                  ))}
                 </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
