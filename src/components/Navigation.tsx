@@ -1,6 +1,7 @@
-import { Home, ShoppingBag, Shirt, Plus, User } from "lucide-react";
+import { Home, ShoppingBag, Shirt, Plus, User, BarChart3, Sparkles, Droplets } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useProfile } from "@/hooks/useProfile";
 
 interface NavigationProps {
   activeTab?: string;
@@ -9,19 +10,14 @@ interface NavigationProps {
 
 const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   const location = useLocation();
+  const { profile } = useProfile();
   
-  const navItems = [
+  const baseNavItems = [
     { 
       name: "Home", 
       href: "/", 
       icon: Home,
       id: "home"
-    },
-    { 
-      name: "Market", 
-      href: "/market", 
-      icon: ShoppingBag,
-      id: "market"
     },
     { 
       name: "Wardrobe", 
@@ -36,12 +32,34 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
       id: "add"
     },
     { 
+      name: "Market", 
+      href: "/marketplace", 
+      icon: ShoppingBag,
+      id: "market"
+    },
+    { 
       name: "Account", 
       href: "/account", 
       icon: User,
       id: "account"
     }
   ];
+
+  // Add advanced features for professional/merchant users
+  const advancedNavItems = [
+    ...baseNavItems.slice(0, 4), // Keep first 4 items
+    {
+      name: "Analytics",
+      href: "/analytics",
+      icon: BarChart3,
+      id: "analytics"
+    },
+    baseNavItems[4] // Add Account back at the end
+  ];
+
+  const navItems = (profile?.role === 'professional' || profile?.role === 'merchant' || profile?.role === 'admin') 
+    ? advancedNavItems 
+    : baseNavItems;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border px-4 py-2 z-50">

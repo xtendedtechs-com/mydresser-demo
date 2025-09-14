@@ -12,6 +12,7 @@ import WardrobeItemDetail from "@/pages/WardrobeItemDetail";
 import ProfileSetup from "@/pages/ProfileSetup";
 import MerchantTerminal from "@/pages/MerchantTerminal";
 import MerchantPage from "@/pages/MerchantPage";
+import Auth from "@/pages/Auth";
 import NotFound from "../pages/NotFound";
 import EnhancedWardrobeManager from "@/components/EnhancedWardrobeManager";
 import EnhancedMarketplace from "@/components/EnhancedMarketplace";
@@ -44,6 +45,7 @@ const AppContent = () => {
         <Route path="/item/:id" element={<ItemDetail />} />
         <Route path="/wardrobe/item/:id" element={<WardrobeItemDetail />} />
         <Route path="/profile-setup" element={<ProfileSetup />} />
+        <Route path="/auth" element={<Auth />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       {/* Only show navigation for non-merchant routes */}
