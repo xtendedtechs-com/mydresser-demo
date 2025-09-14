@@ -138,15 +138,56 @@ const MerchantTerminal = () => {
     { id: '2', itemName: 'New Age Ripped Jeans', currentStock: 1, threshold: 5, severity: 'critical' }
   ]);
 
-  const { items: inventoryItems, loading } = useMerchantItems();
+  const { items: inventoryItems, loading, refetch } = useMerchantItems();
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  // Additional state for functionality
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [editingItem, setEditingItem] = useState<MerchantItem | null>(null);
+  const [viewFilter, setViewFilter] = useState<'all' | 'in-stock' | 'low-stock' | 'out-of-stock'>('all');
+  const [sortBy, setSortBy] = useState<'name' | 'price' | 'stock' | 'created_at'>('created_at');
 
-  const filteredInventory = inventoryItems.filter(item =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter and sort inventory
+  const getFilteredInventory = () => {
+    let filtered = inventoryItems.filter(item =>
+      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    // Apply stock filter
+    switch (viewFilter) {
+      case 'in-stock':
+        filtered = filtered.filter(item => item.stock_quantity > 5);
+        break;
+      case 'low-stock':
+        filtered = filtered.filter(item => item.stock_quantity > 0 && item.stock_quantity <= 5);
+        break;
+      case 'out-of-stock':
+        filtered = filtered.filter(item => item.stock_quantity === 0);
+        break;
+    }
+
+    // Sort items
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return a.name.localeCompare(b.name);
+        case 'price':
+          return (a.price || 0) - (b.price || 0);
+        case 'stock':
+          return (a.stock_quantity || 0) - (b.stock_quantity || 0);
+        case 'created_at':
+        default:
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+    });
+
+    return filtered;
+  };
+
+  const filteredInventory = getFilteredInventory();
 
   const subtotal = checkoutItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const tax = subtotal * 0.17; // 17% tax
@@ -250,6 +291,93 @@ const MerchantTerminal = () => {
         variant: 'destructive'
       });
     }
+  };
+
+  const handleDeleteItem = async (itemId: string) => {
+    try {
+      const { error } = await supabase
+        .from('merchant_items')
+        .delete()
+        .eq('id', itemId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Item Deleted',
+        description: 'Item has been removed from inventory'
+      });
+      
+      refetch();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleToggleFeatured = async (item: MerchantItem) => {
+    try {
+      const { error } = await supabase
+        .from('merchant_items')
+        .update({ is_featured: !item.is_featured })
+        .eq('id', item.id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Item Updated',
+        description: `Item ${item.is_featured ? 'removed from' : 'added to'} featured items`
+      });
+      
+      refetch();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleUpdateStock = async (itemId: string, newStock: number) => {
+    try {
+      const { error } = await supabase
+        .from('merchant_items')
+        .update({ stock_quantity: newStock })
+        .eq('id', itemId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Stock Updated',
+        description: 'Inventory level has been updated'
+      });
+      
+      refetch();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleItemAdded = () => {
+    refetch();
+  };
+
+  const handleItemUpdated = () => {
+    refetch();
+    setEditingItem(null);
+  };
+
+  const getStockStatus = (quantity: number) => {
+    if (quantity === 0) return { status: 'Out of Stock', color: 'text-red-600', bg: 'bg-red-50' };
+    if (quantity <= 5) return { status: 'Low Stock', color: 'text-yellow-600', bg: 'bg-yellow-50' };
+    return { status: 'In Stock', color: 'text-green-600', bg: 'bg-green-50' };
   };
 
   return (
@@ -1286,6 +1414,14 @@ const MerchantTerminal = () => {
           )}
         </main>
       </div>
+
+      {/* Edit Item Dialog */}
+      <EditItemDialog
+        item={editingItem}
+        open={!!editingItem}
+        onClose={() => setEditingItem(null)}
+        onItemUpdated={handleItemUpdated}
+      />
     </div>
   );
 };
