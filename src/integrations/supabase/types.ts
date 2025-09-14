@@ -1355,6 +1355,14 @@ export type Database = {
         Args: { accessed_fields: string[]; merchant_profile_id: string }
         Returns: boolean
       }
+      log_sensitive_data_access: {
+        Args: {
+          operation: string
+          sensitive_fields: string[]
+          table_name: string
+        }
+        Returns: undefined
+      }
       log_suspicious_contact_access: {
         Args: { access_type: string; attempted_user_id: string; reason: string }
         Returns: undefined
