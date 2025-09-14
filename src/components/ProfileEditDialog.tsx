@@ -11,7 +11,8 @@ import { useProfile, UserProfile } from "@/hooks/useProfile";
 import { useContactInfo } from "@/hooks/useContactInfo";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, User, Mail, MapPin, Instagram, Facebook, Camera, Upload } from "lucide-react";
+import { Loader2, User, Mail, MapPin, Instagram, Facebook, Camera, Upload, Shield, Eye, EyeOff } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ProfileEditDialogProps {
   open: boolean;
@@ -20,7 +21,7 @@ interface ProfileEditDialogProps {
 
 const ProfileEditDialog = ({ open, onOpenChange }: ProfileEditDialogProps) => {
   const { profile, updateProfile } = useProfile();
-  const { contactInfo, updateContactInfo } = useContactInfo();
+  const { contactInfo, updateContactInfo, maskSensitiveData, toggleDataMasking } = useContactInfo();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -255,7 +256,34 @@ const ProfileEditDialog = ({ open, onOpenChange }: ProfileEditDialogProps) => {
 
           {/* Contact Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Contact Information</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Contact Information</h3>
+              <div className="flex items-center space-x-2">
+                <Shield className="w-4 h-4 text-green-600" />
+                <span className="text-xs text-muted-foreground">Encrypted</span>
+              </div>
+            </div>
+            
+            <Alert>
+              <Shield className="h-4 w-4" />
+              <AlertDescription>
+                Your contact information is encrypted and protected by rate limiting. Only you can access this data.
+                {maskSensitiveData && " Data is currently masked for privacy."}
+              </AlertDescription>
+            </Alert>
+
+            <div className="flex items-center space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={toggleDataMasking}
+                className="flex items-center space-x-2"
+              >
+                {maskSensitiveData ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                <span>{maskSensitiveData ? 'Show Real Data' : 'Mask Data'}</span>
+              </Button>
+            </div>
             
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -268,8 +296,19 @@ const ProfileEditDialog = ({ open, onOpenChange }: ProfileEditDialogProps) => {
                   onChange={(e) => setContactData({ ...contactData, email: e.target.value })}
                   placeholder="your.email@example.com"
                   className="pl-10"
+                  disabled={maskSensitiveData}
                 />
+                {maskSensitiveData && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <Shield className="w-4 h-4 text-amber-600" />
+                  </div>
+                )}
               </div>
+              {maskSensitiveData && (
+                <p className="text-xs text-muted-foreground">
+                  Data is masked for privacy. Toggle visibility to edit.
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -282,7 +321,13 @@ const ProfileEditDialog = ({ open, onOpenChange }: ProfileEditDialogProps) => {
                   onChange={(e) => setContactData({ ...contactData, social_instagram: e.target.value })}
                   placeholder="@yourusername"
                   className="pl-10"
+                  disabled={maskSensitiveData}
                 />
+                {maskSensitiveData && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <Shield className="w-4 h-4 text-amber-600" />
+                  </div>
+                )}
               </div>
             </div>
 
@@ -296,18 +341,32 @@ const ProfileEditDialog = ({ open, onOpenChange }: ProfileEditDialogProps) => {
                   onChange={(e) => setContactData({ ...contactData, social_facebook: e.target.value })}
                   placeholder="facebook.com/yourprofile"
                   className="pl-10"
+                  disabled={maskSensitiveData}
                 />
+                {maskSensitiveData && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <Shield className="w-4 h-4 text-amber-600" />
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="tiktok">TikTok</Label>
-              <Input
-                id="tiktok"
-                value={contactData.social_tiktok}
-                onChange={(e) => setContactData({ ...contactData, social_tiktok: e.target.value })}
-                placeholder="@yourtiktok"
-              />
+              <div className="relative">
+                <Input
+                  id="tiktok"
+                  value={contactData.social_tiktok}
+                  onChange={(e) => setContactData({ ...contactData, social_tiktok: e.target.value })}
+                  placeholder="@yourtiktok"
+                  disabled={maskSensitiveData}
+                />
+                {maskSensitiveData && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <Shield className="w-4 h-4 text-amber-600" />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
