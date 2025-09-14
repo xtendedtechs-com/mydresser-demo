@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -18,9 +18,10 @@ import EnhancedThemeSelector from './EnhancedThemeSelector';
 interface SettingsDialogProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  initialTabType?: string;
 }
 
-const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
+const SettingsDialog = ({ open, onOpenChange, initialTabType }: SettingsDialogProps) => {
   const { profile, updateProfile } = useProfile();
   const { preferences, updatePreferences, loading } = useUserPreferences();
   const { toast } = useToast();
@@ -31,6 +32,28 @@ const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     location: profile?.location || '',
     avatar_url: profile?.avatar_url || ''
   });
+
+  const [tab, setTab] = useState<'profile'|'notifications'|'privacy'|'appearance'|'accessibility'|'preferences'>('profile');
+
+  const mapTypeToTab = (type?: string): 'profile'|'notifications'|'privacy'|'appearance'|'accessibility'|'preferences' => {
+    switch (type) {
+      case 'theme':
+        return 'appearance';
+      case 'privacy':
+        return 'privacy';
+      case 'notifications':
+        return 'notifications';
+      case 'accessibility':
+        return 'accessibility';
+      case 'behavior':
+      case 'general':
+      case 'preferences':
+        return 'preferences';
+      default:
+        return 'profile';
+    }
+  };
+
 
   const updateProfileField = (key: string, value: any) => {
     setLocalProfile(prev => ({ ...prev, [key]: value }));
@@ -56,6 +79,10 @@ const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
     await saveProfile();
   };
 
+  useEffect(() => {
+    setTab(mapTypeToTab(initialTabType));
+  }, [initialTabType, open]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
@@ -64,9 +91,10 @@ const SettingsDialog = ({ open, onOpenChange }: SettingsDialogProps) => {
             <Settings className="w-5 h-5" />
             Settings
           </DialogTitle>
+          <p className="text-sm text-muted-foreground">Manage your profile, privacy, notifications, theme, accessibility, and app preferences.</p>
         </DialogHeader>
 
-        <Tabs defaultValue="profile" className="space-y-4">
+        <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="space-y-4">
           <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="profile" className="flex items-center gap-1">
               <User className="w-4 h-4" />

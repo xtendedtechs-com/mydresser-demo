@@ -333,6 +333,7 @@ const Account = () => {
       <SettingsDialog
         open={settingsDialogOpen}
         onOpenChange={setSettingsDialogOpen}
+        initialTabType={currentSetting.type}
       />
       <ServiceSettingsDialog
         open={serviceDialogOpen}
