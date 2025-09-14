@@ -113,10 +113,7 @@ const MerchantTerminal = () => {
   const { items: inventoryItems, loading, refetch } = useMerchantItems();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { orders: realOrders, loading: ordersLoading, createOrder, updateOrderStatus, updateTrackingNumber } = useOrders();
-  
-  // Use real orders from database
-  const orders = realOrders;
+  const { orders, loading: ordersLoading, createOrder, updateOrderStatus, updateTrackingNumber } = useOrders();
   
   // Check authentication on component mount
   useEffect(() => {
