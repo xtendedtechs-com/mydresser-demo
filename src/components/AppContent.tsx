@@ -10,6 +10,7 @@ import ItemDetail from "@/pages/ItemDetail";
 import WardrobeItemDetail from "@/pages/WardrobeItemDetail";
 import ProfileSetup from "@/pages/ProfileSetup";
 import MerchantTerminal from "@/pages/MerchantTerminal";
+import MerchantPage from "@/pages/MerchantPage";
 import NotFound from "../pages/NotFound";
 import EnhancedWardrobeManager from "@/components/EnhancedWardrobeManager";
 import EnhancedMarketplace from "@/components/EnhancedMarketplace";
@@ -30,6 +31,7 @@ const AppContent = () => {
         <Route path="/marketplace" element={<EnhancedMarketplace />} />
         <Route path="/add" element={<Add />} />
         <Route path="/merchant-terminal" element={<MerchantTerminal />} />
+        <Route path="/merchant/:id" element={<MerchantPage />} />
         <Route path="/smart-matcher" element={<SmartOutfitMatcher />} />
         <Route path="/account" element={<Account />} />
         <Route path="/item/:id" element={<ItemDetail />} />
