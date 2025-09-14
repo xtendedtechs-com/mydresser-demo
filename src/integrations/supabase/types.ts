@@ -1271,6 +1271,16 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_recent_contact_security_incidents: {
+        Args: { hours_back?: number }
+        Returns: {
+          action: string
+          failure_reason: string
+          incident_count: number
+          incident_time: string
+          user_id: string
+        }[]
+      }
       get_user_contact_info: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -1324,6 +1334,14 @@ export type Database = {
         }
         Returns: Json
       }
+      test_contact_info_security: {
+        Args: { test_user_id?: string }
+        Returns: {
+          details: string
+          result: boolean
+          test_name: string
+        }[]
+      }
       update_contact_info_secure: {
         Args: {
           new_email?: string
@@ -1357,6 +1375,10 @@ export type Database = {
         Returns: string
       }
       validate_user_session: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      validate_user_session_robust: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
