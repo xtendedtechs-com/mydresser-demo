@@ -16,7 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 const ProfileSetup = () => {
   const navigate = useNavigate();
-  const { profile, updateProfile } = useProfile();
+  const { user, profile, updateProfile } = useProfile();
   const { } = useWardrobe();
   
   const [step, setStep] = useState(1);
@@ -102,11 +102,17 @@ const ProfileSetup = () => {
     try {
       setLoading(true);
       
+      // Use user.id instead of profile?.user_id for authenticated user
+      const userId = user?.id;
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
+      
       // Save style preferences to user_preferences table
       const { error } = await supabase
         .from('user_preferences')
         .upsert({
-          user_id: profile?.user_id,
+          user_id: userId,
           suggestion_settings: {
             favoriteColors: stylePreferences.favoriteColors,
             stylePersonality: stylePreferences.stylePersonality,
@@ -132,10 +138,15 @@ const ProfileSetup = () => {
       setLoading(true);
 
       // Create initial wardrobe
+      const userId = user?.id;
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
+      
       const { error: wardrobeError } = await supabase
         .from('wardrobes')
         .insert({
-          user_id: profile?.user_id,
+          user_id: userId,
           name: wardrobeSetup.wardrobeName,
           type: wardrobeSetup.wardrobeType
         });
