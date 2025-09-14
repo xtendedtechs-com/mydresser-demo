@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { EditItemDialog } from '@/components/EditItemDialog';
+import { AddItemDialog } from '@/components/AddItemDialog';
 import { 
   Store,
   Package,
@@ -43,7 +45,7 @@ import {
   LogOut
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useMerchantItems } from '@/hooks/useMerchantItems';
+import { useMerchantItems, type MerchantItem } from '@/hooks/useMerchantItems';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 
