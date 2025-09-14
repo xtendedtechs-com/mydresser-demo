@@ -1143,6 +1143,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      create_invitation_admin: {
+        Args: { invitation_email: string; invited_by_admin?: string }
+        Returns: Json
+      }
       create_sample_wardrobe_items: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -1313,6 +1317,18 @@ export type Database = {
         }
         Returns: string
       }
+      list_invitations_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string
+          token: string
+          used_at: string
+        }[]
+      }
       log_merchant_sensitive_access: {
         Args: { accessed_fields: string[]; merchant_profile_id: string }
         Returns: boolean
@@ -1324,6 +1340,10 @@ export type Database = {
       mask_contact_data: {
         Args: { data_text: string; mask_type?: string }
         Returns: string
+      }
+      revoke_invitation_admin: {
+        Args: { invitation_token: string }
+        Returns: boolean
       }
       setup_user_mfa: {
         Args: {
