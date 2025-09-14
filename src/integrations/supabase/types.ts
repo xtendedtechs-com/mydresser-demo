@@ -501,6 +501,170 @@ export type Database = {
         }
         Relationships: []
       }
+      order_items: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          merchant_item_id: string | null
+          name: string
+          order_id: string
+          price: number
+          quantity: number
+          size: string | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          merchant_item_id?: string | null
+          name: string
+          order_id: string
+          price: number
+          quantity?: number
+          size?: string | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          merchant_item_id?: string | null
+          name?: string
+          order_id?: string
+          price?: number
+          quantity?: number
+          size?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_merchant_item_id_fkey"
+            columns: ["merchant_item_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_status_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          id: string
+          new_status: string
+          notes: string | null
+          order_id: string
+          previous_status: string | null
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_status: string
+          notes?: string | null
+          order_id: string
+          previous_status?: string | null
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_status?: string
+          notes?: string | null
+          order_id?: string
+          previous_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_status_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          billing_address: Json | null
+          created_at: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string | null
+          discount_amount: number
+          id: string
+          items: Json
+          merchant_id: string
+          notes: string | null
+          payment_method: string | null
+          payment_status: string
+          shipping_address: Json | null
+          shipping_amount: number
+          status: string
+          subtotal: number
+          tax_amount: number
+          total_amount: number
+          tracking_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          billing_address?: Json | null
+          created_at?: string
+          customer_email: string
+          customer_name: string
+          customer_phone?: string | null
+          discount_amount?: number
+          id?: string
+          items: Json
+          merchant_id: string
+          notes?: string | null
+          payment_method?: string | null
+          payment_status?: string
+          shipping_address?: Json | null
+          shipping_amount?: number
+          status?: string
+          subtotal?: number
+          tax_amount?: number
+          total_amount?: number
+          tracking_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          billing_address?: Json | null
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string | null
+          discount_amount?: number
+          id?: string
+          items?: Json
+          merchant_id?: string
+          notes?: string | null
+          payment_method?: string | null
+          payment_status?: string
+          shipping_address?: Json | null
+          shipping_amount?: number
+          status?: string
+          subtotal?: number
+          tax_amount?: number
+          total_amount?: number
+          tracking_number?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       outfit_items: {
         Row: {
           created_at: string
