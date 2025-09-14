@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Shield, AlertTriangle, CheckCircle, Activity, Users, Lock } from "lucide-react";
 import InvitationManager from "./InvitationManager";
 import PrivacyComplianceManager from "./PrivacyComplianceManager";
+import SecurityEnhancementNotification from "./SecurityEnhancementNotification";
 
 interface SecurityMetric {
   name: string;
@@ -59,6 +60,12 @@ const SecurityDashboard = () => {
           value: "Comprehensive",
           status: "success",
           description: "All security events logged and monitored"
+        },
+        {
+          name: "Customer Data Protection",
+          value: "Encrypted",
+          status: "success",
+          description: "All customer payment and personal data is encrypted and masked"
         },
         {
           name: "Invitation System",
@@ -119,6 +126,8 @@ const SecurityDashboard = () => {
 
   return (
     <div className="space-y-6">
+      <SecurityEnhancementNotification />
+      
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

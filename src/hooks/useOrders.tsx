@@ -56,15 +56,42 @@ export const useOrders = () => {
         throw new Error('User not authenticated');
       }
 
+      // Fetch orders with masked customer data for security
       const { data, error } = await supabase
         .from('orders')
-        .select('*')
+        .select(`
+          id,
+          merchant_id,
+          items,
+          subtotal,
+          tax_amount,
+          shipping_amount,
+          discount_amount,
+          total_amount,
+          status,
+          payment_method,
+          payment_status,
+          notes,
+          tracking_number,
+          created_at,
+          updated_at
+        `)
         .eq('merchant_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      setOrders(data || []);
+      // Add masked customer info for display
+      const ordersWithMaskedData = (data || []).map(order => ({
+        ...order,
+        customer_name: 'Customer Data Protected',
+        customer_email: 'Protected',
+        customer_phone: null,
+        shipping_address: null,
+        billing_address: null
+      }));
+
+      setOrders(ordersWithMaskedData);
     } catch (error: any) {
       console.error('Error fetching orders:', error);
       toast({

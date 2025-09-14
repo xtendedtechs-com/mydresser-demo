@@ -604,6 +604,7 @@ export type Database = {
           customer_name: string
           customer_phone: string | null
           discount_amount: number
+          encryption_salt: string | null
           id: string
           items: Json
           merchant_id: string
@@ -626,6 +627,7 @@ export type Database = {
           customer_name: string
           customer_phone?: string | null
           discount_amount?: number
+          encryption_salt?: string | null
           id?: string
           items: Json
           merchant_id: string
@@ -648,6 +650,7 @@ export type Database = {
           customer_name?: string
           customer_phone?: string | null
           discount_amount?: number
+          encryption_salt?: string | null
           id?: string
           items?: Json
           merchant_id?: string
@@ -973,6 +976,33 @@ export type Database = {
           success?: boolean
           user_agent?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      sensitive_operation_limits: {
+        Row: {
+          attempt_count: number | null
+          created_at: string | null
+          id: string
+          operation_type: string
+          user_id: string
+          window_start: string | null
+        }
+        Insert: {
+          attempt_count?: number | null
+          created_at?: string | null
+          id?: string
+          operation_type: string
+          user_id: string
+          window_start?: string | null
+        }
+        Update: {
+          attempt_count?: number | null
+          created_at?: string | null
+          id?: string
+          operation_type?: string
+          user_id?: string
+          window_start?: string | null
         }
         Relationships: []
       }
@@ -1329,6 +1359,10 @@ export type Database = {
         Args: { encrypted_text: string; user_salt?: string }
         Returns: string
       }
+      decrypt_customer_data: {
+        Args: { encrypted_text: string; order_salt?: string }
+        Returns: string
+      }
       decrypt_mfa_secret: {
         Args: { encrypted_text: string; user_salt?: string }
         Returns: string
@@ -1357,6 +1391,10 @@ export type Database = {
         Args: { data_text: string; user_salt?: string }
         Returns: string
       }
+      encrypt_customer_data: {
+        Args: { data_text: string; order_salt?: string }
+        Returns: string
+      }
       encrypt_mfa_secret: {
         Args: { secret_text: string; user_salt?: string }
         Returns: string
@@ -1374,6 +1412,16 @@ export type Database = {
       ensure_minimum_sample_wardrobe_items: {
         Args: { min_count?: number }
         Returns: undefined
+      }
+      get_customer_data_secure: {
+        Args: { order_id_param: string }
+        Returns: {
+          billing_address: Json
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          shipping_address: Json
+        }[]
       }
       get_merchant_profile_public: {
         Args: { profile_user_id?: string }
@@ -1503,6 +1551,10 @@ export type Database = {
         Args: { code: string }
         Returns: string
       }
+      hash_invitation_token: {
+        Args: { token: string }
+        Returns: string
+      }
       insert_encrypted_merchant_profile: {
         Args: {
           business_address_param?: Json
@@ -1524,6 +1576,10 @@ export type Database = {
           token: string
           used_at: string
         }[]
+      }
+      log_admin_action: {
+        Args: { action_type: string; details?: Json; resource_name: string }
+        Returns: boolean
       }
       log_merchant_sensitive_access: {
         Args: { accessed_fields: string[]; merchant_profile_id: string }
@@ -1619,6 +1675,10 @@ export type Database = {
       }
       verify_backup_code_hash: {
         Args: { code: string; hash: string }
+        Returns: boolean
+      }
+      verify_invitation_token: {
+        Args: { input_token: string; stored_hash: string }
         Returns: boolean
       }
       verify_totp_secret: {

@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Mail, UserPlus, Trash2, Copy, Shield } from "lucide-react";
 import { format } from "date-fns";
+import SecurityAlert from "@/components/SecurityAlert";
 
 interface Invitation {
   id: string;
@@ -125,6 +126,11 @@ const InvitationManager = () => {
 
   return (
     <div className="space-y-6">
+      <SecurityAlert 
+        type="info"
+        title="Enhanced Security"
+        message="Invitation tokens are now cryptographically hashed for maximum security. All invitation activities are logged for audit purposes."
+      />
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

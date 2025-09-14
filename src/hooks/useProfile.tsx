@@ -59,6 +59,17 @@ export const useProfile = () => {
 
   const fetchProfile = async (userId: string) => {
     try {
+      // Validate session before fetching profile data
+      const { data: sessionValid, error: validationError } = await supabase.rpc('validate_user_session_robust');
+      
+      if (validationError || !sessionValid) {
+        console.warn('Session validation failed:', validationError);
+        setUser(null);
+        setProfile(null);
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -78,12 +89,37 @@ export const useProfile = () => {
     if (!user) return;
 
     try {
+      // Validate session before updating
+      const { data: sessionValid, error: validationError } = await supabase.rpc('validate_user_session_robust');
+      
+      if (validationError || !sessionValid) {
+        throw new Error('Session validation failed - please log in again');
+      }
+
       const { error } = await supabase
         .from('profiles')
         .update(updates)
         .eq('user_id', user.id);
 
       if (error) throw error;
+
+      // Log admin actions for audit trail
+      if (updates.role && profile?.role !== updates.role) {
+        try {
+          await supabase.rpc('log_admin_action', {
+            action_type: 'user_role_changed',
+            resource_name: 'profiles',
+            details: { 
+              user_id: user.id, 
+              old_role: profile?.role, 
+              new_role: updates.role 
+            }
+          });
+        } catch (logError) {
+          // Don't fail update if logging fails
+          console.warn('Admin action logging failed:', logError);
+        }
+      }
 
       // Refresh profile data
       await fetchProfile(user.id);
