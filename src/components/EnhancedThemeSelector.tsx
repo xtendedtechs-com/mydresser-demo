@@ -38,7 +38,7 @@ import {
 
 const EnhancedThemeSelector = () => {
   const { preferences, updatePreferences } = useUserPreferences();
-  const [selectedGradient, setSelectedGradient] = useState(preferences.theme.gradient_preset);
+  const [selectedGradient, setSelectedGradient] = useState(preferences.theme?.gradient_preset || 'default');
 
   const gradientPresets = [
     { name: 'aurora', label: 'Aurora', gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' },
@@ -112,7 +112,7 @@ const EnhancedThemeSelector = () => {
       theme: {
         ...preferences.theme,
         custom_colors: {
-          ...preferences.theme.custom_colors,
+          ...preferences.theme?.custom_colors,
           [colorType]: color
         }
       }
@@ -164,7 +164,7 @@ const EnhancedThemeSelector = () => {
                 ].map(({ value, label, icon: Icon }) => (
                   <Button
                     key={value}
-                    variant={preferences.theme.mode === value ? "default" : "outline"}
+                    variant={preferences.theme?.mode === value ? "default" : "outline"}
                     onClick={() => updatePreferences({
                       theme: { ...preferences.theme, mode: value as any }
                     })}
@@ -259,7 +259,7 @@ const EnhancedThemeSelector = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {Object.entries(preferences.theme.custom_colors).map(([key, value]) => (
+                {Object.entries(preferences.theme?.custom_colors || {}).map(([key, value]) => (
                   <div key={key} className="space-y-2">
                     <Label className="capitalize">{key.replace('_', ' ')}</Label>
                     <div className="flex gap-2">
@@ -296,7 +296,7 @@ const EnhancedThemeSelector = () => {
                 <div className="space-y-2">
                   <Label>Font Family</Label>
                   <Select 
-                    value={preferences.theme.typography.font_family}
+                    value={preferences.theme?.typography?.font_family || 'system'}
                     onValueChange={(value) => handleThemeChange('typography', 'font_family', value)}
                   >
                     <SelectTrigger>
@@ -313,7 +313,7 @@ const EnhancedThemeSelector = () => {
                 <div className="space-y-2">
                   <Label>Font Weight</Label>
                   <Select 
-                    value={preferences.theme.typography.font_weight}
+                    value={preferences.theme?.typography?.font_weight || 'normal'}
                     onValueChange={(value) => handleThemeChange('typography', 'font_weight', value)}
                   >
                     <SelectTrigger>
@@ -332,7 +332,7 @@ const EnhancedThemeSelector = () => {
                 <div className="space-y-2">
                   <Label>Letter Spacing</Label>
                   <Select 
-                    value={preferences.theme.typography.letter_spacing}
+                    value={preferences.theme?.typography?.letter_spacing || 'normal'}
                     onValueChange={(value) => handleThemeChange('typography', 'letter_spacing', value)}
                   >
                     <SelectTrigger>
@@ -349,7 +349,7 @@ const EnhancedThemeSelector = () => {
                 <div className="space-y-2">
                   <Label>Line Height</Label>
                   <Select 
-                    value={preferences.theme.typography.line_height}
+                    value={preferences.theme?.typography?.line_height || 'normal'}
                     onValueChange={(value) => handleThemeChange('typography', 'line_height', value)}
                   >
                     <SelectTrigger>
@@ -387,7 +387,7 @@ const EnhancedThemeSelector = () => {
                 <div className="space-y-2">
                   <Label>Content Spacing</Label>
                   <Select 
-                    value={preferences.theme.layout.spacing}
+                    value={preferences.theme?.layout?.spacing || 'normal'}
                     onValueChange={(value) => handleThemeChange('layout', 'spacing', value)}
                   >
                     <SelectTrigger>
@@ -405,7 +405,7 @@ const EnhancedThemeSelector = () => {
                 <div className="space-y-2">
                   <Label>Content Width</Label>
                   <Select 
-                    value={preferences.theme.layout.content_width}
+                    value={preferences.theme?.layout?.content_width || 'normal'}
                     onValueChange={(value) => handleThemeChange('layout', 'content_width', value)}
                   >
                     <SelectTrigger>
@@ -514,7 +514,7 @@ const EnhancedThemeSelector = () => {
               <CardDescription>Enhance your experience with visual effects</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {Object.entries(preferences.theme.effects).map(([key, value]) => (
+              {Object.entries(preferences.theme?.effects || {}).map(([key, value]) => (
                 <div key={key} className="flex items-center justify-between">
                   <div>
                     <Label className="capitalize">{key.replace('_', ' ')}</Label>
@@ -552,12 +552,12 @@ const EnhancedThemeSelector = () => {
                   <p className="text-sm text-muted-foreground">Enable background patterns</p>
                 </div>
                 <Switch 
-                  checked={preferences.theme.patterns.use_patterns}
+                  checked={preferences.theme?.patterns?.use_patterns || false}
                   onCheckedChange={(checked) => handleThemeChange('patterns', 'use_patterns', checked)}
                 />
               </div>
               
-              {preferences.theme.patterns.use_patterns && (
+              {preferences.theme?.patterns?.use_patterns && (
                 <>
                   <div className="space-y-4">
                     <Label>Pattern Type</Label>
@@ -565,7 +565,7 @@ const EnhancedThemeSelector = () => {
                       {patternTypes.map(({ value, label, icon: Icon }) => (
                         <Button
                           key={value}
-                          variant={preferences.theme.patterns.pattern_type === value ? "default" : "outline"}
+                          variant={preferences.theme?.patterns?.pattern_type === value ? "default" : "outline"}
                           onClick={() => handleThemeChange('patterns', 'pattern_type', value)}
                           className="h-16 flex-col gap-2"
                         >
@@ -579,7 +579,7 @@ const EnhancedThemeSelector = () => {
                   <div className="space-y-2">
                     <Label>Pattern Opacity</Label>
                     <Slider
-                      value={[preferences.theme.patterns.pattern_opacity]}
+                      value={[preferences.theme?.patterns?.pattern_opacity || 0.1]}
                       onValueChange={([value]) => handleThemeChange('patterns', 'pattern_opacity', value)}
                       max={0.5}
                       min={0.05}
@@ -587,7 +587,7 @@ const EnhancedThemeSelector = () => {
                       className="w-full"
                     />
                     <div className="text-sm text-muted-foreground text-center">
-                      {Math.round(preferences.theme.patterns.pattern_opacity * 100)}%
+                      {Math.round((preferences.theme?.patterns?.pattern_opacity || 0.1) * 100)}%
                     </div>
                   </div>
                 </>

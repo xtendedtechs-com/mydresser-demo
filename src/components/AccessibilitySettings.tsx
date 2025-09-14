@@ -71,7 +71,7 @@ const AccessibilitySettings = () => {
                   <p className="text-sm text-muted-foreground">Increase contrast for better visibility</p>
                 </div>
                 <Switch
-                  checked={preferences.accessibility_settings.high_contrast}
+                  checked={preferences.accessibility_settings?.high_contrast || false}
                   onCheckedChange={(checked) => handleAccessibilityChange('high_contrast', checked)}
                 />
               </div>
@@ -87,7 +87,7 @@ const AccessibilitySettings = () => {
                   <p className="text-sm text-muted-foreground">Use larger text throughout the app</p>
                 </div>
                 <Switch
-                  checked={preferences.accessibility_settings.large_text}
+                  checked={preferences.accessibility_settings?.large_text || false}
                   onCheckedChange={(checked) => handleAccessibilityChange('large_text', checked)}
                 />
               </div>
@@ -100,7 +100,7 @@ const AccessibilitySettings = () => {
                   <p className="text-sm text-muted-foreground">Use patterns and shapes in addition to colors</p>
                 </div>
                 <Switch
-                  checked={preferences.accessibility_settings.color_blind_friendly}
+                  checked={preferences.accessibility_settings?.color_blind_friendly || false}
                   onCheckedChange={(checked) => handleAccessibilityChange('color_blind_friendly', checked)}
                 />
               </div>
@@ -110,7 +110,7 @@ const AccessibilitySettings = () => {
               <div className="space-y-4">
                 <Label>Font Size Multiplier</Label>
                 <Slider
-                  value={[preferences.accessibility_settings.font_size_multiplier]}
+                  value={[preferences.accessibility_settings?.font_size_multiplier || 1]}
                   onValueChange={([value]) => handleAccessibilityChange('font_size_multiplier', value)}
                   max={3}
                   min={0.8}
@@ -119,7 +119,7 @@ const AccessibilitySettings = () => {
                 />
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <span>0.8x (Smaller)</span>
-                  <Badge variant="outline">{preferences.accessibility_settings.font_size_multiplier.toFixed(1)}x</Badge>
+                  <Badge variant="outline">{(preferences.accessibility_settings?.font_size_multiplier || 1).toFixed(1)}x</Badge>
                   <span>3x (Larger)</span>
                 </div>
               </div>
@@ -129,7 +129,7 @@ const AccessibilitySettings = () => {
               <div className="space-y-4">
                 <Label>Contrast Ratio</Label>
                 <Slider
-                  value={[preferences.accessibility_settings.contrast_ratio]}
+                  value={[preferences.accessibility_settings?.contrast_ratio || 4.5]}
                   onValueChange={([value]) => handleAccessibilityChange('contrast_ratio', value)}
                   max={7}
                   min={3}
@@ -138,7 +138,7 @@ const AccessibilitySettings = () => {
                 />
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <span>3:1 (Minimum)</span>
-                  <Badge variant="outline">{preferences.accessibility_settings.contrast_ratio.toFixed(1)}:1</Badge>
+                  <Badge variant="outline">{(preferences.accessibility_settings?.contrast_ratio || 4.5).toFixed(1)}:1</Badge>
                   <span>7:1 (Enhanced)</span>
                 </div>
               </div>
@@ -149,7 +149,7 @@ const AccessibilitySettings = () => {
                   <p className="text-sm text-muted-foreground">Use fonts optimized for dyslexia</p>
                 </div>
                 <Switch
-                  checked={preferences.accessibility_settings.dyslexia_friendly}
+                  checked={preferences.accessibility_settings?.dyslexia_friendly || false}
                   onCheckedChange={(checked) => handleAccessibilityChange('dyslexia_friendly', checked)}
                 />
               </div>
@@ -177,7 +177,7 @@ const AccessibilitySettings = () => {
                   <p className="text-sm text-muted-foreground">Full keyboard navigation support</p>
                 </div>
                 <Switch
-                  checked={preferences.accessibility_settings.keyboard_navigation}
+                  checked={preferences.accessibility_settings?.keyboard_navigation || false}
                   onCheckedChange={(checked) => handleAccessibilityChange('keyboard_navigation', checked)}
                 />
               </div>
@@ -193,7 +193,7 @@ const AccessibilitySettings = () => {
                   <p className="text-sm text-muted-foreground">Visible focus rings and highlights</p>
                 </div>
                 <Switch
-                  checked={preferences.accessibility_settings.focus_indicators}
+                  checked={preferences.accessibility_settings?.focus_indicators || false}
                   onCheckedChange={(checked) => handleAccessibilityChange('focus_indicators', checked)}
                 />
               </div>
@@ -209,7 +209,7 @@ const AccessibilitySettings = () => {
                   <p className="text-sm text-muted-foreground">Quick navigation to main content</p>
                 </div>
                 <Switch
-                  checked={preferences.accessibility_settings.skip_navigation}
+                  checked={preferences.accessibility_settings?.skip_navigation || false}
                   onCheckedChange={(checked) => handleAccessibilityChange('skip_navigation', checked)}
                 />
               </div>
@@ -222,7 +222,7 @@ const AccessibilitySettings = () => {
                   <p className="text-sm text-muted-foreground">Larger click targets and assistance</p>
                 </div>
                 <Switch
-                  checked={preferences.accessibility_settings.click_assistance}
+                  checked={preferences.accessibility_settings?.click_assistance || false}
                   onCheckedChange={(checked) => handleAccessibilityChange('click_assistance', checked)}
                 />
               </div>
@@ -235,7 +235,7 @@ const AccessibilitySettings = () => {
                   <p className="text-sm text-muted-foreground">Alternative gesture-based navigation</p>
                 </div>
                 <Switch
-                  checked={preferences.accessibility_settings.gesture_controls}
+                  checked={preferences.accessibility_settings?.gesture_controls || false}
                   onCheckedChange={(checked) => handleAccessibilityChange('gesture_controls', checked)}
                 />
               </div>
@@ -248,7 +248,7 @@ const AccessibilitySettings = () => {
                   <p className="text-sm text-muted-foreground">Enhanced cursor visibility and size</p>
                 </div>
                 <Switch
-                  checked={preferences.accessibility_settings.cursor_enhancement}
+                  checked={preferences.accessibility_settings?.cursor_enhancement || false}
                   onCheckedChange={(checked) => handleAccessibilityChange('cursor_enhancement', checked)}
                 />
               </div>
@@ -264,7 +264,7 @@ const AccessibilitySettings = () => {
                   <p className="text-sm text-muted-foreground">Minimize animations and transitions</p>
                 </div>
                 <Switch
-                  checked={preferences.accessibility_settings.reduce_motion}
+                  checked={preferences.accessibility_settings?.reduce_motion || false}
                   onCheckedChange={(checked) => handleAccessibilityChange('reduce_motion', checked)}
                 />
               </div>
@@ -289,7 +289,7 @@ const AccessibilitySettings = () => {
                   <p className="text-sm text-muted-foreground">Simplified reading experience</p>
                 </div>
                 <Switch
-                  checked={preferences.accessibility_settings.reading_mode}
+                  checked={preferences.accessibility_settings?.reading_mode || false}
                   onCheckedChange={(checked) => handleAccessibilityChange('reading_mode', checked)}
                 />
               </div>
@@ -299,7 +299,7 @@ const AccessibilitySettings = () => {
               <div className="space-y-4">
                 <Label>Reading Speed</Label>
                 <Select 
-                  value={preferences.accessibility_settings.reading_speed}
+                  value={preferences.accessibility_settings?.reading_speed || 'normal'}
                   onValueChange={(value) => handleAccessibilityChange('reading_speed', value)}
                 >
                   <SelectTrigger>
@@ -318,7 +318,7 @@ const AccessibilitySettings = () => {
               <div className="space-y-4">
                 <Label>Content Spacing</Label>
                 <Slider
-                  value={[preferences.accessibility_settings.content_spacing]}
+                  value={[preferences.accessibility_settings?.content_spacing || 1]}
                   onValueChange={([value]) => handleAccessibilityChange('content_spacing', value)}
                   max={2}
                   min={0.5}
@@ -327,7 +327,7 @@ const AccessibilitySettings = () => {
                 />
                 <div className="flex justify-between text-sm text-muted-foreground">
                   <span>Tight</span>
-                  <Badge variant="outline">{preferences.accessibility_settings.content_spacing.toFixed(1)}x</Badge>
+                  <Badge variant="outline">{(preferences.accessibility_settings?.content_spacing || 1).toFixed(1)}x</Badge>
                   <span>Spacious</span>
                 </div>
               </div>
@@ -340,7 +340,7 @@ const AccessibilitySettings = () => {
                   <p className="text-sm text-muted-foreground">Show detailed descriptions for images</p>
                 </div>
                 <Switch
-                  checked={preferences.accessibility_settings.alternative_text}
+                  checked={preferences.accessibility_settings?.alternative_text || false}
                   onCheckedChange={(checked) => handleAccessibilityChange('alternative_text', checked)}
                 />
               </div>
@@ -365,7 +365,7 @@ const AccessibilitySettings = () => {
                   <p className="text-sm text-muted-foreground">Optimize for screen readers and assistive tools</p>
                 </div>
                 <Switch
-                  checked={preferences.accessibility_settings.screen_reader_support}
+                  checked={preferences.accessibility_settings?.screen_reader_support || false}
                   onCheckedChange={(checked) => handleAccessibilityChange('screen_reader_support', checked)}
                 />
               </div>
@@ -381,7 +381,7 @@ const AccessibilitySettings = () => {
                   <p className="text-sm text-muted-foreground">Navigate using voice commands</p>
                 </div>
                 <Switch
-                  checked={preferences.accessibility_settings.voice_navigation}
+                  checked={preferences.accessibility_settings?.voice_navigation || false}
                   onCheckedChange={(checked) => handleAccessibilityChange('voice_navigation', checked)}
                 />
               </div>
@@ -394,7 +394,7 @@ const AccessibilitySettings = () => {
                   <p className="text-sm text-muted-foreground">Enable captions for audio content</p>
                 </div>
                 <Switch
-                  checked={preferences.accessibility_settings.captions_enabled}
+                  checked={preferences.accessibility_settings?.captions_enabled || false}
                   onCheckedChange={(checked) => handleAccessibilityChange('captions_enabled', checked)}
                 />
               </div>
@@ -410,7 +410,7 @@ const AccessibilitySettings = () => {
                   <p className="text-sm text-muted-foreground">Audio feedback for interactions</p>
                 </div>
                 <Switch
-                  checked={preferences.accessibility_settings.sound_feedback}
+                  checked={preferences.accessibility_settings?.sound_feedback || false}
                   onCheckedChange={(checked) => handleAccessibilityChange('sound_feedback', checked)}
                 />
               </div>
@@ -426,7 +426,7 @@ const AccessibilitySettings = () => {
                   <p className="text-sm text-muted-foreground">Tactile feedback for supported devices</p>
                 </div>
                 <Switch
-                  checked={preferences.accessibility_settings.haptic_feedback}
+                  checked={preferences.accessibility_settings?.haptic_feedback || false}
                   onCheckedChange={(checked) => handleAccessibilityChange('haptic_feedback', checked)}
                 />
               </div>
@@ -528,14 +528,14 @@ const AccessibilitySettings = () => {
                 </p>
                 <div className="space-y-3 p-4 bg-background rounded border">
                   <h5 className="font-medium" style={{ 
-                    fontSize: `${preferences.accessibility_settings.font_size_multiplier}rem`,
-                    letterSpacing: preferences.accessibility_settings.content_spacing > 1 ? '0.05em' : 'normal'
+                    fontSize: `${preferences.accessibility_settings?.font_size_multiplier || 1}rem`,
+                    letterSpacing: (preferences.accessibility_settings?.content_spacing || 1) > 1 ? '0.05em' : 'normal'
                   }}>
                     Sample Heading
                   </h5>
                   <p style={{ 
-                    fontSize: `${preferences.accessibility_settings.font_size_multiplier * 0.875}rem`,
-                    lineHeight: preferences.accessibility_settings.content_spacing
+                    fontSize: `${(preferences.accessibility_settings?.font_size_multiplier || 1) * 0.875}rem`,
+                    lineHeight: preferences.accessibility_settings?.content_spacing || 1
                   }}>
                     This is how text will appear with your current accessibility settings. 
                     The font size and spacing adjust based on your preferences.
@@ -543,7 +543,7 @@ const AccessibilitySettings = () => {
                   <div className="flex gap-2">
                     <Button 
                       size="sm"
-                      className={preferences.accessibility_settings.focus_indicators ? 'ring-2 ring-primary ring-offset-2' : ''}
+                      className={preferences.accessibility_settings?.focus_indicators ? 'ring-2 ring-primary ring-offset-2' : ''}
                     >
                       Sample Button
                     </Button>
