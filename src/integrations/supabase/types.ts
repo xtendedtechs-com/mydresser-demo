@@ -1116,9 +1116,46 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      safe_contact_info: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          social_facebook: string | null
+          social_instagram: string | null
+          social_tiktok: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: never
+          social_facebook?: never
+          social_instagram?: never
+          social_tiktok?: never
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: never
+          social_facebook?: never
+          social_instagram?: never
+          social_tiktok?: never
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      check_contact_info_breach_patterns: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          last_suspicious_access: string
+          suspicious_access_count: number
+          user_id: string
+        }[]
+      }
       check_contact_rate_limit: {
         Args: { operation?: string }
         Returns: boolean
@@ -1299,6 +1336,10 @@ export type Database = {
         Args: { accessed_fields: string[]; merchant_profile_id: string }
         Returns: boolean
       }
+      log_suspicious_contact_access: {
+        Args: { access_type: string; attempted_user_id: string; reason: string }
+        Returns: undefined
+      }
       mask_contact_data: {
         Args: { data_text: string; mask_type?: string }
         Returns: string
@@ -1343,6 +1384,10 @@ export type Database = {
       validate_merchant_security: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      validate_user_session: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
       }
       verify_backup_code_hash: {
         Args: { code: string; hash: string }
