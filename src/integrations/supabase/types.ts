@@ -123,6 +123,36 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_info_access_log: {
+        Row: {
+          accessed_fields: string[] | null
+          action: string
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          accessed_fields?: string[] | null
+          action: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          accessed_fields?: string[] | null
+          action?: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       emotes: {
         Row: {
           category: string | null
@@ -1089,6 +1119,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_contact_rate_limit: {
+        Args: { operation?: string }
+        Returns: boolean
+      }
       check_merchant_rate_limit: {
         Args: { operation: string }
         Returns: boolean
@@ -1109,12 +1143,20 @@ export type Database = {
         Args: { business_salt?: string; encrypted_text: string }
         Returns: string
       }
+      decrypt_contact_data: {
+        Args: { encrypted_text: string; user_salt?: string }
+        Returns: string
+      }
       decrypt_mfa_secret: {
         Args: { encrypted_text: string; user_salt?: string }
         Returns: string
       }
       encrypt_business_data: {
         Args: { business_salt?: string; data_text: string }
+        Returns: string
+      }
+      encrypt_contact_data: {
+        Args: { data_text: string; user_salt?: string }
         Returns: string
       }
       encrypt_mfa_secret: {
@@ -1230,6 +1272,15 @@ export type Database = {
           social_tiktok: string
         }[]
       }
+      get_user_contact_info_secure: {
+        Args: { mask_data?: boolean }
+        Returns: {
+          email: string
+          social_facebook: string
+          social_instagram: string
+          social_tiktok: string
+        }[]
+      }
       hash_backup_code: {
         Args: { code: string }
         Returns: string
@@ -1248,6 +1299,10 @@ export type Database = {
         Args: { accessed_fields: string[]; merchant_profile_id: string }
         Returns: boolean
       }
+      mask_contact_data: {
+        Args: { data_text: string; mask_type?: string }
+        Returns: string
+      }
       setup_user_mfa: {
         Args: {
           backup_codes_data?: string[]
@@ -1256,6 +1311,15 @@ export type Database = {
           setup_type: string
         }
         Returns: Json
+      }
+      update_contact_info_secure: {
+        Args: {
+          new_email?: string
+          new_facebook?: string
+          new_instagram?: string
+          new_tiktok?: string
+        }
+        Returns: boolean
       }
       update_encrypted_merchant_profile: {
         Args: {
