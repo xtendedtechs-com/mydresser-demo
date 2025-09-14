@@ -55,6 +55,8 @@ const ReactionButton = ({
         const newReaction: Reaction = {
           id: 'temp',
           user_id: 'current_user_id', // Would need actual user ID
+          post_id: targetId,
+          type: reactionType,
           target_type: targetType,
           target_id: targetId,
           reaction_type: reactionType,

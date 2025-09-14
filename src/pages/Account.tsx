@@ -321,9 +321,6 @@ const Account = () => {
       <SettingsDialog
         open={settingsDialogOpen}
         onOpenChange={setSettingsDialogOpen}
-        settingType={currentSetting.type}
-        title={currentSetting.title}
-        description={currentSetting.description}
       />
       <ServiceSettingsDialog
         open={serviceDialogOpen}

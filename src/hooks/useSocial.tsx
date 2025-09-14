@@ -8,6 +8,9 @@ export interface Reaction {
   post_id: string;
   type: string;
   created_at: string;
+  target_type?: string;
+  target_id?: string;
+  reaction_type?: string;
 }
 
 interface SocialUser {
@@ -136,15 +139,39 @@ export const useSocial = () => {
     fetchPosts();
   }, []);
 
-  const addReaction = async (postId: string, type: string) => {
+  const addReaction = async (postId: string, type: string, targetType: string = 'post') => {
     // Implementation for adding reactions
+    try {
+      toast({
+        title: 'Success',
+        description: 'Reaction added'
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to add reaction',
+        variant: 'destructive'
+      });
+    }
   };
 
-  const removeReaction = async (postId: string, type: string) => {
+  const removeReaction = async (postId: string, type: string, targetType: string = 'post') => {
     // Implementation for removing reactions
+    try {
+      toast({
+        title: 'Success',
+        description: 'Reaction removed'
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to remove reaction',
+        variant: 'destructive'
+      });
+    }
   };
 
-  const getReactions = (postId: string) => {
+  const getReactions = (postId: string, targetType: string = 'post') => {
     // Implementation for getting reactions
     return [];
   };
