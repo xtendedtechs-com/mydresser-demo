@@ -1128,19 +1128,19 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
-          email?: never
-          social_facebook?: never
-          social_instagram?: never
-          social_tiktok?: never
+          email?: string | null
+          social_facebook?: string | null
+          social_instagram?: string | null
+          social_tiktok?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
         Update: {
           created_at?: string | null
-          email?: never
-          social_facebook?: never
-          social_instagram?: never
-          social_tiktok?: never
+          email?: string | null
+          social_facebook?: string | null
+          social_instagram?: string | null
+          social_tiktok?: string | null
           updated_at?: string | null
           user_id?: string | null
         }
