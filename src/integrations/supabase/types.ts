@@ -1116,36 +1116,7 @@ export type Database = {
       }
     }
     Views: {
-      safe_contact_info: {
-        Row: {
-          created_at: string | null
-          email: string | null
-          social_facebook: string | null
-          social_instagram: string | null
-          social_tiktok: string | null
-          updated_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          email?: string | null
-          social_facebook?: string | null
-          social_instagram?: string | null
-          social_tiktok?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          email?: string | null
-          social_facebook?: string | null
-          social_instagram?: string | null
-          social_tiktok?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       check_contact_info_breach_patterns: {
