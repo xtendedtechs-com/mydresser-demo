@@ -301,11 +301,35 @@ export const useUserPreferences = () => {
       if (error) throw error;
 
       if (data) {
-        // Parse the theme data properly
+        // Parse and merge theme with defaults to ensure all nested keys exist
         let parsedTheme = defaultPreferences.theme;
         if (data.theme) {
           try {
-            parsedTheme = typeof data.theme === 'string' ? JSON.parse(data.theme) : data.theme;
+            const rawTheme = typeof data.theme === 'string' ? JSON.parse(data.theme) : data.theme;
+            parsedTheme = {
+              ...defaultPreferences.theme,
+              ...rawTheme,
+              custom_colors: {
+                ...defaultPreferences.theme.custom_colors,
+                ...(rawTheme?.custom_colors || {})
+              },
+              typography: {
+                ...defaultPreferences.theme.typography,
+                ...(rawTheme?.typography || {})
+              },
+              layout: {
+                ...defaultPreferences.theme.layout,
+                ...(rawTheme?.layout || {})
+              },
+              effects: {
+                ...defaultPreferences.theme.effects,
+                ...(rawTheme?.effects || {})
+              },
+              patterns: {
+                ...defaultPreferences.theme.patterns,
+                ...(rawTheme?.patterns || {})
+              },
+            };
           } catch (e) {
             console.warn('Failed to parse theme data:', e);
           }
@@ -537,9 +561,33 @@ export const useUserPreferences = () => {
       const savedTheme = localStorage.getItem('user-theme-preference');
       if (savedTheme) {
         try {
-          const parsedTheme = JSON.parse(savedTheme);
-          setPreferences(prev => ({ ...prev, theme: parsedTheme }));
-          applyTheme(parsedTheme);
+          const rawTheme = JSON.parse(savedTheme);
+          const mergedTheme = {
+            ...defaultPreferences.theme,
+            ...rawTheme,
+            custom_colors: {
+              ...defaultPreferences.theme.custom_colors,
+              ...(rawTheme?.custom_colors || {})
+            },
+            typography: {
+              ...defaultPreferences.theme.typography,
+              ...(rawTheme?.typography || {})
+            },
+            layout: {
+              ...defaultPreferences.theme.layout,
+              ...(rawTheme?.layout || {})
+            },
+            effects: {
+              ...defaultPreferences.theme.effects,
+              ...(rawTheme?.effects || {})
+            },
+            patterns: {
+              ...defaultPreferences.theme.patterns,
+              ...(rawTheme?.patterns || {})
+            },
+          };
+          setPreferences(prev => ({ ...prev, theme: mergedTheme }));
+          applyTheme(mergedTheme);
         } catch (e) {
           // Ignore parsing errors
         }

@@ -88,6 +88,16 @@ const EnhancedThemeSelector = () => {
           mode: value
         }
       });
+    } else if (['typography', 'layout', 'effects', 'patterns'].includes(category)) {
+      updatePreferences({
+        theme: {
+          ...preferences.theme,
+          [category]: {
+            ...(preferences.theme as any)?.[category],
+            [key]: value,
+          },
+        },
+      });
     } else {
       updatePreferences({
         theme: {
