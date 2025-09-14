@@ -10,6 +10,8 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { useToast } from "@/hooks/use-toast";
+import SecurityDashboard from "./SecurityDashboard";
+import PrivacyComplianceManager from "./PrivacyComplianceManager";
 import { 
   Cloud, 
   Shirt, 
@@ -303,6 +305,12 @@ const ServiceSettingsDialog = ({ open, onOpenChange, serviceType, title, descrip
 
   const renderContent = () => {
     switch (serviceType) {
+      case 'security':
+        return <SecurityDashboard />;
+      case 'privacy':
+        return <PrivacyComplianceManager />;
+      case 'data':
+        return <PrivacyComplianceManager />;
       case 'weather':
         return renderWeatherSettings();
       case 'outfit':
@@ -328,7 +336,7 @@ const ServiceSettingsDialog = ({ open, onOpenChange, serviceType, title, descrip
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
@@ -338,14 +346,17 @@ const ServiceSettingsDialog = ({ open, onOpenChange, serviceType, title, descrip
           {renderContent()}
         </div>
 
-        <div className="flex justify-end space-x-2 pt-4 border-t">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave} disabled={loading}>
-            {loading ? "Saving..." : "Save Settings"}
-          </Button>
-        </div>
+        {/* Only show save/cancel buttons for non-security/privacy dialogs */}
+        {!['security', 'privacy', 'data'].includes(serviceType) && (
+          <div className="flex justify-end space-x-2 pt-4 border-t">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSave} disabled={loading}>
+              {loading ? "Saving..." : "Save Settings"}
+            </Button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

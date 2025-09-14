@@ -99,14 +99,15 @@ const Account = () => {
     },
     {
       id: 'privacy',
-      label: 'Privacy',
-      description: 'Control your privacy settings',
-      onClick: () => openSettingsDialog('privacy', 'Privacy Settings', 'Control who can see your profile and content')
+      label: 'Privacy & Data Rights',
+      description: 'GDPR/CCPA compliance & data management',
+      onClick: () => openSettingsDialog('privacy', 'Privacy & Data Rights', 'Exercise your data rights under GDPR, CCPA and other privacy laws'),
+      highlighted: true
     },
     {
       id: 'data',
       label: 'My data',
-      description: 'Manage your personal data',
+      description: 'Export or delete your personal data',
       onClick: () => openSettingsDialog('data', 'Data Management', 'Export, backup, or delete your personal data')
     },
     {
@@ -203,6 +204,17 @@ const Account = () => {
       onClick: () => openServiceDialog('assistant', 'AI Assistant', 'Customize your AI styling assistant preferences')
     }
   ];
+
+  // Add admin security dashboard for admin users
+  if (profile.role === 'admin') {
+    serviceSettings.unshift({
+      id: 'security',
+      label: 'Security Dashboard',
+      description: 'Manage platform security and invitations',
+      onClick: () => openServiceDialog('security', 'Security Dashboard', 'Monitor security and manage user invitations'),
+      highlighted: true
+    });
+  }
 
   // Add merchant-specific settings for merchant users
   if (profile.role === 'merchant') {

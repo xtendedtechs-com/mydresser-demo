@@ -1163,6 +1163,18 @@ export type Database = {
         Args: { encrypted_text: string; user_salt?: string }
         Returns: string
       }
+      delete_user_account: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      detect_bot_patterns: {
+        Args: {
+          ip_address?: unknown
+          request_frequency?: number
+          user_agent_string?: string
+        }
+        Returns: Json
+      }
       encrypt_business_data: {
         Args: { business_salt?: string; data_text: string }
         Returns: string
@@ -1174,6 +1186,16 @@ export type Database = {
       encrypt_mfa_secret: {
         Args: { secret_text: string; user_salt?: string }
         Returns: string
+      }
+      enhanced_rate_limit_check: {
+        Args: {
+          action_type: string
+          identifier_key: string
+          max_requests?: number
+          user_agent_string?: string
+          window_minutes?: number
+        }
+        Returns: Json
       }
       ensure_minimum_sample_wardrobe_items: {
         Args: { min_count?: number }

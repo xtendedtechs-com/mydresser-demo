@@ -2,10 +2,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import SecurityHeaders from "@/components/SecurityHeaders";
+import Landing from "@/pages/Landing";
 import Home from "@/pages/Home";
 import Wardrobe from "@/pages/Wardrobe";
 import Account from "@/pages/Account";
@@ -46,15 +47,20 @@ const App = () => {
     );
   }
 
-  // Show auth page if not authenticated (except for auth route itself)
+  // Show public pages if not authenticated
   if (!isAuthenticated) {
     return (
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
+          <SecurityHeaders />
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Auth />
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="*" element={<Landing />} />
+            </Routes>
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>

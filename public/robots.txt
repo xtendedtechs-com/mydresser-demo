@@ -1,14 +1,60 @@
+# Enhanced Bot Protection - Restrict access to secure platform
+User-agent: *
+Disallow: /
+
+# Allow only public landing page
+Allow: /$
+Allow: /auth$
+
+# Block specific bot types
 User-agent: Googlebot
-Allow: /
+Disallow: /
 
 User-agent: Bingbot
-Allow: /
+Disallow: /
 
 User-agent: Twitterbot
-Allow: /
+Disallow: /
 
 User-agent: facebookexternalhit
-Allow: /
+Disallow: /
 
-User-agent: *
-Allow: /
+# Block common scraping bots
+User-agent: Scrapy
+Disallow: /
+
+User-agent: Wget
+Disallow: /
+
+User-agent: Curl
+Disallow: /
+
+User-agent: Python-requests
+Disallow: /
+
+User-agent: Node
+Disallow: /
+
+# Block AI training crawlers
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+# Block academic/research crawlers
+User-agent: ia_archiver
+Disallow: /
+
+User-agent: Wayback
+Disallow: /
+
+# Site information
+Sitemap: https://mydresser.com/sitemap.xml
+Crawl-delay: 3600

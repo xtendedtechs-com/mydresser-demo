@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { supabase } from "@/integrations/supabase/client";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Mail, Lock, User, Shield, AlertTriangle, Phone } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
@@ -19,7 +20,17 @@ const Auth = () => {
   const [signupBlocked, setSignupBlocked] = useState(false);
   const [blockReason, setBlockReason] = useState("");
   const [showInviteField, setShowInviteField] = useState(false);
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
+
+  // Get invitation token from URL parameters
+  useEffect(() => {
+    const inviteToken = searchParams.get('invite');
+    if (inviteToken) {
+      setInvitationToken(inviteToken);
+      setShowInviteField(true);
+    }
+  }, [searchParams]);
 
   // Check if signup is allowed
   const checkSignupAllowed = async () => {
