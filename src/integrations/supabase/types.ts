@@ -1175,6 +1175,10 @@ export type Database = {
         }
         Returns: Json
       }
+      detect_potential_data_breach: {
+        Args: { access_count?: number; table_accessed: string }
+        Returns: Json
+      }
       encrypt_business_data: {
         Args: { business_salt?: string; data_text: string }
         Returns: string
@@ -1374,6 +1378,17 @@ export type Database = {
       revoke_invitation_admin: {
         Args: { invitation_token: string }
         Returns: boolean
+      }
+      secure_merchant_data_access: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          address_summary: string
+          business_name: string
+          business_type: string
+          contact_summary: string
+          tax_id_masked: string
+          verification_status: string
+        }[]
       }
       setup_user_mfa: {
         Args: {
