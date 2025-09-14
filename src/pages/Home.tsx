@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Shield, Lock, Zap } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import DailyOutfit from "@/components/DailyOutfit";
@@ -15,6 +16,7 @@ import blackJacket from "@/assets/black-jacket.jpg";
 import graySweater from "@/assets/gray-sweater.jpg";
 
 const Home = () => {
+  const navigate = useNavigate();
   const [likedItems, setLikedItems] = useState<Set<string>>(new Set());
   const [starredItems, setStarredItems] = useState<Set<string>>(new Set());
   const { user, profile, isAuthenticated } = useProfile();
@@ -110,7 +112,7 @@ const Home = () => {
                 isStarred={starredItems.has(item.id)}
                 onLike={handleLike}
                 onStar={handleStar}
-                onClick={() => toast(`Viewing ${item.name}`)}
+                onClick={() => navigate(`/wardrobe/item/${item.id}`)}
               />
             ))}
           </div>
@@ -127,7 +129,7 @@ const Home = () => {
                 isStarred={starredItems.has(item.id)}
                 onLike={handleLike}
                 onStar={handleStar}
-                onClick={() => toast(`Viewing ${item.name}`)}
+                onClick={() => navigate(`/market/item/${item.id}`)}
               />
             ))}
           </div>

@@ -70,23 +70,22 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/wardrobe" element={<Wardrobe />} />
-            <Route path="/wardrobe/enhanced" element={<EnhancedWardrobeManager />} />
-            <Route path="/market" element={<Market />} />
-            <Route path="/market/item/:id" element={<MarketItemDetail />} />
-            <Route path="/marketplace" element={<EnhancedMarketplace />} />
-            <Route path="/merchant-terminal" element={<MerchantTerminal />} />
-            
-            <Route path="/smart-matcher" element={<SmartOutfitMatcher />} />
-            <Route path="/account" element={<Account />} />
-            <Route path="/add" element={<Add />} />
-            <Route path="/item/:id" element={<ItemDetail />} />
-            <Route path="/wardrobe/item/:id" element={<WardrobeItemDetail />} />
-            <Route path="/profile-setup" element={<ProfileSetup />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/wardrobe" element={<Wardrobe />} />
+          <Route path="/wardrobe/enhanced" element={<EnhancedWardrobeManager />} />
+          <Route path="/market" element={<Market />} />
+          <Route path="/market/item/:id" element={<MarketItemDetail />} />
+          <Route path="/marketplace" element={<EnhancedMarketplace />} />
+          <Route path="/add" element={<Add />} />
+          <Route path="/merchant-terminal" element={<MerchantTerminal />} />
+          <Route path="/smart-matcher" element={<SmartOutfitMatcher />} />
+          <Route path="/account" element={<Account />} />
+          <Route path="/item/:id" element={<ItemDetail />} />
+          <Route path="/wardrobe/item/:id" element={<WardrobeItemDetail />} />
+          <Route path="/profile-setup" element={<ProfileSetup />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
           <Navigation />
         </BrowserRouter>
       </TooltipProvider>
