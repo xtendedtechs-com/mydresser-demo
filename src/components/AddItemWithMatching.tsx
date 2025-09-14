@@ -13,6 +13,7 @@ import { useItemMatches } from '@/hooks/useItemMatches';
 import { supabase } from '@/integrations/supabase/client';
 import { Upload, X } from 'lucide-react';
 import ItemMatchDialog from './ItemMatchDialog';
+import RealImageUpload from './RealImageUpload';
 
 interface AddItemWithMatchingProps {
   open: boolean;
@@ -60,9 +61,7 @@ const AddItemWithMatching = ({ open, onOpenChange }: AddItemWithMatchingProps) =
   });
 
   const [currentTag, setCurrentTag] = useState('');
-  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -88,57 +87,6 @@ const AddItemWithMatching = ({ open, onOpenChange }: AddItemWithMatchingProps) =
     }));
   };
 
-  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedPhoto(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPhotoPreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const removePhoto = () => {
-    setSelectedPhoto(null);
-    setPhotoPreview(null);
-  };
-
-  const uploadPhoto = async (): Promise<string | null> => {
-    if (!selectedPhoto) return null;
-
-    try {
-      setUploadingPhoto(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
-
-      const fileExt = selectedPhoto.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-
-      const { data, error } = await supabase.storage
-        .from('wardrobe')
-        .upload(fileName, selectedPhoto);
-
-      if (error) throw error;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('wardrobe')
-        .getPublicUrl(data.path);
-
-      return publicUrl;
-    } catch (error: any) {
-      toast({
-        title: "Photo upload failed",
-        description: error.message,
-        variant: "destructive",
-      });
-      return null;
-    } finally {
-      setUploadingPhoto(false);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -154,15 +102,12 @@ const AddItemWithMatching = ({ open, onOpenChange }: AddItemWithMatchingProps) =
     try {
       setIsSubmitting(true);
 
-      // Upload photo if selected
-      const photoUrl = await uploadPhoto();
-
       // Create the wardrobe item
       const itemData = {
         ...formData,
         user_id: '', // Will be set by the hook
         purchase_price: formData.purchase_price ? parseFloat(formData.purchase_price) : undefined,
-        photos: photoUrl ? { main: photoUrl } : undefined,
+        photos: photoUrls.length > 0 ? { urls: photoUrls } : undefined,
         season: formData.season.toLowerCase() || 'all-season',
         occasion: formData.occasion.toLowerCase() || 'casual',
         condition: formData.condition.toLowerCase(),
@@ -355,41 +300,13 @@ const AddItemWithMatching = ({ open, onOpenChange }: AddItemWithMatchingProps) =
 
             {/* Photo Upload */}
             <div>
-              <Label>Photo</Label>
-              {!photoPreview ? (
-                <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePhotoSelect}
-                    className="hidden"
-                    id="photo-upload"
-                  />
-                  <label htmlFor="photo-upload" className="cursor-pointer">
-                    <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">
-                      Click to upload a photo of your item
-                    </p>
-                  </label>
-                </div>
-              ) : (
-                <div className="relative">
-                  <img 
-                    src={photoPreview} 
-                    alt="Item preview" 
-                    className="w-full max-h-48 object-cover rounded-lg"
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-2 right-2 h-6 w-6"
-                    onClick={removePhoto}
-                  >
-                    <X className="w-3 h-3" />
-                  </Button>
-                </div>
-              )}
+              <Label>Photos</Label>
+              <RealImageUpload
+                onFilesSelected={setPhotoUrls}
+                type="photo"
+                maxFiles={5}
+                existingFiles={photoUrls}
+              />
             </div>
 
             {/* Tags */}
@@ -435,8 +352,8 @@ const AddItemWithMatching = ({ open, onOpenChange }: AddItemWithMatchingProps) =
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting || uploadingPhoto} className="flex-1">
-                {uploadingPhoto ? 'Uploading Photo...' : isSubmitting ? 'Adding Item...' : 'Add Item'}
+              <Button type="submit" disabled={isSubmitting} className="flex-1">
+                {isSubmitting ? 'Adding Item...' : 'Add Item'}
               </Button>
             </div>
           </form>

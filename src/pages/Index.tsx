@@ -5,16 +5,18 @@ import Home from './Home';
 
 const Index = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, loading } = useProfile();
+  const { isAuthenticated, loading, profile } = useProfile();
 
   useEffect(() => {
-    // If user is authenticated, show the main home experience
-    // If not authenticated, they'll see the landing page via App.tsx routing
-    if (!loading && !isAuthenticated) {
-      // This will be handled by App.tsx - it shows PublicContent which routes to Landing
-      return;
+    // Check if user needs profile setup
+    if (!loading && isAuthenticated && profile) {
+      // If profile is incomplete, redirect to setup
+      if (!profile.full_name) {
+        navigate('/profile-setup');
+        return;
+      }
     }
-  }, [isAuthenticated, loading, navigate]);
+  }, [isAuthenticated, loading, profile, navigate]);
 
   // If loading, show spinner
   if (loading) {
