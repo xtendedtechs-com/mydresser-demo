@@ -16,6 +16,9 @@ import NotFound from "../pages/NotFound";
 import EnhancedWardrobeManager from "@/components/EnhancedWardrobeManager";
 import EnhancedMarketplace from "@/components/EnhancedMarketplace";
 import SmartOutfitMatcher from "@/components/SmartOutfitMatcher";
+import { WardrobeAnalytics } from "@/components/WardrobeAnalytics";
+import { SmartLaundryTracker } from "@/components/SmartLaundryTracker";
+import { DailyOutfitGenerator } from "@/components/DailyOutfitGenerator";
 
 const AppContent = () => {
   const location = useLocation();
@@ -34,6 +37,9 @@ const AppContent = () => {
         <Route path="/merchant-terminal" element={<MerchantTerminal />} />
         <Route path="/merchant/:id" element={<MerchantPage />} />
         <Route path="/smart-matcher" element={<SmartOutfitMatcher />} />
+        <Route path="/analytics" element={<WardrobeAnalytics />} />
+        <Route path="/laundry" element={<SmartLaundryTracker />} />
+        <Route path="/outfit-generator" element={<DailyOutfitGenerator />} />
         <Route path="/account" element={<Account />} />
         <Route path="/item/:id" element={<ItemDetail />} />
         <Route path="/wardrobe/item/:id" element={<WardrobeItemDetail />} />

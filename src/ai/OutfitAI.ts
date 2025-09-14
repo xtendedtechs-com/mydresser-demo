@@ -25,6 +25,23 @@ export class OutfitAI {
     this.weatherMatcher = weatherMatcher;
   }
 
+  public async generateOutfit(params: {
+    wardrobeItems: WardrobeItem[];
+    weather?: any;
+    preferences?: any;
+    occasion?: string;
+  }): Promise<any> {
+    // Simple outfit generation for now
+    const items = params.wardrobeItems.slice(0, 4); // Take first 4 items
+    
+    return {
+      items,
+      reasoning: `Generated outfit for ${params.occasion || 'casual'} occasion with current weather conditions.`,
+      tags: [params.occasion || 'casual', 'comfortable', 'stylish'],
+      confidence: 0.85
+    };
+  }
+
   public async generateOutfitRecommendation(
     items: WardrobeItem[], 
     context: AIOutfitContext

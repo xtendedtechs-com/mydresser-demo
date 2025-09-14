@@ -1652,7 +1652,7 @@ export type Database = {
         Returns: undefined
       }
       mask_contact_data: {
-        Args: { data_text: string; mask_type?: string }
+        Args: { data_text: string; data_type: string }
         Returns: string
       }
       revoke_invitation_admin: {
