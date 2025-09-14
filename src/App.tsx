@@ -9,6 +9,7 @@ import SecurityHeaders from "@/components/SecurityHeaders";
 import Landing from "@/pages/Landing";
 import Auth from "@/pages/Auth";
 import AppContent from "@/components/AppContent";
+import PublicContent from "@/components/PublicContent";
 import { useProfile } from "@/hooks/useProfile";
 
 const queryClient = new QueryClient();
@@ -43,11 +44,7 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="*" element={<Landing />} />
-            </Routes>
+            <PublicContent />
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>
