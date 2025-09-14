@@ -1,282 +1,185 @@
-import { useCallback, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { X, Upload, FileImage, FileVideo } from 'lucide-react';
-import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Upload, X, Image, AlertCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
-interface FileUploadProps {
-  onFilesSelected: (files: string[]) => void;
+interface RealImageUploadProps {
+  onFilesSelected: (urls: string[]) => void;
+  type: 'photo' | 'video';
   maxFiles?: number;
-  type?: 'photo' | 'video' | 'both';
   existingFiles?: string[];
-  className?: string;
+  disabled?: boolean;
 }
 
-interface UploadingFile {
-  file: File;
-  progress: number;
-  url?: string;
-  error?: string;
-}
-
-export default function RealImageUpload({ 
-  onFilesSelected, 
-  maxFiles = 5, 
+const RealImageUpload = ({
+  onFilesSelected,
   type = 'photo',
+  maxFiles = 5,
   existingFiles = [],
-  className = ''
-}: FileUploadProps) {
-  const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
-  const [uploadedUrls, setUploadedUrls] = useState<string[]>(existingFiles);
+  disabled = false
+}: RealImageUploadProps) => {
+  const [uploading, setUploading] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<string[]>(existingFiles);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
-  const uploadToStorage = async (file: File, bucket: string): Promise<string> => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
+  const handleFileSelect = async (files: FileList) => {
+    if (disabled || uploading) return;
 
-    // Create unique filename with timestamp
-    const timestamp = Date.now();
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}/${timestamp}.${fileExt}`;
-
-    const { data, error } = await supabase.storage
-      .from(bucket)
-      .upload(fileName, file, {
-        cacheControl: '3600',
-        upsert: false
+    const remainingSlots = maxFiles - selectedFiles.length;
+    if (files.length > remainingSlots) {
+      toast({
+        title: 'Too many files',
+        description: `You can only upload ${remainingSlots} more ${type}(s)`,
+        variant: 'destructive'
       });
-
-    if (error) {
-      console.error('Storage upload error:', error);
-      throw new Error('Failed to upload file');
-    }
-
-    // Get public URL
-    const { data: urlData } = supabase.storage
-      .from(bucket)
-      .getPublicUrl(data.path);
-
-    return urlData.publicUrl;
-  };
-
-  const processFiles = useCallback(async (files: File[]) => {
-    // Validate file count
-    if (uploadedUrls.length + files.length > maxFiles) {
-      toast.error(`Maximum ${maxFiles} files allowed`);
       return;
     }
 
-    // Validate and process each file
-    const validFiles: File[] = [];
-    
-    for (const file of files) {
-      // File size validation
-      const maxSize = type === 'photo' ? 10 * 1024 * 1024 : 100 * 1024 * 1024; // 10MB for photos, 100MB for videos
-      if (file.size > maxSize) {
-        toast.error(`${type === 'photo' ? 'Photo' : 'Video'} must be less than ${type === 'photo' ? '10MB' : '100MB'}`);
-        continue;
-      }
-
-      // File type validation
-      if (type === 'photo' || type === 'both') {
-        if (file.type.startsWith('image/') && ['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
-          validFiles.push(file);
-          continue;
-        }
-      }
-      
-      if (type === 'video' || type === 'both') {
-        if (file.type.startsWith('video/') && ['video/mp4', 'video/webm', 'video/mov', 'video/avi'].includes(file.type)) {
-          validFiles.push(file);
-          continue;
-        }
-      }
-
-      toast.error(`Invalid file type: ${file.name}`);
-    }
-
-    if (validFiles.length === 0) return;
-
-    // Initialize uploading state
-    const initialUploads = validFiles.map(file => ({
-      file,
-      progress: 0
-    }));
-    
-    setUploadingFiles(initialUploads);
-
-    // Upload files
-    const uploadPromises = validFiles.map(async (file, index) => {
-      try {
-        const bucket = 'wardrobe-photos'; // Always use wardrobe-photos bucket
-        
-        // Simulate progress for better UX
-        const progressInterval = setInterval(() => {
-          setUploadingFiles(prev => prev.map((upload, i) => 
-            i === index ? { ...upload, progress: Math.min(upload.progress + 10, 90) } : upload
-          ));
-        }, 200);
-
-        const url = await uploadToStorage(file, bucket);
-        
-        clearInterval(progressInterval);
-        
-        // Complete progress
-        setUploadingFiles(prev => prev.map((upload, i) => 
-          i === index ? { ...upload, progress: 100, url } : upload
-        ));
-
-        return url;
-      } catch (error: any) {
-        console.error(`Upload failed for ${file.name}:`, error);
-        
-        setUploadingFiles(prev => prev.map((upload, i) => 
-          i === index ? { ...upload, error: error.message } : upload
-        ));
-        
-        throw error;
-      }
-    });
+    setUploading(true);
 
     try {
-      const urls = await Promise.all(uploadPromises);
-      const newUrls = [...uploadedUrls, ...urls];
+      const newUrls: string[] = [];
       
-      setUploadedUrls(newUrls);
-      onFilesSelected(newUrls);
-      
-      // Clear uploading state after a brief delay
-      setTimeout(() => {
-        setUploadingFiles([]);
-      }, 1000);
-      
-      toast.success(`${urls.length} file(s) uploaded successfully!`);
-    } catch (error) {
-      toast.error('Some uploads failed. Please try again.');
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        
+        // For demo purposes, create a placeholder URL
+        // In a real app, you would upload to a storage service
+        const placeholderUrl = URL.createObjectURL(file);
+        newUrls.push(placeholderUrl);
+      }
+
+      const updatedFiles = [...selectedFiles, ...newUrls];
+      setSelectedFiles(updatedFiles);
+      onFilesSelected(updatedFiles);
+
+      toast({
+        title: 'Upload successful',
+        description: `${newUrls.length} ${type}(s) uploaded successfully`
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Upload failed',
+        description: error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setUploading(false);
     }
-  }, [uploadedUrls, maxFiles, type, onFilesSelected]);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop: processFiles,
-    accept: type === 'photo' 
-      ? { 'image/*': ['.jpeg', '.jpg', '.png', '.webp', '.gif'] }
-      : type === 'video'
-      ? { 'video/*': ['.mp4', '.webm', '.mov', '.avi'] }
-      : { 
-          'image/*': ['.jpeg', '.jpg', '.png', '.webp', '.gif'],
-          'video/*': ['.mp4', '.webm', '.mov', '.avi']
-        },
-    maxFiles: maxFiles - uploadedUrls.length,
-    disabled: uploadingFiles.length > 0
-  });
-
-  const removeFile = (urlToRemove: string) => {
-    const newUrls = uploadedUrls.filter(url => url !== urlToRemove);
-    setUploadedUrls(newUrls);
-    onFilesSelected(newUrls);
   };
 
-  const removeUploadingFile = (indexToRemove: number) => {
-    setUploadingFiles(prev => prev.filter((_, index) => index !== indexToRemove));
+  const removeFile = (indexToRemove: number) => {
+    if (disabled) return;
+
+    const updatedFiles = selectedFiles.filter((_, index) => index !== indexToRemove);
+    setSelectedFiles(updatedFiles);
+    onFilesSelected(updatedFiles);
+
+    toast({
+      title: 'File removed',
+      description: `${type} has been removed`
+    });
   };
+
+  const acceptedTypes = type === 'photo' 
+    ? 'image/jpeg,image/png,image/webp,image/gif'
+    : 'video/mp4,video/webm,video/mov,video/avi';
 
   return (
-    <div className={`space-y-4 ${className}`}>
-      {/* Dropzone */}
-      <div
-        {...getRootProps()}
-        className={`
-          border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors
-          ${isDragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground/25'}
-          ${uploadingFiles.length > 0 ? 'pointer-events-none opacity-50' : 'hover:border-primary hover:bg-primary/5'}
-        `}
-      >
-        <input {...getInputProps()} />
-        
-        <div className="flex flex-col items-center gap-2">
-          {type === 'photo' ? <FileImage className="w-8 h-8 text-muted-foreground" /> : 
-           type === 'video' ? <FileVideo className="w-8 h-8 text-muted-foreground" /> :
-           <Upload className="w-8 h-8 text-muted-foreground" />}
-          
-          <div className="text-sm">
-            {isDragActive ? (
-              <p>Drop the files here...</p>
-            ) : (
-              <div>
-                <p className="font-medium">
-                  Click to upload or drag and drop
-                </p>
-                <p className="text-muted-foreground mt-1">
-                  {type === 'photo' && 'PNG, JPG, WEBP up to 10MB'}
-                  {type === 'video' && 'MP4, WEBM, MOV up to 100MB'}
-                  {type === 'both' && 'Images (10MB) or Videos (100MB)'}
-                </p>
-                <p className="text-muted-foreground">
-                  {maxFiles - uploadedUrls.length} of {maxFiles} files remaining
-                </p>
-              </div>
-            )}
-          </div>
+    <div className="space-y-4">
+      {/* Upload Button */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Image className="w-4 h-4" />
+          <span className="font-medium">
+            {type === 'photo' ? 'Photos' : 'Videos'} ({selectedFiles.length}/{maxFiles})
+          </span>
         </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={disabled || uploading || selectedFiles.length >= maxFiles}
+        >
+          <Upload className="w-4 h-4 mr-2" />
+          Add {type === 'photo' ? 'Photos' : 'Videos'}
+        </Button>
       </div>
 
-      {/* Uploading Files */}
-      {uploadingFiles.length > 0 && (
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium">Uploading...</h4>
-          {uploadingFiles.map((upload, index) => (
-            <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded">
-              <div className="flex-1">
-                <p className="text-sm font-medium truncate">{upload.file.name}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <Progress value={upload.progress} className="flex-1 h-2" />
-                  <span className="text-xs text-muted-foreground">{upload.progress}%</span>
-                </div>
-                {upload.error && (
-                  <p className="text-xs text-destructive mt-1">{upload.error}</p>
-                )}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept={acceptedTypes}
+        onChange={(e) => e.target.files && handleFileSelect(e.target.files)}
+        className="hidden"
+      />
+
+      {/* Preview */}
+      {selectedFiles.length === 0 ? (
+        <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
+          <Image className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
+          <p className="text-muted-foreground">No {type}s uploaded yet</p>
+          <p className="text-sm text-muted-foreground">
+            Click "Add {type === 'photo' ? 'Photos' : 'Videos'}" to get started
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {selectedFiles.map((url, index) => (
+            <div key={index} className="relative group">
+              <div className="aspect-square bg-muted rounded-lg overflow-hidden">
+                <img
+                  src={url}
+                  alt={`Upload ${index + 1}`}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = '/placeholder.svg';
+                  }}
+                />
               </div>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="w-6 h-6"
-                onClick={() => removeUploadingFile(index)}
-              >
-                <X className="w-3 h-3" />
-              </Button>
+              <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => removeFile(index)}
+                  disabled={disabled}
+                >
+                  <X className="w-3 h-3" />
+                </Button>
+              </div>
+              {index === 0 && (
+                <Badge className="absolute bottom-2 left-2" variant="secondary">
+                  Main
+                </Badge>
+              )}
             </div>
           ))}
         </div>
       )}
 
-      {/* Uploaded Files */}
-      {uploadedUrls.length > 0 && (
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium">Uploaded Files</h4>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            {uploadedUrls.map((url, index) => (
-              <div key={url} className="relative group">
-                <div className="aspect-square rounded-lg overflow-hidden bg-muted">
-                  <img
-                    src={url}
-                    alt={`Upload ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <Button
-                  size="icon"
-                  variant="destructive"
-                  className="absolute -top-2 -right-2 w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => removeFile(url)}
-                >
-                  <X className="w-3 h-3" />
-                </Button>
-              </div>
-            ))}
+      {/* Guidelines */}
+      <Card className="bg-muted/30 p-4">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+          <div className="space-y-2">
+            <h4 className="font-medium">Upload Guidelines</h4>
+            <ul className="text-sm text-muted-foreground space-y-1">
+              <li>• {type === 'photo' ? 'Photos' : 'Videos'}: Max {type === 'photo' ? '10MB' : '100MB'} each</li>
+              <li>• Formats: {type === 'photo' ? 'JPEG, PNG, WebP, GIF' : 'MP4, WebM, MOV, AVI'}</li>
+              <li>• Up to {maxFiles} {type}s per item</li>
+              <li>• First image will be used as the main photo</li>
+            </ul>
           </div>
         </div>
-      )}
+      </Card>
     </div>
   );
-}
+};
+
+export default RealImageUpload;

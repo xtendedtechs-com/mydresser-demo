@@ -1,19 +1,10 @@
-import { useState } from 'react';
-import { Check, X, ExternalLink, Sparkles } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { useToast } from '@/hooks/use-toast';
+import { Star, Heart, ShoppingCart } from 'lucide-react';
 import { WardrobeItem } from '@/hooks/useWardrobe';
 import { MerchantItem } from '@/hooks/useMerchantItems';
-import { useItemMatches } from '@/hooks/useItemMatches';
 
 interface ItemMatchDialogProps {
   isOpen: boolean;
@@ -22,8 +13,8 @@ interface ItemMatchDialogProps {
   merchantItem: MerchantItem;
   matchScore: number;
   matchReasons: string[];
-  onAccept?: () => void;
-  onReject?: () => void;
+  onAccept: () => void;
+  onReject: () => void;
 }
 
 const ItemMatchDialog = ({
@@ -36,235 +27,134 @@ const ItemMatchDialog = ({
   onAccept,
   onReject
 }: ItemMatchDialogProps) => {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const { toast } = useToast();
-  const { createMatch } = useItemMatches();
-
-  const handleAccept = async () => {
-    try {
-      setIsProcessing(true);
-      await createMatch(wardrobeItem.id, merchantItem.id, matchScore, matchReasons);
-      
-      toast({
-        title: "Match accepted!",
-        description: `We'll use ${merchantItem.name} details for your ${wardrobeItem.name}.`,
-      });
-      
-      onAccept?.();
-      onClose();
-    } catch (error) {
-      console.error('Error accepting match:', error);
-    } finally {
-      setIsProcessing(false);
-    }
+  const getMatchColor = (score: number) => {
+    if (score >= 0.8) return 'text-green-600';
+    if (score >= 0.6) return 'text-yellow-600';
+    return 'text-red-600';
   };
 
-  const handleReject = () => {
-    toast({
-      title: "Match rejected",
-      description: "We'll keep your original item details.",
-    });
-    
-    onReject?.();
-    onClose();
+  const getPhotoUrl = (photos: any): string => {
+    if (!photos) return '/placeholder.svg';
+    if (typeof photos === 'string') return photos;
+    if (photos.main) return photos.main;
+    if (Array.isArray(photos) && photos.length > 0) return photos[0];
+    return '/placeholder.svg';
   };
-
-  const getWardrobePhotoUrls = (item: WardrobeItem): string[] => {
-    if (!item.photos) return [];
-    if (Array.isArray(item.photos)) return item.photos;
-    if (typeof item.photos === 'string') return [item.photos];
-    return [];
-  };
-
-  const getMerchantPhotoUrls = (item: MerchantItem): string[] => {
-    if (!item.photos) return [];
-    if (Array.isArray(item.photos)) return item.photos;
-    if (typeof item.photos === 'string') return [item.photos];
-    return [];
-  };
-
-  const wardrobePhotos = getWardrobePhotoUrls(wardrobeItem);
-  const merchantPhotos = getMerchantPhotoUrls(merchantItem);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            Item Match Found!
-            <Badge variant="secondary" className="text-xs">
-              {Math.round(matchScore * 100)}% match
-            </Badge>
+            <Star className="w-5 h-5 text-primary" />
+            Perfect Match Found!
           </DialogTitle>
-          <DialogDescription>
-            We found a merchant item that matches your wardrobe item. Would you like to use the merchant's details and photos?
-          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Match Score */}
+          <div className="text-center">
+            <div className={`text-4xl font-bold ${getMatchColor(matchScore)}`}>
+              {Math.round(matchScore * 100)}%
+            </div>
+            <p className="text-muted-foreground">Match Score</p>
+          </div>
+
+          {/* Items Comparison */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Your Item */}
+            <Card>
+              <CardContent className="p-4">
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <Heart className="w-4 h-4" />
+                  Your Item
+                </h3>
+                <div className="space-y-3">
+                  <div className="aspect-square bg-muted rounded-lg overflow-hidden">
+                    <img
+                      src={getPhotoUrl(wardrobeItem.photos)}
+                      alt={wardrobeItem.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = '/placeholder.svg';
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <h4 className="font-medium">{wardrobeItem.name}</h4>
+                    {wardrobeItem.brand && (
+                      <p className="text-sm text-muted-foreground">{wardrobeItem.brand}</p>
+                    )}
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      <Badge variant="outline">{wardrobeItem.category}</Badge>
+                      {wardrobeItem.color && (
+                        <Badge variant="outline">{wardrobeItem.color}</Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Suggested Item */}
+            <Card className="border-primary">
+              <CardContent className="p-4">
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <ShoppingCart className="w-4 h-4" />
+                  Similar Item Available
+                </h3>
+                <div className="space-y-3">
+                  <div className="aspect-square bg-muted rounded-lg overflow-hidden">
+                    <img
+                      src={getPhotoUrl(merchantItem.photos)}
+                      alt={merchantItem.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = '/placeholder.svg';
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <h4 className="font-medium">{merchantItem.name}</h4>
+                    {merchantItem.brand && (
+                      <p className="text-sm text-muted-foreground">{merchantItem.brand}</p>
+                    )}
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      <Badge variant="outline">{merchantItem.category}</Badge>
+                      {merchantItem.color && (
+                        <Badge variant="outline">{merchantItem.color}</Badge>
+                      )}
+                      <Badge variant="secondary">${merchantItem.price}</Badge>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           {/* Match Reasons */}
           <div>
-            <h4 className="font-medium text-sm text-foreground mb-2">Why this matches:</h4>
-            <div className="flex flex-wrap gap-1">
+            <h3 className="font-semibold mb-3">Why this matches:</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {matchReasons.map((reason, index) => (
-                <Badge key={index} variant="outline" className="text-xs">
+                <div key={index} className="flex items-center gap-2 text-sm">
+                  <div className="w-2 h-2 bg-primary rounded-full"></div>
                   {reason}
-                </Badge>
+                </div>
               ))}
             </div>
           </div>
-
-          <Separator />
-
-          {/* Comparison */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Your Item */}
-            <div className="space-y-4">
-              <h3 className="font-semibold text-foreground flex items-center gap-2">
-                Your Item
-                <Badge variant="outline">Current</Badge>
-              </h3>
-              
-              <div className="aspect-square rounded-lg overflow-hidden bg-muted">
-                <img
-                  src={wardrobePhotos[0] || "/placeholder.svg"}
-                  alt={wardrobeItem.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              <div className="space-y-2 text-sm">
-                <div>
-                  <span className="font-medium">Name:</span> {wardrobeItem.name}
-                </div>
-                {wardrobeItem.brand && (
-                  <div>
-                    <span className="font-medium">Brand:</span> {wardrobeItem.brand}
-                  </div>
-                )}
-                <div>
-                  <span className="font-medium">Category:</span> {wardrobeItem.category}
-                </div>
-                {wardrobeItem.color && (
-                  <div>
-                    <span className="font-medium">Color:</span> {wardrobeItem.color}
-                  </div>
-                )}
-                {wardrobeItem.size && (
-                  <div>
-                    <span className="font-medium">Size:</span> {wardrobeItem.size}
-                  </div>
-                )}
-                {wardrobeItem.material && (
-                  <div>
-                    <span className="font-medium">Material:</span> {wardrobeItem.material}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Merchant Item */}
-            <div className="space-y-4">
-              <h3 className="font-semibold text-foreground flex items-center gap-2">
-                Merchant Item
-                <Badge variant="default">Enhanced</Badge>
-              </h3>
-              
-              <div className="aspect-square rounded-lg overflow-hidden bg-muted">
-                <img
-                  src={merchantPhotos[0] || "/placeholder.svg"}
-                  alt={merchantItem.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              <div className="space-y-2 text-sm">
-                <div>
-                  <span className="font-medium">Name:</span> {merchantItem.name}
-                </div>
-                {merchantItem.brand && (
-                  <div>
-                    <span className="font-medium">Brand:</span> {merchantItem.brand}
-                  </div>
-                )}
-                <div>
-                  <span className="font-medium">Category:</span> {merchantItem.category}
-                </div>
-                {merchantItem.color && (
-                  <div>
-                    <span className="font-medium">Color:</span> {merchantItem.color}
-                  </div>
-                )}
-                {merchantItem.size && merchantItem.size.length > 0 && (
-                  <div>
-                    <span className="font-medium">Sizes:</span> {merchantItem.size.join(', ')}
-                  </div>
-                )}
-                {merchantItem.material && (
-                  <div>
-                    <span className="font-medium">Material:</span> {merchantItem.material}
-                  </div>
-                )}
-                <div>
-                  <span className="font-medium">Price:</span> ${merchantItem.price}
-                </div>
-                {merchantItem.description && (
-                  <div>
-                    <span className="font-medium">Description:</span>
-                    <p className="text-muted-foreground mt-1">{merchantItem.description}</p>
-                  </div>
-                )}
-              </div>
-
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full"
-                onClick={() => window.open(`/item/${merchantItem.id}`, '_blank')}
-              >
-                <ExternalLink size={16} className="mr-2" />
-                View Full Details
-              </Button>
-            </div>
-          </div>
-
-          {/* Benefits */}
-          <div className="bg-muted/50 rounded-lg p-4">
-            <h4 className="font-medium text-sm text-foreground mb-2">
-              Benefits of using merchant details:
-            </h4>
-            <ul className="text-sm text-muted-foreground space-y-1">
-              <li>• High-quality professional photos</li>
-              <li>• Detailed product information</li>
-              <li>• Accurate brand and material details</li>
-              <li>• Price and availability information</li>
-              <li>• Enhanced wardrobe organization</li>
-            </ul>
-          </div>
-
-          <Separator />
-
-          {/* Actions */}
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={handleReject}
-              disabled={isProcessing}
-              className="flex-1"
-            >
-              <X size={16} className="mr-2" />
-              Keep Original
-            </Button>
-            <Button
-              onClick={handleAccept}
-              disabled={isProcessing}
-              className="flex-1"
-            >
-              <Check size={16} className="mr-2" />
-              {isProcessing ? 'Processing...' : 'Use Merchant Details'}
-            </Button>
-          </div>
         </div>
+
+        <DialogFooter className="gap-2">
+          <Button variant="outline" onClick={onReject}>
+            Not Interested
+          </Button>
+          <Button onClick={onAccept} className="gap-2">
+            <ShoppingCart className="w-4 h-4" />
+            View in Marketplace
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
