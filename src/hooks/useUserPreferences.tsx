@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 export interface UserPreferences {
   // Theme preferences
   theme: {
-    mode: 'light' | 'dark' | 'system';
+    mode: 'light' | 'dark' | 'system' | 'auto';
     accent_color: string;
     gradient_preset: string;
     blur_effects: boolean;
@@ -15,6 +15,35 @@ export interface UserPreferences {
       primary: string;
       secondary: string;
       accent: string;
+      background: string;
+      foreground: string;
+      muted: string;
+      destructive: string;
+      warning: string;
+      success: string;
+    };
+    typography: {
+      font_family: 'system' | 'inter' | 'roboto' | 'poppins' | 'playfair' | 'mono';
+      font_weight: 'light' | 'normal' | 'medium' | 'semibold' | 'bold';
+      letter_spacing: 'tight' | 'normal' | 'wide';
+      line_height: 'tight' | 'normal' | 'relaxed';
+    };
+    layout: {
+      spacing: 'compact' | 'normal' | 'comfortable' | 'spacious';
+      content_width: 'narrow' | 'normal' | 'wide' | 'full';
+      sidebar_width: 'narrow' | 'normal' | 'wide';
+    };
+    effects: {
+      glass_morphism: boolean;
+      particle_effects: boolean;
+      hover_animations: boolean;
+      page_transitions: boolean;
+      loading_animations: boolean;
+    };
+    patterns: {
+      use_patterns: boolean;
+      pattern_type: 'dots' | 'grid' | 'diagonal' | 'waves' | 'geometric';
+      pattern_opacity: number;
     };
   };
   
@@ -22,9 +51,14 @@ export interface UserPreferences {
   extended_theme: {
     gradient_backgrounds: boolean;
     animated_transitions: boolean;
-    card_style: 'default' | 'minimal' | 'elevated' | 'outlined';
-    border_radius: 'none' | 'small' | 'medium' | 'large' | 'full';
-    shadow_intensity: 'none' | 'subtle' | 'medium' | 'strong';
+    card_style: 'default' | 'minimal' | 'elevated' | 'outlined' | 'glass' | 'neumorphism';
+    border_radius: 'none' | 'small' | 'medium' | 'large' | 'xl' | 'full';
+    shadow_intensity: 'none' | 'subtle' | 'medium' | 'strong' | 'dramatic';
+    button_style: 'default' | 'rounded' | 'pill' | 'sharp' | 'gradient';
+    icon_style: 'outline' | 'filled' | 'duotone' | 'animated';
+    component_density: 'compact' | 'normal' | 'comfortable';
+    color_scheme_type: 'vibrant' | 'muted' | 'pastel' | 'monochrome' | 'high_contrast';
+    custom_css: string;
   };
   
   // Accessibility settings
@@ -37,6 +71,20 @@ export interface UserPreferences {
     color_blind_friendly: boolean;
     font_size_multiplier: number;
     voice_navigation: boolean;
+    focus_indicators: boolean;
+    skip_navigation: boolean;
+    alternative_text: boolean;
+    captions_enabled: boolean;
+    dyslexia_friendly: boolean;
+    reading_mode: boolean;
+    cursor_enhancement: boolean;
+    click_assistance: boolean;
+    gesture_controls: boolean;
+    sound_feedback: boolean;
+    haptic_feedback: boolean;
+    reading_speed: 'slow' | 'normal' | 'fast';
+    contrast_ratio: number;
+    content_spacing: number;
   };
   
   // Notification preferences
@@ -106,6 +154,35 @@ const defaultPreferences: UserPreferences = {
       primary: '#3b82f6',
       secondary: '#64748b',
       accent: '#8b5cf6',
+      background: '#ffffff',
+      foreground: '#0f172a',
+      muted: '#f1f5f9',
+      destructive: '#ef4444',
+      warning: '#f59e0b',
+      success: '#10b981',
+    },
+    typography: {
+      font_family: 'system',
+      font_weight: 'normal',
+      letter_spacing: 'normal',
+      line_height: 'normal',
+    },
+    layout: {
+      spacing: 'normal',
+      content_width: 'normal',
+      sidebar_width: 'normal',
+    },
+    effects: {
+      glass_morphism: true,
+      particle_effects: false,
+      hover_animations: true,
+      page_transitions: true,
+      loading_animations: true,
+    },
+    patterns: {
+      use_patterns: false,
+      pattern_type: 'dots',
+      pattern_opacity: 0.1,
     },
   },
   extended_theme: {
@@ -114,6 +191,11 @@ const defaultPreferences: UserPreferences = {
     card_style: 'default',
     border_radius: 'medium',
     shadow_intensity: 'medium',
+    button_style: 'default',
+    icon_style: 'outline',
+    component_density: 'normal',
+    color_scheme_type: 'vibrant',
+    custom_css: '',
   },
   accessibility_settings: {
     high_contrast: false,
@@ -124,6 +206,20 @@ const defaultPreferences: UserPreferences = {
     color_blind_friendly: false,
     font_size_multiplier: 1.0,
     voice_navigation: false,
+    focus_indicators: true,
+    skip_navigation: true,
+    alternative_text: true,
+    captions_enabled: false,
+    dyslexia_friendly: false,
+    reading_mode: false,
+    cursor_enhancement: false,
+    click_assistance: false,
+    gesture_controls: false,
+    sound_feedback: false,
+    haptic_feedback: false,
+    reading_speed: 'normal',
+    contrast_ratio: 4.5,
+    content_spacing: 1.0,
   },
   notifications: {
     email: true,

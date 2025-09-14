@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import EnhancedThemeSelector from './EnhancedThemeSelector';
+import AccessibilitySettings from './AccessibilitySettings';
 
 interface SettingsDialogProps {
   open?: boolean;
@@ -322,87 +323,7 @@ const SettingsDialog = ({ open, onOpenChange, initialTabType }: SettingsDialogPr
           </TabsContent>
 
           <TabsContent value="accessibility" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Accessibility Settings</CardTitle>
-                <CardDescription>Configure accessibility options for better user experience</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="highContrast">High Contrast</Label>
-                  <Switch
-                    id="highContrast"
-                    checked={preferences.accessibility_settings.high_contrast}
-                    onCheckedChange={(checked) => updatePreferences({
-                      accessibility_settings: { ...preferences.accessibility_settings, high_contrast: checked }
-                    })}
-                  />
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="largeText">Large Text</Label>
-                  <Switch
-                    id="largeText"
-                    checked={preferences.accessibility_settings.large_text}
-                    onCheckedChange={(checked) => updatePreferences({
-                      accessibility_settings: { ...preferences.accessibility_settings, large_text: checked }
-                    })}
-                  />
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="reduceMotion">Reduce Motion</Label>
-                  <Switch
-                    id="reduceMotion"
-                    checked={preferences.accessibility_settings.reduce_motion}
-                    onCheckedChange={(checked) => updatePreferences({
-                      accessibility_settings: { ...preferences.accessibility_settings, reduce_motion: checked }
-                    })}
-                  />
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="keyboardNavigation">Keyboard Navigation</Label>
-                  <Switch
-                    id="keyboardNavigation"
-                    checked={preferences.accessibility_settings.keyboard_navigation}
-                    onCheckedChange={(checked) => updatePreferences({
-                      accessibility_settings: { ...preferences.accessibility_settings, keyboard_navigation: checked }
-                    })}
-                  />
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="colorBlindFriendly">Color Blind Friendly</Label>
-                  <Switch
-                    id="colorBlindFriendly"
-                    checked={preferences.accessibility_settings.color_blind_friendly}
-                    onCheckedChange={(checked) => updatePreferences({
-                      accessibility_settings: { ...preferences.accessibility_settings, color_blind_friendly: checked }
-                    })}
-                  />
-                </div>
-                <Separator />
-                <div className="space-y-2">
-                  <Label>Font Size Multiplier</Label>
-                  <div className="px-2">
-                    <Slider
-                      value={[preferences.accessibility_settings.font_size_multiplier]}
-                      onValueChange={([value]) => updatePreferences({
-                        accessibility_settings: { ...preferences.accessibility_settings, font_size_multiplier: value }
-                      })}
-                      max={2}
-                      min={0.8}
-                      step={0.1}
-                      className="w-full"
-                    />
-                    <div className="text-sm text-muted-foreground mt-2 text-center">
-                      {preferences.accessibility_settings.font_size_multiplier}x
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <AccessibilitySettings />
           </TabsContent>
 
           <TabsContent value="preferences" className="space-y-4">
