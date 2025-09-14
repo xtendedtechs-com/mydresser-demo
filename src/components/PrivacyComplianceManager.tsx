@@ -87,16 +87,9 @@ const PrivacyComplianceManager = () => {
       await supabase.from('merchant_profiles').delete().neq('id', '00000000-0000-0000-0000-000000000000');
       await supabase.from('profiles').delete().neq('id', '00000000-0000-0000-0000-000000000000');
 
-      // Log the deletion request (actual user deletion handled by admin)
-      await supabase.from('security_audit_log').insert({
-        action: 'account_deletion_requested',
-        resource: 'auth.users',
-        success: true,
-        details: {
-          deletion_method: 'user_initiated',
-          compliance: 'GDPR_Article_17'
-        }
-      });
+      // Use the secure delete_user_account function for proper audit logging
+      // @ts-ignore - Function exists in database but not in generated types
+      await (supabase.rpc as any)('delete_user_account');
 
       toast({
         title: "Account deleted successfully",
