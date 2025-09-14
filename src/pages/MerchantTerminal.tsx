@@ -915,10 +915,7 @@ const MerchantTerminal = () => {
                     <Download className="w-4 h-4 mr-2" />
                     Export Inventory
                   </Button>
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Product
-                  </Button>
+                  <AddItemDialog onItemAdded={refetch} />
                 </div>
               </div>
 
