@@ -2,26 +2,13 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import SecurityHeaders from "@/components/SecurityHeaders";
 import Landing from "@/pages/Landing";
-import Home from "@/pages/Home";
-import Wardrobe from "@/pages/Wardrobe";
-import Account from "@/pages/Account";
-import Add from "@/pages/Add";
 import Auth from "@/pages/Auth";
-import Market from "@/pages/Market";
-import MarketItemDetail from "@/pages/MarketItemDetail";
-import ItemDetail from "@/pages/ItemDetail";
-import WardrobeItemDetail from "@/pages/WardrobeItemDetail";
-import ProfileSetup from "@/pages/ProfileSetup";
-import MerchantTerminal from "@/pages/MerchantTerminal";
-import NotFound from "./pages/NotFound";
-import EnhancedWardrobeManager from "@/components/EnhancedWardrobeManager";
-import EnhancedMarketplace from "@/components/EnhancedMarketplace";
-import SmartOutfitMatcher from "@/components/SmartOutfitMatcher";
+import AppContent from "@/components/AppContent";
 import { useProfile } from "@/hooks/useProfile";
 
 const queryClient = new QueryClient();
@@ -76,23 +63,7 @@ const App = () => {
         <Toaster />
         <Sonner />
         <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/wardrobe" element={<Wardrobe />} />
-          <Route path="/wardrobe/enhanced" element={<EnhancedWardrobeManager />} />
-          <Route path="/market" element={<Market />} />
-          <Route path="/market/item/:id" element={<MarketItemDetail />} />
-          <Route path="/marketplace" element={<EnhancedMarketplace />} />
-          <Route path="/add" element={<Add />} />
-          <Route path="/merchant-terminal" element={<MerchantTerminal />} />
-          <Route path="/smart-matcher" element={<SmartOutfitMatcher />} />
-          <Route path="/account" element={<Account />} />
-          <Route path="/item/:id" element={<ItemDetail />} />
-          <Route path="/wardrobe/item/:id" element={<WardrobeItemDetail />} />
-          <Route path="/profile-setup" element={<ProfileSetup />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-          <Navigation />
+          <AppContent />
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
