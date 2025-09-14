@@ -39,10 +39,13 @@ import {
   Star,
   Edit,
   Trash2,
-  ExternalLink
+  ExternalLink,
+  LogOut
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useMerchantItems } from '@/hooks/useMerchantItems';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 
 interface CheckoutItem {
   id: string;
@@ -137,6 +140,7 @@ const MerchantTerminal = () => {
 
   const { items: inventoryItems, loading } = useMerchantItems();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const filteredInventory = inventoryItems.filter(item =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -228,6 +232,26 @@ const MerchantTerminal = () => {
     });
   };
 
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast({
+        title: 'Logged Out',
+        description: 'You have been successfully logged out'
+      });
+      
+      navigate('/auth');
+    } catch (error: any) {
+      toast({
+        title: 'Logout Failed',
+        description: error.message,
+        variant: 'destructive'
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -248,6 +272,10 @@ const MerchantTerminal = () => {
             </Button>
             <Button variant="ghost" size="icon">
               <Settings className="w-4 h-4" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleLogout}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
             </Button>
           </div>
         </div>
