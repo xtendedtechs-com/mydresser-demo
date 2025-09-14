@@ -29,7 +29,7 @@ const ReactionButton = ({
   }, [targetType, targetId, reactionType]);
 
   const fetchReactions = async () => {
-    const allReactions = await getReactions(targetType, targetId);
+    const allReactions = getReactions(targetId, targetType);
     const typeReactions = allReactions.filter(r => r.reaction_type === reactionType);
     setReactions(typeReactions);
     
@@ -45,20 +45,18 @@ const ReactionButton = ({
     setLoading(true);
     try {
       if (userReacted) {
-        await removeReaction(targetType, targetId, reactionType);
+        await removeReaction(targetId, targetType);
         setUserReacted(false);
         setReactions(prev => prev.filter(r => r.user_id !== 'current_user_id')); // Would need actual user ID
       } else {
-        await addReaction(targetType, targetId, reactionType);
+        await addReaction(targetId, targetType, reactionType);
         setUserReacted(true);
         // Add optimistic update
         const newReaction: Reaction = {
           id: 'temp',
           user_id: 'current_user_id', // Would need actual user ID
-          post_id: targetId,
-          type: reactionType,
-          target_type: targetType,
           target_id: targetId,
+          target_type: targetType,
           reaction_type: reactionType,
           created_at: new Date().toISOString()
         };
