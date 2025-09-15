@@ -1,22 +1,32 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Sparkles, RefreshCw, Heart, Share2, Calendar, Thermometer, Cloud } from 'lucide-react';
-import { useWardrobe } from '@/hooks/useWardrobe';
-import { useUserPreferences } from '@/hooks/useUserPreferences';
-import { weatherService } from '@/services/weatherService';
-import { OutfitAI } from '@/ai/OutfitAI';
-import { toast } from 'sonner';
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { 
+  Sparkles, 
+  RefreshCw, 
+  Heart, 
+  Share2, 
+  Calendar, 
+  Thermometer, 
+  Cloud,
+  Loader2
+} from "lucide-react";
+import { useWardrobe } from "@/hooks/useWardrobe";
+import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { OutfitAI } from "@/ai/OutfitAI";
+import { weatherService } from "@/services/weatherService";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface DailyOutfitProps {
   date?: Date;
 }
 
-export const DailyOutfitGenerator = ({ date = new Date() }: DailyOutfitProps) => {
-  const { items: wardrobeItems } = useWardrobe();
-  const { preferences } = useUserPreferences();
+export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
+  const { items: wardrobeItems, loading: wardrobeLoading } = useWardrobe();
+  const { preferences, loading: preferencesLoading } = useUserPreferences();
   
   const [outfit, setOutfit] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -24,8 +34,10 @@ export const DailyOutfitGenerator = ({ date = new Date() }: DailyOutfitProps) =>
   const [regenerating, setRegenerating] = useState(false);
 
   useEffect(() => {
-    generateDailyOutfit();
-  }, [date, wardrobeItems]);
+    if (!wardrobeLoading && !preferencesLoading && wardrobeItems.length > 0) {
+      generateDailyOutfit();
+    }
+  }, [wardrobeLoading, preferencesLoading, wardrobeItems]);
 
   const generateDailyOutfit = async () => {
     if (!wardrobeItems.length) return;
@@ -33,15 +45,23 @@ export const DailyOutfitGenerator = ({ date = new Date() }: DailyOutfitProps) =>
     try {
       setLoading(true);
       
-      // Get weather data if user has location
+      // Get weather data
       let weatherData = null;
-      if (preferences.privacy?.location_sharing) {
-        try {
+      try {
+        if (navigator.geolocation) {
+          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject);
+          });
+          weatherData = await weatherService.getCurrentWeather(
+            position.coords.latitude, 
+            position.coords.longitude
+          );
+        } else {
           weatherData = await weatherService.getCurrentWeather();
-          setWeather(weatherData);
-        } catch (error) {
-          console.warn('Weather data unavailable');
         }
+        setWeather(weatherData);
+      } catch (error) {
+        console.warn('Weather data unavailable:', error);
       }
 
       // Generate outfit using AI
@@ -49,11 +69,47 @@ export const DailyOutfitGenerator = ({ date = new Date() }: DailyOutfitProps) =>
       const generatedOutfit = await outfitAI.generateOutfit({
         wardrobeItems,
         weather: weatherData,
-        preferences: preferences.suggestion_settings,
+        preferences: preferences?.suggestion_settings || {},
         occasion: 'daily'
       });
 
-      setOutfit(generatedOutfit);
+      // Save outfit to database
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: savedOutfit } = await supabase
+          .from('outfits')
+          .insert({
+            user_id: user.id,
+            name: generatedOutfit.name || 'Daily AI Pick',
+            occasion: 'casual',
+            season: 'all-season',
+            is_ai_generated: true,
+            ai_generation_prompt: generatedOutfit.reasoning,
+            weather_conditions: weatherData,
+            notes: `Generated on ${new Date().toLocaleDateString()}`,
+            is_favorite: false
+          })
+          .select()
+          .single();
+
+        if (savedOutfit) {
+          // Link outfit items
+          for (const item of generatedOutfit.items) {
+            await supabase.from('outfit_items').insert({
+              outfit_id: savedOutfit.id,
+              wardrobe_item_id: item.id,
+              item_type: item.category
+            });
+          }
+          generatedOutfit.id = savedOutfit.id;
+        }
+      }
+
+      setOutfit({
+        ...generatedOutfit,
+        name: generatedOutfit.name || 'Daily AI Pick',
+        confidence: Math.round((generatedOutfit.confidence || 0.85) * 100)
+      });
     } catch (error) {
       console.error('Error generating outfit:', error);
       toast.error('Failed to generate outfit');
@@ -71,15 +127,55 @@ export const DailyOutfitGenerator = ({ date = new Date() }: DailyOutfitProps) =>
 
   const saveOutfit = async () => {
     if (!outfit) return;
-    // Implementation for saving outfit
-    toast.success('Outfit saved to your collection!');
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      await supabase
+        .from('outfits')
+        .update({ is_favorite: true })
+        .eq('id', outfit.id);
+
+      toast.success('Outfit saved to favorites!');
+    } catch (error) {
+      toast.error('Failed to save outfit');
+    }
   };
 
   const shareOutfit = async () => {
     if (!outfit) return;
-    // Implementation for sharing outfit
-    toast.success('Outfit shared!');
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `My ${outfit.name}`,
+          text: `Check out my ${outfit.name} outfit! Generated by MyDresser AI.`,
+          url: window.location.href
+        });
+      } catch (error) {
+        console.log('Share cancelled');
+      }
+    } else {
+      await navigator.clipboard.writeText(
+        `Check out my ${outfit.name} outfit! Generated by MyDresser AI.`
+      );
+      toast.success('Copied to clipboard!');
+    }
   };
+
+  if (wardrobeLoading || preferencesLoading) {
+    return (
+      <Card className="w-full max-w-2xl mx-auto">
+        <CardContent className="flex items-center justify-center py-8">
+          <div className="flex flex-col items-center space-y-4">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <p className="text-muted-foreground">Loading your wardrobe...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (loading && !outfit) {
     return (
@@ -94,7 +190,7 @@ export const DailyOutfitGenerator = ({ date = new Date() }: DailyOutfitProps) =>
     );
   }
 
-  if (!outfit) {
+  if (!outfit && wardrobeItems.length === 0) {
     return (
       <Card className="w-full max-w-2xl mx-auto">
         <CardContent className="text-center py-8">
@@ -110,6 +206,19 @@ export const DailyOutfitGenerator = ({ date = new Date() }: DailyOutfitProps) =>
     );
   }
 
+  if (!outfit) {
+    return (
+      <Card className="w-full max-w-2xl mx-auto">
+        <CardContent className="text-center py-8">
+          <Button onClick={generateDailyOutfit} disabled={loading}>
+            <Sparkles className="w-4 h-4 mr-2" />
+            Generate Daily Outfit
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
@@ -117,7 +226,7 @@ export const DailyOutfitGenerator = ({ date = new Date() }: DailyOutfitProps) =>
           <div>
             <CardTitle className="flex items-center space-x-2">
               <Sparkles className="w-5 h-5 text-primary" />
-              <span>Today's AI Pick</span>
+              <span>{outfit.name}</span>
             </CardTitle>
             <CardDescription className="flex items-center space-x-4 mt-2">
               <div className="flex items-center space-x-1">
@@ -130,6 +239,7 @@ export const DailyOutfitGenerator = ({ date = new Date() }: DailyOutfitProps) =>
                   <span>{Math.round(weather.temperature)}°C</span>
                 </div>
               )}
+              <Badge variant="secondary">{outfit.confidence}% match</Badge>
             </CardDescription>
           </div>
           <Button
@@ -151,7 +261,7 @@ export const DailyOutfitGenerator = ({ date = new Date() }: DailyOutfitProps) =>
             <div className="text-sm">
               <span className="font-medium">{weather.condition}</span>
               <span className="text-muted-foreground ml-2">
-                {Math.round(weather.temperature)}°C, feels like {Math.round(weather.feelsLike)}°C
+                {Math.round(weather.temperature)}°C
               </span>
             </div>
           </div>
@@ -160,7 +270,7 @@ export const DailyOutfitGenerator = ({ date = new Date() }: DailyOutfitProps) =>
         {/* Outfit Items */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {outfit.items?.map((item: any, index: number) => (
-            <div key={index} className="text-center">
+            <div key={item.id || index} className="text-center">
               <div className="relative mb-2">
                 <Avatar className="w-20 h-20 mx-auto">
                   <AvatarImage src={item.photos?.main || '/placeholder.svg'} />
@@ -208,7 +318,7 @@ export const DailyOutfitGenerator = ({ date = new Date() }: DailyOutfitProps) =>
             <Share2 className="w-4 h-4 mr-2" />
             Share
           </Button>
-          <Button onClick={regenerateOutfit} className="flex-1">
+          <Button onClick={regenerateOutfit} className="flex-1" disabled={regenerating}>
             <RefreshCw className="w-4 h-4 mr-2" />
             New Suggestion
           </Button>

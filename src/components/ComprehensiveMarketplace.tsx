@@ -59,79 +59,90 @@ export const ComprehensiveMarketplace = () => {
     fetchTrendingItems();
   }, []);
 
-  const socialPosts = [
-    {
-      id: '1',
-      user: {
-        id: 'user1',
-        name: 'Sarah Style',
-        avatar: '/placeholder.svg',
-        role: 'professional'
-      },
-      content: {
-        type: 'outfit' as const,
-        title: 'Perfect Fall Transition Look',
-        description: 'Mixing textures for a cozy yet chic autumn outfit',
-        images: ['/placeholder.svg', '/placeholder.svg'],
-        tags: ['fall', 'layering', 'cozy']
-      },
-      engagement: {
-        likes: 234,
-        comments: 18,
-        shares: 12
-      },
-      metadata: {
-        createdAt: '2024-01-15T10:30:00Z',
-        location: 'New York'
+  const [socialPosts, setSocialPosts] = useState([]);
+  
+  useEffect(() => {
+    const fetchSocialPosts = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('collections')
+          .select(`
+            id,
+            name,
+            description,
+            created_at,
+            profiles:user_id (
+              full_name,
+              avatar_url,
+              role
+            )
+          `)
+          .eq('is_public', true)
+          .order('created_at', { ascending: false })
+          .limit(5);
+        
+        if (error) throw error;
+        setSocialPosts(data || []);
+      } catch (error) {
+        console.error('Error fetching social posts:', error);
       }
-    }
-  ];
+    };
+    
+    fetchSocialPosts();
+  }, []);
 
-  const professionalStylists = [
-    {
-      id: '1',
-      name: 'Emma Rodriguez',
-      specialties: ['Sustainable Fashion', 'Color Analysis'],
-      rating: 4.9,
-      clients: 150,
-      price: '$75/session',
-      avatar: '/placeholder.svg',
-      verified: true
-    },
-    {
-      id: '2',
-      name: 'Marcus Chen',
-      specialties: ['Menswear', 'Corporate Style'],
-      rating: 4.8,
-      clients: 98,
-      price: '$65/session',
-      avatar: '/placeholder.svg',
-      verified: true
-    }
-  ];
+  const [professionalStylists, setProfessionalStylists] = useState([]);
 
-  const featuredMerchants = [
-    {
-      id: '1',
-      name: 'Sustainable Threads',
-      description: 'Eco-friendly fashion for the conscious consumer',
-      rating: 4.7,
-      products: 284,
-      logo: '/placeholder.svg',
-      verified: true,
-      tags: ['sustainable', 'organic', 'fair-trade']
-    },
-    {
-      id: '2',
-      name: 'Vintage Vault',
-      description: 'Curated vintage pieces from the 70s-90s',
-      rating: 4.6,
-      products: 156,
-      logo: '/placeholder.svg',
-      verified: true,
-      tags: ['vintage', 'retro', 'unique']
-    }
-  ];
+  useEffect(() => {
+    const fetchProfessionalStylists = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('role', 'professional')
+          .limit(10);
+        
+        if (error) throw error;
+        setProfessionalStylists(data || []);
+      } catch (error) {
+        console.error('Error fetching professional stylists:', error);
+      }
+    };
+    
+    fetchProfessionalStylists();
+  }, []);
+
+  const [featuredMerchants, setFeaturedMerchants] = useState([]);
+
+  useEffect(() => {
+    const fetchFeaturedMerchants = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('merchant_pages')
+          .select(`
+            id,
+            business_name,
+            brand_story,
+            logo,
+            is_published,
+            merchant_profiles:merchant_id (
+              business_name,
+              business_type,
+              verification_status
+            )
+          `)
+          .eq('is_published', true)
+          .limit(6);
+        
+        if (error) throw error;
+        setFeaturedMerchants(data || []);
+      } catch (error) {
+        console.error('Error fetching featured merchants:', error);
+      }
+    };
+    
+    fetchFeaturedMerchants();
+  }, []);
 
   useEffect(() => {
     // Filter items based on search

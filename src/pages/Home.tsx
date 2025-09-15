@@ -186,7 +186,7 @@ const Home = () => {
 
           <TabsContent value="overview" className="space-y-6">
             {/* Daily Outfit */}
-            <DailyOutfitGenerator />
+            <RealDailyOutfit />
 
             {/* Recent Activity */}
             <Card>
