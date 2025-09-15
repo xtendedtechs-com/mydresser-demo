@@ -239,8 +239,8 @@ export const DatabaseBackedFeatures = () => {
 
     return Object.entries(distribution).map(([category, count]) => ({
       category: category.charAt(0).toUpperCase() + category.slice(1),
-      count,
-      percentage: Math.round((count / items.length) * 100)
+      count: Number(count),
+      percentage: Math.round((Number(count) / items.length) * 100)
     }));
   };
 

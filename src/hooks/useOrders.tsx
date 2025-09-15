@@ -1,103 +1,92 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useProfile } from '@/hooks/useProfile';
 
 export interface Order {
   id: string;
-  merchant_id: string;
-  customer_name: string;
-  customer_email: string;
-  customer_phone?: string | null;
-  items: any;
-  subtotal: number;
-  tax_amount: number;
-  shipping_amount: number;
-  discount_amount: number;
+  buyer_id: string;
+  seller_id: string;
+  item_id: string;
+  quantity: number;
   total_amount: number;
-  status: string;
-  payment_method?: string | null;
-  payment_status: string;
+  status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'completed' | 'cancelled';
   shipping_address?: any;
-  billing_address?: any;
-  notes?: string | null;
-  tracking_number?: string | null;
+  payment_method?: string;
+  payment_status: 'pending' | 'completed' | 'failed' | 'refunded';
+  tracking_number?: string;
+  notes?: string;
+  customer_name?: string;
   created_at: string;
   updated_at: string;
-}
-
-export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded';
-export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded';
-
-export interface OrderItem {
-  id: string;
-  order_id: string;
-  merchant_item_id?: string;
-  name: string;
-  description?: string;
-  price: number;
-  quantity: number;
-  size?: string;
-  color?: string;
-  image_url?: string;
-  created_at: string;
 }
 
 export const useOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user, profile } = useProfile();
   const { toast } = useToast();
 
   const fetchOrders = async () => {
-    try {
-      setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
+    if (!user?.id) return;
 
-      // Fetch orders with masked customer data for security
-      const { data, error } = await supabase
+    setLoading(true);
+    try {
+      let query = supabase
         .from('orders')
         .select(`
-          id,
-          merchant_id,
-          items,
-          subtotal,
-          tax_amount,
-          shipping_amount,
-          discount_amount,
-          total_amount,
-          status,
-          payment_method,
-          payment_status,
-          notes,
-          tracking_number,
-          created_at,
-          updated_at
+          *,
+          market_items(title, price),
+          buyer_profile:profiles!orders_buyer_id_fkey(display_name),
+          seller_profile:profiles!orders_seller_id_fkey(display_name)
         `)
-        .eq('merchant_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      // If user is a merchant, get orders for their items
+      // If user is a customer, get their purchases
+      if (profile?.role === 'merchant' || profile?.role === 'professional') {
+        query = query.eq('seller_id', user.id);
+      } else {
+        query = query.eq('buyer_id', user.id);
+      }
 
-      // Add masked customer info for display
-      const ordersWithMaskedData = (data || []).map(order => ({
-        ...order,
-        customer_name: 'Customer Data Protected',
-        customer_email: 'Protected',
-        customer_phone: null,
-        shipping_address: null,
-        billing_address: null
-      }));
+      const { data, error } = await query;
 
-      setOrders(ordersWithMaskedData);
-    } catch (error: any) {
-      console.error('Error fetching orders:', error);
+      if (error) {
+        console.error('Error fetching orders:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load orders",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const formattedOrders: Order[] = data?.map(order => ({
+        id: order.id,
+        buyer_id: order.buyer_id,
+        seller_id: order.seller_id,
+        item_id: order.item_id,
+        quantity: order.quantity || 1,
+        total_amount: order.total_amount,
+        status: order.status,
+        shipping_address: order.shipping_address,
+        payment_method: order.payment_method,
+        payment_status: order.payment_status,
+        tracking_number: order.tracking_number,
+        notes: order.notes,
+        customer_name: order.buyer_profile?.display_name || order.seller_profile?.display_name || 'Unknown',
+        created_at: order.created_at,
+        updated_at: order.updated_at
+      })) || [];
+
+      setOrders(formattedOrders);
+    } catch (error) {
+      console.error('Error in fetchOrders:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to fetch orders',
-        variant: 'destructive'
+        title: "Error",
+        description: "Failed to load orders",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
@@ -105,196 +94,129 @@ export const useOrders = () => {
   };
 
   const createOrder = async (orderData: {
-    customer_name: string;
-    customer_email: string;
-    customer_phone?: string;
-    items: any;
-    subtotal: number;
-    tax_amount?: number;
-    shipping_amount?: number;
-    discount_amount?: number;
+    seller_id: string;
+    item_id: string;
+    quantity?: number;
     total_amount: number;
-    status?: string;
-    payment_method?: string;
-    payment_status?: string;
     shipping_address?: any;
-    billing_address?: any;
-    notes?: string;
+    payment_method?: string;
   }) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
+    if (!user?.id) return null;
 
+    try {
       const { data, error } = await supabase
         .from('orders')
-        .insert({
-          merchant_id: user.id,
-          customer_name: orderData.customer_name,
-          customer_email: orderData.customer_email,
-          customer_phone: orderData.customer_phone || null,
-          items: orderData.items,
-          subtotal: orderData.subtotal,
-          tax_amount: orderData.tax_amount || 0,
-          shipping_amount: orderData.shipping_amount || 0,
-          discount_amount: orderData.discount_amount || 0,
-          total_amount: orderData.total_amount,
-          status: orderData.status || 'pending',
-          payment_method: orderData.payment_method || null,
-          payment_status: orderData.payment_status || 'pending',
-          shipping_address: orderData.shipping_address || null,
-          billing_address: orderData.billing_address || null,
-          notes: orderData.notes || null
-        })
+        .insert([{
+          buyer_id: user.id,
+          ...orderData,
+          quantity: orderData.quantity || 1,
+          status: 'pending',
+          payment_status: 'pending',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }])
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating order:', error);
+        toast({
+          title: "Error",
+          description: "Failed to create order",
+          variant: "destructive"
+        });
+        return null;
+      }
 
+      await fetchOrders(); // Refresh the list
       toast({
-        title: 'Success',
-        description: 'Order created successfully'
+        title: "Success",
+        description: "Order created successfully"
       });
-
-      fetchOrders();
+      
       return data;
-    } catch (error: any) {
-      console.error('Error creating order:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to create order',
-        variant: 'destructive'
-      });
-      throw error;
+    } catch (error) {
+      console.error('Error in createOrder:', error);
+      return null;
     }
   };
 
-  const updateOrderStatus = async (orderId: string, status: Order['status'], notes?: string) => {
+  const updateOrderStatus = async (orderId: string, status: Order['status']) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
-
-      // Get current order to record status history
-      const { data: currentOrder } = await supabase
+      const { error } = await supabase
         .from('orders')
-        .select('status')
-        .eq('id', orderId)
-        .single();
-
-      // Update order status
-      const { error: updateError } = await supabase
-        .from('orders')
-        .update({ 
+        .update({
           status,
           updated_at: new Date().toISOString()
         })
-        .eq('id', orderId)
-        .eq('merchant_id', user.id);
+        .eq('id', orderId);
 
-      if (updateError) throw updateError;
-
-      // Record status history
-      const { error: historyError } = await supabase
-        .from('order_status_history')
-        .insert({
-          order_id: orderId,
-          previous_status: currentOrder?.status,
-          new_status: status,
-          changed_by: user.id,
-          notes
+      if (error) {
+        console.error('Error updating order status:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update order status",
+          variant: "destructive"
         });
-
-      if (historyError) throw historyError;
-
-      toast({
-        title: 'Success',
-        description: 'Order status updated successfully'
-      });
-
-      fetchOrders();
-    } catch (error: any) {
-      console.error('Error updating order status:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update order status',
-        variant: 'destructive'
-      });
-    }
-  };
-
-  const updateTrackingNumber = async (orderId: string, trackingNumber: string) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        throw new Error('User not authenticated');
+        return false;
       }
 
-      const { error } = await supabase
-        .from('orders')
-        .update({ 
-          tracking_number: trackingNumber,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', orderId)
-        .eq('merchant_id', user.id);
-
-      if (error) throw error;
-
+      await fetchOrders(); // Refresh the list
       toast({
-        title: 'Success',
-        description: 'Tracking number updated successfully'
+        title: "Success",
+        description: "Order status updated successfully"
       });
-
-      fetchOrders();
-    } catch (error: any) {
-      console.error('Error updating tracking number:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update tracking number',
-        variant: 'destructive'
-      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error in updateOrderStatus:', error);
+      return false;
     }
   };
 
-  const getOrderItems = async (orderId: string): Promise<OrderItem[]> => {
+  const updatePaymentStatus = async (orderId: string, payment_status: Order['payment_status']) => {
     try {
-      const { data, error } = await supabase
-        .from('order_items')
-        .select('*')
-        .eq('order_id', orderId)
-        .order('created_at', { ascending: true });
+      const { error } = await supabase
+        .from('orders')
+        .update({
+          payment_status,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', orderId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating payment status:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update payment status",
+          variant: "destructive"
+        });
+        return false;
+      }
 
-      return data || [];
-    } catch (error: any) {
-      console.error('Error fetching order items:', error);
+      await fetchOrders(); // Refresh the list
       toast({
-        title: 'Error',
-        description: 'Failed to fetch order items',
-        variant: 'destructive'
+        title: "Success",
+        description: "Payment status updated successfully"
       });
-      return [];
+      
+      return true;
+    } catch (error) {
+      console.error('Error in updatePaymentStatus:', error);
+      return false;
     }
   };
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [user?.id, profile?.role]);
 
   return {
     orders,
     loading,
-    fetchOrders,
     createOrder,
     updateOrderStatus,
-    updateTrackingNumber,
-    getOrderItems
+    updatePaymentStatus,
+    refetch: fetchOrders
   };
 };

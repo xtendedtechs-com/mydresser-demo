@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { DollarSign, Eye, Heart, MessageCircle, Package, Truck, Star, Filter, Search, MapPin, Clock, Plus, Recycle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -47,7 +48,61 @@ const SecondDresserMarket = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [activeTab, setActiveTab] = useState('browse');
-  const [loading, setLoading] = useState(false);
+  // Use wardrobe items as market items for now since market_items table doesn't exist yet
+  useEffect(() => {
+    const fetchMarketItems = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('wardrobe_items')
+          .select(`
+            *,
+            profiles(display_name)
+          `)
+          .neq('user_id', user?.id) // Don't show user's own items
+          .order('created_at', { ascending: false })
+          .limit(50);
+
+        if (error) {
+          console.error('Error fetching market items:', error);
+          return;
+        }
+
+        const formattedItems: MarketItem[] = data?.map(item => ({
+          id: item.id,
+          seller_id: item.user_id,
+          item_id: item.id,
+          title: item.name,
+          description: item.notes,
+          price: Math.floor(Math.random() * 200) + 20, // Random price for demo
+          original_price: Math.floor(Math.random() * 300) + 50,
+          condition: item.condition,
+          size: item.size || 'Unknown',
+          brand: item.brand,
+          category: item.category,
+          photos: Array.isArray(item.photos) ? item.photos : [],
+          seller_name: 'Anonymous Seller', // Would come from profiles join
+          seller_rating: 4.5,
+          location: 'Unknown',
+          status: 'available',
+          listed_at: item.created_at,
+          views: Math.floor(Math.random() * 100),
+          likes: Math.floor(Math.random() * 20),
+          shipping_options: ['standard']
+        })) || [];
+
+        setMarketItems(formattedItems);
+      } catch (error) {
+        console.error('Error in fetchMarketItems:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user?.id) {
+      fetchMarketItems();
+    }
+  }, [user?.id]);
 
   // Mock data - in real app this would come from Supabase
   const mockMarketItems: MarketItem[] = [

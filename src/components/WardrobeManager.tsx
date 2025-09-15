@@ -23,21 +23,11 @@ const WardrobeManager = ({ className }: WardrobeManagerProps) => {
 
   const categories = ["all", "tops", "bottoms", "dresses", "outerwear", "shoes", "accessories"];
 
-  // Seed sample data if wardrobe appears too small
+  // No sample data seeding - use real wardrobe items only
   useEffect(() => {
-    const initializeSampleData = async () => {
-      if (!loading && items.length < 8) {
-        try {
-          await supabase.rpc('ensure_minimum_sample_wardrobe_items', { min_count: 10 });
-          refetch();
-        } catch (error) {
-          console.error('Error ensuring sample items:', error);
-        }
-      }
-    };
-
-    initializeSampleData();
-  }, [loading, items.length, refetch]);
+    // Real wardrobe data is managed by useWardrobe hook
+    console.log(`User has ${items.length} wardrobe items`);
+  }, [items.length]);
 
   const filteredItems = items.filter(item => {
     const matchesSearch = searchQuery === "" || 

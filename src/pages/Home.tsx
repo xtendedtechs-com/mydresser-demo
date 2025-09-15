@@ -23,6 +23,7 @@ import { useWardrobe } from '@/hooks/useWardrobe';
 import { DailyOutfitGenerator } from '@/components/DailyOutfitGenerator';
 import { WardrobeAnalytics } from '@/components/WardrobeAnalytics';
 import { SmartLaundryTracker } from '@/components/SmartLaundryTracker';
+import { RealDailyOutfit } from '@/components/RealDailyOutfit';
 
 const Home = () => {
   const navigate = useNavigate();
