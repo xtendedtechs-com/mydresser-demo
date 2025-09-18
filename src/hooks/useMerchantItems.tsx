@@ -146,12 +146,15 @@ export const useMerchantItems = () => {
 
   const updateItem = async (itemId: string, updates: Partial<MerchantItem>) => {
     try {
+      const updateData = {
+        ...updates,
+        size: Array.isArray(updates.size) ? updates.size : (updates.size ? [updates.size] : undefined),
+        updated_at: new Date().toISOString()
+      };
+      
       const { error } = await supabase
         .from('merchant_items')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', itemId)
         .eq('merchant_id', user?.id);
 
@@ -237,6 +240,28 @@ export const useMerchantItems = () => {
     fetchMerchantItems();
   }, [user?.id]);
 
+  const getMerchantItem = (id: string) => {
+    return items.find(item => item.id === id);
+  };
+
+  const getSimilarItems = (item: MerchantItem) => {
+    return items.filter(i => i.id !== item.id && i.category === item.category).slice(0, 4);
+  };
+
+  const getItemsByBrand = (brand: string) => {
+    return items.filter(item => item.brand?.toLowerCase() === brand.toLowerCase());
+  };
+
+  const getItemsBySimilarColor = (color: string) => {
+    return items.filter(item => item.color?.toLowerCase() === color?.toLowerCase());
+  };
+
+  const getPhotoUrls = (item: MerchantItem) => {
+    if (!item.photos) return [];
+    if (Array.isArray(item.photos)) return item.photos;
+    return [];
+  };
+
   return {
     items,
     loading,
@@ -247,6 +272,11 @@ export const useMerchantItems = () => {
     getFeaturedItems,
     getPremiumItems,
     searchItems,
-    getItemsByCategory
+    getItemsByCategory,
+    getMerchantItem,
+    getSimilarItems,
+    getItemsByBrand,
+    getItemsBySimilarColor,
+    getPhotoUrls
   };
 };

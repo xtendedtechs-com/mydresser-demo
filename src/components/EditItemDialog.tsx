@@ -86,7 +86,7 @@ export const EditItemDialog = ({ item, open, onClose, onItemUpdated }: EditItemD
       setTags(item.tags || []);
       setSizes(Array.isArray(item.size) ? item.size : (item.size ? [item.size] : []));
       
-      // Convert existing photos to new format
+      // Convert existing photos to new format if needed
       if (item.photos && Array.isArray(item.photos)) {
         const existingPhotos = [];
         if (item.photos.length > 0) {
@@ -109,18 +109,21 @@ export const EditItemDialog = ({ item, open, onClose, onItemUpdated }: EditItemD
             });
           });
         }
+        setUploadedPhotos(existingPhotos);
+      } else {
+        setUploadedPhotos([]);
       }
-      setFiles(existingPhotos);
-    } else {
-      setFiles([]);
-    }
 
-    // Handle existing videos if any (if the field exists)
-    const existingVideos = [];
-    if ((item as any).videos && (item as any).videos.files) {
-      existingVideos.push(...(item as any).videos.files);
+      // Handle existing videos if any (if the field exists)
+      const existingVideos = [];
+      if ((item as any).videos && (item as any).videos.files) {
+        existingVideos.push(...(item as any).videos.files);
+      }
+      setUploadedVideos(existingVideos);
+    } else {
+      setUploadedPhotos([]);
+      setUploadedVideos([]);
     }
-    setUploadedVideos(existingVideos);
   }, [item, open]);
 
   const handleInputChange = (field: string, value: string | boolean | number) => {

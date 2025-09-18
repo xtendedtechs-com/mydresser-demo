@@ -24,7 +24,6 @@ const MerchantItemCard = ({ item, onAction }: MerchantItemCardProps) => {
   const getPhotoUrl = () => {
     if (!item.photos) return '/placeholder.svg';
     if (typeof item.photos === 'string') return item.photos;
-    if (typeof item.photos === 'object' && item.photos.main) return item.photos.main;
     if (Array.isArray(item.photos) && item.photos.length > 0) return item.photos[0];
     return '/placeholder.svg';
   };

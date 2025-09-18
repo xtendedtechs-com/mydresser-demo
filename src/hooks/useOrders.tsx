@@ -34,20 +34,12 @@ export const useOrders = () => {
     try {
       let query = supabase
         .from('orders')
-        .select(`
-          *,
-          market_items(title, price),
-          buyer_profile:profiles!orders_buyer_id_fkey(display_name),
-          seller_profile:profiles!orders_seller_id_fkey(display_name)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       // If user is a merchant, get orders for their items
-      // If user is a customer, get their purchases
       if (profile?.role === 'merchant' || profile?.role === 'professional') {
-        query = query.eq('seller_id', user.id);
-      } else {
-        query = query.eq('buyer_id', user.id);
+        query = query.eq('merchant_id', user.id);
       }
 
       const { data, error } = await query;
@@ -64,18 +56,18 @@ export const useOrders = () => {
 
       const formattedOrders: Order[] = data?.map(order => ({
         id: order.id,
-        buyer_id: order.buyer_id,
-        seller_id: order.seller_id,
-        item_id: order.item_id,
-        quantity: order.quantity || 1,
+        buyer_id: 'customer',
+        seller_id: order.merchant_id,
+        item_id: 'item',
+        quantity: 1,
         total_amount: order.total_amount,
-        status: order.status,
+        status: order.status as Order['status'],
         shipping_address: order.shipping_address,
         payment_method: order.payment_method,
-        payment_status: order.payment_status,
+        payment_status: order.payment_status as Order['payment_status'],
         tracking_number: order.tracking_number,
         notes: order.notes,
-        customer_name: order.buyer_profile?.display_name || order.seller_profile?.display_name || 'Unknown',
+        customer_name: order.customer_name || 'Unknown',
         created_at: order.created_at,
         updated_at: order.updated_at
       })) || [];
@@ -107,9 +99,11 @@ export const useOrders = () => {
       const { data, error } = await supabase
         .from('orders')
         .insert([{
-          buyer_id: user.id,
-          ...orderData,
-          quantity: orderData.quantity || 1,
+          merchant_id: orderData.seller_id,
+          customer_name: 'Customer',
+          customer_email: 'customer@example.com',
+          items: {},
+          total_amount: orderData.total_amount,
           status: 'pending',
           payment_status: 'pending',
           created_at: new Date().toISOString(),

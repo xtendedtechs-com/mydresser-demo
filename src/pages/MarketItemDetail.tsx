@@ -100,7 +100,7 @@ const MarketItemDetail = () => {
   }
 
   const photos = getPhotoUrls(item.photos);
-  const similarItems = getSimilarItems(item, 8);
+  const similarItems = getSimilarItems(item);
   const featuredItems = items.filter(i => i.is_featured && i.id !== item.id).slice(0, 8);
   const discountPercentage = item.original_price && item.original_price > item.price 
     ? Math.round(((item.original_price - item.price) / item.original_price) * 100) 
@@ -220,18 +220,26 @@ const MarketItemDetail = () => {
             {item.size && item.size.length > 0 && (
               <div>
                 <h3 className="font-semibold mb-3">Size</h3>
-                <div className="flex flex-wrap gap-2">
-                  {item.size.map((size) => (
-                    <Button
-                      key={size}
-                      variant={selectedSize === size ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setSelectedSize(size)}
-                    >
-                      {size}
-                    </Button>
-                  ))}
-                </div>
+                 <div className="flex flex-wrap gap-2">
+                   {Array.isArray(item.size) ? item.size.map((size) => (
+                     <Button
+                       key={size}
+                       variant={selectedSize === size ? "default" : "outline"}
+                       size="sm"
+                       onClick={() => setSelectedSize(size)}
+                     >
+                       {size}
+                     </Button>
+                   )) : item.size ? (
+                     <Button
+                       variant={selectedSize === item.size ? "default" : "outline"}
+                       size="sm"
+                       onClick={() => setSelectedSize(item.size as string)}
+                     >
+                       {item.size}
+                     </Button>
+                   ) : null}
+                 </div>
               </div>
             )}
 

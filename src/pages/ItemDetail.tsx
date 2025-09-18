@@ -47,9 +47,9 @@ const ItemDetail = () => {
       setItem(itemData);
       
       // Load related items
-      const similar = getSimilarItems(itemData, 8);
-      const brand = getItemsByBrand(itemData.brand || '', 8);
-      const color = getItemsBySimilarColor(itemData.color || '', 8);
+      const similar = getSimilarItems(itemData);
+      const brand = getItemsByBrand(itemData.brand || '');
+      const color = getItemsBySimilarColor(itemData.color || '');
       
       setSimilarItems(similar);
       setBrandItems(brand);
@@ -260,11 +260,13 @@ const ItemDetail = () => {
             {item.size && item.size.length > 0 && (
               <div>
                 <h3 className="font-semibold text-foreground mb-2">Available Sizes</h3>
-                <div className="flex gap-2 flex-wrap">
-                  {item.size.map((size, index) => (
-                    <Badge key={index} variant="outline">{size}</Badge>
-                  ))}
-                </div>
+                 <div className="flex gap-2 flex-wrap">
+                   {Array.isArray(item.size) ? item.size.map((size, index) => (
+                     <Badge key={index} variant="outline">{size}</Badge>
+                   )) : item.size ? (
+                     <Badge variant="outline">{item.size}</Badge>
+                   ) : null}
+                 </div>
               </div>
             )}
 

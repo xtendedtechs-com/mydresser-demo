@@ -30,7 +30,7 @@ import {
 const MerchantTerminal = () => {
   const navigate = useNavigate();
   const { user, profile } = useProfile();
-  const { merchantProfile, loading: merchantLoading } = useMerchantProfile();
+  const { profile: merchantProfile, sensitiveData, loading: profileLoading } = useMerchantProfile();
   const { items: merchantItems, loading: itemsLoading, refetch: refetchItems } = useMerchantItems();
   const { orders, loading: ordersLoading } = useOrders();
   const { toast } = useToast();
@@ -80,7 +80,7 @@ const MerchantTerminal = () => {
     }
   }, [profile, navigate, toast]);
 
-  if (merchantLoading || itemsLoading || ordersLoading) {
+  if (profileLoading || itemsLoading || ordersLoading) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center space-y-4">
@@ -229,9 +229,9 @@ const MerchantTerminal = () => {
                       </div>
                       <div className="text-right">
                         <p className="font-medium">${item.price}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {item.views || 0} views
-                        </p>
+                         <p className="text-sm text-muted-foreground">
+                           0 views
+                         </p>
                       </div>
                     </div>
                   ))}
