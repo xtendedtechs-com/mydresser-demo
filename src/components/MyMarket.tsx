@@ -333,8 +333,8 @@ const MyMarket = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {featuredProducts.map((item) => {
-              const photoUrl = item.photos && typeof item.photos === 'object' && 'main' in item.photos 
-                ? item.photos.main 
+              const photoUrl = item.photos && Array.isArray(item.photos) && item.photos.length > 0 
+                ? item.photos[0] 
                 : '/placeholder.svg';
               
               return (
@@ -443,8 +443,8 @@ const MyMarket = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {regularProducts.map((item) => {
-              const photoUrl = item.photos && typeof item.photos === 'object' && 'main' in item.photos 
-                ? item.photos.main 
+              const photoUrl = item.photos && Array.isArray(item.photos) && item.photos.length > 0 
+                ? item.photos[0] 
                 : '/placeholder.svg';
               
               return (

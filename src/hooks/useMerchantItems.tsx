@@ -5,14 +5,13 @@ import { useProfile } from '@/hooks/useProfile';
 
 export interface MerchantItem {
   id: string;
-  seller_id: string;
-  item_id?: string;
+  merchant_id: string;
   name: string;
   description?: string;
   price: number;
   original_price?: number;
   condition: string;
-  size?: string;
+  size?: string[] | string;
   brand?: string;
   category: string;
   color?: string;
@@ -22,8 +21,6 @@ export interface MerchantItem {
   photos: string[];
   tags?: string[];
   status: 'available' | 'sold' | 'reserved';
-  views?: number;
-  likes?: number;
   stock_quantity?: number;
   is_featured?: boolean;
   is_premium?: boolean;
@@ -42,11 +39,10 @@ export const useMerchantItems = () => {
 
     setLoading(true);
     try {
-      // Use wardrobe_items as merchant items until market_items table is created
       const { data, error } = await supabase
-        .from('wardrobe_items')
+        .from('merchant_items')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('merchant_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -61,28 +57,25 @@ export const useMerchantItems = () => {
 
       const formattedItems: MerchantItem[] = data?.map(item => ({
         id: item.id,
-        seller_id: item.user_id,
-        item_id: item.id,
+        merchant_id: item.merchant_id,
         name: item.name,
-        description: item.notes,
-        price: Math.floor(Math.random() * 200) + 20,
-        original_price: Math.floor(Math.random() * 300) + 50,
+        description: item.description,
+        price: item.price,
+        original_price: item.original_price,
         condition: item.condition,
-        size: item.size,
+        size: Array.isArray(item.size) ? item.size : [item.size].filter(Boolean),
         brand: item.brand,
         category: item.category,
         color: item.color,
         material: item.material,
         season: item.season,
         occasion: item.occasion,
-        photos: Array.isArray(item.photos) ? item.photos : [],
+        photos: item.photos ? (typeof item.photos === 'object' ? Object.values(item.photos).filter(p => typeof p === 'string') as string[] : []) : [],
         tags: item.tags || [],
         status: 'available',
-        views: Math.floor(Math.random() * 100),
-        likes: Math.floor(Math.random() * 20),
-        stock_quantity: 1,
-        is_featured: false,
-        is_premium: false,
+        stock_quantity: item.stock_quantity,
+        is_featured: item.is_featured,
+        is_premium: item.is_premium,
         created_at: item.created_at,
         updated_at: item.updated_at
       })) || [];
@@ -100,17 +93,30 @@ export const useMerchantItems = () => {
     }
   };
 
-  const addItem = async (itemData: Partial<MerchantItem>) => {
+  const addItem = async (itemData: Partial<MerchantItem> & { name: string; category: string; price: number }) => {
     if (!user?.id) return null;
 
     try {
       const { data, error } = await supabase
-        .from('market_items')
+        .from('merchant_items')
         .insert([{
-          seller_id: user.id,
-          ...itemData,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          merchant_id: user.id,
+          name: itemData.name,
+          category: itemData.category,
+          price: itemData.price,
+          description: itemData.description,
+          brand: itemData.brand,
+          color: itemData.color,
+          size: Array.isArray(itemData.size) ? itemData.size : [itemData.size].filter(Boolean),
+          condition: itemData.condition || 'new',
+          material: itemData.material,
+          season: itemData.season,
+          occasion: itemData.occasion,
+          photos: itemData.photos ? { main: itemData.photos[0] } : null,
+          tags: itemData.tags,
+          stock_quantity: itemData.stock_quantity || 1,
+          is_featured: itemData.is_featured || false,
+          is_premium: itemData.is_premium || false
         }])
         .select()
         .single();
@@ -125,7 +131,7 @@ export const useMerchantItems = () => {
         return null;
       }
 
-      await fetchMerchantItems(); // Refresh the list
+      await fetchMerchantItems();
       toast({
         title: "Success",
         description: "Item added to market successfully"
@@ -141,13 +147,13 @@ export const useMerchantItems = () => {
   const updateItem = async (itemId: string, updates: Partial<MerchantItem>) => {
     try {
       const { error } = await supabase
-        .from('market_items')
+        .from('merchant_items')
         .update({
           ...updates,
           updated_at: new Date().toISOString()
         })
         .eq('id', itemId)
-        .eq('seller_id', user?.id); // Ensure user can only update their own items
+        .eq('merchant_id', user?.id);
 
       if (error) {
         console.error('Error updating item:', error);
@@ -159,7 +165,7 @@ export const useMerchantItems = () => {
         return false;
       }
 
-      await fetchMerchantItems(); // Refresh the list
+      await fetchMerchantItems();
       toast({
         title: "Success",
         description: "Item updated successfully"
@@ -175,10 +181,10 @@ export const useMerchantItems = () => {
   const deleteItem = async (itemId: string) => {
     try {
       const { error } = await supabase
-        .from('market_items')
+        .from('merchant_items')
         .delete()
         .eq('id', itemId)
-        .eq('seller_id', user?.id); // Ensure user can only delete their own items
+        .eq('merchant_id', user?.id);
 
       if (error) {
         console.error('Error deleting item:', error);
@@ -190,7 +196,7 @@ export const useMerchantItems = () => {
         return false;
       }
 
-      await fetchMerchantItems(); // Refresh the list
+      await fetchMerchantItems();
       toast({
         title: "Success",
         description: "Item deleted successfully"

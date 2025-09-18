@@ -171,13 +171,13 @@ const MarketPlace = () => {
                 <Card key={item.id} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                   <CardContent className="p-0">
                     <div className="aspect-square bg-muted relative overflow-hidden rounded-t-lg">
-                      {item.photos?.main ? (
-                        <img
-                          src={item.photos.main}
-                          alt={item.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
+                        {item.photos && Array.isArray(item.photos) && item.photos.length > 0 ? (
+                          <img
+                            src={item.photos[0]}
+                            alt={item.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <div className="text-6xl text-muted-foreground">
                             {item.category.charAt(0).toUpperCase()}
@@ -265,13 +265,13 @@ const MarketPlace = () => {
                 <Card key={item.id} className="group hover:shadow-lg transition-all duration-300">
                   <CardContent className="p-0">
                     <div className="aspect-[4/5] bg-muted relative overflow-hidden rounded-t-lg">
-                      {item.photos?.main ? (
-                        <img
-                          src={item.photos.main}
-                          alt={item.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
+                        {item.photos && Array.isArray(item.photos) && item.photos.length > 0 ? (
+                          <img
+                            src={item.photos[0]}
+                            alt={item.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <Sparkles className="w-12 h-12 text-muted-foreground" />
                         </div>
@@ -343,13 +343,13 @@ const MarketPlace = () => {
               <Card key={item.id} className="group hover:shadow-lg transition-all duration-300">
                 <CardContent className="p-0">
                   <div className="aspect-square bg-muted relative overflow-hidden rounded-t-lg">
-                    {item.photos?.main ? (
-                      <img
-                        src={item.photos.main}
-                        alt={item.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
+                      {item.photos && Array.isArray(item.photos) && item.photos.length > 0 ? (
+                        <img
+                          src={item.photos[0]}
+                          alt={item.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <div className="text-6xl text-muted-foreground">
                           {item.category.charAt(0).toUpperCase()}

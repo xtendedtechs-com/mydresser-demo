@@ -341,9 +341,9 @@ const DualMarketplace = () => {
                   >
                     <CardContent className="p-0">
                       <div className="aspect-square bg-muted relative overflow-hidden rounded-t-lg">
-                        {item.photos?.main ? (
+                        {item.photos && item.photos.length > 0 ? (
                           <img
-                            src={item.photos.main}
+                            src={item.photos[0]}
                             alt={item.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
@@ -406,9 +406,9 @@ const DualMarketplace = () => {
                   >
                     <CardContent className="p-0">
                       <div className="aspect-[4/5] bg-muted relative overflow-hidden rounded-t-lg">
-                        {item.photos?.main ? (
+                        {item.photos && item.photos.length > 0 ? (
                           <img
-                            src={item.photos.main}
+                            src={item.photos[0]}
                             alt={item.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
@@ -458,13 +458,13 @@ const DualMarketplace = () => {
                 >
                   <CardContent className="p-0">
                     <div className="aspect-square bg-muted relative overflow-hidden rounded-t-lg">
-                      {item.photos?.main ? (
-                        <img
-                          src={item.photos.main}
-                          alt={item.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
+                        {item.photos && item.photos.length > 0 ? (
+                          <img
+                            src={item.photos[0]}
+                            alt={item.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <ShoppingCart className="w-12 h-12 text-muted-foreground" />
                         </div>

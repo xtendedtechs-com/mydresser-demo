@@ -48,6 +48,7 @@ const SecondDresserMarket = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [activeTab, setActiveTab] = useState('browse');
+  const [loading, setLoading] = useState(false);
   // Use wardrobe items as market items for now since market_items table doesn't exist yet
   useEffect(() => {
     const fetchMarketItems = async () => {
@@ -80,7 +81,7 @@ const SecondDresserMarket = () => {
           size: item.size || 'Unknown',
           brand: item.brand,
           category: item.category,
-          photos: Array.isArray(item.photos) ? item.photos : [],
+          photos: Array.isArray(item.photos) ? item.photos.map(p => String(p)) : [],
           seller_name: 'Anonymous Seller', // Would come from profiles join
           seller_rating: 4.5,
           location: 'Unknown',

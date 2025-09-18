@@ -87,42 +87,40 @@ export const EditItemDialog = ({ item, open, onClose, onItemUpdated }: EditItemD
       setSizes(Array.isArray(item.size) ? item.size : (item.size ? [item.size] : []));
       
       // Convert existing photos to new format
-      if (item.photos) {
+      if (item.photos && Array.isArray(item.photos)) {
         const existingPhotos = [];
-        if (typeof item.photos === 'object') {
-          if (item.photos.main) {
+        if (item.photos.length > 0) {
+          existingPhotos.push({
+            id: 'existing-main',
+            name: 'Main Photo',
+            url: item.photos[0],
+            type: 'photo',
+            size: 0
+          });
+        }
+        if (item.photos.length > 1) {
+          item.photos.slice(1).forEach((url, index) => {
             existingPhotos.push({
-              id: 'existing-main',
-              name: 'Main Photo',
-              url: item.photos.main,
+              id: `existing-${index}`,
+              name: `Photo ${index + 2}`,
+              url,
               type: 'photo',
               size: 0
             });
-          }
-          if (item.photos.additional && Array.isArray(item.photos.additional)) {
-            item.photos.additional.forEach((url, index) => {
-              existingPhotos.push({
-                id: `existing-${index}`,
-                name: `Photo ${index + 2}`,
-                url,
-                type: 'photo',
-                size: 0
-              });
-            });
-          }
+          });
         }
-        setUploadedPhotos(existingPhotos);
-      } else {
-        setUploadedPhotos([]);
       }
-
-      // Handle existing videos if any (if the field exists)
-      const existingVideos = [];
-      if ((item as any).videos && (item as any).videos.files) {
-        existingVideos.push(...(item as any).videos.files);
-      }
-      setUploadedVideos(existingVideos);
+      setFiles(existingPhotos);
+    } else {
+      setFiles([]);
     }
+
+    // Handle existing videos if any (if the field exists)
+    const existingVideos = [];
+    if ((item as any).videos && (item as any).videos.files) {
+      existingVideos.push(...(item as any).videos.files);
+    }
+    setUploadedVideos(existingVideos);
   }, [item, open]);
 
   const handleInputChange = (field: string, value: string | boolean | number) => {
