@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Mail, Lock, User, Shield, AlertTriangle, Phone, Store, Eye, EyeOff, CheckCircle } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
+import { CaptchaChallenge } from "@/components/CaptchaChallenge";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -26,6 +27,11 @@ const Auth = () => {
   const [activeTab, setActiveTab] = useState<"signin" | "signup" | "merchant">("signin");
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+
+  // CAPTCHA states
+  const [showCaptcha, setShowCaptcha] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [requestCount, setRequestCount] = useState(0);
 
   // Merchant form states
   const [merchantSignInData, setMerchantSignInData] = useState({
@@ -163,7 +169,8 @@ const Auth = () => {
         throw new Error('Please enter a valid email address');
       }
 
-      const { error } = await supabase.auth.signUp({
+      // Prepare auth options
+      const authOptions: any = {
         email,
         password,
         options: {
@@ -174,11 +181,22 @@ const Auth = () => {
             invitation_token: invitationToken || undefined
           }
         }
-      });
+      };
+
+      // Add CAPTCHA token if available
+      if (captchaToken) {
+        authOptions.captcha = captchaToken;
+      }
+
+      const { error } = await supabase.auth.signUp(authOptions);
 
       if (error) throw error;
 
       await auditLog('user_signup', true, { email, invitation_used: !!invitationToken });
+
+      // Reset CAPTCHA state on success
+      setShowCaptcha(false);
+      setCaptchaToken("");
 
       toast({
         title: "Account created successfully!",
@@ -211,11 +229,16 @@ const Auth = () => {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
+        ...(captchaToken && { captcha: captchaToken })
       });
 
       if (error) throw error;
 
       await auditLog('user_signin', true, { email });
+
+      // Reset CAPTCHA state on success
+      setShowCaptcha(false);
+      setCaptchaToken("");
 
       toast({
         title: "Welcome back!",
@@ -436,12 +459,52 @@ const Auth = () => {
                       />
                     </div>
                   </div>
+                  
+                  {showCaptcha && (
+                    <div className="mt-4">
+                      <CaptchaChallenge
+                        onSuccess={(token) => {
+                          setCaptchaToken(token);
+                          setShowCaptcha(false);
+                        }}
+                        onError={(error) => {
+                          toast({
+                            title: "CAPTCHA Error",
+                            description: error,
+                            variant: "destructive",
+                          });
+                        }}
+                        requestCount={requestCount}
+                      />
+                    </div>
+                  )}
                 </CardContent>
                 <CardFooter>
                   <Button 
                     type="submit" 
                     className="w-full" 
                     disabled={loading}
+                    onClick={async (e) => {
+                      if (!showCaptcha) {
+                        e.preventDefault();
+                        setRequestCount(prev => prev + 1);
+                        try {
+                          const { data } = await supabase.functions.invoke('captcha-verification', {
+                            body: { 
+                              action: 'generate',
+                              userAgent: navigator.userAgent,
+                              requestCount: requestCount + 1
+                            }
+                          });
+                          if (data?.requireCaptcha) {
+                            setShowCaptcha(true);
+                            return;
+                          }
+                        } catch (error) {
+                          console.error('CAPTCHA check failed:', error);
+                        }
+                      }
+                    }}
                   >
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Sign In Securely
@@ -542,12 +605,52 @@ const Auth = () => {
                       />
                     </div>
                   </div>
+                  
+                  {showCaptcha && (
+                    <div className="mt-4">
+                      <CaptchaChallenge
+                        onSuccess={(token) => {
+                          setCaptchaToken(token);
+                          setShowCaptcha(false);
+                        }}
+                        onError={(error) => {
+                          toast({
+                            title: "CAPTCHA Error",
+                            description: error,
+                            variant: "destructive",
+                          });
+                        }}
+                        requestCount={requestCount}
+                      />
+                    </div>
+                  )}
                 </CardContent>
                 <CardFooter>
                   <Button 
                     type="submit" 
                     className="w-full" 
                     disabled={loading}
+                    onClick={async (e) => {
+                      if (!showCaptcha) {
+                        e.preventDefault();
+                        setRequestCount(prev => prev + 1);
+                        try {
+                          const { data } = await supabase.functions.invoke('captcha-verification', {
+                            body: { 
+                              action: 'generate',
+                              userAgent: navigator.userAgent,
+                              requestCount: requestCount + 1
+                            }
+                          });
+                          if (data?.requireCaptcha) {
+                            setShowCaptcha(true);
+                            return;
+                          }
+                        } catch (error) {
+                          console.error('CAPTCHA check failed:', error);
+                        }
+                      }
+                    }}
                   >
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Create Secure Account
