@@ -234,9 +234,10 @@ const MerchantAuth = () => {
                     </div>
                   </div>
                 </CardContent>
-                <div className="px-6 pb-4">
+                {/* CAPTCHA temporarily disabled for testing */}
+                {/* <div className="px-6 pb-4">
                   <SupabaseCaptcha onVerify={(token) => setCaptchaToken(token)} />
-                </div>
+                </div> */}
                 <CardFooter>
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -352,9 +353,10 @@ const MerchantAuth = () => {
                     </div>
                   </div>
                 </CardContent>
-                <div className="px-6 pb-4">
+                {/* CAPTCHA temporarily disabled for testing */}
+                {/* <div className="px-6 pb-4">
                   <SupabaseCaptcha onVerify={(token) => setCaptchaToken(token)} />
-                </div>
+                </div> */}
                 <CardFooter>
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

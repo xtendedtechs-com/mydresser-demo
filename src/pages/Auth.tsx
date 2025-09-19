@@ -332,9 +332,10 @@ const Auth = () => {
                     </div>
                   </div>
                   
-                  <div className="mt-4">
+                  {/* CAPTCHA temporarily disabled for testing */}
+                  {/* <div className="mt-4">
                     <SupabaseCaptcha onVerify={(token) => setCaptchaToken(token)} />
-                  </div>
+                  </div> */}
                 </CardContent>
                 <CardFooter>
                   <Button type="submit" className="w-full" disabled={loading}>
@@ -438,9 +439,10 @@ const Auth = () => {
                     </div>
                   </div>
                   
-                  <div className="mt-4">
+                  {/* CAPTCHA temporarily disabled for testing */}
+                  {/* <div className="mt-4">
                     <SupabaseCaptcha onVerify={(token) => setCaptchaToken(token)} />
-                  </div>
+                  </div> */}
                 </CardContent>
                 <CardFooter>
                   <Button type="submit" className="w-full" disabled={loading}>
