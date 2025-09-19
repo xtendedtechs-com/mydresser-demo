@@ -168,14 +168,8 @@ const Auth = () => {
         }
       };
 
-      // Attach CAPTCHA token if available
-      const { error } = await supabase.auth.signUp({
-        ...authOptions,
-        options: {
-          ...authOptions.options,
-          captchaToken: captchaToken || undefined,
-        },
-      });
+      // CAPTCHA disabled for testing: no captchaToken passed
+      const { error } = await supabase.auth.signUp(authOptions as any);
 
       if (error) throw error;
 
@@ -216,9 +210,6 @@ const Auth = () => {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        options: {
-          captchaToken: captchaToken || undefined,
-        }
       });
 
       if (error) throw error;

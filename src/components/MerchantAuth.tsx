@@ -44,9 +44,6 @@ const MerchantAuth = () => {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: signInData.email,
         password: signInData.password,
-        options: {
-          captchaToken: captchaToken || undefined,
-        },
       });
 
       if (error) {
@@ -120,7 +117,6 @@ const MerchantAuth = () => {
         password: signUpData.password,
         options: {
           emailRedirectTo: redirectUrl,
-          captchaToken: captchaToken || undefined,
           data: {
             full_name: signUpData.fullName,
             business_name: signUpData.businessName,
