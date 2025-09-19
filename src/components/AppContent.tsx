@@ -51,7 +51,9 @@ const AppContent = () => {
         <Route path="/social" element={<SocialPage />} />
         <Route path="/ai-recommendations" element={<AIRecommendationsPage />} />
         <Route path="/merchant-analytics" element={<MerchantAnalyticsPage />} />
-        <Route path="/account" element={<Account />} />
+            <Route path="/account" element={<Account />} />
+            <Route path="/account/settings" element={<SettingsPage />} />
+            <Route path="/account/settings/:category" element={<SettingsPage />} />
         <Route path="/settings/:category" element={<SettingsPage />} />
         <Route path="/service-settings/:service" element={<ServiceSettingsPage />} />
         <Route path="/item/:id" element={<ItemDetail />} />
