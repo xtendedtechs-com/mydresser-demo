@@ -35,8 +35,8 @@ export interface SocialProfile {
 
 export const useSocial = () => {
   const { user } = useProfile();
-  const [followers, setFollowers] = useState<SocialProfile[]>([]);
-  const [following, setFollowing] = useState<SocialProfile[]>([]);
+  const [followers, setFollowers] = useState<string[]>([]);
+  const [following, setFollowing] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -50,9 +50,23 @@ export const useSocial = () => {
 
     setLoading(true);
     try {
-      // Simple fetch for now - avoiding complex joins
-      setFollowers([]);
-      setFollowing([]);
+      // Fetch followers
+      const { data: followersData, error: followersError } = await supabase
+        .from('user_follows')
+        .select('follower_id')
+        .eq('following_id', user.id);
+
+      // Fetch following
+      const { data: followingData, error: followingError } = await supabase
+        .from('user_follows')
+        .select('following_id')
+        .eq('follower_id', user.id);
+
+      if (followersError) throw followersError;
+      if (followingError) throw followingError;
+
+      setFollowers(followersData?.map(f => f.follower_id) || []);
+      setFollowing(followingData?.map(f => f.following_id) || []);
     } catch (error: any) {
       console.error('Error fetching social data:', error);
       toast.error('Failed to load social data');
@@ -77,8 +91,8 @@ export const useSocial = () => {
 
       if (error) throw error;
 
+      setFollowing(prev => [...prev, targetUserId]);
       toast.success('User followed successfully');
-      fetchSocialData();
       return true;
     } catch (error: any) {
       console.error('Error following user:', error);
@@ -99,8 +113,8 @@ export const useSocial = () => {
 
       if (error) throw error;
 
+      setFollowing(prev => prev.filter(id => id !== targetUserId));
       toast.success('User unfollowed');
-      fetchSocialData();
       return true;
     } catch (error: any) {
       console.error('Error unfollowing user:', error);
@@ -110,63 +124,7 @@ export const useSocial = () => {
   };
 
   const isFollowing = (targetUserId: string) => {
-    return following.some(f => f.user_id === targetUserId);
-  };
-
-  const getPublicProfiles = async () => {
-    try {
-      const { data, error } = await supabase.rpc('get_public_profiles');
-      if (error) throw error;
-      return data || [];
-    } catch (error: any) {
-      console.error('Error fetching public profiles:', error);
-      return [];
-    }
-  };
-
-  const getFollowCounts = async (userId: string) => {
-    try {
-      const [followersRes, followingRes] = await Promise.all([
-        supabase
-          .from('user_follows')
-          .select('id', { count: 'exact', head: true })
-          .eq('following_id', userId),
-        supabase
-          .from('user_follows')
-          .select('id', { count: 'exact', head: true })
-          .eq('follower_id', userId)
-      ]);
-
-      return {
-        followers_count: followersRes.count || 0,
-        following_count: followingRes.count || 0
-      };
-    } catch (error: any) {
-      console.error('Error fetching follow counts:', error);
-      return { followers_count: 0, following_count: 0 };
-    }
-  };
-
-  const suggestUsers = async (limit = 10) => {
-    try {
-      // Get users that current user is NOT following
-      const { data: publicProfiles, error } = await supabase.rpc('get_public_profiles');
-      if (error) throw error;
-
-      // Filter out current user and users already being followed
-      const followingIds = following.map(f => f.user_id);
-      const suggestions = (publicProfiles || [])
-        .filter(profile => 
-          profile.user_id !== user?.id && 
-          !followingIds.includes(profile.user_id)
-        )
-        .slice(0, limit);
-
-      return suggestions;
-    } catch (error: any) {
-      console.error('Error getting user suggestions:', error);
-      return [];
-    }
+    return following.includes(targetUserId);
   };
 
   const addReaction = async (targetId: string, targetType: string, reactionType: string = 'like') => {
@@ -237,8 +195,6 @@ export const useSocial = () => {
     followUser,
     unfollowUser,
     isFollowing,
-    getFollowCounts,
-    suggestUsers,
     addReaction,
     removeReaction,
     getReactions,

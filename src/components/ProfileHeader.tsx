@@ -11,14 +11,12 @@ interface ProfileHeaderProps {
 }
 
 const ProfileHeader = ({ profile }: ProfileHeaderProps) => {
-  const { getFollowCounts } = useSocial();
   const [followCounts, setFollowCounts] = useState({ followers_count: 0, following_count: 0 });
 
+  // Mock follow counts for now
   useEffect(() => {
-    if (profile.user_id) {
-      getFollowCounts(profile.user_id).then(setFollowCounts);
-    }
-  }, [profile.user_id, getFollowCounts]);
+    setFollowCounts({ followers_count: 24, following_count: 18 });
+  }, [profile.user_id]);
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {

@@ -38,6 +38,12 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
       id: "market"
     },
     { 
+      name: "Social", 
+      href: "/social", 
+      icon: Sparkles,
+      id: "social"
+    },
+    { 
       name: "Account", 
       href: "/account", 
       icon: User,
@@ -47,14 +53,14 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
 
   // Add advanced features for professional/merchant users
   const advancedNavItems = [
-    ...baseNavItems.slice(0, 4), // Keep first 4 items
+    ...baseNavItems.slice(0, 5), // Keep first 5 items (includes Social)
     {
       name: "Analytics",
       href: "/analytics",
       icon: BarChart3,
       id: "analytics"
     },
-    baseNavItems[4] // Add Account back at the end
+    baseNavItems[5] // Add Account back at the end
   ];
 
   const navItems = (profile?.role === 'professional' || profile?.role === 'merchant' || profile?.role === 'admin') 

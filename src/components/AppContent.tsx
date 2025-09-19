@@ -22,6 +22,9 @@ import SmartOutfitMatcher from "@/components/SmartOutfitMatcher";
 import { WardrobeAnalytics } from "@/components/WardrobeAnalytics";
 import { SmartLaundryTracker } from "@/components/SmartLaundryTracker";
 import { DailyOutfitGenerator } from "@/components/DailyOutfitGenerator";
+import SocialPage from "@/pages/SocialPage";
+import AIRecommendationsPage from "@/pages/AIRecommendationsPage";
+import MerchantAnalyticsPage from "@/pages/MerchantAnalyticsPage";
 
 const AppContent = () => {
   const location = useLocation();
@@ -43,6 +46,9 @@ const AppContent = () => {
         <Route path="/analytics" element={<WardrobeAnalytics />} />
         <Route path="/laundry" element={<SmartLaundryTracker />} />
         <Route path="/outfit-generator" element={<DailyOutfitGenerator />} />
+        <Route path="/social" element={<SocialPage />} />
+        <Route path="/ai-recommendations" element={<AIRecommendationsPage />} />
+        <Route path="/merchant-analytics" element={<MerchantAnalyticsPage />} />
         <Route path="/account" element={<Account />} />
         <Route path="/settings/:category" element={<SettingsPage />} />
         <Route path="/service-settings/:service" element={<ServiceSettingsPage />} />
