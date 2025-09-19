@@ -240,22 +240,24 @@ export const useUserPreferences = () => {
           // Extract flat properties from the JSON columns for the settings pages
           currency: (data.app_behavior as any)?.currency || 'USD',
           compact_mode: (data.app_behavior as any)?.compact_mode || false,
-          animations: (data.app_behavior as any)?.animations || true,
+          animations: (data.app_behavior as any)?.animations !== false,
           grid_size: (data.app_behavior as any)?.grid_size || 3,
-          push_notifications: (data.app_behavior as any)?.push_notifications || true,
+          push_notifications: (data.app_behavior as any)?.push_notifications !== false,
           offline_mode: (data.app_behavior as any)?.offline_mode || false,
           
-          public_profile: (data.accessibility_settings as any)?.public_profile || true,
-          wardrobe_visible: (data.accessibility_settings as any)?.wardrobe_visible || true,
-          activity_visible: (data.accessibility_settings as any)?.activity_visible || true,
-          analytics_sharing: (data.accessibility_settings as any)?.analytics_sharing || true,
-          personalized_recommendations: (data.accessibility_settings as any)?.personalized_recommendations || true,
+          // Extract privacy settings from privacy_settings JSON column
+          public_profile: (data.privacy_settings as any)?.profile_visibility === 'public',
+          wardrobe_visible: (data.privacy_settings as any)?.show_wardrobe !== false,
+          activity_visible: (data.privacy_settings as any)?.show_activity !== false,
+          analytics_sharing: (data.privacy_settings as any)?.analytics_sharing !== false,
+          personalized_recommendations: (data.privacy_settings as any)?.personalized_recommendations !== false,
           
-          daily_outfit: (data.notifications as any)?.daily_outfit || true,
-          wardrobe_tips: (data.notifications as any)?.wardrobe_tips || true,
-          market_updates: (data.notifications as any)?.market_updates || true,
+          // Extract notification settings from notifications JSON column
+          daily_outfit: (data.notifications as any)?.outfit_suggestions !== false,
+          wardrobe_tips: (data.notifications as any)?.wardrobe_tips !== false,
+          market_updates: (data.notifications as any)?.market_updates !== false,
           outfit_reminders: (data.notifications as any)?.outfit_reminders || false,
-          social_activity: (data.notifications as any)?.social_activity || false,
+          social_activity: (data.notifications as any)?.social_interactions !== false,
           
           auto_recommendations: (data.marketplace_settings as any)?.auto_recommendations || true,
           price_alerts: (data.marketplace_settings as any)?.price_alerts || false,
@@ -407,10 +409,11 @@ export const useUserPreferences = () => {
         dbUpdates.language = updates.language;
       }
 
-      // For other properties, we'll create a simple object
+      // For other properties, we'll map them to the correct JSON columns
       const appBehaviorUpdates: any = {};
       const notificationUpdates: any = {};
       const marketplaceUpdates: any = {};
+      const privacyUpdates: any = {};
       
       // Map app behavior related updates
       if (updates.currency !== undefined) appBehaviorUpdates.currency = updates.currency;
@@ -420,12 +423,21 @@ export const useUserPreferences = () => {
       if (updates.push_notifications !== undefined) appBehaviorUpdates.push_notifications = updates.push_notifications;
       if (updates.offline_mode !== undefined) appBehaviorUpdates.offline_mode = updates.offline_mode;
       
+      // Map privacy settings updates
+      if (updates.public_profile !== undefined) {
+        privacyUpdates.profile_visibility = updates.public_profile ? 'public' : 'private';
+      }
+      if (updates.wardrobe_visible !== undefined) privacyUpdates.show_wardrobe = updates.wardrobe_visible;
+      if (updates.activity_visible !== undefined) privacyUpdates.show_activity = updates.activity_visible;
+      if (updates.analytics_sharing !== undefined) privacyUpdates.analytics_sharing = updates.analytics_sharing;
+      if (updates.personalized_recommendations !== undefined) privacyUpdates.personalized_recommendations = updates.personalized_recommendations;
+      
       // Map notification updates
-      if (updates.daily_outfit !== undefined) notificationUpdates.daily_outfit = updates.daily_outfit;
+      if (updates.daily_outfit !== undefined) notificationUpdates.outfit_suggestions = updates.daily_outfit;
       if (updates.wardrobe_tips !== undefined) notificationUpdates.wardrobe_tips = updates.wardrobe_tips;
       if (updates.market_updates !== undefined) notificationUpdates.market_updates = updates.market_updates;
       if (updates.outfit_reminders !== undefined) notificationUpdates.outfit_reminders = updates.outfit_reminders;
-      if (updates.social_activity !== undefined) notificationUpdates.social_activity = updates.social_activity;
+      if (updates.social_activity !== undefined) notificationUpdates.social_interactions = updates.social_activity;
       
       // Map marketplace updates
       if (updates.auto_recommendations !== undefined) marketplaceUpdates.auto_recommendations = updates.auto_recommendations;
@@ -437,9 +449,12 @@ export const useUserPreferences = () => {
       if (updates.public_outfits !== undefined) marketplaceUpdates.public_outfits = updates.public_outfits;
       if (updates.follow_suggestions !== undefined) marketplaceUpdates.follow_suggestions = updates.follow_suggestions;
 
-      // Merge with existing data
+      // Merge with existing data from correct JSON columns
       if (Object.keys(appBehaviorUpdates).length > 0) {
         dbUpdates.app_behavior = { ...(preferences.app_behavior || {}), ...appBehaviorUpdates };
+      }
+      if (Object.keys(privacyUpdates).length > 0) {
+        dbUpdates.privacy_settings = { ...(preferences.privacy || {}), ...privacyUpdates };
       }
       if (Object.keys(notificationUpdates).length > 0) {
         dbUpdates.notifications = { ...(preferences.notifications || {}), ...notificationUpdates };

@@ -29,11 +29,11 @@ const PrivacySettings = () => {
   };
 
   const privacySettings = preferences || {
-    public_profile: true,
-    wardrobe_visible: true,
-    activity_visible: true,
-    analytics_sharing: true,
-    personalized_recommendations: true
+    public_profile: preferences?.public_profile !== false,
+    wardrobe_visible: preferences?.wardrobe_visible !== false,
+    activity_visible: preferences?.activity_visible !== false,
+    analytics_sharing: preferences?.analytics_sharing !== false,
+    personalized_recommendations: preferences?.personalized_recommendations !== false
   };
 
   return (

@@ -28,11 +28,11 @@ const ServiceSettings = () => {
   };
 
   const notifications = preferences || {
-    daily_outfit: true,
-    wardrobe_tips: true,
-    market_updates: true,
-    outfit_reminders: false,
-    social_activity: false
+    daily_outfit: preferences?.daily_outfit !== false,
+    wardrobe_tips: preferences?.wardrobe_tips !== false,
+    market_updates: preferences?.market_updates !== false,
+    outfit_reminders: preferences?.outfit_reminders || false,
+    social_activity: preferences?.social_activity !== false
   };
 
   return (
