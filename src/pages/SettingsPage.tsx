@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useMemo } from 'react';
+import { useParams } from 'react-router-dom';
 import ComprehensiveSettingsPanel from '@/components/ComprehensiveSettingsPanel';
 
 const SettingsPage = () => {
-  const [searchParams] = useSearchParams();
-  const [activeSection] = useState<string>(searchParams.get('section') || 'account');
+  const { category } = useParams();
+  const activeSection = useMemo(() => (category || 'account'), [category]);
 
   return (
     <div className="min-h-screen bg-background">

@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Mail, Lock, User, Shield, AlertTriangle, Phone, Store, Eye, EyeOff, CheckCircle } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
-import { CaptchaChallenge } from "@/components/CaptchaChallenge";
+import SupabaseCaptcha from "@/components/SupabaseCaptcha";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -168,7 +168,14 @@ const Auth = () => {
         }
       };
 
-      const { error } = await supabase.auth.signUp(authOptions);
+      // Attach CAPTCHA token if available
+      const { error } = await supabase.auth.signUp({
+        ...authOptions,
+        options: {
+          ...authOptions.options,
+          captchaToken: captchaToken || undefined,
+        },
+      });
 
       if (error) throw error;
 
@@ -208,7 +215,10 @@ const Auth = () => {
 
       const { error } = await supabase.auth.signInWithPassword({
         email,
-        password
+        password,
+        options: {
+          captchaToken: captchaToken || undefined,
+        }
       });
 
       if (error) throw error;
@@ -322,24 +332,9 @@ const Auth = () => {
                     </div>
                   </div>
                   
-                  {showCaptcha && (
-                    <div className="mt-4">
-                      <CaptchaChallenge
-                        onSuccess={(token) => {
-                          setCaptchaToken(token);
-                          setShowCaptcha(false);
-                        }}
-                        onError={(error) => {
-                          toast({
-                            title: "CAPTCHA Error",
-                            description: error,
-                            variant: "destructive",
-                          });
-                        }}
-                        requestCount={requestCount}
-                      />
-                    </div>
-                  )}
+                  <div className="mt-4">
+                    <SupabaseCaptcha onVerify={(token) => setCaptchaToken(token)} />
+                  </div>
                 </CardContent>
                 <CardFooter>
                   <Button type="submit" className="w-full" disabled={loading}>
@@ -443,24 +438,9 @@ const Auth = () => {
                     </div>
                   </div>
                   
-                  {showCaptcha && (
-                    <div className="mt-4">
-                      <CaptchaChallenge
-                        onSuccess={(token) => {
-                          setCaptchaToken(token);
-                          setShowCaptcha(false);
-                        }}
-                        onError={(error) => {
-                          toast({
-                            title: "CAPTCHA Error",
-                            description: error,
-                            variant: "destructive",
-                          });
-                        }}
-                        requestCount={requestCount}
-                      />
-                    </div>
-                  )}
+                  <div className="mt-4">
+                    <SupabaseCaptcha onVerify={(token) => setCaptchaToken(token)} />
+                  </div>
                 </CardContent>
                 <CardFooter>
                   <Button type="submit" className="w-full" disabled={loading}>

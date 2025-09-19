@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Store, Shield, Eye, EyeOff } from "lucide-react";
+import SupabaseCaptcha from "@/components/SupabaseCaptcha";
 
 const MerchantAuth = () => {
   const navigate = useNavigate();
@@ -33,6 +34,8 @@ const MerchantAuth = () => {
     phone: ""
   });
 
+  const [captchaToken, setCaptchaToken] = useState("");
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -41,6 +44,9 @@ const MerchantAuth = () => {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: signInData.email,
         password: signInData.password,
+        options: {
+          captchaToken: captchaToken || undefined,
+        },
       });
 
       if (error) {
@@ -114,6 +120,7 @@ const MerchantAuth = () => {
         password: signUpData.password,
         options: {
           emailRedirectTo: redirectUrl,
+          captchaToken: captchaToken || undefined,
           data: {
             full_name: signUpData.fullName,
             business_name: signUpData.businessName,
@@ -227,6 +234,9 @@ const MerchantAuth = () => {
                     </div>
                   </div>
                 </CardContent>
+                <div className="px-6 pb-4">
+                  <SupabaseCaptcha onVerify={(token) => setCaptchaToken(token)} />
+                </div>
                 <CardFooter>
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -342,6 +352,9 @@ const MerchantAuth = () => {
                     </div>
                   </div>
                 </CardContent>
+                <div className="px-6 pb-4">
+                  <SupabaseCaptcha onVerify={(token) => setCaptchaToken(token)} />
+                </div>
                 <CardFooter>
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

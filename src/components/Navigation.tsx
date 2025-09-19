@@ -1,4 +1,4 @@
-import { Home, ShoppingBag, Shirt, Plus, User, BarChart3, Sparkles, Droplets } from "lucide-react";
+import { Home, ShoppingBag, Shirt, Plus, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useProfile } from "@/hooks/useProfile";
@@ -38,12 +38,6 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
       id: "market"
     },
     { 
-      name: "Social", 
-      href: "/social", 
-      icon: Sparkles,
-      id: "social"
-    },
-    { 
       name: "Account", 
       href: "/account", 
       icon: User,
@@ -51,21 +45,8 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
     }
   ];
 
-  // Add advanced features for professional/merchant users
-  const advancedNavItems = [
-    ...baseNavItems.slice(0, 5), // Keep first 5 items (includes Social)
-    {
-      name: "Analytics",
-      href: "/analytics",
-      icon: BarChart3,
-      id: "analytics"
-    },
-    baseNavItems[5] // Add Account back at the end
-  ];
-
-  const navItems = (profile?.role === 'professional' || profile?.role === 'merchant' || profile?.role === 'admin') 
-    ? advancedNavItems 
-    : baseNavItems;
+  // Only 5 tabs as requested
+  const navItems = baseNavItems;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border px-4 py-2 z-50">
