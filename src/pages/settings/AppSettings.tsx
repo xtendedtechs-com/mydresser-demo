@@ -47,7 +47,15 @@ const AppSettings = () => {
     }
   };
 
-  const appSettings = preferences || {};
+  const appSettings = preferences || {
+    language: 'en',
+    currency: 'USD',
+    compact_mode: false,
+    animations: true,
+    grid_size: 3,
+    push_notifications: true,
+    offline_mode: false
+  };
 
   return (
     <div className="space-y-6">
