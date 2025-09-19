@@ -39,6 +39,20 @@ import {
 const EnhancedThemeSelector = () => {
   const { preferences, updatePreferences } = useUserPreferences();
   const [selectedGradient, setSelectedGradient] = useState(preferences.theme?.gradient_preset || 'default');
+  
+  // Provide safe defaults for extended_theme
+  const extendedTheme = preferences?.extended_theme || {
+    gradient_backgrounds: true,
+    animated_transitions: true,
+    card_style: 'default',
+    border_radius: 'medium',
+    shadow_intensity: 'medium',
+    button_style: 'default',
+    icon_style: 'outline',
+    component_density: 'normal',
+    color_scheme_type: 'vibrant',
+    custom_css: ''
+  };
 
   const gradientPresets = [
     { name: 'aurora', label: 'Aurora', gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' },
@@ -196,7 +210,7 @@ const EnhancedThemeSelector = () => {
                       key={scheme.name}
                       onClick={() => handleExtendedThemeChange('color_scheme_type', scheme.name)}
                       className={`p-4 rounded-lg border transition-all ${
-                        preferences.extended_theme.color_scheme_type === scheme.name
+                        extendedTheme.color_scheme_type === scheme.name
                           ? 'border-primary ring-2 ring-primary/20'
                           : 'border-border hover:border-primary/50'
                       }`}
@@ -433,7 +447,7 @@ const EnhancedThemeSelector = () => {
                 <div className="space-y-2">
                   <Label>Component Density</Label>
                   <Select 
-                    value={preferences.extended_theme.component_density}
+                    value={extendedTheme.component_density}
                     onValueChange={(value) => handleExtendedThemeChange('component_density', value)}
                   >
                     <SelectTrigger>
@@ -454,7 +468,7 @@ const EnhancedThemeSelector = () => {
                 <div className="space-y-2">
                   <Label>Border Radius</Label>
                   <Select 
-                    value={preferences.extended_theme.border_radius}
+                    value={extendedTheme.border_radius}
                     onValueChange={(value) => handleExtendedThemeChange('border_radius', value)}
                   >
                     <SelectTrigger>
@@ -474,7 +488,7 @@ const EnhancedThemeSelector = () => {
                 <div className="space-y-2">
                   <Label>Shadow Intensity</Label>
                   <Select 
-                    value={preferences.extended_theme.shadow_intensity}
+                    value={extendedTheme.shadow_intensity}
                     onValueChange={(value) => handleExtendedThemeChange('shadow_intensity', value)}
                   >
                     <SelectTrigger>
@@ -493,7 +507,7 @@ const EnhancedThemeSelector = () => {
                 <div className="space-y-2">
                   <Label>Card Style</Label>
                   <Select 
-                    value={preferences.extended_theme.card_style}
+                    value={extendedTheme.card_style}
                     onValueChange={(value) => handleExtendedThemeChange('card_style', value)}
                   >
                     <SelectTrigger>
@@ -620,7 +634,7 @@ const EnhancedThemeSelector = () => {
                 <div className="space-y-2">
                   <Label>Button Style</Label>
                   <Select 
-                    value={preferences.extended_theme.button_style}
+                    value={extendedTheme.button_style}
                     onValueChange={(value) => handleExtendedThemeChange('button_style', value)}
                   >
                     <SelectTrigger>
@@ -639,7 +653,7 @@ const EnhancedThemeSelector = () => {
                 <div className="space-y-2">
                   <Label>Icon Style</Label>
                   <Select 
-                    value={preferences.extended_theme.icon_style}
+                    value={extendedTheme.icon_style}
                     onValueChange={(value) => handleExtendedThemeChange('icon_style', value)}
                   >
                     <SelectTrigger>
@@ -659,7 +673,7 @@ const EnhancedThemeSelector = () => {
                 <Label>Custom CSS</Label>
                 <Textarea
                   placeholder="Add your custom CSS rules here..."
-                  value={preferences.extended_theme.custom_css}
+                  value={extendedTheme.custom_css || ''}
                   onChange={(e) => handleExtendedThemeChange('custom_css', e.target.value)}
                   className="font-mono text-sm"
                   rows={6}
