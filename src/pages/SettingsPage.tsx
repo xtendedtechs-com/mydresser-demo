@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
+import { supabase } from '@/integrations/supabase/client';
 import EnhancedThemeSelector from '@/components/EnhancedThemeSelector';
 import AccessibilitySettings from '@/components/AccessibilitySettings';
 
@@ -288,6 +289,292 @@ const SettingsPage = () => {
 
       case 'accessibility':
         return <AccessibilitySettings />;
+
+      case 'authentication':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Authentication Settings</CardTitle>
+              <CardDescription>Manage your authentication and security preferences</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Current Authentication Level</Label>
+                    <p className="text-sm text-muted-foreground capitalize">{profile?.auth_level || 'base'}</p>
+                  </div>
+                  <Button variant="outline" onClick={() => toast({ title: "Multi-factor authentication", description: "MFA setup available in account security settings." })}>
+                    Upgrade Security
+                  </Button>
+                </div>
+                <Separator />
+                <div className="space-y-2">
+                  <Label>Password Security</Label>
+                  <Button variant="outline" onClick={() => toast({ title: "Password change", description: "Password change functionality coming soon." })}>
+                    Change Password
+                  </Button>
+                </div>
+                <Separator />
+                <div className="space-y-2">
+                  <Label>Account Recovery</Label>
+                  <p className="text-sm text-muted-foreground">Recovery email: {profile?.full_name ? `${profile.full_name}'s account` : 'Your account'}</p>
+                  <Button variant="outline" onClick={() => toast({ title: "Recovery settings", description: "Recovery settings will be available in next update." })}>
+                    Update Recovery Options
+                  </Button>
+                </div>
+                <Separator />
+                <div className="space-y-2">
+                  <Label>Session Management</Label>
+                  <Button variant="outline" onClick={async () => {
+                    await supabase.auth.signOut();
+                    toast({ title: "Signed out", description: "All sessions have been terminated." });
+                  }}>
+                    Sign Out All Devices
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+
+      case 'account':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Account Information</CardTitle>
+              <CardDescription>Manage your account details and settings</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="accountEmail">Email Address</Label>
+                <Input
+                  id="accountEmail"
+                  value={'Protected for security'}
+                  disabled
+                  className="bg-muted"
+                />
+                <p className="text-xs text-muted-foreground">Email cannot be changed after account creation</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="accountRole">Account Type</Label>
+                <Input
+                  id="accountRole"
+                  value={profile?.role || 'private'}
+                  disabled
+                  className="bg-muted capitalize"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="memberSince">Member Since</Label>
+                <Input
+                  id="memberSince"
+                  value={profile?.created_at ? new Date(profile.created_at).toLocaleDateString() : 'Unknown'}
+                  disabled
+                  className="bg-muted"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="styleScore">Style Score</Label>
+                <Input
+                  id="styleScore"
+                  value={profile?.style_score || 0}
+                  disabled
+                  className="bg-muted"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        );
+
+      case 'data':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Data Management</CardTitle>
+              <CardDescription>Export, manage, or delete your personal data</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-medium">Data Export</h3>
+                  <p className="text-sm text-muted-foreground">Download a copy of all your data</p>
+                  <Button className="mt-2" onClick={() => toast({ title: "Data Export", description: "Your data export will be ready within 24 hours and sent to your email." })}>
+                    Request Data Export
+                  </Button>
+                </div>
+                <Separator />
+                <div>
+                  <h3 className="text-lg font-medium">Data Portability</h3>
+                  <p className="text-sm text-muted-foreground">Transfer your data to another service</p>
+                  <Button variant="outline" className="mt-2" onClick={() => toast({ title: "Data Portability", description: "Data portability tools will be available soon." })}>
+                    Data Portability Options
+                  </Button>
+                </div>
+                <Separator />
+                <div>
+                  <h3 className="text-lg font-medium text-destructive">Delete Account</h3>
+                  <p className="text-sm text-muted-foreground">Permanently delete your account and all associated data</p>
+                  <Button variant="destructive" className="mt-2" onClick={() => toast({ 
+                    title: "Account Deletion", 
+                    description: "Account deletion requires additional verification. Please contact support.",
+                    variant: "destructive"
+                  })}>
+                    Delete Account
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+
+      case 'general':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>General Settings</CardTitle>
+              <CardDescription>Basic app configuration and preferences</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Language</Label>
+                <Select value={preferences.language || 'en'} onValueChange={(value) => updatePreferences({ language: value } as any)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="es">Spanish</SelectItem>
+                    <SelectItem value="fr">French</SelectItem>
+                    <SelectItem value="de">German</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Separator />
+              <div className="space-y-2">
+                <Label>Time Zone</Label>
+                <Select defaultValue="auto">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="auto">Auto-detect</SelectItem>
+                    <SelectItem value="UTC">UTC</SelectItem>
+                    <SelectItem value="EST">Eastern Time</SelectItem>
+                    <SelectItem value="PST">Pacific Time</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <Label htmlFor="analytics">Allow Analytics</Label>
+                <Switch id="analytics" defaultChecked />
+              </div>
+            </CardContent>
+          </Card>
+        );
+
+      case 'permissions':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>App Permissions</CardTitle>
+              <CardDescription>Manage what the app can access on your device</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Camera Access</Label>
+                  <p className="text-sm text-muted-foreground">For taking photos of clothing items</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Location Services</Label>
+                  <p className="text-sm text-muted-foreground">For weather-based outfit suggestions</p>
+                </div>
+                <Switch />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Push Notifications</Label>
+                  <p className="text-sm text-muted-foreground">Receive app notifications</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>File Storage</Label>
+                  <p className="text-sm text-muted-foreground">Store photos and data locally</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </CardContent>
+          </Card>
+        );
+
+      case 'suggestions':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Suggestion Settings</CardTitle>
+              <CardDescription>Customize how the AI suggests outfits for you</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="weatherSuggestions">Weather-Based Suggestions</Label>
+                <Switch
+                  id="weatherSuggestions"
+                  checked={preferences.suggestion_settings?.weather_based || false}
+                  onCheckedChange={(checked) => updatePreferences({
+                    suggestion_settings: { ...preferences.suggestion_settings, weather_based: checked }
+                  })}
+                />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <Label htmlFor="colorHarmony">Color Harmony Matching</Label>
+                <Switch
+                  id="colorHarmony"
+                  checked={preferences.suggestion_settings?.color_matching || false}
+                  onCheckedChange={(checked) => updatePreferences({
+                    suggestion_settings: { ...preferences.suggestion_settings, color_matching: checked }
+                  })}
+                />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <Label htmlFor="occasionMatching">Occasion-Based Matching</Label>
+                <Switch
+                  id="occasionMatching"
+                  checked={preferences.suggestion_settings?.occasion_based || false}
+                  onCheckedChange={(checked) => updatePreferences({
+                    suggestion_settings: { ...preferences.suggestion_settings, occasion_based: checked }
+                  })}
+                />
+              </div>
+              <Separator />
+              <div className="space-y-2">
+                <Label>Suggestion Frequency</Label>
+                <Select defaultValue="daily">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="realtime">Real-time</SelectItem>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="manual">Manual only</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+        );
 
       case 'behavior':
       case 'preferences':

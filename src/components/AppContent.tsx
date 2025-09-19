@@ -10,6 +10,7 @@ import MarketItemDetail from "@/pages/MarketItemDetail";
 import ItemDetail from "@/pages/ItemDetail";
 import WardrobeItemDetail from "@/pages/WardrobeItemDetail";
 import ProfileSetup from "@/pages/ProfileSetup";
+import MerchantAuth from "@/components/MerchantAuth";
 import MerchantTerminal from "@/pages/MerchantTerminal";
 import MerchantPage from "@/pages/MerchantPage";
 import Auth from "@/pages/Auth";
@@ -19,6 +20,7 @@ import ServiceSettingsPage from "@/pages/ServiceSettingsPage";
 import EnhancedWardrobeManager from "@/components/EnhancedWardrobeManager";
 import EnhancedMarketplace from "@/components/EnhancedMarketplace";
 import SmartOutfitMatcher from "@/components/SmartOutfitMatcher";
+import UserAnalyticsDashboard from "@/components/UserAnalyticsDashboard";
 import { WardrobeAnalytics } from "@/components/WardrobeAnalytics";
 import { SmartLaundryTracker } from "@/components/SmartLaundryTracker";
 import { DailyOutfitGenerator } from "@/components/DailyOutfitGenerator";
@@ -40,10 +42,11 @@ const AppContent = () => {
         <Route path="/market/item/:id" element={<MarketItemDetail />} />
         <Route path="/marketplace" element={<EnhancedMarketplace />} />
         <Route path="/add" element={<Add />} />
+        <Route path="/merchant" element={<MerchantAuth />} />
         <Route path="/merchant-terminal" element={<MerchantTerminal />} />
         <Route path="/merchant/:id" element={<MerchantPage />} />
         <Route path="/smart-matcher" element={<SmartOutfitMatcher />} />
-        <Route path="/analytics" element={<WardrobeAnalytics />} />
+        <Route path="/analytics" element={<UserAnalyticsDashboard />} />
         <Route path="/laundry" element={<SmartLaundryTracker />} />
         <Route path="/outfit-generator" element={<DailyOutfitGenerator />} />
         <Route path="/social" element={<SocialPage />} />
