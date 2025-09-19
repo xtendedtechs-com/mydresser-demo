@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -155,7 +155,7 @@ const Auth = () => {
       }
 
       // Prepare auth options
-      const authOptions: any = {
+      const authOptions = {
         email,
         password,
         options: {
@@ -167,11 +167,6 @@ const Auth = () => {
           }
         }
       };
-
-      // Add CAPTCHA token if available
-      if (captchaToken) {
-        authOptions.captcha = captchaToken;
-      }
 
       const { error } = await supabase.auth.signUp(authOptions);
 
@@ -213,8 +208,7 @@ const Auth = () => {
 
       const { error } = await supabase.auth.signInWithPassword({
         email,
-        password,
-        ...(captchaToken && { captcha: captchaToken })
+        password
       });
 
       if (error) throw error;
@@ -348,32 +342,7 @@ const Auth = () => {
                   )}
                 </CardContent>
                 <CardFooter>
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
-                    disabled={loading}
-                    onClick={async (e) => {
-                      if (!showCaptcha) {
-                        e.preventDefault();
-                        setRequestCount(prev => prev + 1);
-                        try {
-                          const { data } = await supabase.functions.invoke('captcha-verification', {
-                            body: { 
-                              action: 'generate',
-                              userAgent: navigator.userAgent,
-                              requestCount: requestCount + 1
-                            }
-                          });
-                          if (data?.requireCaptcha) {
-                            setShowCaptcha(true);
-                            return;
-                          }
-                        } catch (error) {
-                          console.error('CAPTCHA check failed:', error);
-                        }
-                      }
-                    }}
-                  >
+                  <Button type="submit" className="w-full" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Sign In Securely
                   </Button>
@@ -494,32 +463,7 @@ const Auth = () => {
                   )}
                 </CardContent>
                 <CardFooter>
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
-                    disabled={loading}
-                    onClick={async (e) => {
-                      if (!showCaptcha) {
-                        e.preventDefault();
-                        setRequestCount(prev => prev + 1);
-                        try {
-                          const { data } = await supabase.functions.invoke('captcha-verification', {
-                            body: { 
-                              action: 'generate',
-                              userAgent: navigator.userAgent,
-                              requestCount: requestCount + 1
-                            }
-                          });
-                          if (data?.requireCaptcha) {
-                            setShowCaptcha(true);
-                            return;
-                          }
-                        } catch (error) {
-                          console.error('CAPTCHA check failed:', error);
-                        }
-                      }
-                    }}
-                  >
+                  <Button type="submit" className="w-full" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Create Secure Account
                   </Button>
@@ -535,9 +479,11 @@ const Auth = () => {
             Protected by enterprise security measures
           </div>
           <div className="text-center">
-            <Button variant="link" onClick={() => navigate('/merchant')}>
-              Are you a merchant? Access MyMarket here
-            </Button>
+            <Link to="/merchant">
+              <Button variant="link">
+                Are you a merchant? Access MyMarket here
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

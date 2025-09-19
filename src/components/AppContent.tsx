@@ -42,7 +42,6 @@ const AppContent = () => {
         <Route path="/market/item/:id" element={<MarketItemDetail />} />
         <Route path="/marketplace" element={<EnhancedMarketplace />} />
         <Route path="/add" element={<Add />} />
-        <Route path="/merchant" element={<MerchantAuth />} />
         <Route path="/merchant-terminal" element={<MerchantTerminal />} />
         <Route path="/merchant/:id" element={<MerchantPage />} />
         <Route path="/smart-matcher" element={<SmartOutfitMatcher />} />
