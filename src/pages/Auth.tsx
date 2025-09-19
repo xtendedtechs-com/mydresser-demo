@@ -526,8 +526,6 @@ const Auth = () => {
                 </CardFooter>
               </form>
             </TabsContent>
-
-            </TabsContent>
           </Tabs>
         </Card>
 

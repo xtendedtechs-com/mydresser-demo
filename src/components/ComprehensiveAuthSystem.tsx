@@ -25,7 +25,7 @@ import MFASetup from "@/components/MFASetup";
 
 const ComprehensiveAuthSystem = () => {
   const navigate = useNavigate();
-  const { profile, loading } = useProfile();
+  const { profile, user, loading } = useProfile();
   const { toast } = useToast();
   
   const [authLevel, setAuthLevel] = useState<'base' | 'intermediate' | 'advanced'>('base');
@@ -196,7 +196,7 @@ const ComprehensiveAuthSystem = () => {
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-blue-500">
-                    {profile.email ? '✓' : '○'}
+                    {user?.email ? '✓' : '○'}
                   </div>
                   <p className="text-sm text-muted-foreground">Email Verified</p>
                 </div>

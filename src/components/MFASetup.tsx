@@ -16,7 +16,11 @@ interface MFAStatus {
   backup_codes_count: number;
 }
 
-const MFASetup = () => {
+interface MFASetupProps {
+  onComplete?: () => void;
+}
+
+const MFASetup = ({ onComplete }: MFASetupProps = {}) => {
   const { toast } = useToast();
   const [mfaStatus, setMfaStatus] = useState<MFAStatus>({
     totp_enabled: false,

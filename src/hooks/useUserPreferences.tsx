@@ -61,6 +61,9 @@ export interface UserPreferences {
     custom_css: string;
   };
   
+  // General app settings
+  language: string;
+  
   // Accessibility settings
   accessibility_settings: {
     high_contrast: boolean;
@@ -197,6 +200,10 @@ const defaultPreferences: UserPreferences = {
     color_scheme_type: 'vibrant',
     custom_css: '',
   },
+  
+  // General app settings
+  language: 'en',
+  
   accessibility_settings: {
     high_contrast: false,
     large_text: false,
@@ -338,6 +345,7 @@ export const useUserPreferences = () => {
         const loadedPreferences: UserPreferences = {
           theme: parsedTheme,
           extended_theme: (data.extended_theme as any) || defaultPreferences.extended_theme,
+          language: data.language || defaultPreferences.language,
           accessibility_settings: (data.accessibility_settings as any) || defaultPreferences.accessibility_settings,
           notifications: (data.notifications as any) || defaultPreferences.notifications,
           privacy: (data.privacy_settings as any) || defaultPreferences.privacy,
