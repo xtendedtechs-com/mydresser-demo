@@ -268,9 +268,23 @@ export const useUserPreferences = () => {
           public_outfits: (data.marketplace_settings as any)?.public_outfits || true,
           follow_suggestions: (data.marketplace_settings as any)?.follow_suggestions || false,
 
-          // Nested structures for backward compatibility
-          theme: defaultTheme,
-          extended_theme: data.extended_theme as any || {},
+          // Nested structures for backward compatibility with proper data loading
+          theme: data.theme ? {
+            ...defaultTheme,
+            ...(typeof data.theme === 'string' ? JSON.parse(data.theme) : data.theme)
+          } : defaultTheme,
+          extended_theme: data.extended_theme as any || {
+            gradient_backgrounds: true,
+            animated_transitions: true,
+            card_style: 'default',
+            border_radius: 'medium',
+            shadow_intensity: 'medium',
+            button_style: 'default',
+            icon_style: 'outline',
+            component_density: 'normal',
+            color_scheme_type: 'vibrant',
+            custom_css: ''
+          },
           accessibility_settings: data.accessibility_settings as any || {
             high_contrast: false,
             large_text: false,
@@ -303,7 +317,7 @@ export const useUserPreferences = () => {
             social_interactions: true,
             weather_alerts: true,
           },
-          privacy: {
+          privacy: data.privacy_settings as any || {
             profile_visibility: 'public' as const,
             show_wardrobe: false,
             allow_messages: true,
@@ -370,10 +384,21 @@ export const useUserPreferences = () => {
           public_outfits: true,
           follow_suggestions: false,
           theme: defaultTheme,
-          extended_theme: {},
+          extended_theme: {
+            gradient_backgrounds: true,
+            animated_transitions: true,
+            card_style: 'default',
+            border_radius: 'medium',
+            shadow_intensity: 'medium',
+            button_style: 'default',
+            icon_style: 'outline',
+            component_density: 'normal',
+            color_scheme_type: 'vibrant',
+            custom_css: ''
+          },
           accessibility_settings: { high_contrast: false, large_text: false, reduce_motion: false },
           notifications: { email: true, push: true, outfit_suggestions: true },
-          privacy: { profile_visibility: 'public' as const, show_wardrobe: false },
+          privacy: { profile_visibility: 'public' as const, show_wardrobe: false, allow_messages: true, show_activity: false, location_sharing: false },
           app_behavior: { auto_save: true, show_tips: true },
           suggestion_settings: { weather_based: true, occasion_based: true },
           marketplace_settings: { allow_selling: false, show_price_history: true },
