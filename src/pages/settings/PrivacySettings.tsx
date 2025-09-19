@@ -28,7 +28,13 @@ const PrivacySettings = () => {
     }
   };
 
-  const privacySettings = preferences || {};
+  const privacySettings = preferences || {
+    public_profile: true,
+    wardrobe_visible: true,
+    activity_visible: true,
+    analytics_sharing: true,
+    personalized_recommendations: true
+  };
 
   return (
     <div className="space-y-6">

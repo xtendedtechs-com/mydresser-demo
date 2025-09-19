@@ -33,7 +33,7 @@ class WeatherService {
       this.cache.set(cacheKey, { data: weatherData, timestamp: Date.now() });
       return weatherData;
     } catch (error) {
-      console.warn('Weather service error:', error);
+      console.warn('Weather service error, using fallback data:', error);
       return this.getFallbackWeather();
     }
   }

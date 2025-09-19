@@ -9,7 +9,7 @@ import { useProfile } from "@/hooks/useProfile";
 import ProfileHeader from "@/components/ProfileHeader";
 import SettingsSection from "@/components/SettingsSection";
 import ProfileEditDialog from "@/components/ProfileEditDialog";
-import WardrobeManager from "@/components/WardrobeManager";
+import EnhancedWardrobeManager from "@/components/EnhancedWardrobeManager";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -302,7 +302,7 @@ const Account = () => {
               </TabsContent>
               
               <TabsContent value="wardrobe" className="mt-6">
-                <WardrobeManager />
+                <EnhancedWardrobeManager />
               </TabsContent>
             </Tabs>
           </div>

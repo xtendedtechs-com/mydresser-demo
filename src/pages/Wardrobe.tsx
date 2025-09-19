@@ -3,7 +3,7 @@ import { Grid3X3, List, Search, Filter, Home, Settings, Zap } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import WardrobeVector from "@/components/WardrobeVector";
-import WardrobeManager from "@/components/WardrobeManager";
+import EnhancedWardrobeManager from "@/components/EnhancedWardrobeManager";
 import AddItemWithMatching from "@/components/AddItemWithMatching";
 import EnhancedSearch from "@/components/EnhancedSearch";
 import SmartOutfitMatcher from "@/components/SmartOutfitMatcher";
@@ -76,7 +76,7 @@ const Wardrobe = () => {
           <WardrobeVector onAddItem={() => setShowAddDialog(true)} />
         )}
         {viewMode === "grid" && (
-          <WardrobeManager />
+          <EnhancedWardrobeManager />
         )}
         {viewMode === "search" && (
           <EnhancedSearch searchScope="wardrobe" />

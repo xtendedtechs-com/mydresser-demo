@@ -27,7 +27,13 @@ const ServiceSettings = () => {
     }
   };
 
-  const notifications = preferences || {};
+  const notifications = preferences || {
+    daily_outfit: true,
+    wardrobe_tips: true,
+    market_updates: true,
+    outfit_reminders: false,
+    social_activity: false
+  };
 
   return (
     <div className="space-y-6">
