@@ -41,26 +41,31 @@ export class EnhancedOutfitEngine {
     hot: { // 25°C+
       preferred: ['light', 'breathable', 'cotton', 'linen'],
       avoid: ['wool', 'heavy', 'thick'],
+      neutral: [],
       categories: ['tops', 'bottoms', 'shoes']
     },
     warm: { // 20-25°C
       preferred: ['cotton', 'light'],
+      avoid: [],
       neutral: ['medium'],
       categories: ['tops', 'bottoms', 'shoes']
     },
     mild: { // 15-20°C
       preferred: ['cotton', 'light', 'medium'],
+      avoid: [],
       neutral: ['wool'],
       categories: ['tops', 'bottoms', 'shoes', 'outerwear']
     },
     cool: { // 10-15°C
       preferred: ['wool', 'medium', 'warm'],
+      avoid: [],
       neutral: ['cotton'],
       categories: ['tops', 'bottoms', 'outerwear', 'shoes']
     },
     cold: { // Below 10°C
       preferred: ['wool', 'warm', 'thick', 'heavy'],
       avoid: ['light', 'breathable'],
+      neutral: [],
       categories: ['tops', 'bottoms', 'outerwear', 'shoes', 'accessories']
     }
   };
