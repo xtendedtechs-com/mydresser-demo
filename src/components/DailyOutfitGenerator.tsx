@@ -7,7 +7,7 @@ import { Sparkles, RefreshCw, Heart, Share2, Calendar, Thermometer, Cloud } from
 import { useWardrobe } from '@/hooks/useWardrobe';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { weatherService } from '@/services/weatherService';
-import { OutfitAI } from '@/ai/OutfitAI';
+import { enhancedOutfitEngine } from '@/services/enhancedOutfitEngine';
 import { toast } from 'sonner';
 
 interface DailyOutfitProps {
@@ -44,13 +44,12 @@ export const DailyOutfitGenerator = ({ date = new Date() }: DailyOutfitProps) =>
         }
       }
 
-      // Generate outfit using AI
-      const outfitAI = new OutfitAI();
-      const generatedOutfit = await outfitAI.generateOutfit({
+      // Generate outfit using enhanced AI
+      const generatedOutfit = await enhancedOutfitEngine.generateOutfit({
         wardrobeItems,
         weather: weatherData,
-        preferences: preferences.suggestion_settings,
-        occasion: 'daily'
+        occasion: 'casual',
+        preferences: preferences.suggestion_settings
       });
 
       setOutfit(generatedOutfit);
