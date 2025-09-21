@@ -3,6 +3,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
 
+export interface Reaction {
+  id: string;
+  user_id: string;
+  target_id: string;
+  target_type: string;
+  reaction_type: string;
+  created_at: string;
+}
+
 export interface SocialPost {
   id: string;
   user_id: string;

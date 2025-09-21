@@ -70,7 +70,8 @@ export const useOrders = () => {
       const formattedOrders: Order[] = data?.map(order => ({
         ...order,
         status: order.status as Order['status'],
-        payment_status: order.payment_status as Order['payment_status']
+        payment_status: order.payment_status as Order['payment_status'],
+        items: Array.isArray(order.items) ? order.items : []
       })) || [];
       
       setOrders(formattedOrders);
