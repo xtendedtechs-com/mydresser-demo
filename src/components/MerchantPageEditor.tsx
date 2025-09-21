@@ -10,7 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useMerchantProfile } from '@/hooks/useMerchantProfile';
-import { SecurityAlert } from '@/components/SecurityAlert';
 import { 
   Plus, X, Upload, Eye, Save, 
   Instagram, Facebook, Twitter, 
@@ -57,7 +56,7 @@ export const MerchantPageEditor: React.FC<MerchantPageEditorProps> = ({
   onSave,
   onPreview
 }) => {
-  const { merchantProfile } = useMerchantProfile();
+  const { profile: merchantProfile } = useMerchantProfile();
   const { toast } = useToast();
 
   const [settings, setSettings] = useState<MerchantPageSettings>({
@@ -102,9 +101,9 @@ export const MerchantPageEditor: React.FC<MerchantPageEditorProps> = ({
           hero_image: data.hero_image || '',
           specialties: data.specialties || [],
           featured_collections: data.featured_collections || [],
-          social_links: data.social_links || {},
-          contact_info: data.contact_info || {},
-          business_hours: data.business_hours || {},
+          social_links: (data.social_links as any) || {},
+          contact_info: (data.contact_info as any) || {},
+          business_hours: (data.business_hours as any) || {},
           is_published: data.is_published !== false
         });
       } else {
@@ -172,9 +171,7 @@ export const MerchantPageEditor: React.FC<MerchantPageEditorProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      <SecurityAlert />
-      
+    <div className="space-y-6">      
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Merchant Page Editor</CardTitle>

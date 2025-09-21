@@ -1,112 +1,121 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { useMerchantItems } from '@/hooks/useMerchantItems';
-import { useProfile } from '@/hooks/useProfile';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Heart, 
-  Share2, 
-  MapPin, 
-  Calendar, 
-  Star, 
-  ShoppingBag, 
-  Users, 
-  Award,
-  Edit3,
-  Grid,
-  List
-} from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useMerchantItems } from '@/hooks/useMerchantItems';
 import MerchantItemCard from '@/components/MerchantItemCard';
+import { 
+  Heart, Share2, MapPin, Clock, Phone, Mail, 
+  Instagram, Facebook, Twitter, Globe, 
+  Grid, List, Star, Users
+} from 'lucide-react';
 
 interface MerchantPageData {
   id: string;
+  merchant_id: string;
   business_name: string;
-  business_type: string | null;
-  verification_status: string;
-  created_at: string;
-  user_id: string;
-  featured_collections?: string[];
-  brand_story?: string;
-  specialties?: string[];
-  social_links?: {
+  brand_story: string;
+  theme_color: string;
+  logo: string;
+  hero_image: string;
+  specialties: string[];
+  featured_collections: string[];
+  social_links: {
     instagram?: string;
-    website?: string;
     facebook?: string;
+    twitter?: string;
+    website?: string;
   };
-  hero_image?: string;
-  logo?: string;
+  contact_info: {
+    phone?: string;
+    email?: string;
+    address?: string;
+  };
+  business_hours: {
+    [key: string]: string;
+  };
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
-const MerchantPage = () => {
-  const { id } = useParams();
-  const navigate = useNavigate();
+export const MerchantPage: React.FC = () => {
+  const { merchantId } = useParams<{ merchantId: string }>();
   const { toast } = useToast();
-  const { profile: currentUserProfile } = useProfile();
   const { items, loading: itemsLoading } = useMerchantItems();
-  
+
   const [merchantData, setMerchantData] = useState<MerchantPageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [activeCategory, setActiveCategory] = useState('all');
-
-  // Check if current user is the merchant (for edit access)
-  const isOwner = currentUserProfile?.user_id === merchantData?.user_id;
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [sortBy, setSortBy] = useState<'newest' | 'price-low' | 'price-high' | 'popular'>('newest');
 
   useEffect(() => {
-    if (id) {
-      fetchMerchantData(id);
-      checkFollowStatus(id);
+    if (merchantId) {
+      fetchMerchantData();
+      checkFollowStatus();
     }
-  }, [id, currentUserProfile]);
+  }, [merchantId]);
 
-  const fetchMerchantData = async (merchantId: string) => {
+  const fetchMerchantData = async () => {
+    if (!merchantId) return;
+
     try {
       setLoading(true);
-
-      // Fetch merchant profile data
-      const { data: profileData, error: profileError } = await supabase
-        .from('merchant_profiles')
-        .select(`
-          id,
-          business_name,
-          business_type,
-          verification_status,
-          created_at,
-          user_id
-        `)
-        .eq('user_id', merchantId)
-        .maybeSingle();
-
-      if (profileError && profileError.code !== 'PGRST116') throw profileError;
-      if (!profileData) throw new Error('Merchant not found');
-
-      // Fetch merchant page customization data
-      const { data: pageData, error: pageError } = await supabase
+      const { data, error } = await supabase
         .from('merchant_pages')
         .select('*')
         .eq('merchant_id', merchantId)
-        .maybeSingle();
+        .eq('is_published', true)
+        .single();
 
-      if (pageError && pageError.code !== 'PGRST116') throw pageError;
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching merchant data:', error);
+        return;
+      }
 
-      setMerchantData({
-        ...profileData,
-        featured_collections: pageData?.featured_collections || ['Featured Items'],
-        brand_story: pageData?.brand_story || "Welcome to our store! We offer quality fashion items and exceptional service.",
-        specialties: pageData?.specialties || ['Fashion', 'Quality', 'Service'],
-        social_links: (pageData?.social_links as any) || {},
-        hero_image: pageData?.hero_image,
-        logo: pageData?.logo
-      });
-    } catch (error: any) {
-      console.error('Error fetching merchant data:', error);
+      if (data) {
+        setMerchantData({
+          ...data,
+          social_links: (data.social_links as any) || {},
+          contact_info: (data.contact_info as any) || {},
+          business_hours: (data.business_hours as any) || {}
+        });
+      } else {
+        // Fallback to merchant profile if no page exists
+        const { data: profileData, error: profileError } = await supabase
+          .from('merchant_profiles')
+          .select('business_name, business_type, user_id')
+          .eq('user_id', merchantId)
+          .single();
+
+        if (profileData) {
+          setMerchantData({
+            id: '',
+            merchant_id: profileData.user_id,
+            business_name: profileData.business_name,
+            brand_story: '',
+            theme_color: '#000000',
+            logo: '',
+            hero_image: '',
+            specialties: [profileData.business_type || ''].filter(Boolean),
+            featured_collections: [],
+            social_links: {},
+            contact_info: {},
+            business_hours: {},
+            is_published: true,
+            created_at: '',
+            updated_at: ''
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error in fetchMerchantData:', error);
       toast({
         title: "Error",
         description: "Failed to load merchant page",
@@ -117,57 +126,63 @@ const MerchantPage = () => {
     }
   };
 
-  const checkFollowStatus = async (merchantId: string) => {
-    try {
-      if (!currentUserProfile?.user_id) return;
+  const checkFollowStatus = async () => {
+    if (!merchantId) return;
 
+    try {
       const { data, error } = await supabase
         .from('user_follows')
         .select('id')
-        .eq('follower_id', currentUserProfile.user_id)
+        .eq('follower_id', (await supabase.auth.getUser()).data.user?.id)
         .eq('following_id', merchantId)
         .single();
 
       setIsFollowing(!!data);
     } catch (error) {
-      // Not following or error - default to false
-      setIsFollowing(false);
+      // User not logged in or no follow relationship
     }
   };
 
   const handleFollow = async () => {
-    if (!currentUserProfile?.user_id || !merchantData?.user_id) return;
+    if (!merchantId) return;
 
     try {
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please log in to follow merchants",
+          variant: "destructive"
+        });
+        return;
+      }
+
       if (isFollowing) {
-        // Unfollow
         await supabase
           .from('user_follows')
           .delete()
-          .eq('follower_id', currentUserProfile.user_id)
-          .eq('following_id', merchantData.user_id);
-        
+          .eq('follower_id', user.id)
+          .eq('following_id', merchantId);
         setIsFollowing(false);
         toast({
           title: "Unfollowed",
-          description: `You are no longer following ${merchantData.business_name}`,
+          description: `You've unfollowed ${merchantData?.business_name}`
         });
       } else {
-        // Follow
         await supabase
           .from('user_follows')
           .insert({
-            follower_id: currentUserProfile.user_id,
-            following_id: merchantData.user_id
+            follower_id: user.id,
+            following_id: merchantId
           });
-        
         setIsFollowing(true);
         toast({
           title: "Following",
-          description: `You are now following ${merchantData.business_name}`,
+          description: `You're now following ${merchantData?.business_name}`
         });
       }
-    } catch (error: any) {
+    } catch (error) {
+      console.error('Error updating follow status:', error);
       toast({
         title: "Error",
         description: "Failed to update follow status",
@@ -176,40 +191,48 @@ const MerchantPage = () => {
     }
   };
 
-  const handleShare = async () => {
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: merchantData?.business_name,
-          text: `Check out ${merchantData?.business_name} on MyDresser`,
-          url: window.location.href
-        });
-      } else {
-        // Fallback to clipboard
-        await navigator.clipboard.writeText(window.location.href);
-        toast({
-          title: "Link Copied",
-          description: "Merchant page link copied to clipboard",
-        });
-      }
-    } catch (error) {
-      console.error('Error sharing:', error);
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: merchantData?.business_name,
+        text: merchantData?.brand_story,
+        url: window.location.href
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: "Link Copied",
+        description: "Page link copied to clipboard"
+      });
     }
   };
 
-  // Filter merchant items
-  const merchantItems = items.filter(item => item.merchant_id === id);
-  const categories = Array.from(new Set(merchantItems.map(item => item.category)));
-  const filteredItems = activeCategory === 'all' 
-    ? merchantItems 
-    : merchantItems.filter(item => item.category === activeCategory);
+  const filteredItems = items.filter(item => {
+    if (selectedCategory === 'all') return true;
+    return item.category.toLowerCase() === selectedCategory.toLowerCase();
+  });
+
+  const sortedItems = filteredItems.sort((a, b) => {
+    switch (sortBy) {
+      case 'price-low':
+        return a.price - b.price;
+      case 'price-high':
+        return b.price - a.price;
+      case 'popular':
+        return (b.is_featured ? 1 : 0) - (a.is_featured ? 1 : 0);
+      default: // newest
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    }
+  });
+
+  const categories = [...new Set(items.map(item => item.category))];
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-muted-foreground">Loading merchant page...</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Loading merchant page...</p>
         </div>
       </div>
     );
@@ -217,13 +240,10 @@ const MerchantPage = () => {
 
   if (!merchantData) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <h2 className="text-2xl font-bold">Merchant Not Found</h2>
-          <p className="text-muted-foreground">This merchant page doesn't exist or has been removed.</p>
-          <Button onClick={() => navigate('/market')}>
-            Browse Market
-          </Button>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-2">Merchant Not Found</h2>
+          <p className="text-muted-foreground">This merchant page doesn't exist or is not published.</p>
         </div>
       </div>
     );
@@ -232,160 +252,115 @@ const MerchantPage = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-primary/10 to-secondary/10 border-b">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row gap-6 items-start">
-            {/* Profile Avatar/Logo */}
-            <div className="flex-shrink-0">
-              <div className="w-32 h-32 rounded-xl bg-primary/20 flex items-center justify-center border-2 border-primary/30">
-                <ShoppingBag className="h-16 w-16 text-primary" />
-              </div>
-            </div>
-
-            {/* Merchant Info */}
-            <div className="flex-1 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                <div>
-                  <h1 className="text-3xl font-bold">{merchantData.business_name}</h1>
-                  <div className="flex items-center gap-2 mt-1">
-                    {merchantData.verification_status === 'verified' && (
-                      <Badge variant="default" className="gap-1">
-                        <Award className="h-3 w-3" />
-                        Verified Merchant
-                      </Badge>
-                    )}
-                    <Badge variant="secondary">{merchantData.business_type || 'Fashion Retailer'}</Badge>
-                  </div>
-                </div>
-                
-                {/* Action Buttons */}
-                <div className="flex gap-2 sm:ml-auto">
-                  {isOwner && (
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => navigate('/merchant-terminal')}
-                      className="gap-2"
-                    >
-                      <Edit3 className="h-4 w-4" />
-                      Edit Page
-                    </Button>
-                  )}
-                  
-                  {!isOwner && (
-                    <Button 
-                      variant={isFollowing ? "outline" : "default"}
-                      size="sm"
-                      onClick={handleFollow}
-                      className="gap-2"
-                    >
-                      <Heart className={`h-4 w-4 ${isFollowing ? 'fill-current' : ''}`} />
-                      {isFollowing ? 'Following' : 'Follow'}
-                    </Button>
-                  )}
-                  
-                  <Button variant="outline" size="sm" onClick={handleShare} className="gap-2">
-                    <Share2 className="h-4 w-4" />
-                    Share
-                  </Button>
-                </div>
-              </div>
-
-              {/* Stats */}
-              <div className="flex gap-6 text-sm">
-                <div className="flex items-center gap-1">
-                  <ShoppingBag className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">{merchantItems.length}</span>
-                  <span className="text-muted-foreground">Items</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">1.2K</span>
-                  <span className="text-muted-foreground">Followers</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">4.8</span>
-                  <span className="text-muted-foreground">Rating</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">
-                    Joined {new Date(merchantData.created_at).toLocaleDateString('en-US', { 
-                      month: 'long', 
-                      year: 'numeric' 
-                    })}
-                  </span>
-                </div>
-              </div>
-
-              {/* Brand Story */}
-              {merchantData.brand_story && (
-                <p className="text-muted-foreground max-w-2xl">
-                  {merchantData.brand_story}
-                </p>
+      <div 
+        className="relative h-64 bg-cover bg-center"
+        style={{
+          backgroundColor: merchantData.theme_color,
+          backgroundImage: merchantData.hero_image ? `url(${merchantData.hero_image})` : undefined
+        }}
+      >
+        <div className="absolute inset-0 bg-black/30" />
+        <div className="relative h-full flex items-end">
+          <div className="container mx-auto px-4 pb-6">
+            <div className="flex items-end gap-4">
+              {merchantData.logo && (
+                <img
+                  src={merchantData.logo}
+                  alt={merchantData.business_name}
+                  className="w-20 h-20 rounded-lg bg-white p-2 shadow-lg"
+                />
               )}
-
-              {/* Specialties */}
-              {merchantData.specialties && (
-                <div className="flex flex-wrap gap-2">
+              <div className="text-white">
+                <h1 className="text-3xl font-bold">{merchantData.business_name}</h1>
+                <div className="flex flex-wrap gap-2 mt-2">
                   {merchantData.specialties.map((specialty, index) => (
-                    <Badge key={index} variant="outline" className="text-xs">
+                    <Badge key={index} variant="secondary" className="bg-white/20 text-white">
                       {specialty}
                     </Badge>
                   ))}
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="items" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="items">Items ({merchantItems.length})</TabsTrigger>
-            <TabsTrigger value="collections">Collections</TabsTrigger>
+      <div className="container mx-auto px-4 py-6">
+        {/* Action Buttons */}
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex gap-2">
+            <Button onClick={handleFollow} variant={isFollowing ? "default" : "outline"}>
+              <Heart className={`h-4 w-4 mr-2 ${isFollowing ? 'fill-current' : ''}`} />
+              {isFollowing ? 'Following' : 'Follow'}
+            </Button>
+            <Button variant="outline" onClick={handleShare}>
+              <Share2 className="h-4 w-4 mr-2" />
+              Share
+            </Button>
+          </div>
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Users className="h-4 w-4" />
+              1.2K followers
+            </span>
+            <span className="flex items-center gap-1">
+              <Star className="h-4 w-4" />
+              4.8 rating
+            </span>
+          </div>
+        </div>
+
+        <Tabs defaultValue="products" className="w-full">
+          <TabsList>
+            <TabsTrigger value="products">Products</TabsTrigger>
             <TabsTrigger value="about">About</TabsTrigger>
-            <TabsTrigger value="reviews">Reviews</TabsTrigger>
           </TabsList>
 
-          {/* Items Tab */}
-          <TabsContent value="items" className="mt-6">
-            <div className="space-y-6">
-              {/* Controls */}
-              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                <div className="flex flex-wrap gap-2">
+          <TabsContent value="products" className="space-y-4">
+            {/* Filters and Controls */}
+            <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant={selectedCategory === 'all' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSelectedCategory('all')}
+                >
+                  All
+                </Button>
+                {categories.map(category => (
                   <Button
-                    variant={activeCategory === 'all' ? 'default' : 'outline'}
+                    key={category}
+                    variant={selectedCategory === category ? 'default' : 'outline'}
                     size="sm"
-                    onClick={() => setActiveCategory('all')}
+                    onClick={() => setSelectedCategory(category)}
                   >
-                    All Items
+                    {category}
                   </Button>
-                  {categories.map((category) => (
-                    <Button
-                      key={category}
-                      variant={activeCategory === category ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setActiveCategory(category)}
-                    >
-                      {category.charAt(0).toUpperCase() + category.slice(1)}
-                    </Button>
-                  ))}
-                </div>
-
-                <div className="flex gap-2">
+                ))}
+              </div>
+              
+              <div className="flex gap-2">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="px-3 py-2 border rounded-md text-sm"
+                >
+                  <option value="newest">Newest</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                  <option value="popular">Most Popular</option>
+                </select>
+                
+                <div className="flex border rounded-md">
                   <Button
-                    variant={viewMode === 'grid' ? 'default' : 'outline'}
+                    variant={viewMode === 'grid' ? 'default' : 'ghost'}
                     size="sm"
                     onClick={() => setViewMode('grid')}
                   >
                     <Grid className="h-4 w-4" />
                   </Button>
                   <Button
-                    variant={viewMode === 'list' ? 'default' : 'outline'}
+                    variant={viewMode === 'list' ? 'default' : 'ghost'}
                     size="sm"
                     onClick={() => setViewMode('list')}
                   >
@@ -393,143 +368,106 @@ const MerchantPage = () => {
                   </Button>
                 </div>
               </div>
-
-              {/* Items Grid */}
-              {filteredItems.length > 0 ? (
-                <div className={viewMode === 'grid' 
-                  ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" 
-                  : "space-y-4"
-                }>
-                  {filteredItems.map((item) => (
-                    <MerchantItemCard 
-                      key={item.id} 
-                      item={item}
-                      onAction={(action, itemId) => {
-                        // Handle actions like add to cart, etc.
-                        console.log(action, itemId);
-                      }}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <ShoppingBag className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">No items found</h3>
-                  <p className="text-muted-foreground">
-                    {activeCategory === 'all' 
-                      ? "This merchant hasn't added any items yet." 
-                      : `No items found in ${activeCategory} category.`
-                    }
-                  </p>
-                </div>
-              )}
             </div>
-          </TabsContent>
 
-          {/* Collections Tab */}
-          <TabsContent value="collections" className="mt-6">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {merchantData.featured_collections?.map((collection, index) => (
-                <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <CardTitle className="text-lg">{collection}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="aspect-video bg-muted rounded-lg mb-4"></div>
-                    <p className="text-sm text-muted-foreground">
-                      Curated collection of {collection.toLowerCase()} pieces
-                    </p>
-                  </CardContent>
-                </Card>
+            {/* Products Grid */}
+            <div className={`grid gap-4 ${
+              viewMode === 'grid' 
+                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+                : 'grid-cols-1'
+            }`}>
+              {sortedItems.map(item => (
+                <MerchantItemCard
+                  key={item.id}
+                  item={item}
+                />
               ))}
             </div>
           </TabsContent>
 
-          {/* About Tab */}
-          <TabsContent value="about" className="mt-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>About {merchantData.business_name}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-muted-foreground">
-                    {merchantData.brand_story}
-                  </p>
-                  
-                  <Separator />
-                  
-                  <div>
-                    <h4 className="font-medium mb-2">Specialties</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {merchantData.specialties?.map((specialty, index) => (
-                        <Badge key={index} variant="secondary">{specialty}</Badge>
-                      ))}
-                    </div>
-                  </div>
-
-                  <Separator />
-
-                  <div>
-                    <h4 className="font-medium mb-2">Business Type</h4>
-                    <p className="text-muted-foreground">{merchantData.business_type || 'Fashion Retailer'}</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Contact & Social</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
-                    {merchantData.social_links?.website && (
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{merchantData.social_links.website}</span>
-                      </div>
-                    )}
-                    {merchantData.social_links?.instagram && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">Instagram:</span>
-                        <span className="text-sm text-muted-foreground">{merchantData.social_links.instagram}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <Separator />
-
-                  <div>
-                    <h4 className="font-medium mb-2">Member Since</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(merchantData.created_at).toLocaleDateString('en-US', {
-                        month: 'long',
-                        day: 'numeric', 
-                        year: 'numeric'
-                      })}
+          <TabsContent value="about" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Our Story</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {merchantData.brand_story || 'This merchant hasn\'t shared their story yet.'}
                     </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
+                  </CardContent>
+                </Card>
+              </div>
 
-          {/* Reviews Tab */}
-          <TabsContent value="reviews" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Customer Reviews</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Star className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">No reviews yet</h3>
-                  <p className="text-muted-foreground">
-                    Be the first to leave a review for {merchantData.business_name}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+              <div className="space-y-4">
+                {/* Contact Info */}
+                {(merchantData.contact_info.phone || merchantData.contact_info.email || merchantData.contact_info.address) && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        Contact Info
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {merchantData.contact_info.phone && (
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm">{merchantData.contact_info.phone}</span>
+                        </div>
+                      )}
+                      {merchantData.contact_info.email && (
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm">{merchantData.contact_info.email}</span>
+                        </div>
+                      )}
+                      {merchantData.contact_info.address && (
+                        <div className="flex items-start gap-2">
+                          <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+                          <span className="text-sm">{merchantData.contact_info.address}</span>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Social Links */}
+                {Object.keys(merchantData.social_links).length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Connect With Us</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex gap-3">
+                        {merchantData.social_links.instagram && (
+                          <Button variant="outline" size="sm" asChild>
+                            <a href={`https://instagram.com/${merchantData.social_links.instagram}`} target="_blank" rel="noopener noreferrer">
+                              <Instagram className="h-4 w-4" />
+                            </a>
+                          </Button>
+                        )}
+                        {merchantData.social_links.facebook && (
+                          <Button variant="outline" size="sm" asChild>
+                            <a href={merchantData.social_links.facebook} target="_blank" rel="noopener noreferrer">
+                              <Facebook className="h-4 w-4" />
+                            </a>
+                          </Button>
+                        )}
+                        {merchantData.social_links.website && (
+                          <Button variant="outline" size="sm" asChild>
+                            <a href={merchantData.social_links.website} target="_blank" rel="noopener noreferrer">
+                              <Globe className="h-4 w-4" />
+                            </a>
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

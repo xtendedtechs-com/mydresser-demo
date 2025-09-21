@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 export const MerchantPageTab: React.FC = () => {
-  const { merchantProfile, loading } = useMerchantProfile();
+  const { profile: merchantProfile, loading } = useMerchantProfile();
   const [activeTab, setActiveTab] = useState('overview');
 
   if (loading) {
