@@ -546,51 +546,96 @@ export type Database = {
       }
       merchant_pages: {
         Row: {
+          accent_color: string | null
           brand_story: string | null
           business_hours: Json | null
           business_name: string
           contact_info: Json | null
           created_at: string
+          custom_css: string | null
+          enable_chat: boolean | null
+          enable_quick_view: boolean | null
+          enable_wishlist: boolean | null
           featured_collections: string[] | null
+          font_family: string | null
+          gallery_images: string[] | null
+          google_analytics: string | null
           hero_image: string | null
           id: string
           is_published: boolean | null
+          keywords: string | null
+          layout_style: string | null
           logo: string | null
           merchant_id: string
+          meta_description: string | null
+          secondary_color: string | null
+          show_reviews: boolean | null
+          show_social_proof: boolean | null
+          show_stock_count: boolean | null
           social_links: Json | null
           specialties: string[] | null
           theme_color: string | null
           updated_at: string
         }
         Insert: {
+          accent_color?: string | null
           brand_story?: string | null
           business_hours?: Json | null
           business_name: string
           contact_info?: Json | null
           created_at?: string
+          custom_css?: string | null
+          enable_chat?: boolean | null
+          enable_quick_view?: boolean | null
+          enable_wishlist?: boolean | null
           featured_collections?: string[] | null
+          font_family?: string | null
+          gallery_images?: string[] | null
+          google_analytics?: string | null
           hero_image?: string | null
           id?: string
           is_published?: boolean | null
+          keywords?: string | null
+          layout_style?: string | null
           logo?: string | null
           merchant_id: string
+          meta_description?: string | null
+          secondary_color?: string | null
+          show_reviews?: boolean | null
+          show_social_proof?: boolean | null
+          show_stock_count?: boolean | null
           social_links?: Json | null
           specialties?: string[] | null
           theme_color?: string | null
           updated_at?: string
         }
         Update: {
+          accent_color?: string | null
           brand_story?: string | null
           business_hours?: Json | null
           business_name?: string
           contact_info?: Json | null
           created_at?: string
+          custom_css?: string | null
+          enable_chat?: boolean | null
+          enable_quick_view?: boolean | null
+          enable_wishlist?: boolean | null
           featured_collections?: string[] | null
+          font_family?: string | null
+          gallery_images?: string[] | null
+          google_analytics?: string | null
           hero_image?: string | null
           id?: string
           is_published?: boolean | null
+          keywords?: string | null
+          layout_style?: string | null
           logo?: string | null
           merchant_id?: string
+          meta_description?: string | null
+          secondary_color?: string | null
+          show_reviews?: boolean | null
+          show_social_proof?: boolean | null
+          show_stock_count?: boolean | null
           social_links?: Json | null
           specialties?: string[] | null
           theme_color?: string | null

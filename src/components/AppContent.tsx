@@ -36,7 +36,7 @@ const AppContent = () => {
         <Route path="/market/item/:id" element={<MarketItemDetail />} />
         <Route path="/add" element={<Add />} />
         <Route path="/merchant-terminal" element={<MerchantTerminal />} />
-        <Route path="/merchant/:id" element={<MerchantPage />} />
+        <Route path="/merchant/:merchantId" element={<MerchantPage />} />
         <Route path="/outfit-generator" element={<DailyOutfitGenerator />} />
         <Route path="/social" element={<SocialPage />} />
         <Route path="/ai-recommendations" element={<AIRecommendationsPage />} />

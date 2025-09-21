@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Plus, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -368,15 +368,17 @@ export const AddItemDialog = ({ onItemAdded }: AddItemDialogProps) => {
           </Card>
 
           {/* Media Upload */}
-          <FileUpload
-            photos={uploadedPhotos}
-            videos={uploadedVideos}
-            onPhotosChange={setUploadedPhotos}
-            onVideosChange={setUploadedVideos}
-            maxPhotos={20}
-            maxVideos={2}
-            disabled={loading}
-          />
+          <Card>
+            <CardHeader>
+              <CardTitle>Photos & Videos</CardTitle>
+              <CardDescription>Add photos and videos to your wardrobe item</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Photo and video upload functionality is available in the merchant terminal.
+              </p>
+            </CardContent>
+          </Card>
 
           {/* Tags & Settings */}
           <Card>
