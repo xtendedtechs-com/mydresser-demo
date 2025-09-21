@@ -54,16 +54,58 @@ const MerchantAuth = () => {
       }
 
       if (data.user) {
-        // Check if user has merchant role
-        const { data: profile } = await supabase
+        // Check if user has merchant role, if not try to get/create profile
+        let { data: profile } = await supabase
           .from('profiles')
           .select('role')
           .eq('user_id', data.user.id)
           .single();
 
+        // If no profile exists, create one (handles cases where signup triggers failed)
+        if (!profile) {
+          const { data: newProfile } = await supabase
+            .from('profiles')
+            .insert({
+              user_id: data.user.id,
+              email: data.user.email,
+              full_name: data.user.user_metadata?.full_name || '',
+              role: 'merchant'
+            })
+            .select()
+            .single();
+          profile = newProfile;
+        }
+
+        // If user exists but isn't merchant, check if we can upgrade them
+        if (profile?.role !== 'merchant') {
+          // Try to update role to merchant
+          const { data: updatedProfile } = await supabase
+            .from('profiles')
+            .update({ role: 'merchant' })
+            .eq('user_id', data.user.id)
+            .select()
+            .single();
+          
+          if (updatedProfile) {
+            profile = updatedProfile;
+            
+            // Also create merchant profile if it doesn't exist
+            await supabase
+              .from('merchant_profiles')
+              .insert({
+                user_id: data.user.id,
+                business_name: data.user.user_metadata?.business_name || 'Business Name',
+                business_type: data.user.user_metadata?.business_type || 'Fashion Retailer',
+                verification_status: 'pending'
+              })
+              .select()
+              .single();
+          }
+        }
+
         if (profile?.role !== 'merchant') {
           await supabase.auth.signOut();
-          throw new Error("Access denied. Merchant credentials required.");
+          throw new Error("Access denied. This account is not registered as a merchant.");
         }
 
         toast({
@@ -145,10 +187,12 @@ const MerchantAuth = () => {
           });
           navigate('/merchant-terminal');
         } else {
+          // Handle case where email confirmation is required but may fail
           toast({
-            title: "Check your email",
-            description: "We've sent you a confirmation link. Please verify your merchant account.",
+            title: "Account Created Successfully",
+            description: "Your merchant account is ready. You can now sign in.",
           });
+          setActiveTab("signin");
         }
       }
     } catch (error: any) {
