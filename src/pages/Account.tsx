@@ -19,19 +19,22 @@ import {
   Calendar,
   Heart,
   Shirt,
-  Search
+  Search,
+  BarChart3
 } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import ProfileEditDialog from "@/components/ProfileEditDialog";
 import EnhancedThemeSelector from "@/components/EnhancedThemeSelector";
+import ThemeCustomizer from "@/components/ThemeCustomizer";
 import ComprehensiveAuthSystem from "@/components/ComprehensiveAuthSystem";
 import AccessibilitySettings from "@/components/AccessibilitySettings";
 import NotificationCenter from "@/components/NotificationCenter";
 import EnhancedWardrobeManager from "@/components/EnhancedWardrobeManager";
 import ProfileHeader from "@/components/ProfileHeader";
 import SettingsSection from "@/components/SettingsSection";
+import UserAnalyticsDashboard from "@/components/UserAnalyticsDashboard";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -50,6 +53,7 @@ const Account = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [profileEditOpen, setProfileEditOpen] = useState(false);
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("profile");
 
   const handleSignOut = async () => {
     try {
@@ -272,208 +276,242 @@ const Account = () => {
     });
   }
 
-  return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-        {!activeSection ? (
-          <>
-            {/* Header */}
-            <div className="text-center">
-              <h1 className="text-2xl lg:text-3xl font-bold fashion-text-gradient flex items-center justify-center gap-2">
-                <span>👤</span>
-                MYDRESSER ACCOUNT
-              </h1>
-            </div>
+  const renderProfile = () => {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <h1 className="text-2xl lg:text-3xl font-bold fashion-text-gradient flex items-center justify-center gap-2">
+            <span>👤</span>
+            MYDRESSER ACCOUNT
+          </h1>
+        </div>
 
-            {/* Desktop Layout */}
-            <div className="lg:grid lg:grid-cols-3 lg:gap-8 space-y-6 lg:space-y-0">
-              {/* Left Column - Profile & Quick Actions */}
-              <div className="lg:col-span-1 space-y-6">
-                <ProfileHeader profile={profile} />
-                
-                {/* Search Bar */}
-                <Card className="p-4">
-                  <div className="flex flex-col sm:flex-row items-center gap-3">
-                    <div className="relative flex-1 w-full">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                      <Input
-                        placeholder="What would you like to do?"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-                    <Button 
-                      className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90"
-                      onClick={handleMyStyleClick}
-                    >
-                      <Palette className="w-4 h-4 mr-2" />
-                      MY STYLE
-                    </Button>
-                  </div>
-                </Card>
-
-                {/* Data Collection Notice */}
-                <Card className="p-4 bg-accent/30">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Data collection & processing</span>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                </Card>
-              </div>
-
-              {/* Right Column - Settings & Wardrobe */}
-              <div className="lg:col-span-2 space-y-6">
-                <Tabs defaultValue="settings" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="settings" className="flex items-center gap-2">
-                      <Palette className="w-4 h-4" />
-                      Settings
-                    </TabsTrigger>
-                    <TabsTrigger value="wardrobe" className="flex items-center gap-2">
-                      <Shirt className="w-4 h-4" />
-                      Wardrobe
-                    </TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="settings" className="space-y-6 mt-6">
-                    <div className="grid gap-6">
-                      <SettingsSection title="Account" items={accountSettings} />
-                      <SettingsSection title="App" items={appSettings} />
-                      <SettingsSection title="Personalization" items={personalizationSettings} />
-                      <SettingsSection title="Services settings" items={serviceSettings} />
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="wardrobe" className="mt-6">
-                    <EnhancedWardrobeManager />
-                  </TabsContent>
-                </Tabs>
-              </div>
-            </div>
-
-            {/* Sign Out */}
-            <div className="pt-6">
-              <Button
-                variant="outline"
-                onClick={handleSignOut}
-                className="w-full"
-              >
-                Sign out
-              </Button>
-            </div>
-          </>
-        ) : (
-          <div className="space-y-6">
-            <Button 
-              variant="ghost" 
-              onClick={() => setActiveSection(null)}
-              className="mb-4"
-            >
-              ← Back to Settings
-            </Button>
-            
-            {activeSection === 'profile' && (
-              <ProfileEditDialog 
-                open={true} 
-                onOpenChange={() => setActiveSection(null)}
+        <ProfileHeader profile={profile} />
+        
+        <Card className="p-4">
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                placeholder="What would you like to do?"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
               />
-            )}
-            
-            {activeSection === 'theme' && <EnhancedThemeSelector />}
-            
-            {activeSection === 'authentication' && <ComprehensiveAuthSystem />}
-            
-            {activeSection === 'accessibility' && <AccessibilitySettings />}
-            
-            {activeSection === 'notifications' && <NotificationCenter />}
-            
-            {activeSection === 'general' && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>General Settings</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">General app configuration options coming soon.</p>
-                </CardContent>
-              </Card>
-            )}
-            
-            {activeSection === 'permissions' && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>App Permissions</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">Permission management coming soon.</p>
-                </CardContent>
-              </Card>
-            )}
-            
-            {activeSection === 'preferences' && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>User Preferences</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">Preference management coming soon.</p>
-                </CardContent>
-              </Card>
-            )}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Help & Support</CardTitle>
-                  <CardDescription>Get assistance with MyDresser</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-start"
-                      onClick={() => window.open('https://docs.mydresser.app', '_blank')}
-                    >
-                      <HelpCircle className="w-4 h-4 mr-2" />
-                      Documentation & FAQ
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-start"
-                      onClick={() => {
-                        toast({
-                          title: "Contact Support",
-                          description: "Support team will respond within 24 hours.",
-                        });
-                      }}
-                    >
-                      <User className="w-4 h-4 mr-2" />
-                      Contact Support
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-start"
-                      onClick={() => {
-                        toast({
-                          title: "Feedback Sent",
-                          description: "Thank you for your feedback!",
-                        });
-                      }}
-                    >
-                      <Heart className="w-4 h-4 mr-2" />
-                      Send Feedback
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            </div>
+            <Button 
+              className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90"
+              onClick={handleMyStyleClick}
+            >
+              <Palette className="w-4 h-4 mr-2" />
+              MY STYLE
+            </Button>
           </div>
+        </Card>
+
+        <div className="pt-6">
+          <Button
+            variant="outline"
+            onClick={handleSignOut}
+            className="w-full"
+          >
+            Sign out
+          </Button>
+        </div>
+      </div>
+    );
+  };
+
+  const renderMyStyle = () => {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-5 h-5 text-primary" />
+          <h2 className="text-2xl font-bold">My Style</h2>
+        </div>
+        <Card>
+          <CardContent className="p-6">
+            <p className="text-muted-foreground mb-4">
+              Define your personal style preferences and let our AI learn from your choices.
+            </p>
+            <Button onClick={handleMyStyleClick} className="w-full">
+              <Palette className="w-4 h-4 mr-2" />
+              Manage My Style
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
+
+  const renderSettings = () => {
+    if (!activeSection) {
+      return (
+        <div className="space-y-6">
+          <div className="flex items-center gap-2">
+            <Settings className="w-5 h-5 text-primary" />
+            <h2 className="text-2xl font-bold">Settings</h2>
+          </div>
+          <div className="grid gap-6">
+            <SettingsSection title="Account" items={accountSettings} />
+            <SettingsSection title="App" items={appSettings} />
+            <SettingsSection title="Personalization" items={personalizationSettings} />
+            <SettingsSection title="Services settings" items={serviceSettings} />
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-6">
+        <Button 
+          variant="ghost" 
+          onClick={() => setActiveSection(null)}
+          className="mb-4"
+        >
+          ← Back to Settings
+        </Button>
+        
+        {activeSection === 'profile' && (
+          <ProfileEditDialog 
+            open={true} 
+            onOpenChange={() => setActiveSection(null)}
+          />
+        )}
+        
+        {activeSection === 'theme' && <ThemeCustomizer />}
+        
+        {activeSection === 'authentication' && <ComprehensiveAuthSystem />}
+        
+        {activeSection === 'accessibility' && <AccessibilitySettings />}
+        
+        {activeSection === 'notifications' && <NotificationCenter />}
+        
+        {activeSection === 'general' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>General Settings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">General app configuration options coming soon.</p>
+            </CardContent>
+          </Card>
+        )}
+        
+        {activeSection === 'permissions' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>App Permissions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">Permission management coming soon.</p>
+            </CardContent>
+          </Card>
+        )}
+        
+        {activeSection === 'preferences' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>User Preferences</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">Preference management coming soon.</p>
+            </CardContent>
+          </Card>
+        )}
+        
+        {activeSection === 'help' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Help & Support</CardTitle>
+              <CardDescription>Get assistance with MyDresser</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => window.open('https://docs.mydresser.app', '_blank')}
+                >
+                  <HelpCircle className="w-4 h-4 mr-2" />
+                  Documentation & FAQ
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => {
+                    toast({
+                      title: "Contact Support",
+                      description: "Support team will respond within 24 hours.",
+                    });
+                  }}
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  Contact Support
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => {
+                    toast({
+                      title: "Feedback Sent",
+                      description: "Thank you for your feedback!",
+                    });
+                  }}
+                >
+                  <Heart className="w-4 h-4 mr-2" />
+                  Send Feedback
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
+    );
+  };
 
-      {/* Dialogs */}
-      <ProfileEditDialog 
-        open={profileEditOpen} 
-        onOpenChange={setProfileEditOpen} 
-      />
+  const renderAnalytics = () => {
+    if (!profile) return null;
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-2">
+          <BarChart3 className="w-5 h-5 text-primary" />
+          <h2 className="text-2xl font-bold">Analytics</h2>
+        </div>
+        <UserAnalyticsDashboard />
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid grid-cols-4 w-full max-w-md mx-auto">
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="mystyle">My Style</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="profile">
+            {renderProfile()}
+          </TabsContent>
+
+          <TabsContent value="mystyle">
+            {renderMyStyle()}
+          </TabsContent>
+
+          <TabsContent value="settings">
+            {renderSettings()}
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            {renderAnalytics()}
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 };

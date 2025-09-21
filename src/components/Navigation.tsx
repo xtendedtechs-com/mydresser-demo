@@ -21,7 +21,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
     },
     { 
       name: "Wardrobe", 
-      href: "/wardrobe/enhanced", 
+      href: "/wardrobe", 
       icon: Shirt,
       id: "wardrobe"
     },
