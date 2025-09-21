@@ -59,6 +59,7 @@ export const MerchantPageEditor: React.FC<MerchantPageEditorProps> = ({
   const { profile: merchantProfile } = useMerchantProfile();
   const { toast } = useToast();
 
+  // Clean component without SecurityAlert
   const [settings, setSettings] = useState<MerchantPageSettings>({
     business_name: '',
     brand_story: '',
