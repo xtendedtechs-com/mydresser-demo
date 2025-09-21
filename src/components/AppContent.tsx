@@ -15,14 +15,8 @@ import MerchantTerminal from "@/pages/MerchantTerminal";
 import MerchantPage from "@/pages/MerchantPage";
 import Auth from "@/pages/Auth";
 import NotFound from "../pages/NotFound";
-import SettingsPage from "@/pages/SettingsPage";
 import ServiceSettingsPage from "@/pages/ServiceSettingsPage";
-import EnhancedWardrobeManager from "@/components/EnhancedWardrobeManager";
-import EnhancedMarketplace from "@/components/EnhancedMarketplace";
-import SmartOutfitMatcher from "@/components/SmartOutfitMatcher";
-import UserAnalyticsDashboard from "@/components/UserAnalyticsDashboard";
-import { WardrobeAnalytics } from "@/components/WardrobeAnalytics";
-import { SmartLaundryTracker } from "@/components/SmartLaundryTracker";
+import MyStyle from "@/pages/MyStyle";
 import { DailyOutfitGenerator } from "@/components/DailyOutfitGenerator";
 import SocialPage from "@/pages/SocialPage";
 import AIRecommendationsPage from "@/pages/AIRecommendationsPage";
@@ -37,24 +31,17 @@ const AppContent = () => {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/wardrobe" element={<Wardrobe />} />
-        <Route path="/wardrobe/enhanced" element={<EnhancedWardrobeManager />} />
         <Route path="/market" element={<Market />} />
         <Route path="/market/item/:id" element={<MarketItemDetail />} />
-        <Route path="/marketplace" element={<EnhancedMarketplace />} />
         <Route path="/add" element={<Add />} />
         <Route path="/merchant-terminal" element={<MerchantTerminal />} />
         <Route path="/merchant/:id" element={<MerchantPage />} />
-        <Route path="/smart-matcher" element={<SmartOutfitMatcher />} />
-        <Route path="/analytics" element={<UserAnalyticsDashboard />} />
-        <Route path="/laundry" element={<SmartLaundryTracker />} />
         <Route path="/outfit-generator" element={<DailyOutfitGenerator />} />
         <Route path="/social" element={<SocialPage />} />
         <Route path="/ai-recommendations" element={<AIRecommendationsPage />} />
         <Route path="/merchant-analytics" element={<MerchantAnalyticsPage />} />
-            <Route path="/account" element={<Account />} />
-            <Route path="/account/settings" element={<SettingsPage />} />
-            <Route path="/account/settings/:category" element={<SettingsPage />} />
-        <Route path="/settings/:category" element={<SettingsPage />} />
+        <Route path="/account" element={<Account />} />
+        <Route path="/mystyle" element={<MyStyle />} />
         <Route path="/service-settings/:service" element={<ServiceSettingsPage />} />
         <Route path="/item/:id" element={<ItemDetail />} />
         <Route path="/wardrobe/item/:id" element={<WardrobeItemDetail />} />

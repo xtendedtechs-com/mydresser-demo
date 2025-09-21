@@ -850,6 +850,53 @@ export type Database = {
           },
         ]
       }
+      outfit_suggestions: {
+        Row: {
+          confidence_score: number | null
+          created_at: string
+          id: string
+          is_accepted: boolean | null
+          occasion: string | null
+          outfit_id: string | null
+          reasoning: string | null
+          suggestion_type: string
+          user_id: string
+          weather_data: Json | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string
+          id?: string
+          is_accepted?: boolean | null
+          occasion?: string | null
+          outfit_id?: string | null
+          reasoning?: string | null
+          suggestion_type: string
+          user_id: string
+          weather_data?: Json | null
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string
+          id?: string
+          is_accepted?: boolean | null
+          occasion?: string | null
+          outfit_id?: string | null
+          reasoning?: string | null
+          suggestion_type?: string
+          user_id?: string
+          weather_data?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outfit_suggestions_outfit_id_fkey"
+            columns: ["outfit_id"]
+            isOneToOne: false
+            referencedRelation: "outfits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       outfits: {
         Row: {
           ai_generation_prompt: string | null
@@ -1350,6 +1397,48 @@ export type Database = {
           privacy_settings?: Json | null
           suggestion_settings?: Json | null
           theme?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_styles: {
+        Row: {
+          color_palette: Json | null
+          created_at: string
+          id: string
+          inspiration_images: string[] | null
+          is_active: boolean | null
+          preferred_categories: Json | null
+          style_description: string | null
+          style_keywords: string[] | null
+          style_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color_palette?: Json | null
+          created_at?: string
+          id?: string
+          inspiration_images?: string[] | null
+          is_active?: boolean | null
+          preferred_categories?: Json | null
+          style_description?: string | null
+          style_keywords?: string[] | null
+          style_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color_palette?: Json | null
+          created_at?: string
+          id?: string
+          inspiration_images?: string[] | null
+          is_active?: boolean | null
+          preferred_categories?: Json | null
+          style_description?: string | null
+          style_keywords?: string[] | null
+          style_name?: string
           updated_at?: string
           user_id?: string
         }

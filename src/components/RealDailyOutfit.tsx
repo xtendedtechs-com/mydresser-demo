@@ -11,7 +11,8 @@ import {
   Calendar, 
   Thermometer, 
   Cloud,
-  Loader2
+  Loader2,
+  Edit
 } from "lucide-react";
 import { useWardrobe } from "@/hooks/useWardrobe";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
@@ -19,6 +20,7 @@ import { OutfitAI } from "@/ai/OutfitAI";
 import { weatherService } from "@/services/weatherService";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import EditOutfitDialog from "./EditOutfitDialog";
 
 interface DailyOutfitProps {
   date?: Date;
@@ -32,6 +34,7 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
   const [loading, setLoading] = useState(false);
   const [weather, setWeather] = useState<any>(null);
   const [regenerating, setRegenerating] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!wardrobeLoading && !preferencesLoading && wardrobeItems.length > 0) {
@@ -162,6 +165,14 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
       );
       toast.success('Copied to clipboard!');
     }
+  };
+
+  const editOutfit = () => {
+    setEditDialogOpen(true);
+  };
+
+  const handleOutfitUpdated = (updatedOutfit: any) => {
+    setOutfit(updatedOutfit);
   };
 
   if (wardrobeLoading || preferencesLoading) {
@@ -309,21 +320,33 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
         )}
 
         {/* Actions */}
-        <div className="flex space-x-3">
-          <Button onClick={saveOutfit} variant="outline" className="flex-1">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <Button onClick={saveOutfit} variant="outline">
             <Heart className="w-4 h-4 mr-2" />
-            Save Outfit
+            Save
           </Button>
-          <Button onClick={shareOutfit} variant="outline" className="flex-1">
+          <Button onClick={editOutfit} variant="outline">
+            <Edit className="w-4 h-4 mr-2" />
+            Edit
+          </Button>
+          <Button onClick={shareOutfit} variant="outline">
             <Share2 className="w-4 h-4 mr-2" />
             Share
           </Button>
-          <Button onClick={regenerateOutfit} className="flex-1" disabled={regenerating}>
+          <Button onClick={regenerateOutfit} disabled={regenerating}>
             <RefreshCw className="w-4 h-4 mr-2" />
-            New Suggestion
+            New Pick
           </Button>
         </div>
       </CardContent>
+      
+      {/* Edit Dialog */}
+      <EditOutfitDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        outfit={outfit}
+        onOutfitUpdated={handleOutfitUpdated}
+      />
     </Card>
   );
 };

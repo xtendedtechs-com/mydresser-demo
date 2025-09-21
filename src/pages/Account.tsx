@@ -45,7 +45,18 @@ const Account = () => {
   };
 
   const navigateToSettings = (category: string) => {
-    navigate(`/settings/${category}`);
+    // Redirect to specific settings pages
+    if (category === 'theme') {
+      navigate('/account/settings/app');
+    } else if (category === 'mystyle') {
+      navigate('/mystyle');
+    } else {
+      navigate(`/account/settings/${category}`);
+    }
+  };
+
+  const handleMyStyleClick = () => {
+    navigate('/mystyle');
   };
 
   if (loading) {
@@ -153,6 +164,13 @@ const Account = () => {
       label: 'Customize theme',
       description: 'Change the app appearance',
       onClick: () => navigateToSettings('theme'),
+      highlighted: true
+    },
+    {
+      id: 'mystyle',
+      label: 'My Style',
+      description: 'Define your personal style preferences',
+      onClick: () => navigateToSettings('mystyle'),
       highlighted: true
     }
   ];
@@ -262,7 +280,10 @@ const Account = () => {
                     className="pl-10"
                   />
                 </div>
-                <Button className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90">
+                <Button 
+                  className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90"
+                  onClick={handleMyStyleClick}
+                >
                   <Palette className="w-4 h-4 mr-2" />
                   MY STYLE
                 </Button>
