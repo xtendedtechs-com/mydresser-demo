@@ -12,15 +12,18 @@ import {
   Thermometer, 
   Cloud,
   Loader2,
-  Edit
+  Edit,
+  ShoppingBag
 } from "lucide-react";
 import { useWardrobe } from "@/hooks/useWardrobe";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { useDailyOutfitSuggestions } from "@/hooks/useDailyOutfitSuggestions";
 import { OutfitAI } from "@/ai/OutfitAI";
 import { weatherService } from "@/services/weatherService";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import EditOutfitDialog from "./EditOutfitDialog";
+import MarketOutfitSuggestions from "./MarketOutfitSuggestions";
 
 interface DailyOutfitProps {
   date?: Date;
@@ -29,12 +32,14 @@ interface DailyOutfitProps {
 export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
   const { items: wardrobeItems, loading: wardrobeLoading } = useWardrobe();
   const { preferences, loading: preferencesLoading } = useUserPreferences();
+  const { createSuggestion, acceptSuggestion, rejectSuggestion } = useDailyOutfitSuggestions();
   
   const [outfit, setOutfit] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [weather, setWeather] = useState<any>(null);
   const [regenerating, setRegenerating] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [showMarketSuggestions, setShowMarketSuggestions] = useState(false);
 
   useEffect(() => {
     if (!wardrobeLoading && !preferencesLoading && wardrobeItems.length > 0) {
@@ -135,6 +140,18 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
+      // Create suggestion and mark as accepted
+      await createSuggestion({
+        outfit_id: outfit.id,
+        suggestion_date: new Date().toISOString().split('T')[0],
+        time_slot: getCurrentTimeSlot(),
+        weather_data: weather,
+        occasion: 'casual',
+        confidence_score: outfit.confidence || 85,
+        is_accepted: true,
+        is_rejected: false
+      });
+
       await supabase
         .from('outfits')
         .update({ is_favorite: true })
@@ -173,6 +190,13 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
 
   const handleOutfitUpdated = (updatedOutfit: any) => {
     setOutfit(updatedOutfit);
+  };
+
+  const getCurrentTimeSlot = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'morning';
+    if (hour < 17) return 'afternoon';
+    return 'evening';
   };
 
   if (wardrobeLoading || preferencesLoading) {
@@ -333,7 +357,14 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
             <Share2 className="w-4 h-4 mr-2" />
             Share
           </Button>
-          <Button onClick={regenerateOutfit} disabled={regenerating}>
+          <Button 
+            onClick={() => setShowMarketSuggestions(true)} 
+            variant="outline"
+          >
+            <ShoppingBag className="w-4 h-4 mr-2" />
+            Shop Look
+          </Button>
+          <Button onClick={regenerateOutfit} disabled={regenerating} className="md:col-span-2">
             <RefreshCw className="w-4 h-4 mr-2" />
             New Pick
           </Button>
@@ -347,6 +378,13 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
         outfit={outfit}
         onOutfitUpdated={handleOutfitUpdated}
       />
+
+      {/* Market Suggestions Dialog */}
+      {showMarketSuggestions && (
+        <MarketOutfitSuggestions 
+          onClose={() => setShowMarketSuggestions(false)}
+        />
+      )}
     </Card>
   );
 };

@@ -18,9 +18,10 @@ import { useToast } from "@/hooks/use-toast";
 
 interface MarketOutfitSuggestionsProps {
   selectedItems?: any[];
+  onClose?: () => void;
 }
 
-const MarketOutfitSuggestions = ({ selectedItems = [] }: MarketOutfitSuggestionsProps) => {
+const MarketOutfitSuggestions = ({ selectedItems = [], onClose }: MarketOutfitSuggestionsProps) => {
   const { items: marketItems } = useMarketplace();
   const { items: wardrobeItems } = useWardrobe();
   const { toast } = useToast();

@@ -291,10 +291,29 @@ const SmartOutfitMatcher = () => {
 
                     {/* Action Buttons */}
                     <div className="flex gap-2 pt-2">
-                      <Button size="sm" className="flex-1">
+                      <Button 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => {
+                          toast({
+                            title: "Outfit selected!",
+                            description: `Trying ${outfit.style} look`,
+                          });
+                        }}
+                      >
                         Try This Outfit
                       </Button>
-                      <Button size="sm" variant="outline">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => {
+                          toast({
+                            title: "Finding similar outfits...",
+                            description: "Generating variations of this look",
+                          });
+                          generateSuggestions();
+                        }}
+                      >
                         <Shuffle className="w-4 h-4 mr-1" />
                         Similar
                       </Button>
@@ -433,7 +452,16 @@ const SmartOutfitMatcher = () => {
                 </div>
               </div>
 
-              <Button onClick={generateSuggestions} className="w-full">
+              <Button 
+                onClick={() => {
+                  toast({
+                    title: "Applying preferences...",
+                    description: "Generating outfits with your settings",
+                  });
+                  generateSuggestions();
+                }} 
+                className="w-full"
+              >
                 Apply Preferences & Generate
               </Button>
             </CardContent>

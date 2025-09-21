@@ -153,6 +153,59 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_outfit_suggestions: {
+        Row: {
+          confidence_score: number | null
+          created_at: string
+          id: string
+          is_accepted: boolean | null
+          is_rejected: boolean | null
+          occasion: string | null
+          outfit_id: string | null
+          suggestion_date: string
+          time_slot: string
+          updated_at: string
+          user_id: string
+          weather_data: Json | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string
+          id?: string
+          is_accepted?: boolean | null
+          is_rejected?: boolean | null
+          occasion?: string | null
+          outfit_id?: string | null
+          suggestion_date?: string
+          time_slot?: string
+          updated_at?: string
+          user_id: string
+          weather_data?: Json | null
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string
+          id?: string
+          is_accepted?: boolean | null
+          is_rejected?: boolean | null
+          occasion?: string | null
+          outfit_id?: string | null
+          suggestion_date?: string
+          time_slot?: string
+          updated_at?: string
+          user_id?: string
+          weather_data?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_outfit_suggestions_outfit_id_fkey"
+            columns: ["outfit_id"]
+            isOneToOne: false
+            referencedRelation: "outfits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       emotes: {
         Row: {
           category: string | null
@@ -1489,6 +1542,51 @@ export type Database = {
           subscriber_id?: string
           subscription_type?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      user_theme_settings: {
+        Row: {
+          accent_color: string
+          animations_enabled: boolean
+          background_style: string
+          border_radius: string
+          created_at: string
+          font_family: string
+          id: string
+          primary_color: string
+          secondary_color: string
+          theme_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accent_color?: string
+          animations_enabled?: boolean
+          background_style?: string
+          border_radius?: string
+          created_at?: string
+          font_family?: string
+          id?: string
+          primary_color?: string
+          secondary_color?: string
+          theme_name?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accent_color?: string
+          animations_enabled?: boolean
+          background_style?: string
+          border_radius?: string
+          created_at?: string
+          font_family?: string
+          id?: string
+          primary_color?: string
+          secondary_color?: string
+          theme_name?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
