@@ -11,6 +11,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useMerchantProfile } from '@/hooks/useMerchantProfile';
 import { useMerchantItems } from '@/hooks/useMerchantItems';
 import { useOrders } from '@/hooks/useOrders';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Store, 
   Package, 
@@ -46,8 +47,12 @@ import {
   Phone,
   MapPin,
   Tag,
-  Percent
+  Percent,
+  Globe,
+  Palette,
+  Image
 } from 'lucide-react';
+import AddMerchantProductDialog from '@/components/AddMerchantProductDialog';
 
 const MerchantTerminal = () => {
   const navigate = useNavigate();
@@ -67,6 +72,8 @@ const MerchantTerminal = () => {
   });
   const [discountCode, setDiscountCode] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showAddProductDialog, setShowAddProductDialog] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
   const [stats, setStats] = useState({
     totalSales: 0,
     totalOrders: 0,
@@ -206,6 +213,58 @@ const MerchantTerminal = () => {
       toast({
         title: "Error",
         description: "Failed to process order",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handlePublishToggle = async (item, newStatus) => {
+    try {
+      const { error } = await supabase
+        .from('merchant_items')
+        .update({ status: newStatus })
+        .eq('id', item.id)
+        .eq('merchant_id', user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Status Updated",
+        description: `${item.name} is now ${newStatus}`,
+      });
+      
+      refetchItems();
+    } catch (error) {
+      console.error('Error updating product status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update product status",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDeleteProduct = async (productId) => {
+    try {
+      const { error } = await supabase
+        .from('merchant_items')
+        .delete()
+        .eq('id', productId)
+        .eq('merchant_id', user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Product Deleted",
+        description: "Product has been removed from inventory",
+      });
+      
+      refetchItems();
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete product",
         variant: "destructive"
       });
     }
