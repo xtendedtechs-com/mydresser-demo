@@ -11,7 +11,7 @@ import { useMerchantItems } from '@/hooks/useMerchantItems';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import AddMerchantProductDialog from '@/components/AddMerchantProductDialog';
-import { MerchantPageTab } from '@/components/MerchantPageTab';
+import { EnhancedMerchantPageEditor } from '@/components/EnhancedMerchantPageEditor';
 import { 
   ShoppingBag, Package, Users, DollarSign, 
   TrendingUp, Calendar, Clock, Star,
@@ -821,7 +821,40 @@ const MerchantTerminal: React.FC = () => {
 
             {/* Merchant Page */}
             {activeSection === 'page' && (
-              <MerchantPageTab />
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl font-bold">Merchant Page Management</h1>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        const merchantId = user?.id;
+                        if (merchantId) {
+                          window.open(`/merchant/${merchantId}`, '_blank');
+                        }
+                      }}
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      View Live Page
+                    </Button>
+                  </div>
+                </div>
+
+                <EnhancedMerchantPageEditor
+                  onSave={(settings) => {
+                    toast({
+                      title: "Page Updated",
+                      description: "Your merchant page has been updated successfully"
+                    });
+                  }}
+                  onPreview={(settings) => {
+                    const merchantId = user?.id;
+                    if (merchantId) {
+                      window.open(`/merchant/${merchantId}?preview=true`, '_blank');
+                    }
+                  }}
+                />
+              </div>
             )}
 
             {/* Support & Resources */}

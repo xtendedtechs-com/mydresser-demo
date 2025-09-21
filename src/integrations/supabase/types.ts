@@ -483,6 +483,7 @@ export type Database = {
           price: number
           season: string | null
           size: string[] | null
+          status: string | null
           stock_quantity: number | null
           style_tags: string[] | null
           tags: string[] | null
@@ -508,6 +509,7 @@ export type Database = {
           price: number
           season?: string | null
           size?: string[] | null
+          status?: string | null
           stock_quantity?: number | null
           style_tags?: string[] | null
           tags?: string[] | null
@@ -533,6 +535,7 @@ export type Database = {
           price?: number
           season?: string | null
           size?: string[] | null
+          status?: string | null
           stock_quantity?: number | null
           style_tags?: string[] | null
           tags?: string[] | null

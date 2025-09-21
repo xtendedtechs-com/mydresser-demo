@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +11,7 @@ import MerchantItemCard from '@/components/MerchantItemCard';
 import { 
   Heart, Share2, MapPin, Clock, Phone, Mail, 
   Instagram, Facebook, Twitter, Globe, 
-  Grid, List, Star, Users
+  Grid, List, Star, Users, ArrowLeft
 } from 'lucide-react';
 
 interface MerchantPageData {
@@ -45,6 +45,7 @@ interface MerchantPageData {
 
 export const MerchantPage: React.FC = () => {
   const { merchantId } = useParams<{ merchantId: string }>();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const { items, loading: itemsLoading } = useMerchantItems();
 
@@ -251,6 +252,16 @@ export const MerchantPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Navigation Bar */}
+      <div className="border-b">
+        <div className="container mx-auto px-4 py-3">
+          <Button variant="outline" onClick={() => navigate(-1)} className="mb-4 lg:mb-0">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+        </div>
+      </div>
+
       {/* Hero Section */}
       <div 
         className="relative h-64 bg-cover bg-center"
