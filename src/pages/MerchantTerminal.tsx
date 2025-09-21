@@ -220,13 +220,22 @@ const MerchantTerminal = () => {
 
   const handlePublishToggle = async (item, newStatus) => {
     try {
-      const { error } = await supabase
-        .from('merchant_items')
-        .update({ status: newStatus })
-        .eq('id', item.id)
-        .eq('merchant_id', user.id);
-
-      if (error) throw error;
+      await updateItem(item.id, { 
+        status: newStatus,
+        is_featured: newStatus === 'published' ? item.is_featured : false
+      });
+      toast({
+        title: "Success",
+        description: `Item ${newStatus === 'published' ? 'published' : 'unpublished'} successfully`
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update item status",
+        variant: "destructive"
+      });
+    }
+  };
 
       toast({
         title: "Status Updated",
@@ -244,7 +253,7 @@ const MerchantTerminal = () => {
     }
   };
 
-  const handleDeleteProduct = async (productId) => {
+  const handleDeleteProduct = async (productId: string) => {
     try {
       const { error } = await supabase
         .from('merchant_items')
@@ -1058,9 +1067,30 @@ const MerchantTerminal = () => {
                 </CardContent>
               </Card>
             </div>
-          )}
+            {activeSection === 'page' && (
+              <MerchantPageTab />
+            )}
 
-          {activeSection === 'support' && (
+            {activeSection === 'support' && (
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Support & Resources</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center py-12">
+                      <p className="text-muted-foreground">Support resources coming soon...</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </main>
+        </div>
+      </div>
+    </div>
+  );
+};
             <div className="space-y-6">
               <Card>
                 <CardHeader>

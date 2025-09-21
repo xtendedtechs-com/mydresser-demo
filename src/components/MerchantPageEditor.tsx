@@ -1,249 +1,171 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { useMerchantProfile } from '@/hooks/useMerchantProfile';
+import { SecurityAlert } from '@/components/SecurityAlert';
 import { 
-  Plus, 
-  X, 
-  Upload, 
-  Save, 
-  Eye, 
-  Palette, 
-  Image, 
-  Link2,
-  ShoppingBag,
-  Star,
-  Calendar
+  Plus, X, Upload, Eye, Save, 
+  Instagram, Facebook, Twitter, 
+  Clock, MapPin, Phone, Mail 
 } from 'lucide-react';
-import SecurityAlert from '@/components/SecurityAlert';
-import { FileUpload } from '@/components/FileUpload';
 
 interface MerchantPageSettings {
   business_name: string;
   brand_story: string;
+  theme_color: string;
+  logo: string;
+  hero_image: string;
   specialties: string[];
   featured_collections: string[];
   social_links: {
-    instagram: string;
-    website: string;
-    facebook: string;
-  };
-  hero_image?: string;
-  logo?: string;
-  theme_color: string;
-  business_hours: {
-    monday: string;
-    tuesday: string;
-    wednesday: string;
-    thursday: string;
-    friday: string;
-    saturday: string;
-    sunday: string;
+    instagram?: string;
+    facebook?: string;
+    twitter?: string;
+    website?: string;
   };
   contact_info: {
-    email: string;
-    phone: string;
-    address: string;
+    phone?: string;
+    email?: string;
+    address?: string;
   };
+  business_hours: {
+    monday?: string;
+    tuesday?: string;
+    wednesday?: string;
+    thursday?: string;
+    friday?: string;
+    saturday?: string;
+    sunday?: string;
+  };
+  is_published: boolean;
 }
 
 interface MerchantPageEditorProps {
-  onSave?: () => void;
-  onPreview?: () => void;
+  onSave?: (settings: MerchantPageSettings) => void;
+  onPreview?: (settings: MerchantPageSettings) => void;
 }
 
-const MerchantPageEditor = ({ onSave, onPreview }: MerchantPageEditorProps) => {
+export const MerchantPageEditor: React.FC<MerchantPageEditorProps> = ({
+  onSave,
+  onPreview
+}) => {
+  const { merchantProfile } = useMerchantProfile();
   const { toast } = useToast();
-  const { profile: merchantProfile } = useMerchantProfile();
-  
+
   const [settings, setSettings] = useState<MerchantPageSettings>({
     business_name: '',
     brand_story: '',
+    theme_color: '#000000',
+    logo: '',
+    hero_image: '',
     specialties: [],
     featured_collections: [],
-    social_links: {
-      instagram: '',
-      website: '',
-      facebook: ''
-    },
-    theme_color: '#000000',
-    business_hours: {
-      monday: '9:00 AM - 6:00 PM',
-      tuesday: '9:00 AM - 6:00 PM',
-      wednesday: '9:00 AM - 6:00 PM',
-      thursday: '9:00 AM - 6:00 PM',
-      friday: '9:00 AM - 6:00 PM',
-      saturday: '10:00 AM - 4:00 PM',
-      sunday: 'Closed'
-    },
-    contact_info: {
-      email: '',
-      phone: '',
-      address: ''
-    }
+    social_links: {},
+    contact_info: {},
+    business_hours: {},
+    is_published: true
   });
-
-  const [loading, setSaving] = useState(false);
-  const [newSpecialty, setNewSpecialty] = useState('');
-  const [newCollection, setNewCollection] = useState('');
 
   useEffect(() => {
     if (merchantProfile) {
-      setSettings(prev => ({
-        ...prev,
-        business_name: merchantProfile.business_name || '',
-      }));
       loadPageSettings();
     }
   }, [merchantProfile]);
 
   const loadPageSettings = async () => {
     try {
-      if (!merchantProfile?.user_id) return;
-
       const { data, error } = await supabase
         .from('merchant_pages')
         .select('*')
-        .eq('merchant_id', merchantProfile.user_id)
-        .maybeSingle();
+        .eq('merchant_id', merchantProfile?.user_id)
+        .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error loading page settings:', error);
+        return;
+      }
 
       if (data) {
-        setSettings(prev => ({
-          ...prev,
-          business_name: data.business_name || merchantProfile.business_name,
+        setSettings({
+          business_name: data.business_name || merchantProfile?.business_name || '',
           brand_story: data.brand_story || '',
+          theme_color: data.theme_color || '#000000',
+          logo: data.logo || '',
+          hero_image: data.hero_image || '',
           specialties: data.specialties || [],
           featured_collections: data.featured_collections || [],
-          social_links: (data.social_links as any) || { instagram: '', website: '', facebook: '' },
-          hero_image: data.hero_image || '',
-          logo: data.logo || '',
-          theme_color: data.theme_color || '#000000',
-          business_hours: (data.business_hours as any) || {
-            monday: '9:00 AM - 6:00 PM',
-            tuesday: '9:00 AM - 6:00 PM',
-            wednesday: '9:00 AM - 6:00 PM',
-            thursday: '9:00 AM - 6:00 PM',
-            friday: '9:00 AM - 6:00 PM',
-            saturday: '10:00 AM - 4:00 PM',
-            sunday: 'Closed'
-          },
-          contact_info: (data.contact_info as any) || { email: '', phone: '', address: '' }
+          social_links: data.social_links || {},
+          contact_info: data.contact_info || {},
+          business_hours: data.business_hours || {},
+          is_published: data.is_published !== false
+        });
+      } else {
+        setSettings(prev => ({
+          ...prev,
+          business_name: merchantProfile?.business_name || ''
         }));
       }
     } catch (error) {
-      console.error('Error loading page settings:', error);
+      console.error('Error in loadPageSettings:', error);
     }
   };
 
   const savePageSettings = async () => {
+    if (!merchantProfile) return;
+
     try {
-      setSaving(true);
-
-      if (!merchantProfile?.user_id) {
-        throw new Error('Merchant profile required');
-      }
-
-      // Save to merchant_pages table with upsert
       const { error } = await supabase
         .from('merchant_pages')
         .upsert({
           merchant_id: merchantProfile.user_id,
-          business_name: settings.business_name,
-          brand_story: settings.brand_story,
-          specialties: settings.specialties,
-          featured_collections: settings.featured_collections,
-          social_links: settings.social_links,
-          hero_image: settings.hero_image,
-          logo: settings.logo,
-          theme_color: settings.theme_color,
-          business_hours: settings.business_hours,
-          contact_info: settings.contact_info
-        }, {
-          onConflict: 'merchant_id'
+          ...settings
         });
 
       if (error) throw error;
 
-      // Also update business_name in merchant_profiles for consistency
-      await supabase
-        .from('merchant_profiles')
-        .update({ business_name: settings.business_name })
-        .eq('user_id', merchantProfile.user_id);
+      if (settings.business_name !== merchantProfile.business_name) {
+        await supabase
+          .from('merchant_profiles')
+          .update({ business_name: settings.business_name })
+          .eq('user_id', merchantProfile.user_id);
+      }
 
       toast({
-        title: "Page Settings Saved",
-        description: "Your merchant page has been updated successfully.",
+        title: "Success",
+        description: "Page settings saved successfully"
       });
 
-      onSave?.();
-    } catch (error: any) {
+      onSave?.(settings);
+    } catch (error) {
       console.error('Error saving page settings:', error);
       toast({
-        title: "Save Failed",
-        description: error.message,
+        title: "Error",
+        description: "Failed to save page settings",
         variant: "destructive"
       });
-    } finally {
-      setSaving(false);
     }
   };
 
-  const addSpecialty = () => {
-    if (newSpecialty.trim() && !settings.specialties.includes(newSpecialty.trim())) {
-      setSettings(prev => ({
-        ...prev,
-        specialties: [...prev.specialties, newSpecialty.trim()]
-      }));
-      setNewSpecialty('');
-    }
-  };
-
-  const removeSpecialty = (index: number) => {
-    setSettings(prev => ({
-      ...prev,
-      specialties: prev.specialties.filter((_, i) => i !== index)
-    }));
-  };
-
-  const addCollection = () => {
-    if (newCollection.trim() && !settings.featured_collections.includes(newCollection.trim())) {
-      setSettings(prev => ({
-        ...prev,
-        featured_collections: [...prev.featured_collections, newCollection.trim()]
-      }));
-      setNewCollection('');
-    }
-  };
-
-  const removeCollection = (index: number) => {
-    setSettings(prev => ({
-      ...prev,
-      featured_collections: prev.featured_collections.filter((_, i) => i !== index)
-    }));
-  };
-
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: keyof MerchantPageSettings, value: any) => {
     setSettings(prev => ({
       ...prev,
       [field]: value
     }));
   };
 
-  const handleNestedChange = (parent: keyof MerchantPageSettings, field: string, value: string) => {
+  const handleNestedChange = (parent: string, field: string, value: any) => {
     setSettings(prev => ({
       ...prev,
       [parent]: {
-        ...(prev[parent] as Record<string, any>),
+        ...prev[parent],
         [field]: value
       }
     }));
@@ -251,340 +173,121 @@ const MerchantPageEditor = ({ onSave, onPreview }: MerchantPageEditorProps) => {
 
   return (
     <div className="space-y-6">
-      <SecurityAlert 
-        type="info"
-        title="Merchant Page Customization"
-        message="Customize your public merchant page that customers will see. All changes are saved securely and can be previewed before publishing."
-      />
-
+      <SecurityAlert />
+      
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Merchant Page Editor</CardTitle>
-            <CardDescription>
-              Customize how your business appears to customers
-            </CardDescription>
-          </div>
+          <CardTitle>Merchant Page Editor</CardTitle>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={onPreview} className="gap-2">
-              <Eye className="h-4 w-4" />
+            <Button variant="outline" onClick={() => onPreview?.(settings)}>
+              <Eye className="h-4 w-4 mr-2" />
               Preview
             </Button>
-            <Button onClick={savePageSettings} disabled={loading} className="gap-2">
-              <Save className="h-4 w-4" />
-              {loading ? 'Saving...' : 'Save Changes'}
+            <Button onClick={savePageSettings}>
+              <Save className="h-4 w-4 mr-2" />
+              Save Changes
             </Button>
           </div>
         </CardHeader>
-      </Card>
+        <CardContent>
+          <Tabs defaultValue="basic" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="basic">Basic Info</TabsTrigger>
+              <TabsTrigger value="branding">Branding</TabsTrigger>
+              <TabsTrigger value="contact">Contact</TabsTrigger>
+            </TabsList>
 
-      <Tabs defaultValue="basic" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="basic">Basic Info</TabsTrigger>
-          <TabsTrigger value="branding">Branding</TabsTrigger>
-          <TabsTrigger value="collections">Collections</TabsTrigger>
-          <TabsTrigger value="contact">Contact</TabsTrigger>
-          <TabsTrigger value="hours">Hours</TabsTrigger>
-        </TabsList>
-
-        {/* Basic Information */}
-        <TabsContent value="basic" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ShoppingBag className="h-5 w-5" />
-                Basic Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="business_name">Business Name</Label>
-                <Input
-                  id="business_name"
-                  value={settings.business_name}
-                  onChange={(e) => handleInputChange('business_name', e.target.value)}
-                  placeholder="Enter your business name"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="brand_story">Brand Story</Label>
-                <Textarea
-                  id="brand_story"
-                  value={settings.brand_story}
-                  onChange={(e) => handleInputChange('brand_story', e.target.value)}
-                  placeholder="Tell customers about your brand, mission, and what makes you unique..."
-                  rows={4}
-                />
-              </div>
-
-              <div>
-                <Label>Specialties</Label>
-                <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <Input
-                      value={newSpecialty}
-                      onChange={(e) => setNewSpecialty(e.target.value)}
-                      placeholder="Add a specialty (e.g., Business Attire)"
-                      onKeyPress={(e) => e.key === 'Enter' && addSpecialty()}
-                    />
-                    <Button type="button" onClick={addSpecialty} size="sm">
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {settings.specialties.map((specialty, index) => (
-                      <Badge key={index} variant="secondary" className="gap-1">
-                        {specialty}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-4 w-4 p-0 hover:bg-transparent"
-                          onClick={() => removeSpecialty(index)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Branding */}
-        <TabsContent value="branding" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Palette className="h-5 w-5" />
-                Visual Branding
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <Label>Brand Logo</Label>
-                <div className="mt-2">
-                  <FileUpload
-                    photos={[]}
-                    videos={[]}
-                    onPhotosChange={(photos) => {
-                      if (photos.length > 0) {
-                        handleInputChange('logo', photos[0].url);
-                      }
-                    }}
-                    onVideosChange={() => {}}
-                    maxPhotos={1}
-                    maxVideos={0}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label>Hero Image</Label>
-                <div className="mt-2">
-                  <FileUpload
-                    photos={[]}
-                    videos={[]}
-                    onPhotosChange={(photos) => {
-                      if (photos.length > 0) {
-                        handleInputChange('hero_image', photos[0].url);
-                      }
-                    }}
-                    onVideosChange={() => {}}
-                    maxPhotos={1}
-                    maxVideos={0}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="theme_color">Theme Color</Label>
-                <div className="flex gap-2 mt-2">
+            <TabsContent value="basic" className="space-y-4">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="businessName">Business Name</Label>
                   <Input
-                    id="theme_color"
+                    id="businessName"
+                    value={settings.business_name}
+                    onChange={(e) => handleInputChange('business_name', e.target.value)}
+                    placeholder="Your Business Name"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="brandStory">Brand Story</Label>
+                  <Textarea
+                    id="brandStory"
+                    value={settings.brand_story}
+                    onChange={(e) => handleInputChange('brand_story', e.target.value)}
+                    placeholder="Tell your brand's story..."
+                    rows={4}
+                  />
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="published"
+                    checked={settings.is_published}
+                    onCheckedChange={(checked) => handleInputChange('is_published', checked)}
+                  />
+                  <Label htmlFor="published">Page Published</Label>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="branding" className="space-y-4">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="themeColor">Theme Color</Label>
+                  <Input
+                    id="themeColor"
                     type="color"
                     value={settings.theme_color}
                     onChange={(e) => handleInputChange('theme_color', e.target.value)}
                     className="w-20"
                   />
-                  <Input
-                    value={settings.theme_color}
-                    onChange={(e) => handleInputChange('theme_color', e.target.value)}
-                    placeholder="#000000"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Collections */}
-        <TabsContent value="collections" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Star className="h-5 w-5" />
-                Featured Collections
-              </CardTitle>
-              <CardDescription>
-                Showcase your best collections to customers
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex gap-2">
-                <Input
-                  value={newCollection}
-                  onChange={(e) => setNewCollection(e.target.value)}
-                  placeholder="Add a featured collection (e.g., Summer 2024)"
-                  onKeyPress={(e) => e.key === 'Enter' && addCollection()}
-                />
-                <Button type="button" onClick={addCollection} size="sm">
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-
-              <div className="space-y-2">
-                {settings.featured_collections.map((collection, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                    <span className="font-medium">{collection}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeCollection(index)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-
-              {settings.featured_collections.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Star className="h-8 w-8 mx-auto mb-2" />
-                  <p>No featured collections yet</p>
-                  <p className="text-sm">Add collections to showcase your best items</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Contact Information */}
-        <TabsContent value="contact" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Link2 className="h-5 w-5" />
-                Contact & Social Media
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <Label htmlFor="email">Business Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={settings.contact_info.email}
-                    onChange={(e) => handleNestedChange('contact_info', 'email', e.target.value)}
-                    placeholder="contact@business.com"
-                  />
                 </div>
 
                 <div>
-                  <Label htmlFor="phone">Phone Number</Label>
+                  <Label htmlFor="logo">Logo URL</Label>
+                  <Input
+                    id="logo"
+                    value={settings.logo}
+                    onChange={(e) => handleInputChange('logo', e.target.value)}
+                    placeholder="https://example.com/logo.png"
+                  />
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="contact" className="space-y-4">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="phone" className="flex items-center gap-2">
+                    <Phone className="h-4 w-4" />
+                    Phone
+                  </Label>
                   <Input
                     id="phone"
-                    type="tel"
-                    value={settings.contact_info.phone}
+                    value={settings.contact_info.phone || ''}
                     onChange={(e) => handleNestedChange('contact_info', 'phone', e.target.value)}
                     placeholder="+1 (555) 123-4567"
                   />
                 </div>
-              </div>
-
-              <div>
-                <Label htmlFor="address">Business Address</Label>
-                <Textarea
-                  id="address"
-                  value={settings.contact_info.address}
-                  onChange={(e) => handleNestedChange('contact_info', 'address', e.target.value)}
-                  placeholder="123 Main Street, City, State 12345"
-                  rows={3}
-                />
-              </div>
-
-              <Separator />
-
-              <div className="space-y-4">
-                <h4 className="font-medium">Social Media Links</h4>
-                
                 <div>
-                  <Label htmlFor="website">Website</Label>
+                  <Label htmlFor="email" className="flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    Email
+                  </Label>
                   <Input
-                    id="website"
-                    value={settings.social_links.website}
-                    onChange={(e) => handleNestedChange('social_links', 'website', e.target.value)}
-                    placeholder="https://www.yourbusiness.com"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="instagram">Instagram</Label>
-                  <Input
-                    id="instagram"
-                    value={settings.social_links.instagram}
-                    onChange={(e) => handleNestedChange('social_links', 'instagram', e.target.value)}
-                    placeholder="@yourbusiness"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="facebook">Facebook</Label>
-                  <Input
-                    id="facebook"
-                    value={settings.social_links.facebook}
-                    onChange={(e) => handleNestedChange('social_links', 'facebook', e.target.value)}
-                    placeholder="facebook.com/yourbusiness"
+                    id="email"
+                    type="email"
+                    value={settings.contact_info.email || ''}
+                    onChange={(e) => handleNestedChange('contact_info', 'email', e.target.value)}
+                    placeholder="contact@business.com"
                   />
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Business Hours */}
-        <TabsContent value="hours" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Business Hours
-              </CardTitle>
-              <CardDescription>
-                Set your operating hours for customers
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {Object.entries(settings.business_hours).map(([day, hours]) => (
-                <div key={day} className="flex items-center gap-4">
-                  <Label className="w-20 capitalize">{day}</Label>
-                  <Input
-                    value={hours}
-                    onChange={(e) => handleNestedChange('business_hours', day, e.target.value)}
-                    placeholder="9:00 AM - 6:00 PM or Closed"
-                  />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 };
-
-export default MerchantPageEditor;
