@@ -135,29 +135,8 @@ const MerchantAuth = () => {
       }
 
       if (data.user) {
-        // Update the user's profile to merchant role immediately after signup
-        const { error: profileError } = await supabase
-          .from('profiles')  
-          .update({ role: 'merchant' })
-          .eq('user_id', data.user.id);
-
-        if (profileError) {
-          console.error('Error updating profile role:', profileError);
-        }
-
-        // Create merchant profile
-        const { error: merchantError } = await supabase
-          .from('merchant_profiles')
-          .insert({
-            user_id: data.user.id,
-            business_name: signUpData.businessName,
-            business_type: signUpData.businessType || 'Fashion Retailer',
-            verification_status: 'pending'
-          });
-
-        if (merchantError) {
-          console.error('Error creating merchant profile:', merchantError);
-        }
+        // The database triggers will handle profile and merchant profile creation
+        // based on the user_type metadata set above
 
         if (data.user.email_confirmed_at) {
           toast({
