@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 import { X, Plus, Upload, Tag } from 'lucide-react';
 import React from 'react';
+import { FileUpload } from '@/components/FileUpload';
 
 interface AddMerchantProductDialogProps {
   open: boolean;
@@ -504,18 +505,22 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
               </div>
 
               {/* Photos */}
-              <div className="space-y-2">
-                <Label>Product Photos (Max 20)</Label>
-                <p className="text-sm text-muted-foreground">Upload up to 20 high-quality photos of your product</p>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
+              <div className="space-y-4">
+                <div>
+                  <Label>Product Photos (Max 20)</Label>
+                  <p className="text-sm text-muted-foreground">Upload up to 20 high-quality photos of your product</p>
+                </div>
+                
+                {/* Photo Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
                   {photos.map((photo, index) => (
-                    <div key={index} className="relative">
-                      <img src={photo} alt={`Product ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                    <div key={index} className="relative group">
+                      <img src={photo} alt={`Product ${index + 1}`} className="w-full h-24 object-cover rounded border" />
                       <Button
                         type="button"
                         variant="destructive"
                         size="sm"
-                        className="absolute -top-2 -right-2 w-6 h-6 p-0"
+                        className="absolute -top-2 -right-2 w-6 h-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={() => setPhotos(photos.filter((_, i) => i !== index))}
                       >
                         <X className="w-3 h-3" />
@@ -523,39 +528,67 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
                     </div>
                   ))}
                 </div>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Add photo URL"
-                    value={newPhoto}
-                    onChange={(e) => setNewPhoto(e.target.value)}
-                    disabled={photos.length >= 20}
-                  />
-                  <Button 
-                    type="button" 
-                    onClick={addPhoto}
-                    disabled={photos.length >= 20 || !newPhoto.trim()}
-                  >
-                    <Upload className="w-4 h-4" />
-                  </Button>
-                </div>
+
+                {/* File Upload */}
+                {photos.length < 20 && (
+                  <div className="space-y-3">
+                    <FileUpload
+                      type="image"
+                      onUpload={(url) => setPhotos(prev => [...prev, url])}
+                      maxSize={5}
+                      accept="image/*"
+                    />
+                    
+                    {/* URL Input Alternative */}
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">Or add URL</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Add photo URL"
+                        value={newPhoto}
+                        onChange={(e) => setNewPhoto(e.target.value)}
+                      />
+                      <Button 
+                        type="button" 
+                        onClick={addPhoto}
+                        disabled={!newPhoto.trim()}
+                        variant="outline"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
                 {photos.length >= 20 && (
                   <p className="text-sm text-orange-500">Maximum of 20 photos reached</p>
                 )}
               </div>
 
               {/* Videos */}
-              <div className="space-y-2">
-                <Label>Product Videos (Max 2)</Label>
-                <p className="text-sm text-muted-foreground">Add up to 2 videos to showcase your product</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+              <div className="space-y-4">
+                <div>
+                  <Label>Product Videos (Max 2)</Label>
+                  <p className="text-sm text-muted-foreground">Add up to 2 videos to showcase your product</p>
+                </div>
+                
+                {/* Video Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
                   {videos.map((video, index) => (
-                    <div key={index} className="relative">
-                      <video src={video} className="w-full h-24 object-cover rounded" controls />
+                    <div key={index} className="relative group">
+                      <video src={video} className="w-full h-24 object-cover rounded border" controls />
                       <Button
                         type="button"
                         variant="destructive"
                         size="sm"
-                        className="absolute -top-2 -right-2 w-6 h-6 p-0"
+                        className="absolute -top-2 -right-2 w-6 h-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={() => setVideos(videos.filter((_, i) => i !== index))}
                       >
                         <X className="w-3 h-3" />
@@ -563,21 +596,45 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
                     </div>
                   ))}
                 </div>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Add video URL"
-                    value={newVideo}
-                    onChange={(e) => setNewVideo(e.target.value)}
-                    disabled={videos.length >= 2}
-                  />
-                  <Button 
-                    type="button" 
-                    onClick={addVideo}
-                    disabled={videos.length >= 2 || !newVideo.trim()}
-                  >
-                    <Upload className="w-4 h-4" />
-                  </Button>
-                </div>
+
+                {/* File Upload */}
+                {videos.length < 2 && (
+                  <div className="space-y-3">
+                    <FileUpload
+                      type="video"
+                      onUpload={(url) => setVideos(prev => [...prev, url])}
+                      maxSize={50}
+                      accept="video/*"
+                    />
+                    
+                    {/* URL Input Alternative */}
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">Or add URL</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Add video URL"
+                        value={newVideo}
+                        onChange={(e) => setNewVideo(e.target.value)}
+                      />
+                      <Button 
+                        type="button" 
+                        onClick={addVideo}
+                        disabled={!newVideo.trim()}
+                        variant="outline"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
                 {videos.length >= 2 && (
                   <p className="text-sm text-orange-500">Maximum of 2 videos reached</p>
                 )}
