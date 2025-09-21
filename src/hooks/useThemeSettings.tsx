@@ -126,18 +126,22 @@ export const useThemeSettings = () => {
       return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
     };
 
-    // Apply colors
+    // Apply colors immediately to CSS custom properties
     root.style.setProperty('--primary', hexToHsl(theme.primary_color));
     root.style.setProperty('--secondary', hexToHsl(theme.secondary_color));
     root.style.setProperty('--accent', hexToHsl(theme.accent_color));
 
-    // Apply theme class
+    // Apply theme class for background style
     root.className = root.className.replace(/theme-\w+/g, '');
-    root.classList.add(`theme-${theme.theme_name}`);
+    if (theme.background_style && theme.background_style !== 'default') {
+      root.classList.add(`theme-${theme.background_style}`);
+    }
 
     // Apply font family
-    if (theme.font_family !== 'system') {
+    if (theme.font_family && theme.font_family !== 'system') {
       root.style.setProperty('--font-family', theme.font_family);
+    } else {
+      root.style.removeProperty('--font-family');
     }
 
     // Apply border radius
@@ -156,6 +160,11 @@ export const useThemeSettings = () => {
     } else {
       root.classList.remove('reduce-motion');
     }
+    
+    // Force repaint to apply changes immediately
+    root.style.display = 'none';
+    root.offsetHeight; // trigger reflow
+    root.style.display = '';
   };
 
   // Apply theme on load

@@ -35,6 +35,7 @@ import EnhancedWardrobeManager from "@/components/EnhancedWardrobeManager";
 import ProfileHeader from "@/components/ProfileHeader";
 import SettingsSection from "@/components/SettingsSection";
 import UserAnalyticsDashboard from "@/components/UserAnalyticsDashboard";
+import ComprehensiveSettingsPanel from "@/components/ComprehensiveSettingsPanel";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -52,8 +53,6 @@ const Account = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [profileEditOpen, setProfileEditOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("profile");
 
   const handleSignOut = async () => {
     try {
@@ -72,11 +71,10 @@ const Account = () => {
   };
 
   const navigateToSettings = (category: string) => {
-    // Set active section instead of navigating
     if (category === 'mystyle') {
       navigate('/mystyle');
     } else {
-      setActiveSection(category);
+      navigate(`/service-settings/${category}`);
     }
   };
 
@@ -286,28 +284,7 @@ const Account = () => {
           </h1>
         </div>
 
-        <ProfileHeader profile={profile} />
-        
-        <Card className="p-4">
-          <div className="flex flex-col sm:flex-row items-center gap-3">
-            <div className="relative flex-1 w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="What would you like to do?"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Button 
-              className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={handleMyStyleClick}
-            >
-              <Palette className="w-4 h-4 mr-2" />
-              MY STYLE
-            </Button>
-          </div>
-        </Card>
+        <ComprehensiveSettingsPanel />
 
         <div className="pt-6">
           <Button
@@ -344,132 +321,6 @@ const Account = () => {
     );
   };
 
-  const renderSettings = () => {
-    if (!activeSection) {
-      return (
-        <div className="space-y-6">
-          <div className="flex items-center gap-2">
-            <Settings className="w-5 h-5 text-primary" />
-            <h2 className="text-2xl font-bold">Settings</h2>
-          </div>
-          <div className="grid gap-6">
-            <SettingsSection title="Account" items={accountSettings} />
-            <SettingsSection title="App" items={appSettings} />
-            <SettingsSection title="Personalization" items={personalizationSettings} />
-            <SettingsSection title="Services settings" items={serviceSettings} />
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="space-y-6">
-        <Button 
-          variant="ghost" 
-          onClick={() => setActiveSection(null)}
-          className="mb-4"
-        >
-          ← Back to Settings
-        </Button>
-        
-        {activeSection === 'profile' && (
-          <ProfileEditDialog 
-            open={true} 
-            onOpenChange={() => setActiveSection(null)}
-          />
-        )}
-        
-        {activeSection === 'theme' && <ThemeCustomizer />}
-        
-        {activeSection === 'authentication' && <ComprehensiveAuthSystem />}
-        
-        {activeSection === 'accessibility' && <AccessibilitySettings />}
-        
-        {activeSection === 'notifications' && <NotificationCenter />}
-        
-        {activeSection === 'general' && (
-          <Card>
-            <CardHeader>
-              <CardTitle>General Settings</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">General app configuration options coming soon.</p>
-            </CardContent>
-          </Card>
-        )}
-        
-        {activeSection === 'permissions' && (
-          <Card>
-            <CardHeader>
-              <CardTitle>App Permissions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Permission management coming soon.</p>
-            </CardContent>
-          </Card>
-        )}
-        
-        {activeSection === 'preferences' && (
-          <Card>
-            <CardHeader>
-              <CardTitle>User Preferences</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">Preference management coming soon.</p>
-            </CardContent>
-          </Card>
-        )}
-        
-        {activeSection === 'help' && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Help & Support</CardTitle>
-              <CardDescription>Get assistance with MyDresser</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => window.open('https://docs.mydresser.app', '_blank')}
-                >
-                  <HelpCircle className="w-4 h-4 mr-2" />
-                  Documentation & FAQ
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => {
-                    toast({
-                      title: "Contact Support",
-                      description: "Support team will respond within 24 hours.",
-                    });
-                  }}
-                >
-                  <User className="w-4 h-4 mr-2" />
-                  Contact Support
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => {
-                    toast({
-                      title: "Feedback Sent",
-                      description: "Thank you for your feedback!",
-                    });
-                  }}
-                >
-                  <Heart className="w-4 h-4 mr-2" />
-                  Send Feedback
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    );
-  };
-
   const renderAnalytics = () => {
     if (!profile) return null;
 
@@ -485,32 +336,9 @@ const Account = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20">
       <div className="container mx-auto px-4 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid grid-cols-4 w-full max-w-md mx-auto">
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="mystyle">My Style</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="profile">
-            {renderProfile()}
-          </TabsContent>
-
-          <TabsContent value="mystyle">
-            {renderMyStyle()}
-          </TabsContent>
-
-          <TabsContent value="settings">
-            {renderSettings()}
-          </TabsContent>
-
-          <TabsContent value="analytics">
-            {renderAnalytics()}
-          </TabsContent>
-        </Tabs>
+        {renderProfile()}
       </div>
     </div>
   );

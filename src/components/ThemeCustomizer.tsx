@@ -90,42 +90,58 @@ const ThemeCustomizer = () => {
     const updated = { ...themeSettings, [field]: value };
     setPreviewSettings(updated);
     
+    // Apply preview changes immediately if in preview mode
     if (isPreviewMode) {
-      // Apply preview changes immediately
-      const root = document.documentElement;
-      if (field.includes('color')) {
-        const hexToHsl = (hex: string) => {
-          const r = parseInt(hex.slice(1, 3), 16) / 255;
-          const g = parseInt(hex.slice(3, 5), 16) / 255;
-          const b = parseInt(hex.slice(5, 7), 16) / 255;
-
-          const max = Math.max(r, g, b);
-          const min = Math.min(r, g, b);
-          let h = 0, s = 0, l = (max + min) / 2;
-
-          if (max !== min) {
-            const d = max - min;
-            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-            switch (max) {
-              case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-              case g: h = (b - r) / d + 2; break;
-              case b: h = (r - g) / d + 4; break;
-            }
-            h /= 6;
-          }
-
-          return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
-        };
-
-        if (field === 'primary_color') {
-          root.style.setProperty('--primary', hexToHsl(value));
-        } else if (field === 'secondary_color') {
-          root.style.setProperty('--secondary', hexToHsl(value));
-        } else if (field === 'accent_color') {
-          root.style.setProperty('--accent', hexToHsl(value));
-        }
-      }
+      applyPreviewToDOM(updated);
     }
+  };
+
+  const applyPreviewToDOM = (theme: any) => {
+    const root = document.documentElement;
+    
+    const hexToHsl = (hex: string) => {
+      const r = parseInt(hex.slice(1, 3), 16) / 255;
+      const g = parseInt(hex.slice(3, 5), 16) / 255;
+      const b = parseInt(hex.slice(5, 7), 16) / 255;
+
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      let h = 0, s = 0, l = (max + min) / 2;
+
+      if (max !== min) {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+          case g: h = (b - r) / d + 2; break;
+          case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+      }
+
+      return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+    };
+
+    // Apply colors immediately
+    root.style.setProperty('--primary', hexToHsl(theme.primary_color || '#000000'));
+    root.style.setProperty('--secondary', hexToHsl(theme.secondary_color || '#ffffff'));
+    root.style.setProperty('--accent', hexToHsl(theme.accent_color || '#6366f1'));
+    
+    // Apply background style
+    root.className = root.className.replace(/theme-\w+/g, '');
+    if (theme.background_style && theme.background_style !== 'default') {
+      root.classList.add(`theme-${theme.background_style}`);
+    }
+    
+    // Apply border radius
+    const radiusMap = {
+      'none': '0px',
+      'small': '4px', 
+      'medium': '8px',
+      'large': '12px',
+      'full': '9999px'
+    };
+    root.style.setProperty('--radius', radiusMap[theme.border_radius as keyof typeof radiusMap] || '8px');
   };
 
   const applyPreset = (preset: any) => {
@@ -136,10 +152,11 @@ const ThemeCustomizer = () => {
       ...preset
     };
     setPreviewSettings(updated);
-    handleInputChange('primary_color', preset.primary_color);
-    handleInputChange('secondary_color', preset.secondary_color);
-    handleInputChange('accent_color', preset.accent_color);
-    handleInputChange('background_style', preset.background_style);
+    
+    // Apply preset immediately in preview mode
+    if (isPreviewMode) {
+      applyPreviewToDOM(updated);
+    }
   };
 
   const saveSettings = async () => {
@@ -150,7 +167,7 @@ const ThemeCustomizer = () => {
       setIsPreviewMode(false);
       toast({
         title: "Theme saved",
-        description: "Your custom theme has been applied.",
+        description: "Your custom theme has been applied successfully.",
       });
     } catch (error) {
       toast({
@@ -209,7 +226,13 @@ const ThemeCustomizer = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setIsPreviewMode(!isPreviewMode)}
+                onClick={() => {
+                  const newMode = !isPreviewMode;
+                  setIsPreviewMode(newMode);
+                  if (newMode && previewSettings) {
+                    applyPreviewToDOM(previewSettings);
+                  }
+                }}
               >
                 <Eye className="w-4 h-4 mr-1" />
                 {isPreviewMode ? 'Exit Preview' : 'Preview Mode'}

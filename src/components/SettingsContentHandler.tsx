@@ -1,13 +1,18 @@
 import { useState } from 'react';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { useProfile } from '@/hooks/useProfile';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
-import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
+import ThemeCustomizer from './ThemeCustomizer';
+import ComprehensiveAuthSystem from './ComprehensiveAuthSystem';
+import AccessibilitySettings from './AccessibilitySettings';
+import NotificationCenter from './NotificationCenter';
 
 interface SettingsContentHandlerProps {
   settingType: string;
@@ -35,7 +40,6 @@ const SettingsContentHandler = ({ settingType, settingTitle, settingDescription 
         description: "Your profile has been updated successfully.",
       });
     } catch (error) {
-      console.error('Profile update error:', error);
       toast({
         title: "Error",
         description: "Failed to update profile. Please try again.",
@@ -45,55 +49,33 @@ const SettingsContentHandler = ({ settingType, settingTitle, settingDescription 
   };
 
   const handleNotificationToggle = async (key: string, value: boolean) => {
-    try {
-      const newNotifications = { ...preferences.notifications, [key]: value };
-      await updatePreferences({ notifications: newNotifications });
-    } catch (error) {
-      console.error('Notification update error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update notification settings.",
-        variant: "destructive",
-      });
-    }
+    await updatePreferences({
+      ...preferences,
+      notifications: { ...preferences?.notifications, [key]: value }
+    });
   };
 
-  const handlePrivacyToggle = async (key: string, value: boolean | string) => {
-    try {
-      const newPrivacy = { ...preferences.privacy, [key]: value };
-      await updatePreferences({ privacy: newPrivacy });
-    } catch (error) {
-      console.error('Privacy update error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update privacy settings.",
-        variant: "destructive",
-      });
-    }
+  const handlePrivacyToggle = async (key: string, value: boolean) => {
+    await updatePreferences({
+      ...preferences,
+      privacy: { ...preferences?.privacy, [key]: value }
+    });
   };
 
   const handleAppBehaviorToggle = async (key: string, value: boolean) => {
-    try {
-      const newBehavior = { ...preferences.app_behavior, [key]: value };
-      await updatePreferences({ app_behavior: newBehavior });
-    } catch (error) {
-      console.error('App behavior update error:', error);
-      toast({
-        title: "Error", 
-        description: "Failed to update app behavior settings.",
-        variant: "destructive",
-      });
-    }
+    await updatePreferences({
+      ...preferences,
+      app_behavior: { ...preferences?.app_behavior, [key]: value }
+    });
   };
 
   const renderContent = () => {
     switch (settingType) {
-      case 'account':
+      case 'profile':
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Account Information</CardTitle>
-              <CardDescription>Manage your account details</CardDescription>
+              <CardTitle>{settingTitle}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -102,6 +84,7 @@ const SettingsContentHandler = ({ settingType, settingTitle, settingDescription 
                   id="full_name"
                   value={localProfile.full_name}
                   onChange={(e) => setLocalProfile(prev => ({ ...prev, full_name: e.target.value }))}
+                  placeholder="Enter your full name"
                 />
               </div>
               <div>
@@ -110,6 +93,7 @@ const SettingsContentHandler = ({ settingType, settingTitle, settingDescription 
                   id="bio"
                   value={localProfile.bio}
                   onChange={(e) => setLocalProfile(prev => ({ ...prev, bio: e.target.value }))}
+                  placeholder="Tell us about yourself"
                 />
               </div>
               <div>
@@ -118,43 +102,143 @@ const SettingsContentHandler = ({ settingType, settingTitle, settingDescription 
                   id="location"
                   value={localProfile.location}
                   onChange={(e) => setLocalProfile(prev => ({ ...prev, location: e.target.value }))}
+                  placeholder="City, Country"
                 />
               </div>
-              <Button onClick={handleSaveProfile}>Save Changes</Button>
+              <Button onClick={handleSaveProfile}>Save Profile</Button>
             </CardContent>
           </Card>
         );
 
+      case 'authentication':
+        return <ComprehensiveAuthSystem />;
+
+      case 'theme':
+        return <ThemeCustomizer />;
+
+      case 'accessibility':
+        return <AccessibilitySettings />;
+
       case 'notifications':
+        return <NotificationCenter />;
+
+      case 'general':
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Notification Preferences</CardTitle>
-              <CardDescription>Control what notifications you receive</CardDescription>
+              <CardTitle>{settingTitle}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label htmlFor="email-notifications">Email Notifications</Label>
+                <Label htmlFor="auto-save">Auto Save Changes</Label>
                 <Switch
-                  id="email-notifications"
-                  checked={preferences.notifications?.email || false}
-                  onCheckedChange={(checked) => handleNotificationToggle('email', checked)}
+                  id="auto-save"
+                  checked={preferences?.app_behavior?.auto_save || false}
+                  onCheckedChange={(checked) => handleAppBehaviorToggle('auto_save', checked)}
                 />
               </div>
+              <Separator />
               <div className="flex items-center justify-between">
-                <Label htmlFor="outfit-suggestions">Outfit Suggestions</Label>
+                <Label htmlFor="show-tips">Show Tips & Hints</Label>
                 <Switch
-                  id="outfit-suggestions"
-                  checked={preferences.notifications?.outfit_suggestions || false}
-                  onCheckedChange={(checked) => handleNotificationToggle('outfit_suggestions', checked)}
+                  id="show-tips"
+                  checked={preferences?.app_behavior?.show_tips || false}
+                  onCheckedChange={(checked) => handleAppBehaviorToggle('show_tips', checked)}
                 />
               </div>
+              <Separator />
+              <div>
+                <Label>Language</Label>
+                <Select 
+                  value={preferences?.language || 'en'}
+                  onValueChange={(value) => updatePreferences({ ...preferences, language: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="es">Español</SelectItem>
+                    <SelectItem value="fr">Français</SelectItem>
+                    <SelectItem value="de">Deutsch</SelectItem>
+                    <SelectItem value="it">Italiano</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+        );
+
+      case 'permissions':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>{settingTitle}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="location-access">Location Access</Label>
+                  <Switch
+                    id="location-access"
+                    checked={preferences?.privacy?.location_sharing || false}
+                    onCheckedChange={(checked) => handlePrivacyToggle('location_sharing', checked)}
+                  />
+                </div>
+                <Separator />
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="show-activity">Show Activity</Label>
+                  <Switch
+                    id="show-activity"
+                    checked={preferences?.privacy?.show_activity || false}
+                    onCheckedChange={(checked) => handlePrivacyToggle('show_activity', checked)}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+
+      case 'preferences':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>{settingTitle}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label htmlFor="social-interactions">Social Interactions</Label>
+                <Label htmlFor="weather-based">Weather-Based Recommendations</Label>
                 <Switch
-                  id="social-interactions"
-                  checked={preferences.notifications?.social_interactions || false}
-                  onCheckedChange={(checked) => handleNotificationToggle('social_interactions', checked)}
+                  id="weather-based"
+                  checked={preferences?.suggestion_settings?.weather_based || false}
+                  onCheckedChange={(checked) => updatePreferences({
+                    ...preferences,
+                    suggestion_settings: { ...preferences?.suggestion_settings, weather_based: checked }
+                  })}
+                />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <Label htmlFor="occasion-based">Occasion-Based Suggestions</Label>
+                <Switch
+                  id="occasion-based"
+                  checked={preferences?.suggestion_settings?.occasion_based || false}
+                  onCheckedChange={(checked) => updatePreferences({
+                    ...preferences,
+                    suggestion_settings: { ...preferences?.suggestion_settings, occasion_based: checked }
+                  })}
+                />
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between">
+                <Label htmlFor="color-matching">Color Matching</Label>
+                <Switch
+                  id="color-matching"
+                  checked={preferences?.suggestion_settings?.color_matching || false}
+                  onCheckedChange={(checked) => updatePreferences({
+                    ...preferences,
+                    suggestion_settings: { ...preferences?.suggestion_settings, color_matching: checked }
+                  })}
                 />
               </div>
             </CardContent>
@@ -165,68 +249,44 @@ const SettingsContentHandler = ({ settingType, settingTitle, settingDescription 
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Privacy Settings</CardTitle>
-              <CardDescription>Control your privacy and data sharing</CardDescription>
+              <CardTitle>{settingTitle}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div>
+                <Label>Profile Visibility</Label>
+                <Select 
+                  value={preferences?.privacy?.profile_visibility || 'private'}
+                  onValueChange={(value) => updatePreferences({
+                    ...preferences,
+                    privacy: { ...preferences?.privacy, profile_visibility: value as 'public' | 'friends' | 'private' }
+                  })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="public">Public</SelectItem>
+                    <SelectItem value="friends">Friends Only</SelectItem>
+                    <SelectItem value="private">Private</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Separator />
               <div className="flex items-center justify-between">
-                <Label htmlFor="show-wardrobe">Show Wardrobe Publicly</Label>
+                <Label htmlFor="show-wardrobe">Show Wardrobe</Label>
                 <Switch
                   id="show-wardrobe"
-                  checked={preferences.privacy?.show_wardrobe || false}
+                  checked={preferences?.privacy?.show_wardrobe || false}
                   onCheckedChange={(checked) => handlePrivacyToggle('show_wardrobe', checked)}
                 />
               </div>
+              <Separator />
               <div className="flex items-center justify-between">
-                <Label htmlFor="allow-messages">Allow Messages</Label>
+                <Label htmlFor="allow-messages">Allow Direct Messages</Label>
                 <Switch
                   id="allow-messages"
-                  checked={preferences.privacy?.allow_messages || false}
+                  checked={preferences?.privacy?.allow_messages || false}
                   onCheckedChange={(checked) => handlePrivacyToggle('allow_messages', checked)}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="location-sharing">Location Sharing</Label>
-                <Switch
-                  id="location-sharing"
-                  checked={preferences.privacy?.location_sharing || false}
-                  onCheckedChange={(checked) => handlePrivacyToggle('location_sharing', checked)}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        );
-
-      case 'behavior':
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>App Behavior</CardTitle>
-              <CardDescription>Customize how the app behaves</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="auto-save">Auto Save</Label>
-                <Switch
-                  id="auto-save"
-                  checked={preferences.app_behavior?.auto_save || false}
-                  onCheckedChange={(checked) => handleAppBehaviorToggle('auto_save', checked)}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="show-tips">Show Tips</Label>
-                <Switch
-                  id="show-tips"
-                  checked={preferences.app_behavior?.show_tips || false}
-                  onCheckedChange={(checked) => handleAppBehaviorToggle('show_tips', checked)}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="quick-actions">Quick Actions</Label>
-                <Switch
-                  id="quick-actions"
-                  checked={preferences.app_behavior?.quick_actions || false}
-                  onCheckedChange={(checked) => handleAppBehaviorToggle('quick_actions', checked)}
                 />
               </div>
             </CardContent>
@@ -238,10 +298,9 @@ const SettingsContentHandler = ({ settingType, settingTitle, settingDescription 
           <Card>
             <CardHeader>
               <CardTitle>{settingTitle}</CardTitle>
-              <CardDescription>{settingDescription}</CardDescription>
             </CardHeader>
             <CardContent>
-              <p>Settings for {settingType} will be implemented here.</p>
+              <p className="text-muted-foreground">{settingDescription}</p>
             </CardContent>
           </Card>
         );

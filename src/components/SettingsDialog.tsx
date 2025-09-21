@@ -180,9 +180,10 @@ const SettingsDialog = ({ open, onOpenChange, initialTabType }: SettingsDialogPr
                   <Label htmlFor="emailNotifications">Email Notifications</Label>
                   <Switch
                     id="emailNotifications"
-                    checked={preferences.notifications.email}
+                    checked={preferences?.notifications?.email || false}
                     onCheckedChange={(checked) => updatePreferences({
-                      notifications: { ...preferences.notifications, email: checked }
+                      ...preferences,
+                      notifications: { ...preferences?.notifications, email: checked }
                     })}
                   />
                 </div>
@@ -191,9 +192,10 @@ const SettingsDialog = ({ open, onOpenChange, initialTabType }: SettingsDialogPr
                   <Label htmlFor="pushNotifications">Push Notifications</Label>
                   <Switch
                     id="pushNotifications"
-                    checked={preferences.notifications.push}
+                    checked={preferences?.notifications?.push || false}
                     onCheckedChange={(checked) => updatePreferences({
-                      notifications: { ...preferences.notifications, push: checked }
+                      ...preferences,
+                      notifications: { ...preferences?.notifications, push: checked }
                     })}
                   />
                 </div>
@@ -202,9 +204,10 @@ const SettingsDialog = ({ open, onOpenChange, initialTabType }: SettingsDialogPr
                   <Label htmlFor="outfitSuggestions">Outfit Suggestions</Label>
                   <Switch
                     id="outfitSuggestions"
-                    checked={preferences.notifications.outfit_suggestions}
+                    checked={preferences?.notifications?.outfit_suggestions || false}
                     onCheckedChange={(checked) => updatePreferences({
-                      notifications: { ...preferences.notifications, outfit_suggestions: checked }
+                      ...preferences,
+                      notifications: { ...preferences?.notifications, outfit_suggestions: checked }
                     })}
                   />
                 </div>
@@ -213,9 +216,10 @@ const SettingsDialog = ({ open, onOpenChange, initialTabType }: SettingsDialogPr
                   <Label htmlFor="socialInteractions">Social Interactions</Label>
                   <Switch
                     id="socialInteractions"
-                    checked={preferences.notifications.social_interactions}
+                    checked={preferences?.notifications?.social_interactions || false}
                     onCheckedChange={(checked) => updatePreferences({
-                      notifications: { ...preferences.notifications, social_interactions: checked }
+                      ...preferences,
+                      notifications: { ...preferences?.notifications, social_interactions: checked }
                     })}
                   />
                 </div>
@@ -224,9 +228,10 @@ const SettingsDialog = ({ open, onOpenChange, initialTabType }: SettingsDialogPr
                   <Label htmlFor="weatherAlerts">Weather Alerts</Label>
                   <Switch
                     id="weatherAlerts"
-                    checked={preferences.notifications.weather_alerts}
+                    checked={preferences?.notifications?.weather_alerts || false}
                     onCheckedChange={(checked) => updatePreferences({
-                      notifications: { ...preferences.notifications, weather_alerts: checked }
+                      ...preferences,
+                      notifications: { ...preferences?.notifications, weather_alerts: checked }
                     })}
                   />
                 </div>
@@ -235,9 +240,10 @@ const SettingsDialog = ({ open, onOpenChange, initialTabType }: SettingsDialogPr
                   <Label htmlFor="newItems">New Items</Label>
                   <Switch
                     id="newItems"
-                    checked={preferences.notifications.new_items}
+                    checked={preferences?.notifications?.new_items || false}
                     onCheckedChange={(checked) => updatePreferences({
-                      notifications: { ...preferences.notifications, new_items: checked }
+                      ...preferences,
+                      notifications: { ...preferences?.notifications, new_items: checked }
                     })}
                   />
                 </div>
@@ -255,9 +261,10 @@ const SettingsDialog = ({ open, onOpenChange, initialTabType }: SettingsDialogPr
                 <div className="space-y-2">
                   <Label>Profile Visibility</Label>
                   <Select 
-                    value={preferences.privacy.profile_visibility} 
+                    value={preferences?.privacy?.profile_visibility || 'private'} 
                     onValueChange={(value) => updatePreferences({
-                      privacy: { ...preferences.privacy, profile_visibility: value as 'public' | 'friends' | 'private' }
+                      ...preferences,
+                      privacy: { ...preferences?.privacy, profile_visibility: value as 'public' | 'friends' | 'private' }
                     })}
                   >
                     <SelectTrigger>
@@ -319,7 +326,15 @@ const SettingsDialog = ({ open, onOpenChange, initialTabType }: SettingsDialogPr
           </TabsContent>
 
           <TabsContent value="appearance" className="space-y-4">
-            <EnhancedThemeSelector />
+            <Card>
+              <CardHeader>
+                <CardTitle>Theme Customization</CardTitle>
+                <CardDescription>Personalize your app's appearance</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <EnhancedThemeSelector />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="accessibility" className="space-y-4">

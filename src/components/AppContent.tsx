@@ -16,6 +16,7 @@ import MerchantPage from "@/pages/MerchantPage";
 import Auth from "@/pages/Auth";
 import NotFound from "../pages/NotFound";
 import ServiceSettingsPage from "@/pages/ServiceSettingsPage";
+import SettingsPage from "@/pages/SettingsPage";
 import MyStyle from "@/pages/MyStyle";
 import { DailyOutfitGenerator } from "@/components/DailyOutfitGenerator";
 import SocialPage from "@/pages/SocialPage";
@@ -43,6 +44,7 @@ const AppContent = () => {
         <Route path="/account" element={<Account />} />
         <Route path="/mystyle" element={<MyStyle />} />
         <Route path="/service-settings/:service" element={<ServiceSettingsPage />} />
+        <Route path="/settings/:category" element={<SettingsPage />} />
         <Route path="/item/:id" element={<ItemDetail />} />
         <Route path="/wardrobe/item/:id" element={<WardrobeItemDetail />} />
         <Route path="/profile-setup" element={<ProfileSetup />} />
