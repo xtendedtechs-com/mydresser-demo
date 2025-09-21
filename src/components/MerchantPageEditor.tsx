@@ -189,10 +189,11 @@ export const MerchantPageEditor: React.FC<MerchantPageEditorProps> = ({
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="basic" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="basic">Basic Info</TabsTrigger>
               <TabsTrigger value="branding">Branding</TabsTrigger>
               <TabsTrigger value="contact">Contact</TabsTrigger>
+              <TabsTrigger value="advanced">Advanced</TabsTrigger>
             </TabsList>
 
             <TabsContent value="basic" className="space-y-4">
@@ -218,6 +219,28 @@ export const MerchantPageEditor: React.FC<MerchantPageEditorProps> = ({
                   />
                 </div>
 
+                <div>
+                  <Label htmlFor="specialties">Specialties (one per line)</Label>
+                  <Textarea
+                    id="specialties"
+                    value={settings.specialties.join('\n')}
+                    onChange={(e) => handleInputChange('specialties', e.target.value.split('\n').filter(s => s.trim()))}
+                    placeholder="Luxury Fashion&#10;Sustainable Clothing&#10;Custom Tailoring"
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="collections">Featured Collections (one per line)</Label>
+                  <Textarea
+                    id="collections"
+                    value={settings.featured_collections.join('\n')}
+                    onChange={(e) => handleInputChange('featured_collections', e.target.value.split('\n').filter(s => s.trim()))}
+                    placeholder="Summer Collection 2024&#10;Formal Wear&#10;Casual Essentials"
+                    rows={3}
+                  />
+                </div>
+
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="published"
@@ -233,13 +256,21 @@ export const MerchantPageEditor: React.FC<MerchantPageEditorProps> = ({
               <div className="space-y-4">
                 <div>
                   <Label htmlFor="themeColor">Theme Color</Label>
-                  <Input
-                    id="themeColor"
-                    type="color"
-                    value={settings.theme_color}
-                    onChange={(e) => handleInputChange('theme_color', e.target.value)}
-                    className="w-20"
-                  />
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="themeColor"
+                      type="color"
+                      value={settings.theme_color}
+                      onChange={(e) => handleInputChange('theme_color', e.target.value)}
+                      className="w-20"
+                    />
+                    <Input
+                      value={settings.theme_color}
+                      onChange={(e) => handleInputChange('theme_color', e.target.value)}
+                      placeholder="#000000"
+                      className="flex-1"
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -250,6 +281,70 @@ export const MerchantPageEditor: React.FC<MerchantPageEditorProps> = ({
                     onChange={(e) => handleInputChange('logo', e.target.value)}
                     placeholder="https://example.com/logo.png"
                   />
+                  {settings.logo && (
+                    <div className="mt-2">
+                      <img src={settings.logo} alt="Logo preview" className="w-16 h-16 object-contain border rounded" />
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="heroImage">Hero Background Image URL</Label>
+                  <Input
+                    id="heroImage"
+                    value={settings.hero_image}
+                    onChange={(e) => handleInputChange('hero_image', e.target.value)}
+                    placeholder="https://example.com/hero-image.jpg"
+                  />
+                  {settings.hero_image && (
+                    <div className="mt-2">
+                      <img src={settings.hero_image} alt="Hero preview" className="w-full h-32 object-cover border rounded" />
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="font-semibold">Social Media Links</h4>
+                  
+                  <div>
+                    <Label htmlFor="instagram">Instagram Username</Label>
+                    <Input
+                      id="instagram"
+                      value={settings.social_links.instagram || ''}
+                      onChange={(e) => handleNestedChange('social_links', 'instagram', e.target.value)}
+                      placeholder="your_instagram_handle"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="facebook">Facebook Page URL</Label>
+                    <Input
+                      id="facebook"
+                      value={settings.social_links.facebook || ''}
+                      onChange={(e) => handleNestedChange('social_links', 'facebook', e.target.value)}
+                      placeholder="https://facebook.com/yourpage"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="twitter">Twitter Handle</Label>
+                    <Input
+                      id="twitter"
+                      value={settings.social_links.twitter || ''}
+                      onChange={(e) => handleNestedChange('social_links', 'twitter', e.target.value)}
+                      placeholder="@your_twitter"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="website">Website URL</Label>
+                    <Input
+                      id="website"
+                      value={settings.social_links.website || ''}
+                      onChange={(e) => handleNestedChange('social_links', 'website', e.target.value)}
+                      placeholder="https://yourwebsite.com"
+                    />
+                  </div>
                 </div>
               </div>
             </TabsContent>
@@ -268,6 +363,7 @@ export const MerchantPageEditor: React.FC<MerchantPageEditorProps> = ({
                     placeholder="+1 (555) 123-4567"
                   />
                 </div>
+                
                 <div>
                   <Label htmlFor="email" className="flex items-center gap-2">
                     <Mail className="h-4 w-4" />
@@ -280,6 +376,112 @@ export const MerchantPageEditor: React.FC<MerchantPageEditorProps> = ({
                     onChange={(e) => handleNestedChange('contact_info', 'email', e.target.value)}
                     placeholder="contact@business.com"
                   />
+                </div>
+
+                <div>
+                  <Label htmlFor="address" className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    Business Address
+                  </Label>
+                  <Textarea
+                    id="address"
+                    value={settings.contact_info.address || ''}
+                    onChange={(e) => handleNestedChange('contact_info', 'address', e.target.value)}
+                    placeholder="123 Main Street&#10;City, State 12345&#10;Country"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="font-semibold flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    Business Hours
+                  </h4>
+                  
+                  {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map(day => (
+                    <div key={day} className="flex items-center gap-2">
+                      <Label className="w-20 capitalize">{day}</Label>
+                      <Input
+                        value={settings.business_hours[day] || ''}
+                        onChange={(e) => handleNestedChange('business_hours', day, e.target.value)}
+                        placeholder="9:00 AM - 6:00 PM"
+                        className="flex-1"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="advanced" className="space-y-4">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="customCSS">Custom CSS</Label>
+                  <Textarea
+                    id="customCSS"
+                    placeholder="/* Add custom CSS styles here */&#10;.my-custom-class {&#10;  color: #333;&#10;}"
+                    rows={6}
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Add custom CSS to personalize your page appearance
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="metaDescription">SEO Meta Description</Label>
+                  <Textarea
+                    id="metaDescription"
+                    placeholder="A brief description of your business for search engines..."
+                    rows={3}
+                    maxLength={160}
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Maximum 160 characters for optimal SEO
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="keywords">SEO Keywords</Label>
+                  <Input
+                    id="keywords"
+                    placeholder="fashion, clothing, style, boutique"
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Comma-separated keywords for search optimization
+                  </p>
+                </div>
+
+                <div className="p-4 border rounded-lg">
+                  <h4 className="font-semibold mb-2">Analytics Integration</h4>
+                  <div>
+                    <Label htmlFor="googleAnalytics">Google Analytics ID</Label>
+                    <Input
+                      id="googleAnalytics"
+                      placeholder="G-XXXXXXXXXX"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4 border rounded-lg">
+                  <h4 className="font-semibold mb-2">Advanced Settings</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label>Enable Customer Reviews</Label>
+                      <Switch />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>Show Stock Quantities</Label>
+                      <Switch />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>Enable Live Chat</Label>
+                      <Switch />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>Show Business Hours</Label>
+                      <Switch defaultChecked />
+                    </div>
+                  </div>
                 </div>
               </div>
             </TabsContent>

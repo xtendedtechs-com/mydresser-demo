@@ -9,6 +9,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useMerchantProfile } from '@/hooks/useMerchantProfile';
 import { useMerchantItems } from '@/hooks/useMerchantItems';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import AddMerchantProductDialog from '@/components/AddMerchantProductDialog';
 import { MerchantPageTab } from '@/components/MerchantPageTab';
 import { 
@@ -17,7 +18,7 @@ import {
   Plus, Settings, BarChart3, HelpCircle, 
   Search, Filter, Edit, Trash2, Eye,
   CreditCard, Truck, CheckCircle, XCircle,
-  Globe
+  Globe, Mail, Phone, LogOut
 } from 'lucide-react';
 
 interface CustomerInfo {
@@ -75,7 +76,8 @@ const MerchantTerminal: React.FC = () => {
     { label: 'Customer Relations', id: 'customers', icon: Users },
     { label: 'Financial Reports', id: 'financial', icon: DollarSign },
     { label: 'Merchant Page', id: 'page', icon: Globe },
-    { label: 'Support & Resources', id: 'support', icon: HelpCircle }
+    { label: 'Support & Resources', id: 'support', icon: HelpCircle },
+    { label: 'Account Settings', id: 'account', icon: Settings }
   ];
 
   // Redirect if not merchant
@@ -592,22 +594,226 @@ const MerchantTerminal: React.FC = () => {
             {/* Customer Relations */}
             {activeSection === 'customers' && (
               <div className="space-y-6">
-                <h1 className="text-2xl font-bold">Customer Relations</h1>
-                <Card>
-                  <CardContent className="p-6 text-center">
-                    <p className="text-muted-foreground">Customer management features coming soon...</p>
-                  </CardContent>
-                </Card>
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl font-bold">Customer Relations</h1>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Customer
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card>
+                    <CardContent className="p-4 text-center">
+                      <Users className="h-8 w-8 mx-auto mb-2 text-blue-500" />
+                      <p className="text-2xl font-bold">342</p>
+                      <p className="text-sm text-muted-foreground">Total Customers</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4 text-center">
+                      <Star className="h-8 w-8 mx-auto mb-2 text-green-500" />
+                      <p className="text-2xl font-bold">89%</p>
+                      <p className="text-sm text-muted-foreground">Satisfaction Rate</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4 text-center">
+                      <TrendingUp className="h-8 w-8 mx-auto mb-2 text-purple-500" />
+                      <p className="text-2xl font-bold">2.3</p>
+                      <p className="text-sm text-muted-foreground">Avg Orders per Customer</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Recent Customers</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {[
+                          { name: 'Emma Thompson', email: 'emma@example.com', orders: 5, total: '$285.00' },
+                          { name: 'James Wilson', email: 'james@example.com', orders: 3, total: '$180.50' },
+                          { name: 'Sarah Davis', email: 'sarah@example.com', orders: 7, total: '$420.25' }
+                        ].map((customer, index) => (
+                          <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div>
+                              <p className="font-medium">{customer.name}</p>
+                              <p className="text-sm text-muted-foreground">{customer.email}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium">{customer.total}</p>
+                              <p className="text-sm text-muted-foreground">{customer.orders} orders</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Customer Feedback</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {[
+                          { name: 'Alice Brown', rating: 5, comment: 'Amazing quality and fast shipping!' },
+                          { name: 'Mark Johnson', rating: 4, comment: 'Great products, will order again.' },
+                          { name: 'Lisa Garcia', rating: 5, comment: 'Perfect fit and excellent customer service.' }
+                        ].map((review, index) => (
+                          <div key={index} className="p-3 border rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                              <p className="font-medium">{review.name}</p>
+                              <div className="flex items-center">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                  <Star key={i} className={`h-4 w-4 ${i < review.rating ? 'fill-current text-yellow-400' : 'text-gray-300'}`} />
+                                ))}
+                              </div>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{review.comment}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
             )}
 
             {/* Financial Reports */}
             {activeSection === 'financial' && (
               <div className="space-y-6">
-                <h1 className="text-2xl font-bold">Financial Reports</h1>
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl font-bold">Financial Reports</h1>
+                  <div className="flex gap-2">
+                    <Button variant="outline">Export CSV</Button>
+                    <Button variant="outline">Generate Report</Button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <DollarSign className="h-4 w-4 text-green-500" />
+                        <h3 className="font-semibold">Total Revenue</h3>
+                      </div>
+                      <p className="text-2xl font-bold">$45,250.00</p>
+                      <p className="text-sm text-green-500">+12% vs last month</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <TrendingUp className="h-4 w-4 text-blue-500" />
+                        <h3 className="font-semibold">Net Profit</h3>
+                      </div>
+                      <p className="text-2xl font-bold">$12,340.00</p>
+                      <p className="text-sm text-blue-500">+8% vs last month</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CreditCard className="h-4 w-4 text-purple-500" />
+                        <h3 className="font-semibold">Processing Fees</h3>
+                      </div>
+                      <p className="text-2xl font-bold">$1,280.50</p>
+                      <p className="text-sm text-muted-foreground">2.8% of revenue</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Truck className="h-4 w-4 text-orange-500" />
+                        <h3 className="font-semibold">Shipping Costs</h3>
+                      </div>
+                      <p className="text-2xl font-bold">$890.25</p>
+                      <p className="text-sm text-muted-foreground">1.9% of revenue</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Revenue Breakdown</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {[
+                          { category: 'Dresses', amount: '$18,500', percentage: 41 },
+                          { category: 'Tops', amount: '$12,300', percentage: 27 },
+                          { category: 'Bottoms', amount: '$8,750', percentage: 19 },
+                          { category: 'Accessories', amount: '$5,700', percentage: 13 }
+                        ].map((item, index) => (
+                          <div key={index} className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-3 h-3 rounded-full bg-primary" style={{ opacity: 1 - (index * 0.2) }}></div>
+                              <span>{item.category}</span>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium">{item.amount}</p>
+                              <p className="text-sm text-muted-foreground">{item.percentage}%</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Monthly Trends</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {[
+                          { month: 'January', revenue: '$38,200', growth: '+5%' },
+                          { month: 'February', revenue: '$42,100', growth: '+10%' },
+                          { month: 'March', revenue: '$45,250', growth: '+7%' }
+                        ].map((month, index) => (
+                          <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                            <span className="font-medium">{month.month}</span>
+                            <div className="text-right">
+                              <p className="font-medium">{month.revenue}</p>
+                              <p className="text-sm text-green-500">{month.growth}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
                 <Card>
-                  <CardContent className="p-6 text-center">
-                    <p className="text-muted-foreground">Financial reporting features coming soon...</p>
+                  <CardHeader>
+                    <CardTitle>Tax Information</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="p-4 bg-muted rounded-lg">
+                        <h4 className="font-semibold mb-2">Sales Tax Collected</h4>
+                        <p className="text-2xl font-bold">$3,620.00</p>
+                        <p className="text-sm text-muted-foreground">8% average rate</p>
+                      </div>
+                      <div className="p-4 bg-muted rounded-lg">
+                        <h4 className="font-semibold mb-2">Taxable Revenue</h4>
+                        <p className="text-2xl font-bold">$45,250.00</p>
+                        <p className="text-sm text-muted-foreground">All transactions</p>
+                      </div>
+                      <div className="p-4 bg-muted rounded-lg">
+                        <h4 className="font-semibold mb-2">Next Filing Due</h4>
+                        <p className="text-2xl font-bold">Apr 15</p>
+                        <p className="text-sm text-muted-foreground">Quarterly filing</p>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
@@ -621,13 +827,204 @@ const MerchantTerminal: React.FC = () => {
             {/* Support & Resources */}
             {activeSection === 'support' && (
               <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl font-bold">Support & Resources</h1>
+                  <Button>
+                    <HelpCircle className="h-4 w-4 mr-2" />
+                    Contact Support
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Quick Help</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-3">
+                        <div className="p-3 border rounded-lg hover:bg-muted cursor-pointer">
+                          <h4 className="font-medium">Getting Started Guide</h4>
+                          <p className="text-sm text-muted-foreground">Learn how to set up your merchant account</p>
+                        </div>
+                        <div className="p-3 border rounded-lg hover:bg-muted cursor-pointer">
+                          <h4 className="font-medium">Product Management</h4>
+                          <p className="text-sm text-muted-foreground">How to add, edit, and organize your inventory</p>
+                        </div>
+                        <div className="p-3 border rounded-lg hover:bg-muted cursor-pointer">
+                          <h4 className="font-medium">Payment Processing</h4>
+                          <p className="text-sm text-muted-foreground">Understanding fees and payment methods</p>
+                        </div>
+                        <div className="p-3 border rounded-lg hover:bg-muted cursor-pointer">
+                          <h4 className="font-medium">Shipping & Fulfillment</h4>
+                          <p className="text-sm text-muted-foreground">Set up shipping options and manage orders</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Resources</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <h4 className="font-medium">Video Tutorials</h4>
+                            <p className="text-sm text-muted-foreground">Step-by-step video guides</p>
+                          </div>
+                          <Button variant="outline" size="sm">
+                            <Eye className="h-4 w-4 mr-2" />
+                            Watch
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <h4 className="font-medium">API Documentation</h4>
+                            <p className="text-sm text-muted-foreground">For developers and integrations</p>
+                          </div>
+                          <Button variant="outline" size="sm">
+                            <Globe className="h-4 w-4 mr-2" />
+                            View Docs
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <h4 className="font-medium">Community Forum</h4>
+                            <p className="text-sm text-muted-foreground">Connect with other merchants</p>
+                          </div>
+                          <Button variant="outline" size="sm">
+                            <Users className="h-4 w-4 mr-2" />
+                            Join
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <h4 className="font-medium">Best Practices</h4>
+                            <p className="text-sm text-muted-foreground">Tips for successful selling</p>
+                          </div>
+                          <Button variant="outline" size="sm">
+                            <Star className="h-4 w-4 mr-2" />
+                            Read
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
                 <Card>
                   <CardHeader>
-                    <CardTitle>Support & Resources</CardTitle>
+                    <CardTitle>Contact Support</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-center py-12">
-                      <p className="text-muted-foreground">Support resources coming soon...</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="text-center p-4 border rounded-lg">
+                        <Mail className="h-8 w-8 mx-auto mb-2 text-primary" />
+                        <h4 className="font-medium">Email Support</h4>
+                        <p className="text-sm text-muted-foreground mb-3">Get help via email</p>
+                        <Button variant="outline" size="sm">Send Email</Button>
+                      </div>
+                      <div className="text-center p-4 border rounded-lg">
+                        <Phone className="h-8 w-8 mx-auto mb-2 text-primary" />
+                        <h4 className="font-medium">Phone Support</h4>
+                        <p className="text-sm text-muted-foreground mb-3">Call us directly</p>
+                        <Button variant="outline" size="sm">Call Now</Button>
+                      </div>
+                      <div className="text-center p-4 border rounded-lg">
+                        <Clock className="h-8 w-8 mx-auto mb-2 text-primary" />
+                        <h4 className="font-medium">Live Chat</h4>
+                        <p className="text-sm text-muted-foreground mb-3">Chat with support</p>
+                        <Button variant="outline" size="sm">Start Chat</Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+            {/* Account Settings */}
+            {activeSection === 'account' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl font-bold">Account Settings</h1>
+                  <Button 
+                    variant="outline"
+                    onClick={async () => {
+                      await supabase.auth.signOut();
+                      window.location.href = '/';
+                    }}
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Profile Information</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <label className="text-sm font-medium">Business Name</label>
+                        <Input value={merchantProfile?.business_name || ''} />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium">Business Type</label>
+                        <Input value={merchantProfile?.business_type || ''} />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium">Email</label>
+                        <Input value={user?.email || ''} disabled />
+                      </div>
+                      <Button>Update Profile</Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Security Settings</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="p-4 border rounded-lg">
+                        <h4 className="font-medium mb-2">Two-Factor Authentication</h4>
+                        <p className="text-sm text-muted-foreground mb-3">Add an extra layer of security to your account</p>
+                        <Button variant="outline" size="sm">Enable 2FA</Button>
+                      </div>
+                      <div className="p-4 border rounded-lg">
+                        <h4 className="font-medium mb-2">Change Password</h4>
+                        <p className="text-sm text-muted-foreground mb-3">Update your account password</p>
+                        <Button variant="outline" size="sm">Change Password</Button>
+                      </div>
+                      <div className="p-4 border rounded-lg">
+                        <h4 className="font-medium mb-2">Login History</h4>
+                        <p className="text-sm text-muted-foreground mb-3">View recent login activity</p>
+                        <Button variant="outline" size="sm">View History</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Notification Preferences</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {[
+                        { label: 'Order Notifications', description: 'Get notified when you receive new orders' },
+                        { label: 'Payment Alerts', description: 'Receive alerts for successful payments and refunds' },
+                        { label: 'Inventory Warnings', description: 'Low stock and out-of-stock notifications' },
+                        { label: 'Marketing Updates', description: 'Tips and updates to grow your business' }
+                      ].map((item, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <h4 className="font-medium">{item.label}</h4>
+                            <p className="text-sm text-muted-foreground">{item.description}</p>
+                          </div>
+                          <input type="checkbox" className="w-4 h-4" defaultChecked />
+                        </div>
+                      ))}
                     </div>
                   </CardContent>
                 </Card>
@@ -643,7 +1040,7 @@ const MerchantTerminal: React.FC = () => {
         onOpenChange={(open) => {
           setShowAddProductDialog(open);
           if (!open) {
-            setEditingProduct(null);
+            setEditingProduct(null);  
           }
         }}
         onProductAdded={refetchItems}

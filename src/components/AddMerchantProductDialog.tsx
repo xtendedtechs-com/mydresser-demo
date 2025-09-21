@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 import { X, Plus, Upload, Tag } from 'lucide-react';
+import React from 'react';
 
 interface AddMerchantProductDialogProps {
   open: boolean;
@@ -25,31 +26,74 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
   const { toast } = useToast();
   
   const [formData, setFormData] = useState({
-    name: editProduct?.name || '',
-    description: editProduct?.description || '',
-    category: editProduct?.category || '',
-    brand: editProduct?.brand || '',
-    price: editProduct?.price || '',
-    original_price: editProduct?.original_price || '',
-    condition: editProduct?.condition || 'new',
-    color: editProduct?.color || '',
-    material: editProduct?.material || '',
-    occasion: editProduct?.occasion || '',
-    season: editProduct?.season || '',
-    stock_quantity: editProduct?.stock_quantity || 1,
-    is_featured: editProduct?.is_featured || false,
-    is_premium: editProduct?.is_premium || false,
-    status: editProduct?.status || 'draft'
+    name: '',
+    description: '',
+    category: '',
+    brand: '',
+    price: '',
+    original_price: '',
+    condition: 'new',
+    color: '',
+    material: '',
+    occasion: '',
+    season: '',
+    stock_quantity: '1',
+    is_featured: false,
+    is_premium: false,
+    status: 'draft'
   });
   
-  const [sizes, setSizes] = useState<string[]>(editProduct?.size || []);
-  const [tags, setTags] = useState<string[]>(editProduct?.tags || []);
-  const [styleTags, setStyleTags] = useState<string[]>(editProduct?.style_tags || []);
-  const [photos, setPhotos] = useState<string[]>(editProduct?.photos || []);
+  const [sizes, setSizes] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
+  const [styleTags, setStyleTags] = useState<string[]>([]);
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [videos, setVideos] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
   const [newStyleTag, setNewStyleTag] = useState('');
   const [newPhoto, setNewPhoto] = useState('');
+  const [newVideo, setNewVideo] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Reset and populate form when editProduct changes
+  React.useEffect(() => {
+    if (editProduct) {
+      setFormData({
+        name: editProduct.name || '',
+        description: editProduct.description || '',
+        category: editProduct.category || '',
+        brand: editProduct.brand || '',
+        price: editProduct.price?.toString() || '',
+        original_price: editProduct.original_price?.toString() || '',
+        condition: editProduct.condition || 'new',
+        color: editProduct.color || '',
+        material: editProduct.material || '',
+        occasion: editProduct.occasion || '',
+        season: editProduct.season || '', 
+        stock_quantity: editProduct.stock_quantity?.toString() || '1',
+        is_featured: editProduct.is_featured || false,
+        is_premium: editProduct.is_premium || false,
+        status: editProduct.status || 'draft'
+      });
+      setSizes(editProduct.size || []);
+      setTags(editProduct.tags || []);
+      setStyleTags(editProduct.style_tags || []);
+      setPhotos(Array.isArray(editProduct.photos) ? editProduct.photos : []);
+      setVideos(Array.isArray(editProduct.videos) ? editProduct.videos : []);
+    } else {
+      // Reset form for new product
+      setFormData({
+        name: '', description: '', category: '', brand: '', price: '',
+        original_price: '', condition: 'new', color: '', material: '',
+        occasion: '', season: '', stock_quantity: '1', is_featured: false,
+        is_premium: false, status: 'draft'
+      });
+      setSizes([]);
+      setTags([]);
+      setStyleTags([]);
+      setPhotos([]);
+      setVideos([]);
+    }
+  }, [editProduct]);
 
   const categories = [
     'Tops', 'Bottoms', 'Dresses', 'Outerwear', 'Shoes', 'Accessories', 
@@ -91,9 +135,16 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
   };
 
   const addPhoto = () => {
-    if (newPhoto.trim() && !photos.includes(newPhoto.trim())) {
+    if (newPhoto.trim() && !photos.includes(newPhoto.trim()) && photos.length < 20) {
       setPhotos([...photos, newPhoto.trim()]);
       setNewPhoto('');
+    }
+  };
+
+  const addVideo = () => {
+    if (newVideo.trim() && !videos.includes(newVideo.trim()) && videos.length < 2) {
+      setVideos([...videos, newVideo.trim()]);
+      setNewVideo('');
     }
   };
 
@@ -108,11 +159,12 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
         merchant_id: user.id,
         price: parseFloat(formData.price),
         original_price: formData.original_price ? parseFloat(formData.original_price) : null,
-        stock_quantity: parseInt(formData.stock_quantity),
+        stock_quantity: parseInt(formData.stock_quantity.toString()),
         size: sizes,
         tags,
         style_tags: styleTags,
         photos: photos.length > 0 ? photos : null,
+        videos: videos.length > 0 ? videos : null,
       };
 
       let result;
@@ -142,13 +194,14 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
       setFormData({
         name: '', description: '', category: '', brand: '', price: '',
         original_price: '', condition: 'new', color: '', material: '',
-        occasion: '', season: '', stock_quantity: 1, is_featured: false,
+        occasion: '', season: '', stock_quantity: '1', is_featured: false,
         is_premium: false, status: 'draft'
       });
       setSizes([]);
       setTags([]);
       setStyleTags([]);
       setPhotos([]);
+      setVideos([]);
     } catch (error) {
       console.error('Error saving product:', error);
       toast({
@@ -281,7 +334,7 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
                     <Input
                       id="stock_quantity"
                       type="number"
-                      value={formData.stock_quantity}
+                      value={formData.stock_quantity.toString()}
                       onChange={(e) => setFormData({...formData, stock_quantity: e.target.value})}
                     />
                   </div>
@@ -357,7 +410,7 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="draft">Draft (Not visible to customers)</SelectItem>
-                        <SelectItem value="published">Published (Visible in market)</SelectItem>
+                        <SelectItem value="available">Published (Visible in market)</SelectItem>
                         <SelectItem value="archived">Archived</SelectItem>
                       </SelectContent>
                     </Select>
@@ -452,7 +505,8 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
 
               {/* Photos */}
               <div className="space-y-2">
-                <Label>Product Photos</Label>
+                <Label>Product Photos (Max 20)</Label>
+                <p className="text-sm text-muted-foreground">Upload up to 20 high-quality photos of your product</p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
                   {photos.map((photo, index) => (
                     <div key={index} className="relative">
@@ -474,11 +528,59 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
                     placeholder="Add photo URL"
                     value={newPhoto}
                     onChange={(e) => setNewPhoto(e.target.value)}
+                    disabled={photos.length >= 20}
                   />
-                  <Button type="button" onClick={addPhoto}>
+                  <Button 
+                    type="button" 
+                    onClick={addPhoto}
+                    disabled={photos.length >= 20 || !newPhoto.trim()}
+                  >
                     <Upload className="w-4 h-4" />
                   </Button>
                 </div>
+                {photos.length >= 20 && (
+                  <p className="text-sm text-orange-500">Maximum of 20 photos reached</p>
+                )}
+              </div>
+
+              {/* Videos */}
+              <div className="space-y-2">
+                <Label>Product Videos (Max 2)</Label>
+                <p className="text-sm text-muted-foreground">Add up to 2 videos to showcase your product</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+                  {videos.map((video, index) => (
+                    <div key={index} className="relative">
+                      <video src={video} className="w-full h-24 object-cover rounded" controls />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute -top-2 -right-2 w-6 h-6 p-0"
+                        onClick={() => setVideos(videos.filter((_, i) => i !== index))}
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Add video URL"
+                    value={newVideo}
+                    onChange={(e) => setNewVideo(e.target.value)}
+                    disabled={videos.length >= 2}
+                  />
+                  <Button 
+                    type="button" 
+                    onClick={addVideo}
+                    disabled={videos.length >= 2 || !newVideo.trim()}
+                  >
+                    <Upload className="w-4 h-4" />
+                  </Button>
+                </div>
+                {videos.length >= 2 && (
+                  <p className="text-sm text-orange-500">Maximum of 2 videos reached</p>
+                )}
               </div>
             </CardContent>
           </Card>
