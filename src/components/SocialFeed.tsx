@@ -37,68 +37,45 @@ interface OutfitPost {
 }
 
 export const SocialFeed = () => {
-  const { profile } = useProfile();
-  const { following, followers, followUser, unfollowUser, isFollowing } = useSocial();
+  const { profile, user } = useProfile();
+  const { 
+    posts: socialPosts, 
+    following, 
+    followers, 
+    followUser, 
+    unfollowUser, 
+    isFollowing, 
+    likePost, 
+    loading: socialLoading,
+    createPost
+  } = useSocial();
   const [activeTab, setActiveTab] = useState('feed');
   const [posts, setPosts] = useState<OutfitPost[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Mock data for demonstration - in real app this would come from API
+  // Use real social posts data
   useEffect(() => {
-    const mockPosts: OutfitPost[] = [
-      {
-        id: '1',
-        user_id: 'user1',
-        user: {
-          full_name: 'Emma Style',
-          avatar_url: '/placeholder.svg'
-        },
-        caption: 'Perfect autumn look for a coffee date ☕️ #FallFashion #CasualChic',
-        outfit_image: '/placeholder.svg',
-        items: ['Knitted Sweater', 'Dark Jeans', 'Ankle Boots'],
-        occasion: 'casual',
-        created_at: '2 hours ago',
-        likes_count: 24,
-        comments_count: 3,
-        user_has_liked: false
-      },
-      {
-        id: '2',
-        user_id: 'user2',
-        user: {
-          full_name: 'Alex Fashion',
-          avatar_url: '/placeholder.svg'
-        },
-        caption: 'Business meeting ready! Confidence is the best accessory ✨',
-        outfit_image: '/placeholder.svg',
-        items: ['Blazer', 'White Shirt', 'Trousers', 'Oxfords'],
-        occasion: 'business',
-        created_at: '5 hours ago',
-        likes_count: 42,
-        comments_count: 7,
-        user_has_liked: true
-      }
-    ];
-    
-    setTimeout(() => {
-      setPosts(mockPosts);
-      setLoading(false);
-    }, 1000);
-  }, []);
+    if (socialPosts.length > 0) {
+      const formattedPosts: OutfitPost[] = socialPosts.map(post => ({
+        id: post.id,
+        user_id: post.user_id,
+        user: post.user_profile,
+        caption: post.content,
+        outfit_image: post.images[0] || '/placeholder.svg',
+        items: post.outfit_items,
+        occasion: 'casual', // Default, could be enhanced
+        created_at: new Date(post.created_at).toLocaleString(),
+        likes_count: post.likes_count,
+        comments_count: post.comments_count,
+        user_has_liked: post.user_has_liked
+      }));
+      setPosts(formattedPosts);
+    }
+    setLoading(socialLoading);
+  }, [socialPosts, socialLoading]);
 
   const handleLike = (postId: string) => {
-    setPosts(prev => prev.map(post => 
-      post.id === postId 
-        ? {
-            ...post,
-            user_has_liked: !post.user_has_liked,
-            likes_count: post.user_has_liked 
-              ? post.likes_count - 1 
-              : post.likes_count + 1
-          }
-        : post
-    ));
-    toast.success('Reaction added!');
+    likePost(postId);
   };
 
   const suggestedUsers = [

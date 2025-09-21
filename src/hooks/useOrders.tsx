@@ -1,22 +1,27 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
+import { useToast } from '@/hooks/use-toast';
 
 export interface Order {
   id: string;
-  buyer_id: string;
-  seller_id: string;
-  item_id: string;
-  quantity: number;
-  total_amount: number;
-  status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'completed' | 'cancelled';
-  shipping_address?: any;
+  merchant_id: string;
+  customer_name: string;
+  customer_email: string;
+  customer_phone?: string;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'completed';
+  payment_status: 'pending' | 'paid' | 'failed' | 'refunded';
   payment_method?: string;
-  payment_status: 'pending' | 'completed' | 'failed' | 'refunded';
+  subtotal: number;
+  tax_amount: number;
+  shipping_amount: number;
+  discount_amount: number;
+  total_amount: number;
+  items: any[];
+  shipping_address?: any;
+  billing_address?: any;
   tracking_number?: string;
   notes?: string;
-  customer_name?: string;
   created_at: string;
   updated_at: string;
 }
@@ -34,12 +39,20 @@ export const useOrders = () => {
     try {
       let query = supabase
         .from('orders')
-        .select('*')
+        .select(`
+          *,
+          order_items (*)
+        `)
         .order('created_at', { ascending: false });
 
-      // If user is a merchant, get orders for their items
-      if (profile?.role === 'merchant' || profile?.role === 'professional') {
+      // Only merchants see their orders
+      if (profile?.role === 'merchant') {
         query = query.eq('merchant_id', user.id);
+      } else {
+        // Regular users would see their purchase orders (not implemented yet)
+        setOrders([]);
+        setLoading(false);
+        return;
       }
 
       const { data, error } = await query;
@@ -55,23 +68,11 @@ export const useOrders = () => {
       }
 
       const formattedOrders: Order[] = data?.map(order => ({
-        id: order.id,
-        buyer_id: 'customer',
-        seller_id: order.merchant_id,
-        item_id: 'item',
-        quantity: 1,
-        total_amount: order.total_amount,
+        ...order,
         status: order.status as Order['status'],
-        shipping_address: order.shipping_address,
-        payment_method: order.payment_method,
-        payment_status: order.payment_status as Order['payment_status'],
-        tracking_number: order.tracking_number,
-        notes: order.notes,
-        customer_name: order.customer_name || 'Unknown',
-        created_at: order.created_at,
-        updated_at: order.updated_at
+        payment_status: order.payment_status as Order['payment_status']
       })) || [];
-
+      
       setOrders(formattedOrders);
     } catch (error) {
       console.error('Error in fetchOrders:', error);
@@ -86,34 +87,58 @@ export const useOrders = () => {
   };
 
   const createOrder = async (orderData: {
-    seller_id: string;
-    item_id: string;
-    quantity?: number;
-    total_amount: number;
+    customer_name: string;
+    customer_email: string;
+    customer_phone?: string;
+    items: Array<{
+      merchant_item_id?: string;
+      name: string;
+      description?: string;
+      price: number;
+      quantity: number;
+      size?: string;
+      color?: string;
+      image_url?: string;
+    }>;
     shipping_address?: any;
+    billing_address?: any;
     payment_method?: string;
+    notes?: string;
   }) => {
     if (!user?.id) return null;
 
     try {
-      const { data, error } = await supabase
+      // Calculate totals
+      const subtotal = orderData.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const tax_amount = subtotal * 0.08; // 8% tax
+      const shipping_amount = subtotal > 100 ? 0 : 9.99; // Free shipping over $100
+      const total_amount = subtotal + tax_amount + shipping_amount;
+
+      const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert([{
-          merchant_id: orderData.seller_id,
-          customer_name: 'Customer',
-          customer_email: 'customer@example.com',
-          items: {},
-          total_amount: orderData.total_amount,
+          merchant_id: user.id,
+          customer_name: orderData.customer_name,
+          customer_email: orderData.customer_email,
+          customer_phone: orderData.customer_phone,
           status: 'pending',
           payment_status: 'pending',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          payment_method: orderData.payment_method,
+          subtotal,
+          tax_amount,
+          shipping_amount,
+          discount_amount: 0,
+          total_amount,
+          items: orderData.items,
+          shipping_address: orderData.shipping_address,
+          billing_address: orderData.billing_address,
+          notes: orderData.notes
         }])
         .select()
         .single();
 
-      if (error) {
-        console.error('Error creating order:', error);
+      if (orderError) {
+        console.error('Error creating order:', orderError);
         toast({
           title: "Error",
           description: "Failed to create order",
@@ -122,28 +147,55 @@ export const useOrders = () => {
         return null;
       }
 
-      await fetchOrders(); // Refresh the list
+      // Create order items
+      if (orderData.items.length > 0) {
+        const orderItems = orderData.items.map(item => ({
+          order_id: order.id,
+          merchant_item_id: item.merchant_item_id,
+          name: item.name,
+          description: item.description,
+          price: item.price,
+          quantity: item.quantity,
+          size: item.size,
+          color: item.color,
+          image_url: item.image_url
+        }));
+
+        const { error: itemsError } = await supabase
+          .from('order_items')
+          .insert(orderItems);
+
+        if (itemsError) {
+          console.error('Error creating order items:', itemsError);
+        }
+      }
+
+      await fetchOrders();
       toast({
         title: "Success",
         description: "Order created successfully"
       });
-      
-      return data;
+
+      return order;
     } catch (error) {
       console.error('Error in createOrder:', error);
       return null;
     }
   };
 
-  const updateOrderStatus = async (orderId: string, status: Order['status']) => {
+  const updateOrderStatus = async (orderId: string, status: Order['status'], notes?: string) => {
+    if (!user?.id) return false;
+
     try {
       const { error } = await supabase
         .from('orders')
-        .update({
-          status,
+        .update({ 
+          status, 
+          notes,
           updated_at: new Date().toISOString()
         })
-        .eq('id', orderId);
+        .eq('id', orderId)
+        .eq('merchant_id', user.id);
 
       if (error) {
         console.error('Error updating order status:', error);
@@ -155,12 +207,22 @@ export const useOrders = () => {
         return false;
       }
 
-      await fetchOrders(); // Refresh the list
+      // Log status history
+      await supabase
+        .from('order_status_history')
+        .insert([{
+          order_id: orderId,
+          new_status: status,
+          changed_by: user.id,
+          notes
+        }]);
+
+      await fetchOrders();
       toast({
         title: "Success",
         description: "Order status updated successfully"
       });
-      
+
       return true;
     } catch (error) {
       console.error('Error in updateOrderStatus:', error);
@@ -168,41 +230,16 @@ export const useOrders = () => {
     }
   };
 
-  const updatePaymentStatus = async (orderId: string, payment_status: Order['payment_status']) => {
-    try {
-      const { error } = await supabase
-        .from('orders')
-        .update({
-          payment_status,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', orderId);
-
-      if (error) {
-        console.error('Error updating payment status:', error);
-        toast({
-          title: "Error",
-          description: "Failed to update payment status",
-          variant: "destructive"
-        });
-        return false;
-      }
-
-      await fetchOrders(); // Refresh the list
-      toast({
-        title: "Success",
-        description: "Payment status updated successfully"
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Error in updatePaymentStatus:', error);
-      return false;
-    }
+  const getTotalRevenue = () => {
+    return orders
+      .filter(order => order.payment_status === 'paid')
+      .reduce((sum, order) => sum + order.total_amount, 0);
   };
 
   useEffect(() => {
-    fetchOrders();
+    if (user?.id) {
+      fetchOrders();
+    }
   }, [user?.id, profile?.role]);
 
   return {
@@ -210,7 +247,7 @@ export const useOrders = () => {
     loading,
     createOrder,
     updateOrderStatus,
-    updatePaymentStatus,
+    getTotalRevenue,
     refetch: fetchOrders
   };
 };

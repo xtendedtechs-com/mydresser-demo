@@ -1,203 +1,270 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useProfile } from './useProfile';
-import { toast } from 'sonner';
+import { useProfile } from '@/hooks/useProfile';
+import { useToast } from '@/hooks/use-toast';
 
-export interface UserFollow {
-  id: string;
-  follower_id: string;
-  following_id: string;
-  created_at: string;
-}
-
-export interface Reaction {
+export interface SocialPost {
   id: string;
   user_id: string;
-  target_id: string;
-  target_type: string;
-  reaction_type: string;
+  content: string;
+  images: string[];
+  outfit_items: string[];
+  likes_count: number;
+  comments_count: number;
   created_at: string;
-}
-
-export interface SocialProfile {
-  id: string;
-  user_id: string;
-  full_name: string;
-  avatar_url: string;
-  role: string;
-  bio: string;
-  style_score: number;
-  created_at: string;
-  followers_count?: number;
-  following_count?: number;
-  is_following?: boolean;
+  user_profile: {
+    full_name: string;
+    avatar_url: string;
+  };
+  user_has_liked: boolean;
 }
 
 export const useSocial = () => {
-  const { user } = useProfile();
-  const [followers, setFollowers] = useState<string[]>([]);
+  const [posts, setPosts] = useState<SocialPost[]>([]);
   const [following, setFollowing] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [followers, setFollowers] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useProfile();
+  const { toast } = useToast();
 
-  useEffect(() => {
-    if (user) {
-      fetchSocialData();
-    }
-  }, [user]);
+  const fetchPosts = async () => {
+    // Mock data for now since social_posts table doesn't exist yet
+    const mockPosts: SocialPost[] = [
+      {
+        id: '1',
+        user_id: 'user1',
+        content: 'Perfect autumn look for a coffee date ☕️ #FallFashion #CasualChic',
+        images: ['/placeholder.svg'],
+        outfit_items: ['Knitted Sweater', 'Dark Jeans', 'Ankle Boots'],
+        likes_count: 24,
+        comments_count: 3,
+        created_at: new Date().toISOString(),
+        user_profile: {
+          full_name: 'Emma Style',
+          avatar_url: '/placeholder.svg'
+        },
+        user_has_liked: false
+      },
+      {
+        id: '2',
+        user_id: 'user2',
+        content: 'Business meeting ready! Confidence is the best accessory ✨',
+        images: ['/placeholder.svg'],
+        outfit_items: ['Blazer', 'White Shirt', 'Trousers', 'Oxfords'],
+        likes_count: 42,
+        comments_count: 7,
+        created_at: new Date(Date.now() - 3600000).toISOString(),
+        user_profile: {
+          full_name: 'Alex Fashion',
+          avatar_url: '/placeholder.svg'
+        },
+        user_has_liked: true
+      }
+    ];
 
-  const fetchSocialData = async () => {
-    if (!user) return;
+    setPosts(mockPosts);
+    setLoading(false);
+  };
 
-    setLoading(true);
+  const fetchFollowData = async () => {
+    if (!user?.id) return;
+
     try {
-      // Fetch followers
-      const { data: followersData, error: followersError } = await supabase
-        .from('user_follows')
-        .select('follower_id')
-        .eq('following_id', user.id);
-
-      // Fetch following
-      const { data: followingData, error: followingError } = await supabase
+      // Get following
+      const { data: followingData } = await supabase
         .from('user_follows')
         .select('following_id')
         .eq('follower_id', user.id);
 
-      if (followersError) throw followersError;
-      if (followingError) throw followingError;
+      // Get followers
+      const { data: followersData } = await supabase
+        .from('user_follows')
+        .select('follower_id')
+        .eq('following_id', user.id);
 
-      setFollowers(followersData?.map(f => f.follower_id) || []);
       setFollowing(followingData?.map(f => f.following_id) || []);
-    } catch (error: any) {
-      console.error('Error fetching social data:', error);
-      toast.error('Failed to load social data');
-    } finally {
-      setLoading(false);
+      setFollowers(followersData?.map(f => f.follower_id) || []);
+    } catch (error) {
+      console.error('Error fetching follow data:', error);
     }
   };
 
-  const followUser = async (targetUserId: string) => {
-    if (!user) {
-      toast.error('Please sign in to follow users');
-      return false;
-    }
+  const createPost = async (content: string, images: string[] = [], outfitItems: string[] = []) => {
+    if (!user?.id) return null;
+
+    // Mock implementation for now
+    const newPost: SocialPost = {
+      id: Date.now().toString(),
+      user_id: user.id,
+      content,
+      images,
+      outfit_items: outfitItems,
+      likes_count: 0,
+      comments_count: 0,
+      created_at: new Date().toISOString(),
+      user_profile: {
+        full_name: 'You',
+        avatar_url: '/placeholder.svg'
+      },
+      user_has_liked: false
+    };
+
+    setPosts(prev => [newPost, ...prev]);
+    toast({
+      title: "Success",
+      description: "Post created successfully"
+    });
+
+    return newPost;
+  };
+
+  const likePost = async (postId: string) => {
+    setPosts(prev => prev.map(post => 
+      post.id === postId 
+        ? {
+            ...post,
+            user_has_liked: !post.user_has_liked,
+            likes_count: post.user_has_liked 
+              ? post.likes_count - 1 
+              : post.likes_count + 1
+          }
+        : post
+    ));
+  };
+
+  const followUser = async (userId: string): Promise<boolean> => {
+    if (!user?.id || userId === user.id) return false;
 
     try {
       const { error } = await supabase
         .from('user_follows')
-        .insert({
+        .insert([{
           follower_id: user.id,
-          following_id: targetUserId
-        });
+          following_id: userId
+        }]);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error following user:', error);
+        return false;
+      }
 
-      setFollowing(prev => [...prev, targetUserId]);
-      toast.success('User followed successfully');
+      await fetchFollowData();
+      toast({
+        title: "Success",
+        description: "Now following user"
+      });
       return true;
-    } catch (error: any) {
-      console.error('Error following user:', error);
-      toast.error('Failed to follow user');
+    } catch (error) {
+      console.error('Error in followUser:', error);
       return false;
     }
   };
 
-  const unfollowUser = async (targetUserId: string) => {
-    if (!user) return false;
+  const unfollowUser = async (userId: string): Promise<boolean> => {
+    if (!user?.id) return false;
 
     try {
       const { error } = await supabase
         .from('user_follows')
         .delete()
         .eq('follower_id', user.id)
-        .eq('following_id', targetUserId);
+        .eq('following_id', userId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error unfollowing user:', error);
+        return false;
+      }
 
-      setFollowing(prev => prev.filter(id => id !== targetUserId));
-      toast.success('User unfollowed');
+      await fetchFollowData();
+      toast({
+        title: "Success",
+        description: "Unfollowed user"
+      });
       return true;
-    } catch (error: any) {
-      console.error('Error unfollowing user:', error);
-      toast.error('Failed to unfollow user');
+    } catch (error) {
+      console.error('Error in unfollowUser:', error);
       return false;
     }
   };
 
-  const isFollowing = (targetUserId: string) => {
-    return following.includes(targetUserId);
+  const isFollowing = (userId: string) => {
+    return following.includes(userId);
   };
+
+  const refreshSocialData = async () => {
+    await Promise.all([fetchPosts(), fetchFollowData()]);
+  };
+
+  useEffect(() => {
+    fetchPosts();
+    if (user?.id) {
+      fetchFollowData();
+    }
+  }, [user?.id]);
 
   const addReaction = async (targetId: string, targetType: string, reactionType: string = 'like') => {
-    if (!user) {
-      toast.error('Please sign in to react');
-      return false;
-    }
+    if (!user?.id) return false;
 
     try {
-      const { error } = await supabase
+      await supabase
         .from('reactions')
-        .insert({
+        .insert([{
           user_id: user.id,
           target_id: targetId,
           target_type: targetType,
           reaction_type: reactionType
-        });
-
-      if (error) throw error;
+        }]);
       return true;
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error adding reaction:', error);
-      toast.error('Failed to add reaction');
       return false;
     }
   };
 
   const removeReaction = async (targetId: string, targetType: string) => {
-    if (!user) return false;
+    if (!user?.id) return false;
 
     try {
-      const { error } = await supabase
+      await supabase
         .from('reactions')
         .delete()
         .eq('user_id', user.id)
         .eq('target_id', targetId)
         .eq('target_type', targetType);
-
-      if (error) throw error;
       return true;
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error removing reaction:', error);
-      toast.error('Failed to remove reaction');
       return false;
     }
   };
 
-  const getReactions = async (targetId: string, targetType: string = 'outfit'): Promise<Reaction[]> => {
+  const getReactions = async (targetId: string, targetType: string) => {
     try {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('reactions')
         .select('*')
         .eq('target_id', targetId)
         .eq('target_type', targetType);
-
-      if (error) throw error;
       return data || [];
-    } catch (error: any) {
-      console.error('Error fetching reactions:', error);
+    } catch (error) {
+      console.error('Error getting reactions:', error);
       return [];
     }
   };
 
   return {
-    followers,
+    posts,
     following,
+    followers,
     loading,
     followUser,
     unfollowUser,
     isFollowing,
+    likePost,
+    createPost,
     addReaction,
     removeReaction,
     getReactions,
-    refreshSocialData: fetchSocialData
+    refreshSocialData
   };
 };
