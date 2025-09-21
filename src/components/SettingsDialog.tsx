@@ -27,6 +27,36 @@ const SettingsDialog = ({ open, onOpenChange, initialTabType }: SettingsDialogPr
   const { preferences, updatePreferences, loading } = useUserPreferences();
   const { toast } = useToast();
   
+  // Safe preferences with defaults
+  const safePreferences = {
+    privacy: {
+      profile_visibility: preferences?.privacy?.profile_visibility || 'private',
+      show_wardrobe: preferences?.privacy?.show_wardrobe || false,
+      allow_messages: preferences?.privacy?.allow_messages || false,
+      show_activity: preferences?.privacy?.show_activity || false,
+      location_sharing: preferences?.privacy?.location_sharing || false,
+      ...preferences?.privacy
+    },
+    notifications: {
+      email: preferences?.notifications?.email || false,
+      push: preferences?.notifications?.push || false,
+      outfit_suggestions: preferences?.notifications?.outfit_suggestions || false,
+      social_interactions: preferences?.notifications?.social_interactions || false,
+      weather_alerts: preferences?.notifications?.weather_alerts || false,
+      new_items: preferences?.notifications?.new_items || false,
+      ...preferences?.notifications
+    },
+    app_behavior: {
+      auto_save: preferences?.app_behavior?.auto_save || false,
+      show_tips: preferences?.app_behavior?.show_tips || true,
+      compact_navigation: preferences?.app_behavior?.compact_navigation || false,
+      quick_actions: preferences?.app_behavior?.quick_actions || true,
+      gesture_navigation: preferences?.app_behavior?.gesture_navigation || false,
+      ...preferences?.app_behavior
+    },
+    ...preferences
+  };
+  
   const [localProfile, setLocalProfile] = useState({
     full_name: profile?.full_name || '',
     bio: profile?.bio || '',
@@ -282,9 +312,10 @@ const SettingsDialog = ({ open, onOpenChange, initialTabType }: SettingsDialogPr
                   <Label htmlFor="showWardrobe">Show Wardrobe</Label>
                   <Switch
                     id="showWardrobe"
-                    checked={preferences.privacy.show_wardrobe}
+                    checked={safePreferences.privacy.show_wardrobe}
                     onCheckedChange={(checked) => updatePreferences({
-                      privacy: { ...preferences.privacy, show_wardrobe: checked }
+                      ...safePreferences,
+                      privacy: { ...safePreferences.privacy, show_wardrobe: checked }
                     })}
                   />
                 </div>
@@ -293,9 +324,10 @@ const SettingsDialog = ({ open, onOpenChange, initialTabType }: SettingsDialogPr
                   <Label htmlFor="allowMessages">Allow Direct Messages</Label>
                   <Switch
                     id="allowMessages"
-                    checked={preferences.privacy.allow_messages}
+                    checked={safePreferences.privacy.allow_messages}
                     onCheckedChange={(checked) => updatePreferences({
-                      privacy: { ...preferences.privacy, allow_messages: checked }
+                      ...safePreferences,
+                      privacy: { ...safePreferences.privacy, allow_messages: checked }
                     })}
                   />
                 </div>
@@ -304,9 +336,10 @@ const SettingsDialog = ({ open, onOpenChange, initialTabType }: SettingsDialogPr
                   <Label htmlFor="showActivity">Show Activity</Label>
                   <Switch
                     id="showActivity"
-                    checked={preferences.privacy.show_activity}
+                    checked={safePreferences.privacy.show_activity}
                     onCheckedChange={(checked) => updatePreferences({
-                      privacy: { ...preferences.privacy, show_activity: checked }
+                      ...safePreferences,
+                      privacy: { ...safePreferences.privacy, show_activity: checked }
                     })}
                   />
                 </div>
@@ -315,9 +348,10 @@ const SettingsDialog = ({ open, onOpenChange, initialTabType }: SettingsDialogPr
                   <Label htmlFor="locationSharing">Location Sharing</Label>
                   <Switch
                     id="locationSharing"
-                    checked={preferences.privacy.location_sharing}
+                    checked={safePreferences.privacy.location_sharing}
                     onCheckedChange={(checked) => updatePreferences({
-                      privacy: { ...preferences.privacy, location_sharing: checked }
+                      ...safePreferences,
+                      privacy: { ...safePreferences.privacy, location_sharing: checked }
                     })}
                   />
                 </div>
@@ -352,9 +386,10 @@ const SettingsDialog = ({ open, onOpenChange, initialTabType }: SettingsDialogPr
                   <Label htmlFor="autoSave">Auto Save</Label>
                   <Switch
                     id="autoSave"
-                    checked={preferences.app_behavior.auto_save}
+                    checked={safePreferences.app_behavior.auto_save}
                     onCheckedChange={(checked) => updatePreferences({
-                      app_behavior: { ...preferences.app_behavior, auto_save: checked }
+                      ...safePreferences,
+                      app_behavior: { ...safePreferences.app_behavior, auto_save: checked }
                     })}
                   />
                 </div>
@@ -363,9 +398,10 @@ const SettingsDialog = ({ open, onOpenChange, initialTabType }: SettingsDialogPr
                   <Label htmlFor="showTips">Show Tips</Label>
                   <Switch
                     id="showTips"
-                    checked={preferences.app_behavior.show_tips}
+                    checked={safePreferences.app_behavior.show_tips}
                     onCheckedChange={(checked) => updatePreferences({
-                      app_behavior: { ...preferences.app_behavior, show_tips: checked }
+                      ...safePreferences,
+                      app_behavior: { ...safePreferences.app_behavior, show_tips: checked }
                     })}
                   />
                 </div>
@@ -374,9 +410,10 @@ const SettingsDialog = ({ open, onOpenChange, initialTabType }: SettingsDialogPr
                   <Label htmlFor="compactNavigation">Compact Navigation</Label>
                   <Switch
                     id="compactNavigation"
-                    checked={preferences.app_behavior.compact_navigation}
+                    checked={safePreferences.app_behavior.compact_navigation}
                     onCheckedChange={(checked) => updatePreferences({
-                      app_behavior: { ...preferences.app_behavior, compact_navigation: checked }
+                      ...safePreferences,
+                      app_behavior: { ...safePreferences.app_behavior, compact_navigation: checked }
                     })}
                   />
                 </div>
@@ -385,9 +422,10 @@ const SettingsDialog = ({ open, onOpenChange, initialTabType }: SettingsDialogPr
                   <Label htmlFor="quickActions">Quick Actions</Label>
                   <Switch
                     id="quickActions"
-                    checked={preferences.app_behavior.quick_actions}
+                    checked={safePreferences.app_behavior.quick_actions}
                     onCheckedChange={(checked) => updatePreferences({
-                      app_behavior: { ...preferences.app_behavior, quick_actions: checked }
+                      ...safePreferences,
+                      app_behavior: { ...safePreferences.app_behavior, quick_actions: checked }
                     })}
                   />
                 </div>
@@ -396,9 +434,10 @@ const SettingsDialog = ({ open, onOpenChange, initialTabType }: SettingsDialogPr
                   <Label htmlFor="gestureNavigation">Gesture Navigation</Label>
                   <Switch
                     id="gestureNavigation"
-                    checked={preferences.app_behavior.gesture_navigation}
+                    checked={safePreferences.app_behavior.gesture_navigation}
                     onCheckedChange={(checked) => updatePreferences({
-                      app_behavior: { ...preferences.app_behavior, gesture_navigation: checked }
+                      ...safePreferences,
+                      app_behavior: { ...safePreferences.app_behavior, gesture_navigation: checked }
                     })}
                   />
                 </div>
