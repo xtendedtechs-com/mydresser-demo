@@ -68,19 +68,31 @@ const MerchantTerminal = () => {
     }
   }, [merchantItems, orders]);
 
-  // Redirect non-merchants
+  // Redirect non-merchants - but only after profile has loaded
   useEffect(() => {
-    if (!profile?.role || !['merchant', 'professional'].includes(profile.role)) {
+    // Don't redirect while profile is still loading
+    if (profileLoading) return;
+    
+    // If profile is loaded and user is not authenticated, redirect to auth
+    if (!user) {
+      navigate('/merchant-terminal');
+      return;
+    }
+    
+    // If profile is loaded but user doesn't have merchant role, redirect with error
+    if (profile && !['merchant', 'professional'].includes(profile.role)) {
       toast({
         title: "Access Denied",
-        description: "Merchant access required",
+        description: "Merchant access required. Please sign in with a merchant account.",
         variant: "destructive"
       });
-      navigate('/');
+      navigate('/merchant-terminal');
+      return;
     }
-  }, [profile, navigate, toast]);
+  }, [profile, user, profileLoading, navigate, toast]);
 
-  if (profileLoading || itemsLoading || ordersLoading) {
+  // Show loading screen while any data is loading or if profile doesn't exist yet
+  if (profileLoading || itemsLoading || ordersLoading || !profile) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center space-y-4">
