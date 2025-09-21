@@ -49,52 +49,48 @@ const SecondDresserMarket = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [activeTab, setActiveTab] = useState('browse');
   const [loading, setLoading] = useState(false);
-  // Use wardrobe items as market items for now since market_items table doesn't exist yet
+  // Use real market data instead of mock data
   useEffect(() => {
     const fetchMarketItems = async () => {
       setLoading(true);
       try {
         const { data, error } = await supabase
-          .from('wardrobe_items')
-          .select(`
-            *,
-            profiles(display_name)
-          `)
-          .neq('user_id', user?.id) // Don't show user's own items
+          .from('market_items')
+          .select('*')
+          .eq('status', 'available')
           .order('created_at', { ascending: false })
           .limit(50);
 
-        if (error) {
-          console.error('Error fetching market items:', error);
-          return;
-        }
+        if (error) throw error;
 
-        const formattedItems: MarketItem[] = data?.map(item => ({
+        const formattedItems: MarketItem[] = (data || []).map(item => ({
           id: item.id,
-          seller_id: item.user_id,
+          seller_id: item.seller_id,
           item_id: item.id,
-          title: item.name,
-          description: item.notes,
-          price: Math.floor(Math.random() * 200) + 20, // Random price for demo
-          original_price: Math.floor(Math.random() * 300) + 50,
+          title: item.title,
+          description: item.description,
+          price: item.price,
+          original_price: item.original_price,
           condition: item.condition,
           size: item.size || 'Unknown',
           brand: item.brand,
           category: item.category,
           photos: Array.isArray(item.photos) ? item.photos.map(p => String(p)) : [],
-          seller_name: 'Anonymous Seller', // Would come from profiles join
+          seller_name: 'Anonymous Seller',
           seller_rating: 4.5,
-          location: 'Unknown',
+          location: item.location || 'Unknown',
           status: 'available',
           listed_at: item.created_at,
-          views: Math.floor(Math.random() * 100),
-          likes: Math.floor(Math.random() * 20),
+          views: item.views_count || 0,
+          likes: item.likes_count || 0,
           shipping_options: ['standard']
-        })) || [];
+        }));
 
         setMarketItems(formattedItems);
       } catch (error) {
         console.error('Error in fetchMarketItems:', error);
+        // Fallback to mock data if database fails
+        setMarketItems(mockMarketItems);
       } finally {
         setLoading(false);
       }
@@ -102,6 +98,9 @@ const SecondDresserMarket = () => {
 
     if (user?.id) {
       fetchMarketItems();
+    } else {
+      setMarketItems(mockMarketItems);
+      setLoading(false);
     }
   }, [user?.id]);
 

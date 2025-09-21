@@ -321,6 +321,95 @@ export type Database = {
         }
         Relationships: []
       }
+      market_items: {
+        Row: {
+          brand: string | null
+          category: string
+          color: string | null
+          condition: string
+          created_at: string
+          description: string | null
+          id: string
+          is_featured: boolean | null
+          likes_count: number | null
+          location: string | null
+          material: string | null
+          original_price: number | null
+          photos: Json | null
+          price: number
+          seller_id: string
+          shipping_options: Json | null
+          size: string | null
+          status: string
+          sustainability_score: number | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          views_count: number | null
+          wardrobe_item_id: string | null
+        }
+        Insert: {
+          brand?: string | null
+          category: string
+          color?: string | null
+          condition?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_featured?: boolean | null
+          likes_count?: number | null
+          location?: string | null
+          material?: string | null
+          original_price?: number | null
+          photos?: Json | null
+          price: number
+          seller_id: string
+          shipping_options?: Json | null
+          size?: string | null
+          status?: string
+          sustainability_score?: number | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          views_count?: number | null
+          wardrobe_item_id?: string | null
+        }
+        Update: {
+          brand?: string | null
+          category?: string
+          color?: string | null
+          condition?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_featured?: boolean | null
+          likes_count?: number | null
+          location?: string | null
+          material?: string | null
+          original_price?: number | null
+          photos?: Json | null
+          price?: number
+          seller_id?: string
+          shipping_options?: Json | null
+          size?: string | null
+          status?: string
+          sustainability_score?: number | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          views_count?: number | null
+          wardrobe_item_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_items_wardrobe_item_id_fkey"
+            columns: ["wardrobe_item_id"]
+            isOneToOne: false
+            referencedRelation: "wardrobe_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       merchant_items: {
         Row: {
           brand: string | null
@@ -1057,6 +1146,74 @@ export type Database = {
           operation_type?: string
           user_id?: string
           window_start?: string | null
+        }
+        Relationships: []
+      }
+      social_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "social_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_posts: {
+        Row: {
+          comments_count: number | null
+          content: string
+          created_at: string
+          id: string
+          images: string[] | null
+          likes_count: number | null
+          outfit_items: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comments_count?: number | null
+          content: string
+          created_at?: string
+          id?: string
+          images?: string[] | null
+          likes_count?: number | null
+          outfit_items?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comments_count?: number | null
+          content?: string
+          created_at?: string
+          id?: string
+          images?: string[] | null
+          likes_count?: number | null
+          outfit_items?: string[] | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

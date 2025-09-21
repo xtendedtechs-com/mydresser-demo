@@ -37,42 +37,59 @@ export const useSocial = () => {
   const { toast } = useToast();
 
   const fetchPosts = async () => {
-    // Mock data for now since social_posts table doesn't exist yet
-    const mockPosts: SocialPost[] = [
-      {
-        id: '1',
-        user_id: 'user1',
-        content: 'Perfect autumn look for a coffee date ☕️ #FallFashion #CasualChic',
-        images: ['/placeholder.svg'],
-        outfit_items: ['Knitted Sweater', 'Dark Jeans', 'Ankle Boots'],
-        likes_count: 24,
-        comments_count: 3,
-        created_at: new Date().toISOString(),
-        user_profile: {
-          full_name: 'Emma Style',
-          avatar_url: '/placeholder.svg'
-        },
-        user_has_liked: false
-      },
-      {
-        id: '2',
-        user_id: 'user2',
-        content: 'Business meeting ready! Confidence is the best accessory ✨',
-        images: ['/placeholder.svg'],
-        outfit_items: ['Blazer', 'White Shirt', 'Trousers', 'Oxfords'],
-        likes_count: 42,
-        comments_count: 7,
-        created_at: new Date(Date.now() - 3600000).toISOString(),
-        user_profile: {
-          full_name: 'Alex Fashion',
-          avatar_url: '/placeholder.svg'
-        },
-        user_has_liked: true
-      }
-    ];
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('social_posts')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-    setPosts(mockPosts);
-    setLoading(false);
+      if (error) throw error;
+
+      // Get user profiles separately to avoid join issues
+      const userIds = [...new Set((data || []).map(post => post.user_id))];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, avatar_url')
+        .in('user_id', userIds);
+
+      const profileMap = new Map();
+      (profiles || []).forEach(profile => {
+        profileMap.set(profile.user_id, profile);
+      });
+
+      const formattedPosts: SocialPost[] = (data || []).map(post => {
+        const profile = profileMap.get(post.user_id);
+        
+        return {
+          id: post.id,
+          user_id: post.user_id,
+          content: post.content,
+          images: Array.isArray(post.images) ? post.images : [],
+          outfit_items: Array.isArray(post.outfit_items) ? post.outfit_items : [],
+          likes_count: post.likes_count || 0,
+          comments_count: post.comments_count || 0,
+          created_at: post.created_at,
+          user_profile: {
+            full_name: profile?.full_name || 'Anonymous',
+            avatar_url: profile?.avatar_url || '/placeholder.svg'
+          },
+          user_has_liked: false // We'll implement this with reactions table later
+        };
+      });
+
+      setPosts(formattedPosts);
+    } catch (error: any) {
+      console.error('Error fetching posts:', error);
+      toast({
+        title: "Error loading posts",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchFollowData = async () => {
@@ -101,44 +118,117 @@ export const useSocial = () => {
   const createPost = async (content: string, images: string[] = [], outfitItems: string[] = []) => {
     if (!user?.id) return null;
 
-    // Mock implementation for now
-    const newPost: SocialPost = {
-      id: Date.now().toString(),
-      user_id: user.id,
-      content,
-      images,
-      outfit_items: outfitItems,
-      likes_count: 0,
-      comments_count: 0,
-      created_at: new Date().toISOString(),
-      user_profile: {
-        full_name: 'You',
-        avatar_url: '/placeholder.svg'
-      },
-      user_has_liked: false
-    };
+    try {
+      const { data, error } = await supabase
+        .from('social_posts')
+        .insert({
+          user_id: user.id,
+          content,
+          images,
+          outfit_items: outfitItems
+        })
+        .select('*')
+        .single();
 
-    setPosts(prev => [newPost, ...prev]);
-    toast({
-      title: "Success",
-      description: "Post created successfully"
-    });
+      if (error) throw error;
 
-    return newPost;
+      // Get user profile separately
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, avatar_url')
+        .eq('user_id', user.id)
+        .single();
+
+      const newPost: SocialPost = {
+        id: data.id,
+        user_id: data.user_id,
+        content: data.content,
+        images: Array.isArray(data.images) ? data.images : [],
+        outfit_items: Array.isArray(data.outfit_items) ? data.outfit_items : [],
+        likes_count: 0,
+        comments_count: 0,
+        created_at: data.created_at,
+        user_profile: {
+          full_name: profile?.full_name || 'You',
+          avatar_url: profile?.avatar_url || '/placeholder.svg'
+        },
+        user_has_liked: false
+      };
+
+      setPosts(prev => [newPost, ...prev]);
+      toast({
+        title: "Success",
+        description: "Post created successfully"
+      });
+
+      return newPost;
+    } catch (error: any) {
+      console.error('Error creating post:', error);
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+      return null;
+    }
   };
 
   const likePost = async (postId: string) => {
-    setPosts(prev => prev.map(post => 
-      post.id === postId 
-        ? {
-            ...post,
-            user_has_liked: !post.user_has_liked,
-            likes_count: post.user_has_liked 
-              ? post.likes_count - 1 
-              : post.likes_count + 1
-          }
-        : post
-    ));
+    if (!user?.id) return;
+
+    try {
+      const post = posts.find(p => p.id === postId);
+      if (!post) return;
+
+      if (post.user_has_liked) {
+        // Unlike: remove reaction and decrement count
+        await supabase
+          .from('reactions')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('target_id', postId)
+          .eq('target_type', 'social_post');
+
+        await supabase
+          .from('social_posts')
+          .update({ likes_count: Math.max(0, post.likes_count - 1) })
+          .eq('id', postId);
+
+        setPosts(prev => prev.map(p => 
+          p.id === postId 
+            ? { ...p, user_has_liked: false, likes_count: Math.max(0, p.likes_count - 1) }
+            : p
+        ));
+      } else {
+        // Like: add reaction and increment count
+        await supabase
+          .from('reactions')
+          .insert({
+            user_id: user.id,
+            target_id: postId,
+            target_type: 'social_post',
+            reaction_type: 'like'
+          });
+
+        await supabase
+          .from('social_posts')
+          .update({ likes_count: post.likes_count + 1 })
+          .eq('id', postId);
+
+        setPosts(prev => prev.map(p => 
+          p.id === postId 
+            ? { ...p, user_has_liked: true, likes_count: p.likes_count + 1 }
+            : p
+        ));
+      }
+    } catch (error: any) {
+      console.error('Error liking post:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update like",
+        variant: "destructive"
+      });
+    }
   };
 
   const followUser = async (userId: string): Promise<boolean> => {
