@@ -25,7 +25,7 @@ import MerchantAnalyticsPage from "@/pages/MerchantAnalyticsPage";
 
 const AppContent = () => {
   const location = useLocation();
-  const isMerchantRoute = location.pathname.startsWith('/merchant-terminal');
+  const isMerchantRoute = location.pathname.startsWith('/merchant-terminal') || location.pathname.startsWith('/merchant/');
 
   return (
     <>
@@ -37,6 +37,7 @@ const AppContent = () => {
         <Route path="/add" element={<Add />} />
         <Route path="/merchant-terminal" element={<MerchantTerminal />} />
         <Route path="/merchant/:merchantId" element={<MerchantPage />} />
+        <Route path="/merchant" element={<MerchantAuth />} />
         <Route path="/outfit-generator" element={<DailyOutfitGenerator />} />
         <Route path="/social" element={<SocialPage />} />
         <Route path="/ai-recommendations" element={<AIRecommendationsPage />} />
