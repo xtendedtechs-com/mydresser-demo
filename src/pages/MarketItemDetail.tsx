@@ -5,16 +5,17 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { useMerchantItems, MerchantItem } from '@/hooks/useMerchantItems';
+import { useMarketItems, MarketItem } from '@/hooks/useMarketItems';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 const MarketItemDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { getMerchantItem, items, getSimilarItems } = useMerchantItems();
+  const [marketItems, setMarketItems] = useState<any[]>([]);
   
-  const [item, setItem] = useState<MerchantItem | null>(null);
+  const [item, setItem] = useState<MarketItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedImage, setSelectedImage] = useState(0);
@@ -28,10 +29,32 @@ const MarketItemDetail = () => {
 
   const loadItem = async (itemId: string) => {
     setLoading(true);
-    const fetchedItem = await getMerchantItem(itemId);
-    setItem(fetchedItem);
-    if (fetchedItem?.size && fetchedItem.size.length > 0) {
-      setSelectedSize(fetchedItem.size[0]);
+    try {
+      const { data: fetchedItem, error } = await supabase
+        .from('market_items')
+        .select('*')
+        .eq('id', itemId)
+        .single();
+
+      if (error) throw error;
+      
+      setItem(fetchedItem);
+      if (fetchedItem?.size && fetchedItem.size.length > 0) {
+        setSelectedSize(fetchedItem.size.split(',')[0]);
+      }
+      
+      // Load similar items
+      const { data: similar } = await supabase
+        .from('market_items')
+        .select('*')
+        .eq('category', fetchedItem.category)
+        .neq('id', itemId)
+        .limit(4);
+      
+      setMarketItems(similar || []);
+    } catch (error) {
+      console.error('Error loading item:', error);
+      setItem(null);
     }
     setLoading(false);
   };
@@ -47,7 +70,7 @@ const MarketItemDetail = () => {
     
     toast({
       title: "Added to cart!",
-      description: `${item?.name} has been added to your cart.`,
+      description: `${item?.title} has been added to your cart.`,
     });
   };
 
@@ -100,8 +123,8 @@ const MarketItemDetail = () => {
   }
 
   const photos = getPhotoUrls(item.photos);
-  const similarItems = getSimilarItems(item);
-  const featuredItems = items.filter(i => i.is_featured && i.id !== item.id).slice(0, 8);
+  const similarItems = marketItems.slice(0, 4);
+  const featuredItems = marketItems.filter(i => i.is_featured && i.id !== item.id).slice(0, 8);
   const discountPercentage = item.original_price && item.original_price > item.price 
     ? Math.round(((item.original_price - item.price) / item.original_price) * 100) 
     : 0;
@@ -114,7 +137,7 @@ const MarketItemDetail = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate('/market')}>
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <h1 className="text-lg font-semibold truncate mx-4">{item.name}</h1>
+          <h1 className="text-lg font-semibold truncate mx-4">{item.title}</h1>
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
@@ -138,7 +161,7 @@ const MarketItemDetail = () => {
               {photos.length > 0 ? (
                 <img
                   src={photos[selectedImage] || photos[0]}
-                  alt={item.name}
+                  alt={item.title}
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -154,12 +177,6 @@ const MarketItemDetail = () => {
               
               {/* Badges */}
               <div className="absolute top-4 left-4 flex flex-col gap-2">
-                {item.is_premium && (
-                  <Badge className="bg-purple-500 text-white">
-                    <Crown className="w-3 h-3 mr-1" />
-                    Premium
-                  </Badge>
-                )}
                 {discountPercentage > 0 && (
                   <Badge variant="destructive">
                     -{discountPercentage}%
@@ -180,7 +197,7 @@ const MarketItemDetail = () => {
                   >
                     <img
                       src={photo}
-                      alt={`${item.name} ${index + 1}`}
+                      alt={`${item.title} ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
                   </button>
@@ -201,7 +218,7 @@ const MarketItemDetail = () => {
                 </div>
               </div>
               
-              <h1 className="text-3xl font-bold mb-2">{item.name}</h1>
+              <h1 className="text-3xl font-bold mb-2">{item.title}</h1>
               {item.brand && (
                 <p className="text-lg text-muted-foreground">{item.brand}</p>
               )}
@@ -340,7 +357,7 @@ const MarketItemDetail = () => {
                   variant="outline" 
                   size="sm" 
                   className="mt-3"
-                  onClick={() => navigate(`/merchant/${item.merchant_id}`)}
+                  onClick={() => navigate(`/merchant/${item.seller_id}`)}
                 >
                   View Store
                 </Button>
@@ -365,7 +382,7 @@ const MarketItemDetail = () => {
                       {getPhotoUrls(similar.photos)[0] ? (
                         <img
                           src={getPhotoUrls(similar.photos)[0]}
-                          alt={similar.name}
+                          alt={similar.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
@@ -386,7 +403,7 @@ const MarketItemDetail = () => {
                       </Button>
                     </div>
                     <div className="p-3">
-                      <h3 className="font-medium text-sm truncate">{similar.name}</h3>
+                      <h3 className="font-medium text-sm truncate">{similar.title}</h3>
                       <p className="text-xs text-muted-foreground truncate">{similar.brand}</p>
                       <div className="flex items-center justify-between mt-2">
                         <span className="font-bold text-primary">${similar.price}</span>
@@ -419,7 +436,7 @@ const MarketItemDetail = () => {
                       {getPhotoUrls(featured.photos)[0] ? (
                         <img
                           src={getPhotoUrls(featured.photos)[0]}
-                          alt={featured.name}
+                          alt={featured.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
@@ -440,7 +457,7 @@ const MarketItemDetail = () => {
                       </Button>
                     </div>
                     <div className="p-3">
-                      <h3 className="font-medium text-sm truncate">{featured.name}</h3>
+                      <h3 className="font-medium text-sm truncate">{featured.title}</h3>
                       <p className="text-xs text-muted-foreground truncate">{featured.brand}</p>
                       <div className="flex items-center justify-between mt-2">
                         <span className="font-bold text-primary">${featured.price}</span>

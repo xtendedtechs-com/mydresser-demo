@@ -12,6 +12,9 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import AddMerchantProductDialog from '@/components/AddMerchantProductDialog';
 import { EnhancedMerchantPageEditor } from '@/components/EnhancedMerchantPageEditor';
+import CustomerRelations from '@/pages/CustomerRelations';
+import SupportResources from '@/pages/SupportsResources';
+import FinancialReports from '@/pages/FinancialReports';
 import { 
   ShoppingBag, Package, Users, DollarSign, 
   TrendingUp, Calendar, Clock, Star,

@@ -55,9 +55,15 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     setUploading(true);
 
     try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `merchant-items/${type}s/${fileName}`;
+      const filePath = `${user.id}/merchant-items/${type}s/${fileName}`;
 
       // Upload to Supabase Storage
       const { error: uploadError } = await supabase.storage
