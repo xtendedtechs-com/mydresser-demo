@@ -167,12 +167,11 @@ const MerchantTerminal: React.FC = () => {
   const handlePublishToggle = async (item: any, newStatus: string) => {
     try {
       await updateItem(item.id, { 
-        status: newStatus as 'available' | 'sold' | 'reserved',
-        is_featured: newStatus === 'published' ? item.is_featured : false
+        status: newStatus as 'available' | 'sold' | 'reserved'
       });
       toast({
         title: "Success",
-        description: `Item ${newStatus === 'published' ? 'published' : 'unpublished'} successfully`
+        description: `Item ${newStatus === 'available' ? 'published' : 'unpublished'} successfully`
       });
       
       refetchItems();

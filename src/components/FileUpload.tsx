@@ -55,11 +55,12 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     setUploading(true);
 
     try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      // Get current user from session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
         throw new Error('User not authenticated');
       }
+      const user = session.user;
 
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;

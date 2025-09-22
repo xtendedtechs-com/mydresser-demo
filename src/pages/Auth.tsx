@@ -225,20 +225,8 @@ const Auth = () => {
         description: "You have been signed in successfully.",
       });
 
-      // Check user role and navigate appropriately
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
-        .single();
-
-      if (profileData?.role === 'merchant') {
-        navigate('/merchant-terminal');
-      } else if (profileData?.role === 'admin') {
-        navigate('/account');
-      } else {
-        navigate('/');
-      }
+      // Get user data and navigate appropriately - regular users go to main app
+      navigate('/');
     } catch (error: any) {
       await auditLog('user_signin', false, { email, error: error.message });
       

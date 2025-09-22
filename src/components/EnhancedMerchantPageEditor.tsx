@@ -178,6 +178,8 @@ export const EnhancedMerchantPageEditor: React.FC<EnhancedMerchantPageEditorProp
         .upsert({
           merchant_id: merchantProfile.user_id,
           ...settings
+        }, {
+          onConflict: 'merchant_id'
         });
 
       if (error) throw error;
