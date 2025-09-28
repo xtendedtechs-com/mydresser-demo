@@ -128,53 +128,14 @@ class MyDresserPaymentSystem {
     metadata: Record<string, any> = {}
   ): Promise<{ success: boolean; transactionId?: string; error?: string }> {
     try {
-      // Simulate payment processing
+      // Simulate successful payment for demo (no actual Supabase calls)
       const transactionId = this.generateTransactionId();
       
-      // Create transaction record
-      const { data: transaction, error } = await supabase
-        .from('transactions')
-        .insert({
-          id: transactionId,
-          amount,
-          currency,
-          type: metadata.type || 'purchase',
-          status: 'pending',
-          description,
-          payment_method_id: paymentMethod.id,
-          metadata
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Simulate payment processing delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Simulate success rate (95% success for demo)
-      const isSuccessful = Math.random() > 0.05;
-
-      if (isSuccessful) {
-        // Update transaction to completed
-        await supabase
-          .from('transactions')
-          .update({ 
-            status: 'completed', 
-            completed_at: new Date().toISOString() 
-          })
-          .eq('id', transactionId);
-
-        return { success: true, transactionId };
-      } else {
-        // Update transaction to failed
-        await supabase
-          .from('transactions')
-          .update({ status: 'failed' })
-          .eq('id', transactionId);
-
-        return { success: false, error: 'Payment processing failed. Please try again.' };
-      }
+      // Simulate processing delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Return success for demo purposes
+      return { success: true, transactionId };
     } catch (error) {
       console.error('Payment processing error:', error);
       return { success: false, error: 'Payment system error. Please try again later.' };
@@ -207,21 +168,8 @@ class MyDresserPaymentSystem {
         }
       }
 
-      // Create subscription record
+      // Create subscription record (demo version)
       const subscriptionId = this.generateSubscriptionId();
-      const { error } = await supabase
-        .from('user_subscriptions')
-        .insert({
-          id: subscriptionId,
-          subscriber_id: userId,
-          plan_id: planId,
-          status: 'active',
-          started_at: new Date().toISOString(),
-          expires_at: this.calculateExpiryDate(plan.interval).toISOString(),
-          auto_renew: true
-        });
-
-      if (error) throw error;
 
       return { success: true, subscriptionId };
     } catch (error) {
@@ -254,32 +202,8 @@ class MyDresserPaymentSystem {
         return buyerPayment;
       }
 
-      // Create commission transaction
-      await supabase
-        .from('transactions')
-        .insert({
-          id: this.generateTransactionId(),
-          amount: commission,
-          currency: 'USD',
-          type: 'commission',
-          status: 'completed',
-          description: `Marketplace commission: Item ${itemId}`,
-          metadata: { itemId, sellerId, buyerId, originalTransactionId: buyerPayment.transactionId }
-        });
-
-      // Create seller payout (pending)
-      await supabase
-        .from('transactions')
-        .insert({
-          id: this.generateTransactionId(),
-          user_id: sellerId,
-          amount: sellerAmount,
-          currency: 'USD',
-          type: 'payout',
-          status: 'pending',
-          description: `Marketplace sale: Item ${itemId}`,
-          metadata: { itemId, buyerId, originalTransactionId: buyerPayment.transactionId }
-        });
+      // Demo: simulate commission and payout processing
+      console.log(`Commission: $${commission}, Seller payout: $${sellerAmount}`);
 
       return { success: true, transactionId: buyerPayment.transactionId };
     } catch (error) {
@@ -289,21 +213,20 @@ class MyDresserPaymentSystem {
   }
 
   async getUserTransactions(userId: string, limit: number = 50): Promise<Transaction[]> {
-    try {
-      const { data, error } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(limit);
-
-      if (error) throw error;
-
-      return data || [];
-    } catch (error) {
-      console.error('Error fetching transactions:', error);
-      return [];
-    }
+    // Demo: return mock transactions
+    return [
+      {
+        id: 'demo_txn_1',
+        userId,
+        amount: 49.99,
+        currency: 'USD',
+        type: 'purchase',
+        status: 'completed',
+        description: 'Vintage Denim Jacket',
+        metadata: {},
+        createdAt: new Date()
+      }
+    ];
   }
 
   async getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
@@ -311,27 +234,8 @@ class MyDresserPaymentSystem {
   }
 
   async getCurrentSubscription(userId: string): Promise<SubscriptionPlan | null> {
-    try {
-      const { data, error } = await supabase
-        .from('user_subscriptions')
-        .select('*')
-        .eq('subscriber_id', userId)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .limit(1);
-
-      if (error) throw error;
-
-      if (data && data.length > 0) {
-        const subscription = data[0];
-        return this.subscriptionPlans.find(plan => plan.id === subscription.plan_id) || null;
-      }
-
-      return null;
-    } catch (error) {
-      console.error('Error fetching current subscription:', error);
-      return null;
-    }
+    // Demo: return free plan by default
+    return this.subscriptionPlans.find(plan => plan.id === 'private-free') || null;
   }
 
   private generateTransactionId(): string {

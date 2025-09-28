@@ -1365,6 +1365,51 @@ export type Database = {
         }
         Relationships: []
       }
+      transactions: {
+        Row: {
+          amount: number
+          completed_at: string | null
+          created_at: string
+          currency: string
+          description: string
+          id: string
+          metadata: Json | null
+          payment_method_id: string | null
+          status: string
+          type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          description: string
+          id?: string
+          metadata?: Json | null
+          payment_method_id?: string | null
+          status?: string
+          type: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          description?: string
+          id?: string
+          metadata?: Json | null
+          payment_method_id?: string | null
+          status?: string
+          type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_follows: {
         Row: {
           created_at: string

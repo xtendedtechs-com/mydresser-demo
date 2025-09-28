@@ -101,15 +101,15 @@ class MyDresserAIEngine {
     const colorAnalysis = this.colorEngine.analyzeOutfitColors(wardrobeItems);
 
     return {
-      primaryStyle: styleAnalysis.primaryStyle,
-      secondaryStyle: styleAnalysis.secondaryStyle,
-      colorPalette: colorAnalysis.dominantColors,
+      primaryStyle: (styleAnalysis as any)?.primaryStyle || 'classic',
+      secondaryStyle: (styleAnalysis as any)?.secondaryStyle || 'casual',
+      colorPalette: (colorAnalysis as any)?.dominantColors || ['black', 'white', 'gray'],
       preferredBrands: this.extractPreferredBrands(wardrobeItems),
       bodyType: preferences.bodyType || 'average',
       lifestyle: this.inferLifestyle(wardrobeItems),
       budget: this.inferBudgetRange(wardrobeItems),
       sustainabilityScore: this.calculateSustainabilityScore(wardrobeItems),
-      versatilityPreference: styleAnalysis.versatility || 0.7
+      versatilityPreference: (styleAnalysis as any)?.versatility || 0.7
     };
   }
 
@@ -154,9 +154,9 @@ class MyDresserAIEngine {
       recommendations.push({
         type: 'outfit',
         title: `Perfect ${context.occasion || 'Daily'} Outfit`,
-        description: outfitSuggestion.reasoning || 'AI-curated outfit based on your style and weather',
-        confidence: outfitSuggestion.confidence,
-        reasoning: outfitSuggestion.stylingTips || [],
+        description: (outfitSuggestion as any)?.reasoning || 'AI-curated outfit based on your style and weather',
+        confidence: typeof (outfitSuggestion as any)?.confidence === 'number' ? (outfitSuggestion as any).confidence : 0.8,
+        reasoning: (outfitSuggestion as any)?.stylingTips || ['Smart AI recommendations based on your wardrobe'],
         actionable: true,
         priority: 'high',
         category: 'daily_suggestion',
@@ -268,23 +268,27 @@ class MyDresserAIEngine {
 
   private extractPreferredBrands(items: any[]): string[] {
     const brandCounts = items.reduce((acc, item) => {
-      if (item.brand) {
+      if (item.brand && typeof item.brand === 'string') {
         acc[item.brand] = (acc[item.brand] || 0) + 1;
       }
       return acc;
     }, {} as Record<string, number>);
 
     return Object.entries(brandCounts)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([,a], [,b]) => (b as number) - (a as number))
       .slice(0, 5)
       .map(([brand]) => brand);
   }
 
   private inferLifestyle(items: any[]): string {
-    const occasions = items.flatMap(item => item.occasion || []);
-    const businessCount = occasions.filter(occ => occ.includes('business') || occ.includes('formal')).length;
-    const casualCount = occasions.filter(occ => occ.includes('casual')).length;
-    const activeCount = occasions.filter(occ => occ.includes('sport') || occ.includes('active')).length;
+    const allOccasions = items.flatMap(item => {
+      const occasions = (item.occasion || '').split(',').filter(Boolean);
+      return occasions;
+    });
+    
+    const businessCount = allOccasions.filter(occ => occ.includes('business') || occ.includes('formal')).length;
+    const casualCount = allOccasions.filter(occ => occ.includes('casual')).length;
+    const activeCount = allOccasions.filter(occ => occ.includes('sport') || occ.includes('active')).length;
 
     if (businessCount > casualCount && businessCount > activeCount) return 'professional';
     if (activeCount > casualCount) return 'active';
@@ -292,7 +296,9 @@ class MyDresserAIEngine {
   }
 
   private inferBudgetRange(items: any[]): 'low' | 'medium' | 'high' {
-    const prices = items.filter(item => item.purchase_price).map(item => Number(item.purchase_price));
+    const prices = items
+      .filter(item => item.purchase_price && !isNaN(Number(item.purchase_price)))
+      .map(item => Number(item.purchase_price));
     if (prices.length === 0) return 'medium';
 
     const averagePrice = prices.reduce((a, b) => a + b, 0) / prices.length;
@@ -321,7 +327,8 @@ class MyDresserAIEngine {
       }
 
       // Versatility (reusability)
-      if (item.tags?.includes('versatile') || item.occasion?.includes('versatile')) {
+      const occasions = (item.occasion || '').split(',').filter(Boolean);
+      if (item.tags?.includes('versatile') || occasions.includes('versatile')) {
         score += 0.1;
       }
     });
@@ -352,7 +359,7 @@ class MyDresserAIEngine {
     }, {} as Record<string, number>);
 
     const popularColors = Object.entries(colorFrequency)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([,a], [,b]) => (b as number) - (a as number))
       .slice(0, 3)
       .map(([color]) => color);
 

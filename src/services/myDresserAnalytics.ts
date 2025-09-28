@@ -132,7 +132,9 @@ class MyDresserAnalyticsEngine {
 
   private calculateWardrobeValue(items: any[]): number {
     return items.reduce((total, item) => {
-      const price = parseFloat(item.purchase_price) || 0;
+      const price = typeof item.purchase_price === 'string' || typeof item.purchase_price === 'number' 
+        ? parseFloat(String(item.purchase_price)) || 0 
+        : 0;
       return total + price;
     }, 0);
   }
@@ -142,9 +144,9 @@ class MyDresserAnalyticsEngine {
 
     // Analyze style distribution
     const styles = items.reduce((acc, item) => {
-      const itemStyles = item.tags?.filter((tag: string) => 
+      const itemStyles = (item.tags || []).filter((tag: string) => 
         ['classic', 'modern', 'bohemian', 'minimalist', 'vintage'].includes(tag)
-      ) || [];
+      );
       
       itemStyles.forEach((style: string) => {
         acc[style] = (acc[style] || 0) + 1;
@@ -153,12 +155,12 @@ class MyDresserAnalyticsEngine {
       return acc;
     }, {} as Record<string, number>);
 
-    const totalStyled = Object.values(styles).reduce((a, b) => a + b, 0);
+    const totalStyled = Object.values(styles).reduce((a: number, b: number) => a + b, 0);
     if (totalStyled === 0) return 0.5;
 
     // Calculate consistency (how concentrated the styles are)
-    const maxStyle = Math.max(...Object.values(styles));
-    return Math.min(maxStyle / totalStyled * 2, 1); // Scale to 0-1
+    const maxStyle = Math.max(...(Object.values(styles) as number[]));
+    return Math.min(((maxStyle as number) / (totalStyled as number)) * 2, 1); // Scale to 0-1
   }
 
   private calculateColorHarmony(items: any[]): number {
