@@ -1,4 +1,4 @@
-import { useState, ReactNode } from "react";
+import React, { useState, ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
