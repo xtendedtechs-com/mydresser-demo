@@ -917,6 +917,33 @@ export type Database = {
           },
         ]
       }
+      merchant_customer_access_log: {
+        Row: {
+          access_type: string
+          accessed_at: string | null
+          customer_id: string
+          id: string
+          ip_address: unknown | null
+          merchant_id: string
+        }
+        Insert: {
+          access_type: string
+          accessed_at?: string | null
+          customer_id: string
+          id?: string
+          ip_address?: unknown | null
+          merchant_id: string
+        }
+        Update: {
+          access_type?: string
+          accessed_at?: string | null
+          customer_id?: string
+          id?: string
+          ip_address?: unknown | null
+          merchant_id?: string
+        }
+        Relationships: []
+      }
       merchant_customers: {
         Row: {
           created_at: string | null
@@ -2079,6 +2106,36 @@ export type Database = {
         }
         Relationships: []
       }
+      sensitive_data_access_audit: {
+        Row: {
+          accessed_at: string | null
+          accessed_fields: string[] | null
+          id: string
+          ip_address: unknown | null
+          row_id: string
+          table_name: string
+          user_id: string
+        }
+        Insert: {
+          accessed_at?: string | null
+          accessed_fields?: string[] | null
+          id?: string
+          ip_address?: unknown | null
+          row_id: string
+          table_name: string
+          user_id: string
+        }
+        Update: {
+          accessed_at?: string | null
+          accessed_fields?: string[] | null
+          id?: string
+          ip_address?: unknown | null
+          row_id?: string
+          table_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       sensitive_operation_limits: {
         Row: {
           attempt_count: number | null
@@ -3029,6 +3086,10 @@ export type Database = {
           customer_phone: string
           shipping_address: Json
         }[]
+      }
+      get_merchant_contact_safe: {
+        Args: { page_id: string; requesting_user_id: string }
+        Returns: Json
       }
       get_merchant_profile_public: {
         Args: { profile_user_id?: string }
