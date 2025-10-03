@@ -36,6 +36,9 @@ import ProfileHeader from "@/components/ProfileHeader";
 import SettingsSection from "@/components/SettingsSection";
 import UserAnalyticsDashboard from "@/components/UserAnalyticsDashboard";
 import ComprehensiveSettingsPanel from "@/components/ComprehensiveSettingsPanel";
+import { PaymentSettingsPanel } from "@/components/settings/PaymentSettingsPanel";
+import { AISettingsPanel } from "@/components/settings/AISettingsPanel";
+import { MerchantSettingsPanel } from "@/components/settings/MerchantSettingsPanel";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -355,45 +358,49 @@ const Account = () => {
           {profile && <ProfileHeader profile={profile} />}
 
           {/* Quick Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card className="text-center p-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            <Card className="text-center p-3 md:p-4 hover:shadow-md transition-shadow cursor-pointer">
               <div className="space-y-2">
-                <Shirt className="w-6 h-6 mx-auto text-primary" />
-                <div className="text-2xl font-bold">{items?.length || 0}</div>
-                <div className="text-sm text-muted-foreground">Wardrobe Items</div>
+                <Shirt className="w-5 h-5 md:w-6 md:h-6 mx-auto text-primary" />
+                <div className="text-xl md:text-2xl font-bold">{items?.length || 0}</div>
+                <div className="text-xs md:text-sm text-muted-foreground">Wardrobe Items</div>
               </div>
             </Card>
-            <Card className="text-center p-4">
+            <Card className="text-center p-3 md:p-4 hover:shadow-md transition-shadow cursor-pointer">
               <div className="space-y-2">
-                <Heart className="w-6 h-6 mx-auto text-primary" />
-                <div className="text-2xl font-bold">{items?.filter(i => i.is_favorite).length || 0}</div>
-                <div className="text-sm text-muted-foreground">Favorite Items</div>
+                <Heart className="w-5 h-5 md:w-6 md:h-6 mx-auto text-primary" />
+                <div className="text-xl md:text-2xl font-bold">{items?.filter(i => i.is_favorite).length || 0}</div>
+                <div className="text-xs md:text-sm text-muted-foreground">Favorite Items</div>
               </div>
             </Card>
-            <Card className="text-center p-4">
+            <Card className="text-center p-3 md:p-4 hover:shadow-md transition-shadow cursor-pointer">
               <div className="space-y-2">
-                <Calendar className="w-6 h-6 mx-auto text-primary" />
-                <div className="text-2xl font-bold">{profile.style_score || 0}</div>
-                <div className="text-sm text-muted-foreground">Style Score</div>
+                <Calendar className="w-5 h-5 md:w-6 md:h-6 mx-auto text-primary" />
+                <div className="text-xl md:text-2xl font-bold">{profile.style_score || 0}</div>
+                <div className="text-xs md:text-sm text-muted-foreground">Style Score</div>
               </div>
             </Card>
-            <Card className="text-center p-4">
+            <Card className="text-center p-3 md:p-4 hover:shadow-md transition-shadow cursor-pointer">
               <div className="space-y-2">
-                <UserCheck className="w-6 h-6 mx-auto text-primary" />
-                <div className="text-2xl font-bold capitalize">{profile.auth_level}</div>
-                <div className="text-sm text-muted-foreground">Auth Level</div>
+                <UserCheck className="w-5 h-5 md:w-6 md:h-6 mx-auto text-primary" />
+                <div className="text-xl md:text-2xl font-bold capitalize">{profile.auth_level}</div>
+                <div className="text-xs md:text-sm text-muted-foreground">Auth Level</div>
               </div>
             </Card>
           </div>
 
           {/* Account Settings Sections */}
           <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="profile">Profile</TabsTrigger>
-              <TabsTrigger value="settings">Settings</TabsTrigger>
-              <TabsTrigger value="mystyle">My Style</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
-              <TabsTrigger value="security">Security</TabsTrigger>
+            <TabsList className="grid grid-cols-4 lg:grid-cols-7 gap-1 h-auto">
+              <TabsTrigger value="profile" className="text-xs sm:text-sm">Profile</TabsTrigger>
+              <TabsTrigger value="settings" className="text-xs sm:text-sm">Settings</TabsTrigger>
+              <TabsTrigger value="payments" className="text-xs sm:text-sm">Payments</TabsTrigger>
+              <TabsTrigger value="ai" className="text-xs sm:text-sm">AI</TabsTrigger>
+              {profile?.role === 'merchant' && (
+                <TabsTrigger value="merchant" className="text-xs sm:text-sm">Merchant</TabsTrigger>
+              )}
+              <TabsTrigger value="mystyle" className="text-xs sm:text-sm">Style</TabsTrigger>
+              <TabsTrigger value="analytics" className="text-xs sm:text-sm">Analytics</TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile" className="space-y-6">
@@ -420,21 +427,21 @@ const Account = () => {
               </Card>
 
               {/* Account Settings Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 {accountSettings.map((setting) => (
-                  <Card key={setting.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                    <CardContent className="p-4" onClick={setting.onClick}>
+                  <Card key={setting.id} className="cursor-pointer hover:shadow-md transition-all active:scale-95">
+                    <CardContent className="p-4 md:p-5" onClick={setting.onClick}>
                       <div className="flex items-center justify-between">
-                        <div className="space-y-1">
-                          <div className="font-medium flex items-center gap-2">
+                        <div className="space-y-1 flex-1 min-w-0">
+                          <div className="font-medium flex items-center gap-2 text-sm md:text-base">
                             {setting.label}
                             {setting.highlighted && <Badge variant="secondary" className="text-xs">Important</Badge>}
                           </div>
                           {setting.description && (
-                            <p className="text-sm text-muted-foreground">{setting.description}</p>
+                            <p className="text-xs md:text-sm text-muted-foreground line-clamp-1">{setting.description}</p>
                           )}
                         </div>
-                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                        <ChevronRight className="w-4 h-4 md:w-5 md:h-5 text-muted-foreground flex-shrink-0 ml-2" />
                       </div>
                     </CardContent>
                   </Card>
@@ -455,12 +462,16 @@ const Account = () => {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {appSettings.map((setting) => (
-                      <div key={setting.id} className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50" onClick={setting.onClick}>
-                        <div>
-                          <div className="font-medium">{setting.label}</div>
-                          <div className="text-sm text-muted-foreground">{setting.description}</div>
+                      <div 
+                        key={setting.id} 
+                        className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50 active:scale-98 transition-all" 
+                        onClick={setting.onClick}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm md:text-base">{setting.label}</div>
+                          <div className="text-xs md:text-sm text-muted-foreground line-clamp-1">{setting.description}</div>
                         </div>
-                        <ChevronRight className="w-4 h-4" />
+                        <ChevronRight className="w-4 h-4 flex-shrink-0 ml-2" />
                       </div>
                     ))}
                   </CardContent>
@@ -477,15 +488,19 @@ const Account = () => {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {personalizationSettings.map((setting) => (
-                      <div key={setting.id} className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50" onClick={setting.onClick}>
-                        <div>
-                          <div className="font-medium flex items-center gap-2">
+                      <div 
+                        key={setting.id} 
+                        className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50 active:scale-98 transition-all" 
+                        onClick={setting.onClick}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium flex items-center gap-2 text-sm md:text-base">
                             {setting.label}
                             {setting.highlighted && <Badge variant="outline" className="text-xs">New</Badge>}
                           </div>
-                          <div className="text-sm text-muted-foreground">{setting.description}</div>
+                          <div className="text-xs md:text-sm text-muted-foreground line-clamp-1">{setting.description}</div>
                         </div>
-                        <ChevronRight className="w-4 h-4" />
+                        <ChevronRight className="w-4 h-4 flex-shrink-0 ml-2" />
                       </div>
                     ))}
                   </CardContent>
@@ -502,17 +517,21 @@ const Account = () => {
                   <CardDescription>Configure AI-powered features and services</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                     {serviceSettings.map((setting) => (
-                      <div key={setting.id} className="flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors" onClick={setting.onClick}>
-                        <div className="space-y-1">
-                          <div className="font-medium flex items-center gap-2">
+                      <div 
+                        key={setting.id} 
+                        className="flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-muted/50 active:scale-98 transition-all" 
+                        onClick={setting.onClick}
+                      >
+                        <div className="space-y-1 flex-1 min-w-0">
+                          <div className="font-medium flex items-center gap-2 text-sm md:text-base">
                             {setting.label}
                             {setting.highlighted && <Badge variant="secondary" className="text-xs">Featured</Badge>}
                           </div>
-                          <div className="text-sm text-muted-foreground">{setting.description}</div>
+                          <div className="text-xs md:text-sm text-muted-foreground line-clamp-1">{setting.description}</div>
                         </div>
-                        <ChevronRight className="w-4 h-4" />
+                        <ChevronRight className="w-4 h-4 flex-shrink-0 ml-2" />
                       </div>
                     ))}
                   </div>
@@ -520,29 +539,26 @@ const Account = () => {
               </Card>
             </TabsContent>
 
+            <TabsContent value="payments" className="space-y-6">
+              <PaymentSettingsPanel />
+            </TabsContent>
+
+            <TabsContent value="ai" className="space-y-6">
+              <AISettingsPanel />
+            </TabsContent>
+
+            {profile?.role === 'merchant' && (
+              <TabsContent value="merchant" className="space-y-6">
+                <MerchantSettingsPanel />
+              </TabsContent>
+            )}
+
             <TabsContent value="mystyle" className="space-y-6">
               {renderMyStyle()}
             </TabsContent>
 
             <TabsContent value="analytics" className="space-y-6">
               {renderAnalytics()}
-            </TabsContent>
-
-            <TabsContent value="security" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Shield className="w-5 h-5" />
-                    Security & Authentication
-                  </CardTitle>
-                  <CardDescription>
-                    Manage your security settings and authentication methods
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ComprehensiveAuthSystem />
-                </CardContent>
-              </Card>
             </TabsContent>
           </Tabs>
 
