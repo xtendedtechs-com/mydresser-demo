@@ -28,7 +28,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useWardrobe } from "@/hooks/useWardrobe";
 import EditWardrobeItemDialog from "@/components/EditWardrobeItemDialog";
 import { CreateWardrobeDialog } from "@/components/CreateWardrobeDialog";
-
+import { CameraScanner } from "@/components/CameraScanner";
 const Add = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -41,7 +41,8 @@ const Add = () => {
   const { items } = useWardrobe();
   const editItem = items.find(i => i.id === editId) || null;
   const [editOpen, setEditOpen] = useState<boolean>(!!editId);
-
+  const [showScanner, setShowScanner] = useState(false);
+  const [scanPrefill, setScanPrefill] = useState<any | null>(null);
   useEffect(() => {
     setEditOpen(!!editId);
   }, [editId]);
@@ -60,12 +61,7 @@ const Add = () => {
     } else if (optionName === "Link Import") {
       setShowImportDialog(true);
     } else if (optionName === "Item Scanning") {
-      // Open add dialog - user can use the "Scan Item with Camera" button inside
-      setShowAddDialog(true);
-      toast({
-        title: "Camera Scanner Ready",
-        description: "Click 'Scan Item with Camera' to start scanning.",
-      });
+      setShowScanner(true);
     } else {
       toast({
         title: `${optionName} - Coming Soon!`,
@@ -74,6 +70,25 @@ const Add = () => {
     }
   };
 
+  const mapScanToWardrobeForm = (scan: any) => ({
+    name: scan.name || '',
+    category: scan.category || '',
+    brand: scan.brand || '',
+    color: scan.color || '',
+    material: scan.material || '',
+    season: scan.season ? scan.season.charAt(0).toUpperCase() + scan.season.slice(1) : '',
+    occasion: scan.occasion ? scan.occasion.charAt(0).toUpperCase() + scan.occasion.slice(1) : '',
+    condition: (() => {
+      const lc = (scan.condition || '').toLowerCase();
+      if (lc === 'new' || lc === 'like-new' || lc === 'excellent') return 'Excellent';
+      if (lc === 'good') return 'Good';
+      if (lc === 'fair') return 'Fair';
+      return 'Excellent';
+    })(),
+    description: scan.description || '',
+    style_tags: Array.isArray(scan.style_tags) ? scan.style_tags : [],
+    photo: scan.photo || ''
+  });
   const itemOptions = [
     {
       title: "Insert Item Manually",
@@ -293,9 +308,31 @@ const Add = () => {
           </div>
         </Card>
 
+        {showScanner && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <CameraScanner
+              onScanComplete={(data) => {
+                const mapped = mapScanToWardrobeForm(data);
+                setScanPrefill(mapped);
+                setShowScanner(false);
+                setShowAddDialog(true);
+                toast({
+                  title: 'Scan Complete',
+                  description: 'We prefilled details from your scan. Review and save.',
+                });
+              }}
+              onClose={() => setShowScanner(false)}
+            />
+          </div>
+        )}
+
         <AddItemWithMatching 
           open={showAddDialog} 
-          onOpenChange={setShowAddDialog}
+          onOpenChange={(open) => {
+            setShowAddDialog(open);
+            if (!open) setScanPrefill(null);
+          }}
+          initialData={scanPrefill || undefined}
         />
         
         <ImportFromLink 

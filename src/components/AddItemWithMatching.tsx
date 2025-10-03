@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,6 +18,19 @@ import RealImageUpload from './RealImageUpload';
 interface AddItemWithMatchingProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialData?: Partial<{
+    name: string;
+    category: string;
+    brand: string;
+    color: string;
+    material: string;
+    season: string;
+    occasion: string;
+    condition: string;
+    description: string;
+    style_tags: string[];
+    photo: string;
+  }>;
 }
 
 const categories = [
@@ -29,7 +42,7 @@ const conditions = ['Excellent', 'Good', 'Fair', 'Poor'];
 const seasons = ['Spring', 'Summer', 'Fall', 'Winter', 'All Seasons'];
 const occasions = ['Casual', 'Work', 'Formal', 'Party', 'Sport', 'Travel'];
 
-const AddItemWithMatching = ({ open, onOpenChange }: AddItemWithMatchingProps) => {
+const AddItemWithMatching = ({ open, onOpenChange, initialData }: AddItemWithMatchingProps) => {
   const { toast } = useToast();
   const { addItem } = useWardrobe();
   const { items: merchantItems } = useMerchantItems();
@@ -62,6 +75,37 @@ const AddItemWithMatching = ({ open, onOpenChange }: AddItemWithMatchingProps) =
 
   const [currentTag, setCurrentTag] = useState('');
   const [photoUrls, setPhotoUrls] = useState<string[]>([]);
+
+  // Helpers to map scan data
+  const titleCase = (s?: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+  const mapCondition = (c?: string) => {
+    if (!c) return undefined;
+    const lc = c.toLowerCase();
+    if (lc === 'new' || lc === 'like-new' || lc === 'excellent') return 'Excellent';
+    if (lc === 'good') return 'Good';
+    if (lc === 'fair') return 'Fair';
+    return 'Good';
+  };
+
+  useEffect(() => {
+    if (!initialData) return;
+    setFormData(prev => ({
+      ...prev,
+      name: initialData.name ?? prev.name,
+      category: initialData.category ?? prev.category,
+      brand: initialData.brand ?? prev.brand,
+      color: initialData.color ?? prev.color,
+      material: initialData.material ?? prev.material,
+      season: initialData.season ? (titleCase(initialData.season) as string) : prev.season,
+      occasion: initialData.occasion ? (titleCase(initialData.occasion) as string) : prev.occasion,
+      condition: mapCondition(initialData.condition) ?? prev.condition,
+      notes: initialData.description ?? prev.notes,
+      tags: Array.from(new Set([...(prev.tags || []), ...(((initialData.style_tags as string[]) || []))]))
+    }));
+    if (initialData.photo) {
+      setPhotoUrls(prev => [initialData.photo as string, ...prev]);
+    }
+  }, [initialData]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
