@@ -18,9 +18,10 @@ import {
 } from 'lucide-react';
 import { useWardrobe } from '@/hooks/useWardrobe';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
-import { OutfitAI } from '@/ai/OutfitAI';
-import { WeatherMatcher } from '@/ai/WeatherMatcher';
-import { ColorHarmonyEngine } from '@/ai/ColorHarmonyEngine';
+import { myDresserAI } from '@/services/myDresserAI';
+import { myDresserWeather } from '@/services/myDresserWeather';
+import { colorHarmonyEngine } from '@/ai/ColorHarmonyEngine';
+import { styleAnalyzer } from '@/ai/StyleAnalyzer';
 import { toast } from 'sonner';
 
 interface AIRecommendation {
@@ -71,69 +72,41 @@ export const AdvancedAIRecommendations = () => {
     setLoading(true);
     
     try {
-      const outfitAI = new OutfitAI();
-      const weatherMatcher = new WeatherMatcher();
-      const colorEngine = new ColorHarmonyEngine();
+      // Use MyDresser AI services
+      const weather = weatherData || myDresserWeather.generateWeatherData('Current Location');
+      const styleProfile = await myDresserAI.generatePersonalStyleProfile(wardrobeItems, preferences);
+      const colorAnalysis = colorHarmonyEngine.analyzeOutfitColors(wardrobeItems.slice(0, 5));
 
-      // Generate different types of recommendations
-      const recommendations: AIRecommendation[] = [
-        // Weather-based recommendation
-        {
-          id: '1',
-          type: 'weather',
-          title: 'Perfect for Today\'s Weather',
-          description: 'Light layers for mild temperatures with potential rain',
-          items: ['Light Knit Sweater', 'Dark Jeans', 'Waterproof Jacket', 'Comfortable Sneakers'],
-          confidence: 92,
-          reasoning: [
-            'Temperature: 18°C - ideal for light layering',
-            'Partly cloudy - breathable fabrics recommended',
-            'Light wind - avoid loose-fitting items'
-          ]
-        },
-        // Occasion-based recommendation
-        {
-          id: '2',
-          type: 'occasion',
-          title: 'Lunch Date Ready',
-          description: 'Casual chic outfit perfect for afternoon meetups',
-          items: ['Floral Midi Dress', 'Denim Jacket', 'White Sneakers', 'Cross-body Bag'],
-          confidence: 88,
-          reasoning: [
-            'Versatile dress works for multiple occasions',
-            'Denim jacket adds casual sophistication',
-            'Comfortable footwear for walking'
-          ]
-        },
-        // Trend-based recommendation
-        {
-          id: '3',
-          type: 'trend',
-          title: 'Fall 2024 Trending',
-          description: 'Embrace this season\'s earthy tones and textures',
-          items: ['Oversized Blazer', 'Ribbed Tank Top', 'Wide-leg Trousers', 'Loafers'],
-          confidence: 85,
-          reasoning: [
-            'Oversized blazers are trending this season',
-            'Earth tones align with fall color palette',
-            'Wide-leg silhouettes are fashion-forward'
-          ]
-        },
-        // Color harmony recommendation
-        {
-          id: '4',
-          type: 'color',
-          title: 'Color Harmony Match',
-          description: 'Complementary colors that enhance your complexion',
-          items: ['Navy Blouse', 'Camel Coat', 'Dark Wash Jeans', 'Tan Ankle Boots'],
-          confidence: 90,
-          reasoning: [
-            'Navy and camel create sophisticated contrast',
-            'Colors complement your skin tone',
-            'Monochromatic denim grounds the look'
-          ]
-        }
-      ];
+      // Generate AI recommendations
+      const aiRecs = await myDresserAI.generateSmartRecommendations(
+        wardrobeItems,
+        styleProfile,
+        { weather, preferences }
+      );
+
+      // Convert to display format
+      const recommendations: AIRecommendation[] = aiRecs.slice(0, 4).map((rec, idx) => ({
+        id: `${idx + 1}`,
+        type: idx === 0 ? 'weather' : idx === 1 ? 'occasion' : idx === 2 ? 'trend' : 'color',
+        title: rec.title || 'Style Recommendation',
+        description: rec.description || 'Curated by MyDresser AI',
+        items: [],
+        confidence: rec.confidence || 85,
+        reasoning: rec.reasoning || ['AI-powered analysis', 'Style matching', 'Trend awareness']
+      }));
+
+      // Add default recommendations if needed
+      while (recommendations.length < 4) {
+        recommendations.push({
+          id: `default-${recommendations.length + 1}`,
+          type: 'style',
+          title: 'Curated for You',
+          description: 'Based on your wardrobe analysis',
+          items: wardrobeItems.slice(0, 4).map(i => i.name),
+          confidence: 80,
+          reasoning: ['Personalized selection', 'Wardrobe optimization', 'Style coherence']
+        });
+      }
 
       setRecommendations(recommendations);
     } catch (error) {

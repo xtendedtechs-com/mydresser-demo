@@ -21,6 +21,8 @@ import {
 } from 'lucide-react';
 import { useWardrobe } from '@/hooks/useWardrobe';
 import { useToast } from '@/hooks/use-toast';
+import { myDresserAI } from '@/services/myDresserAI';
+import { OutfitAI } from '@/ai/OutfitAI';
 
 interface OutfitSuggestion {
   id: string;
@@ -71,65 +73,44 @@ const SmartOutfitMatcher = () => {
     
     setLoading(true);
     try {
-      // Simulate AI-powered outfit matching
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Use OutfitAI for outfit generation
+      const outfitAI = new OutfitAI();
+      const aiSuggestions = await Promise.all([
+        outfitAI.generateOutfit({
+          wardrobeItems: items,
+          occasion: preferences.occasion,
+          weather: { condition: preferences.weather, temperature: 20 },
+          preferences
+        }),
+        outfitAI.generateOutfit({
+          wardrobeItems: items,
+          occasion: preferences.occasion,
+          weather: { condition: preferences.weather, temperature: 20 },
+          preferences
+        }),
+        outfitAI.generateOutfit({
+          wardrobeItems: items,
+          occasion: preferences.occasion,
+          weather: { condition: preferences.weather, temperature: 20 },
+          preferences
+        })
+      ]);
+
+      const formattedSuggestions: OutfitSuggestion[] = aiSuggestions.map((outfit, index) => ({
+        id: `${index + 1}`,
+        items: outfit.items || [],
+        occasion: preferences.occasion,
+        weather: preferences.weather,
+        style: 'versatile',
+        compatibilityScore: Math.round((outfit.confidence || 0.85) * 100),
+        colorHarmony: 88,
+        seasonalFit: 87,
+        occasionMatch: 90,
+        reasons: [outfit.reasoning || 'AI-curated combination', 'Style analysis match', 'Perfect balance'],
+        tags: outfit.tags || ['versatile', 'stylish']
+      }));
       
-      const mockSuggestions: OutfitSuggestion[] = [
-        {
-          id: '1',
-          items: items.slice(0, 3),
-          occasion: preferences.occasion,
-          weather: preferences.weather,
-          style: 'smart-casual',
-          compatibilityScore: 92,
-          colorHarmony: 95,
-          seasonalFit: 88,
-          occasionMatch: 94,
-          reasons: [
-            'Perfect color coordination',
-            'Weather appropriate',
-            'Matches occasion perfectly',
-            'Flattering silhouette'
-          ],
-          tags: ['trending', 'comfortable', 'versatile']
-        },
-        {
-          id: '2',
-          items: items.slice(1, 4),
-          occasion: preferences.occasion,
-          weather: preferences.weather,
-          style: 'minimalist',
-          compatibilityScore: 87,
-          colorHarmony: 90,
-          seasonalFit: 85,
-          occasionMatch: 88,
-          reasons: [
-            'Clean and minimal look',
-            'Great for the weather',
-            'Professional appearance'
-          ],
-          tags: ['classic', 'elegant', 'professional']
-        },
-        {
-          id: '3',
-          items: items.slice(2, 5),
-          occasion: preferences.occasion,
-          weather: preferences.weather,
-          style: 'bohemian',
-          compatibilityScore: 84,
-          colorHarmony: 86,
-          seasonalFit: 90,
-          occasionMatch: 80,
-          reasons: [
-            'Creative and artistic',
-            'Seasonal colors',
-            'Comfortable fit'
-          ],
-          tags: ['creative', 'artistic', 'expressive']
-        }
-      ];
-      
-      setSuggestions(mockSuggestions);
+      setSuggestions(formattedSuggestions);
     } catch (error) {
       toast({
         title: 'Error',

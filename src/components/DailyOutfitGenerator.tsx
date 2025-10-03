@@ -6,8 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Sparkles, RefreshCw, Heart, Share2, Calendar, Thermometer, Cloud } from 'lucide-react';
 import { useWardrobe } from '@/hooks/useWardrobe';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
-import { weatherService } from '@/services/weatherService';
-import { enhancedOutfitEngine } from '@/services/enhancedOutfitEngine';
+import { myDresserWeather } from '@/services/myDresserWeather';
+import { OutfitAI } from '@/ai/OutfitAI';
 import { toast } from 'sonner';
 
 interface DailyOutfitProps {
@@ -33,23 +33,18 @@ export const DailyOutfitGenerator = ({ date = new Date() }: DailyOutfitProps) =>
     try {
       setLoading(true);
       
-      // Get weather data if user has location
-      let weatherData = null;
-      if (preferences.privacy?.location_sharing) {
-        try {
-          weatherData = await weatherService.getCurrentWeather();
-          setWeather(weatherData);
-        } catch (error) {
-          console.warn('Weather data unavailable');
-        }
-      }
+      // Get weather data
+      const location = preferences.privacy?.location_sharing ? 'Current Location' : 'Default';
+      const weatherData = myDresserWeather.generateWeatherData(location);
+      setWeather(weatherData);
 
-      // Generate outfit using enhanced AI
-      const generatedOutfit = await enhancedOutfitEngine.generateOutfit({
+      // Generate outfit using OutfitAI
+      const outfitAI = new OutfitAI();
+      const generatedOutfit = await outfitAI.generateOutfit({
         wardrobeItems,
         weather: weatherData,
         occasion: 'casual',
-        preferences: preferences.suggestion_settings
+        preferences: preferences.suggestion_settings || {}
       });
 
       setOutfit(generatedOutfit);
