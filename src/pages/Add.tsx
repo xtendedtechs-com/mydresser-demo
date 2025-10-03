@@ -109,7 +109,7 @@ const Add = () => {
   const wardrobeOptions = [
     {
       title: "Manual Wardrobe Setup",
-      description: "Enter precise measurements of your wardrobe including hanging space, shelves, and drawers.",
+      description: "Build your wardrobe with shelves, drawers, hanging rods, and customize each component.",
       icon: <Ruler className="w-6 h-6" />,
       onClick: () => setShowCreateWardrobeDialog(true),
       isNew: false

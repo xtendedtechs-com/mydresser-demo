@@ -95,8 +95,13 @@ export const CreateWardrobeDialog = ({ open, onOpenChange }: CreateWardrobeDialo
 
     setLoading(true);
     try {
+      const { data: { user } } = await import("@/integrations/supabase/client").then(m => m.supabase.auth.getUser());
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
       await createWardrobe({
-        user_id: "", // Will be set by the hook
+        user_id: user.id,
         name: formData.name,
         type: formData.type,
         location: formData.location || undefined,

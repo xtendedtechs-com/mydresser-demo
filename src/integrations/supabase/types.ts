@@ -1791,6 +1791,62 @@ export type Database = {
         }
         Relationships: []
       }
+      wardrobe_components: {
+        Row: {
+          capacity: number | null
+          color: string | null
+          component_type: string
+          created_at: string | null
+          current_items: number | null
+          dimensions: Json
+          id: string
+          name: string
+          notes: string | null
+          position: Json
+          updated_at: string | null
+          user_id: string
+          wardrobe_id: string
+        }
+        Insert: {
+          capacity?: number | null
+          color?: string | null
+          component_type: string
+          created_at?: string | null
+          current_items?: number | null
+          dimensions: Json
+          id?: string
+          name: string
+          notes?: string | null
+          position?: Json
+          updated_at?: string | null
+          user_id: string
+          wardrobe_id: string
+        }
+        Update: {
+          capacity?: number | null
+          color?: string | null
+          component_type?: string
+          created_at?: string | null
+          current_items?: number | null
+          dimensions?: Json
+          id?: string
+          name?: string
+          notes?: string | null
+          position?: Json
+          updated_at?: string | null
+          user_id?: string
+          wardrobe_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wardrobe_components_wardrobe_id_fkey"
+            columns: ["wardrobe_id"]
+            isOneToOne: false
+            referencedRelation: "wardrobes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wardrobe_items: {
         Row: {
           brand: string | null
@@ -1879,6 +1935,7 @@ export type Database = {
       }
       wardrobes: {
         Row: {
+          component_layout: Json | null
           created_at: string
           dimensions: Json | null
           id: string
@@ -1890,6 +1947,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          component_layout?: Json | null
           created_at?: string
           dimensions?: Json | null
           id?: string
@@ -1901,6 +1959,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          component_layout?: Json | null
           created_at?: string
           dimensions?: Json | null
           id?: string

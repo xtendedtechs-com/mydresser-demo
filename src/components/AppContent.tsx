@@ -26,6 +26,7 @@ import AIAssistantPage from "@/pages/AIAssistantPage";
 import SecurityPage from "@/pages/SecurityPage";
 import WardrobeInsightsPage from "@/pages/WardrobeInsightsPage";
 import UserAnalyticsPage from "@/pages/UserAnalyticsPage";
+import WardrobeBuilder from "@/pages/WardrobeBuilder";
 
 const AppContent = () => {
   const location = useLocation();
@@ -44,6 +45,7 @@ const AppContent = () => {
         <Route path="/merchant" element={<MerchantAuth />} />
         <Route path="/outfit-generator" element={<DailyOutfitGenerator />} />
         <Route path="/social" element={<SocialPage />} />
+        <Route path="/wardrobe-builder" element={<WardrobeBuilder />} />
         <Route path="/ai-recommendations" element={<AIRecommendationsPage />} />
         <Route path="/ai-assistant" element={<AIAssistantPage />} />
         <Route path="/security" element={<SecurityPage />} />
