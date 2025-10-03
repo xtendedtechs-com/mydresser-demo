@@ -26,11 +26,11 @@ export const AppProviders = ({ children }: AppProvidersProps) => {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
+        <TooltipProvider delayDuration={0} skipDelayDuration={0}>
           <SecurityHeaders />
+          {children}
           <Toaster />
           <Sonner />
-          {children}
         </TooltipProvider>
       </QueryClientProvider>
     </ErrorBoundary>

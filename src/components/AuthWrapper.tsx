@@ -41,6 +41,7 @@ import MerchantAnalyticsPage from "@/pages/MerchantAnalyticsPage";
 import OutfitDetail from "@/pages/OutfitDetail";
 import SecurityPage from "@/pages/SecurityPage";
 import AIHub from "@/pages/AIHub";
+import AdvancedWardrobeInsights from "@/pages/AdvancedWardrobeInsights";
 
 export const AuthWrapper = () => {
   const { isAuthenticated, loading } = useProfile();
@@ -71,6 +72,7 @@ export const AuthWrapper = () => {
             <Route path="/social" element={<SocialPage />} />
             <Route path="/ai-assistant" element={<AIAssistantPage />} />
             <Route path="/wardrobe-insights" element={<WardrobeInsightsPage />} />
+            <Route path="/wardrobe-insights/advanced" element={<AdvancedWardrobeInsights />} />
             <Route path="/2nddresser" element={<SecondDresserPage />} />
             <Route path="/mymirror" element={<MyMirrorPage />} />
             <Route path="/wardrobe-builder" element={<WardrobeBuilder />} />
