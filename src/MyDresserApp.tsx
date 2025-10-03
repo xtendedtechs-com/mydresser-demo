@@ -3,6 +3,8 @@ import { AppProviders } from "@/components/providers/AppProviders";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import Navigation from "@/components/Navigation";
 import { useProfile } from "@/hooks/useProfile";
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
 
 // Pages
 import Index from "@/pages/Index";
@@ -40,6 +42,7 @@ const MyDresserApp = () => {
 
   return (
     <AppProviders>
+        <OfflineIndicator />
         {!isAuthenticated ? (
           <Routes>
             <Route path="/" element={<Landing />} />
@@ -48,6 +51,7 @@ const MyDresserApp = () => {
           </Routes>
         ) : (
           <>
+            <PWAInstallPrompt />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/wardrobe" element={<Wardrobe />} />

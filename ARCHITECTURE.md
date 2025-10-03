@@ -3,14 +3,19 @@
 ## Overview
 MyDresser is a comprehensive fashion management platform with dual interfaces: a consumer app for wardrobe management and a merchant terminal for retail operations.
 
-## 🎯 Recent Enhancements (Phase 24)
+## 🎯 Recent Enhancements (Phase 25)
 
-### Enhanced Search & Discovery
-- **EnhancedSearchDiscovery Component**: Multi-tab search interface with trending, recent, and saved searches
-- **DiscoveryPage**: Dedicated page for advanced search and discovery features
-- **Quick Filters**: One-click filters for price, condition, location, and categories
-- **AI Recommendations**: Personalized suggestions based on user behavior
-- **Touch-Optimized**: Mobile-first design with responsive interactions
+### PWA & Offline Capabilities
+- **PWA Manifest**: Complete manifest with icons, shortcuts, and share target
+- **Service Worker**: Offline caching, background sync, and push notifications
+- **PWA Components**: Install prompt, offline indicator, settings panel
+- **usePWA Hook**: Comprehensive PWA state and functionality management
+- **iOS Support**: Full iOS PWA compatibility with meta tags
+
+### Phase 24: Enhanced Search & Discovery
+- **EnhancedSearchDiscovery Component**: Multi-tab search interface
+- **DiscoveryPage**: Dedicated search and discovery features
+- **Quick Filters**: Price, condition, location filters
 
 ### Phase 23: AI Camera Scanning
 - **CameraScanner Component**: Live camera capture with AI analysis
