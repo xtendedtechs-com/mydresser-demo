@@ -99,6 +99,27 @@ const WardrobeItemDetail = () => {
     });
   };
 
+  const handleDelete = async () => {
+    if (!confirm(`Are you sure you want to delete "${item.name}"? This action cannot be undone.`)) {
+      return;
+    }
+    
+    try {
+      await deleteItem(item.id);
+      toast({
+        title: "Item deleted",
+        description: `${item.name} has been removed from your wardrobe.`,
+      });
+      navigate('/wardrobe');
+    } catch (error) {
+      toast({
+        title: "Delete failed",
+        description: "Could not delete item. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getConditionColor = (condition: string) => {
     switch (condition) {
       case 'excellent': return 'bg-emerald-500 text-white';
@@ -359,6 +380,14 @@ const WardrobeItemDetail = () => {
             >
               <Calendar className="mr-2" size={20} />
               Mark as Worn Today
+            </Button>
+
+            <Button 
+              variant="destructive"
+              className="w-full"
+              onClick={handleDelete}
+            >
+              Delete Item
             </Button>
           </div>
         </div>
