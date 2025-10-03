@@ -20,3 +20,9 @@ verify_jwt = true
 
 [functions.ai-wardrobe-insights]
 verify_jwt = true
+
+[functions.ai-virtual-tryon]
+verify_jwt = true
+
+[functions.ai-style-transform]
+verify_jwt = true
