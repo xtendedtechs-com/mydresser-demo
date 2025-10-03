@@ -46,6 +46,7 @@ import AdvancedWardrobeInsights from "@/pages/AdvancedWardrobeInsights";
 import AIStyleHub from "@/pages/AIStyleHub";
 import SustainabilityPage from "@/pages/SustainabilityPage";
 import GamificationPage from "@/pages/GamificationPage";
+import VirtualFittingRoom from "@/pages/VirtualFittingRoom";
 
 export const AuthWrapper = () => {
   const { isAuthenticated, loading } = useProfile();
@@ -102,6 +103,7 @@ export const AuthWrapper = () => {
             <Route path="/ai-style-hub" element={<AIStyleHub />} />
             <Route path="/sustainability" element={<SustainabilityPage />} />
             <Route path="/challenges" element={<GamificationPage />} />
+            <Route path="/virtual-fitting" element={<VirtualFittingRoom />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
