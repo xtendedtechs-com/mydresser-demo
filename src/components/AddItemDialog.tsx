@@ -8,10 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Camera } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { FileUpload } from './FileUpload';
+import { CameraScanner } from './CameraScanner';
 
 interface AddItemDialogProps {
   onItemAdded: () => void;
@@ -20,6 +21,7 @@ interface AddItemDialogProps {
 export const AddItemDialog = ({ onItemAdded }: AddItemDialogProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [sizes, setSizes] = useState<string[]>([]);
@@ -85,6 +87,43 @@ export const AddItemDialog = ({ onItemAdded }: AddItemDialogProps) => {
 
   const removeSize = (size: string) => {
     setSizes(sizes.filter(s => s !== size));
+  };
+
+  const handleScanComplete = (scanData: any) => {
+    // Pre-fill form with scanned data
+    setFormData(prev => ({
+      ...prev,
+      name: scanData.name || prev.name,
+      category: scanData.category || prev.category,
+      brand: scanData.brand || prev.brand,
+      color: scanData.color || prev.color,
+      material: scanData.material || prev.material,
+      condition: scanData.condition || prev.condition,
+      season: scanData.season || prev.season,
+      occasion: scanData.occasion || prev.occasion,
+      description: scanData.description || prev.description,
+    }));
+
+    // Add style tags
+    if (scanData.style_tags && Array.isArray(scanData.style_tags)) {
+      setTags(prev => [...new Set([...prev, ...scanData.style_tags])]);
+    }
+
+    // Add scanned photo
+    if (scanData.photo) {
+      setUploadedPhotos(prev => [{
+        url: scanData.photo,
+        name: 'scanned-photo.jpg',
+        type: 'image/jpeg'
+      }, ...prev]);
+    }
+
+    setShowScanner(false);
+    
+    toast({
+      title: 'Scan Complete!',
+      description: `Item detected with ${Math.round((scanData.confidence || 0.8) * 100)}% confidence`,
+    });
   };
 
   const resetForm = () => {
@@ -176,19 +215,44 @@ export const AddItemDialog = ({ onItemAdded }: AddItemDialogProps) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="gap-2">
-          <Plus className="w-4 h-4" />
-          Add Item
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Add New Item to Inventory</DialogTitle>
-        </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="space-y-6">
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button className="gap-2">
+            <Plus className="w-4 h-4" />
+            Add Item
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Item to Inventory</DialogTitle>
+          </DialogHeader>
+          
+          {showScanner ? (
+            <CameraScanner 
+              onScanComplete={handleScanComplete}
+              onClose={() => setShowScanner(false)}
+            />
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Camera Scanner Button */}
+              <Card className="border-dashed border-2 border-primary/20">
+                <CardContent className="pt-6 text-center">
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    size="lg"
+                    onClick={() => setShowScanner(true)}
+                    className="gap-2"
+                  >
+                    <Camera className="w-5 h-5" />
+                    Scan Item with Camera
+                  </Button>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Use AI to automatically detect and fill item details
+                  </p>
+                </CardContent>
+              </Card>
           {/* Basic Information */}
           <Card>
             <CardContent className="pt-6">
@@ -449,7 +513,9 @@ export const AddItemDialog = ({ onItemAdded }: AddItemDialogProps) => {
             </Button>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
