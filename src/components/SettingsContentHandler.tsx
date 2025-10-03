@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import ThemeCustomizer from './ThemeCustomizer';
 import ComprehensiveAuthSystem from './ComprehensiveAuthSystem';
 import AccessibilitySettings from './AccessibilitySettings';
-import NotificationCenter from './NotificationCenter';
+import NotificationSettings from './NotificationSettings';
 
 interface SettingsContentHandlerProps {
   settingType: string;
@@ -120,7 +120,7 @@ const SettingsContentHandler = ({ settingType, settingTitle, settingDescription 
         return <AccessibilitySettings />;
 
       case 'notifications':
-        return <NotificationCenter />;
+        return <NotificationSettings />;
 
       case 'general':
         return (

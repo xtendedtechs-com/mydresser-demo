@@ -25,6 +25,7 @@ import MerchantAnalyticsPage from "@/pages/MerchantAnalyticsPage";
 import AIAssistantPage from "@/pages/AIAssistantPage";
 import SecurityPage from "@/pages/SecurityPage";
 import WardrobeInsightsPage from "@/pages/WardrobeInsightsPage";
+import UserAnalyticsPage from "@/pages/UserAnalyticsPage";
 
 const AppContent = () => {
   const location = useLocation();
@@ -47,6 +48,7 @@ const AppContent = () => {
         <Route path="/ai-assistant" element={<AIAssistantPage />} />
         <Route path="/security" element={<SecurityPage />} />
         <Route path="/wardrobe-insights" element={<WardrobeInsightsPage />} />
+        <Route path="/analytics" element={<UserAnalyticsPage />} />
         <Route path="/merchant-analytics" element={<MerchantAnalyticsPage />} />
         <Route path="/account" element={<Account />} />
         <Route path="/mystyle" element={<MyStyle />} />

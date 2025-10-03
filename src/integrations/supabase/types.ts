@@ -745,6 +745,45 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          action_url: string | null
+          created_at: string | null
+          data: Json | null
+          expires_at: string | null
+          id: string
+          message: string
+          read: boolean | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          action_url?: string | null
+          created_at?: string | null
+          data?: Json | null
+          expires_at?: string | null
+          id?: string
+          message: string
+          read?: boolean | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          action_url?: string | null
+          created_at?: string | null
+          data?: Json | null
+          expires_at?: string | null
+          id?: string
+          message?: string
+          read?: boolean | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           color: string | null
@@ -1365,6 +1404,51 @@ export type Database = {
         }
         Relationships: []
       }
+      style_preferences: {
+        Row: {
+          body_type: string | null
+          budget_range: Json | null
+          created_at: string | null
+          favorite_brands: string[] | null
+          favorite_colors: string[] | null
+          id: string
+          preferred_occasions: string[] | null
+          size_preferences: Json | null
+          style_keywords: string[] | null
+          sustainability_priority: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          body_type?: string | null
+          budget_range?: Json | null
+          created_at?: string | null
+          favorite_brands?: string[] | null
+          favorite_colors?: string[] | null
+          id?: string
+          preferred_occasions?: string[] | null
+          size_preferences?: Json | null
+          style_keywords?: string[] | null
+          sustainability_priority?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          body_type?: string | null
+          budget_range?: Json | null
+          created_at?: string | null
+          favorite_brands?: string[] | null
+          favorite_colors?: string[] | null
+          id?: string
+          preferred_occasions?: string[] | null
+          size_preferences?: Json | null
+          style_keywords?: string[] | null
+          sustainability_priority?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount: number
@@ -1407,6 +1491,30 @@ export type Database = {
           type?: string
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_activity: {
+        Row: {
+          activity_data: Json | null
+          activity_type: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          activity_data?: Json | null
+          activity_type: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          activity_data?: Json | null
+          activity_type?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -1838,6 +1946,17 @@ export type Database = {
         Args: { invitation_email: string; invited_by_admin?: string }
         Returns: Json
       }
+      create_notification: {
+        Args: {
+          notification_action_url?: string
+          notification_data?: Json
+          notification_message: string
+          notification_title: string
+          notification_type: string
+          target_user_id: string
+        }
+        Returns: string
+      }
       create_sample_wardrobe_items: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -2091,6 +2210,10 @@ export type Database = {
       log_suspicious_contact_access: {
         Args: { access_type: string; attempted_user_id: string; reason: string }
         Returns: undefined
+      }
+      log_user_activity: {
+        Args: { activity_data_param?: Json; activity_type_param: string }
+        Returns: string
       }
       mask_contact_data: {
         Args: { data_text: string; data_type: string }
