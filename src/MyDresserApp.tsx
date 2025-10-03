@@ -38,6 +38,8 @@ import CommunityPage from "@/pages/CommunityPage";
 import InternationalPage from "@/pages/InternationalPage";
 import SupportsResources from "@/pages/SupportsResources";
 import ReportsAnalyticsPage from "@/pages/ReportsAnalyticsPage";
+import UserAnalyticsPage from "@/pages/UserAnalyticsPage";
+import MerchantAnalyticsPage from "@/pages/MerchantAnalyticsPage";
 
 const MyDresserApp = () => {
   const { isAuthenticated, loading } = useProfile();
@@ -78,6 +80,8 @@ const MyDresserApp = () => {
               <Route path="/international" element={<InternationalPage />} />
               <Route path="/support" element={<SupportsResources />} />
               <Route path="/reports" element={<ReportsAnalyticsPage />} />
+              <Route path="/analytics" element={<UserAnalyticsPage />} />
+              <Route path="/merchant-analytics" element={<MerchantAnalyticsPage />} />
               <Route path="/account" element={<Account />} />
               <Route path="/mystyle" element={<MyStyle />} />
               <Route path="/service-settings/:service" element={<ServiceSettingsPage />} />

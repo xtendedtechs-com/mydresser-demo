@@ -3,7 +3,75 @@
 ## Overview
 MyDresser is a comprehensive fashion management platform with dual interfaces: a consumer app for wardrobe management and a merchant terminal for retail operations.
 
-## 🎯 Recent Enhancements (Phase 33)
+## 🔒 Critical Security Model
+
+### User Role Management (SECURITY CRITICAL)
+
+**⚠️ IMPORTANT**: User roles are stored in a separate `user_roles` table to prevent privilege escalation attacks. **NEVER** store roles in the profiles table or check roles via localStorage/sessionStorage.
+
+**Architecture:**
+```
+user_roles table
+├── id: UUID
+├── user_id: UUID (references auth.users)
+├── role: app_role ENUM
+├── granted_at: TIMESTAMP
+└── granted_by: UUID (audit trail)
+
+app_role ENUM: 'admin' | 'merchant' | 'professional' | 'user'
+```
+
+**Security Function:**
+```sql
+-- Security definer function prevents RLS recursion
+CREATE FUNCTION public.has_role(_user_id UUID, _role app_role)
+RETURNS BOOLEAN
+LANGUAGE SQL STABLE SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.user_roles
+    WHERE user_id = _user_id AND role = _role
+  );
+$$;
+```
+
+**Usage in RLS Policies:**
+```sql
+-- Example: Merchants can manage their own items
+CREATE POLICY "Merchants manage own items"
+ON merchant_items FOR ALL
+USING (
+  auth.uid() = merchant_id AND 
+  public.has_role(auth.uid(), 'merchant')
+);
+```
+
+**Frontend Usage:**
+```typescript
+import { useUserRoles } from '@/hooks/useUserRoles';
+
+const { hasRole, isMerchant, isAdmin } = useUserRoles();
+
+// Check roles securely
+if (isMerchant) {
+  // Show merchant features
+}
+```
+
+**DO NOT:**
+- ❌ Store roles in profiles table
+- ❌ Check roles via localStorage or client-side state  
+- ❌ Allow direct role updates from client code
+- ❌ Use hardcoded credentials for admin checks
+
+**DO:**
+- ✅ Use `useUserRoles()` hook for role checks
+- ✅ Use `has_role()` function in RLS policies
+- ✅ Require admin privileges for role modifications
+- ✅ Audit all role changes in security logs
+
+## 🎯 Recent Enhancements (Phase 33+)
 
 ### Advanced Reporting & Data Export
 - **Report Builder**: Custom reports with date ranges, metrics selection, and multiple formats
