@@ -79,6 +79,20 @@ const Home = () => {
       icon: BarChart3,
       href: '/wardrobe-insights',
       color: 'orange'
+    },
+    {
+      title: '2ndDresser',
+      description: 'Sustainable marketplace',
+      icon: Users,
+      href: '/2nddresser',
+      color: 'emerald'
+    },
+    {
+      title: 'MyMirror',
+      description: 'Virtual try-on',
+      icon: Calendar,
+      href: '/mymirror',
+      color: 'cyan'
     }
   ];
 
@@ -157,7 +171,7 @@ const Home = () => {
             <CardDescription>Jump into your favorite features</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {quickActions.map((action) => (
                 <Button
                   key={action.title}

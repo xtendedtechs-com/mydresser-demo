@@ -29,6 +29,9 @@ import SocialPage from "@/pages/SocialPage";
 import AIRecommendationsPage from "@/pages/AIRecommendationsPage";
 import AIAssistantPage from "@/pages/AIAssistantPage";
 import WardrobeInsightsPage from "@/pages/WardrobeInsightsPage";
+import SecondDresserPage from "@/pages/SecondDresserPage";
+import MyMirrorPage from "@/pages/MyMirrorPage";
+import WardrobeBuilder from "@/pages/WardrobeBuilder";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +79,9 @@ const MyDresserApp = () => {
               <Route path="/ai-recommendations" element={<AIRecommendationsPage />} />
               <Route path="/ai-assistant" element={<AIAssistantPage />} />
               <Route path="/wardrobe-insights" element={<WardrobeInsightsPage />} />
+              <Route path="/2nddresser" element={<SecondDresserPage />} />
+              <Route path="/mymirror" element={<MyMirrorPage />} />
+              <Route path="/wardrobe-builder" element={<WardrobeBuilder />} />
               <Route path="/account" element={<Account />} />
               <Route path="/mystyle" element={<MyStyle />} />
               <Route path="/service-settings/:service" element={<ServiceSettingsPage />} />
