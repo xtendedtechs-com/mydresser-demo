@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import MyDresserApp from "./MyDresserApp.tsx";
+import { AppProviders } from "@/components/providers/AppProviders";
+import { AuthWrapper } from "@/components/AuthWrapper";
 import TerminalApp from "./TerminalApp.tsx";
 import "./index.css";
 
@@ -23,16 +24,13 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Router wrapper to handle both apps
-const AppRouter = () => {
-  return (
+createRoot(document.getElementById("root")!).render(
+  <AppProviders>
     <BrowserRouter>
       <Routes>
         <Route path="/terminal/*" element={<TerminalApp />} />
-        <Route path="*" element={<MyDresserApp />} />
+        <Route path="*" element={<AuthWrapper />} />
       </Routes>
     </BrowserRouter>
-  );
-};
-
-createRoot(document.getElementById("root")!).render(<AppRouter />);
+  </AppProviders>
+);
