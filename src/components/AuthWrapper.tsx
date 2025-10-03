@@ -7,7 +7,6 @@ import { OfflineIndicator } from "@/components/OfflineIndicator";
 
 // Pages
 import Index from "@/pages/Index";
-import Home from "@/pages/Home";
 import Wardrobe from "@/pages/Wardrobe";
 import Account from "@/pages/Account";
 import Add from "@/pages/Add";
@@ -40,6 +39,7 @@ import ReportsAnalyticsPage from "@/pages/ReportsAnalyticsPage";
 import UserAnalyticsPage from "@/pages/UserAnalyticsPage";
 import MerchantAnalyticsPage from "@/pages/MerchantAnalyticsPage";
 import OutfitDetail from "@/pages/OutfitDetail";
+import SecurityPage from "@/pages/SecurityPage";
 
 export const AuthWrapper = () => {
   const { isAuthenticated, loading } = useProfile();
@@ -89,6 +89,7 @@ export const AuthWrapper = () => {
             <Route path="/item/:id" element={<ItemDetail />} />
             <Route path="/wardrobe/item/:id" element={<WardrobeItemDetail />} />
             <Route path="/wardrobe/outfit/:id" element={<OutfitDetail />} />
+            <Route path="/security" element={<SecurityPage />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
