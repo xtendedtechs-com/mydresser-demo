@@ -4,6 +4,9 @@ import Navigation from "@/components/Navigation";
 import { useProfile } from "@/hooks/useProfile";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
+import { CommandPalette } from "@/components/CommandPalette";
+import { QuickActionsMenu } from "@/components/QuickActionsMenu";
+import { KeyboardShortcutsHelper } from "@/components/KeyboardShortcutsHelper";
 
 // Pages
 import Index from "@/pages/Index";
@@ -70,6 +73,9 @@ export const AuthWrapper = () => {
       ) : (
         <>
           <PWAInstallPrompt />
+          <CommandPalette />
+          <QuickActionsMenu />
+          <KeyboardShortcutsHelper />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/wardrobe" element={<Wardrobe />} />
