@@ -16,7 +16,8 @@ import {
   ShoppingBag,
   Users,
   Shield,
-  Star
+  Star,
+  Trophy
 } from 'lucide-react';
 import { useProfile } from '@/hooks/useProfile';
 import { useWardrobe } from '@/hooks/useWardrobe';
@@ -72,6 +73,13 @@ const Home = () => {
       icon: ShoppingBag,
       href: '/market',
       color: 'green'
+    },
+    {
+      title: 'Community',
+      description: 'Challenges, events & more',
+      icon: Trophy,
+      href: '/community',
+      color: 'pink'
     },
     {
       title: 'Wardrobe Insights',

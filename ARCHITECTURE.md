@@ -3,9 +3,15 @@
 ## Overview
 MyDresser is a comprehensive fashion management platform with dual interfaces: a consumer app for wardrobe management and a merchant terminal for retail operations.
 
-## 🎯 Recent Enhancements (Phase 29)
+## 🎯 Recent Enhancements (Phase 30)
 
-### Brand Partnerships & Integrations
+### Community Features
+- **Style Challenges**: Compete in fashion challenges with prizes, submissions, and leaderboards
+- **Fashion Events**: Discover and join virtual/physical fashion events, workshops, and meetups
+- **Influencer Program**: Four-tier program with commissions (5-20%), benefits, and analytics
+- **Community Hub**: Unified page with tabbed navigation for all community features
+
+### Brand Partnerships & Integrations (Phase 29)
 - **Partnership Portal**: Manage suppliers, brands, and distributors with commission tracking
 - **Bulk Ordering**: Create large-scale orders with SKU-based tracking
 - **Partnership Analytics**: Revenue, commission, and performance metrics
