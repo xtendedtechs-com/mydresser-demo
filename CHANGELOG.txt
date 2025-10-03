@@ -1,6 +1,72 @@
 # MyDresser Application Changelog
 
-## Phase 28: Multi-Store Management (Current)
+## Phase 29: Brand Partnerships & Integrations (Current)
+**Date**: October 3, 2025
+
+### Major Features Added
+- **Brand Partnership Portal**
+  - Partner management dashboard with search and filtering
+  - Support for suppliers, brands, and distributors
+  - Partnership status tracking (active, pending, inactive)
+  - Commission rate management and tracking
+  - Revenue and order analytics per partner
+  - Partner contact information management
+  - Add new partners with full details
+  
+- **Bulk Ordering System**
+  - Create large-scale orders from suppliers
+  - Multi-item order builder with dynamic pricing
+  - SKU-based product tracking
+  - Quantity and unit price management
+  - Automatic total calculations
+  - Order status tracking (draft, submitted, processing, shipped, delivered)
+  - Order history with expected delivery dates
+  - Export/import capabilities for bulk operations
+  
+- **Partnership Analytics**
+  - Total partners count and active status
+  - Partnership revenue tracking
+  - Average commission rate calculation
+  - Total orders via partnerships
+  - Performance metrics per partner
+  - Revenue growth indicators
+  
+- **Terminal Enhancements**
+  - Logout button added to terminal sidebar
+  - Brand Partnerships navigation menu item
+  - Quick partnership overview in terminal
+  - Direct access to full partnership dashboard
+
+### New Components
+- `src/components/BrandPartnershipsPortal.tsx`
+  - Complete partnership management interface
+  - Partner list with filtering and search
+  - Add partner dialog with commission settings
+  - Partnership analytics dashboard
+  
+- `src/components/BulkOrderingSystem.tsx`
+  - Bulk order creation interface
+  - Item-by-item order builder
+  - Order history tracking
+  - Status monitoring with visual indicators
+  
+- `src/pages/BrandPartnershipsPage.tsx`
+  - Dedicated page for partnership features
+  - Tab navigation between partnerships and bulk orders
+  - Merchant terminal integration
+
+### Routes Added
+- `/terminal/brand-partnerships` - Access brand partnerships dashboard (Terminal App only)
+
+### UI/UX Improvements
+- Added logout button to merchant terminal sidebar
+- Enhanced terminal navigation with partnerships section
+- Improved sidebar layout with fixed logout at bottom
+- Better visual hierarchy for partnership metrics
+
+---
+
+## Phase 28: Multi-Store Management
 **Date**: October 3, 2025
 
 ### Major Features Added

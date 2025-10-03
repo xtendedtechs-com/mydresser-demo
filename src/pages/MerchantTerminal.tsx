@@ -23,7 +23,7 @@ import {
   Plus, Settings, BarChart3, HelpCircle, 
   Search, Filter, Edit, Trash2, Eye,
   CreditCard, Truck, CheckCircle, XCircle,
-  Globe, Mail, Phone, LogOut
+  Globe, Mail, Phone, LogOut, Handshake
 } from 'lucide-react';
 
 interface CustomerInfo {
@@ -79,6 +79,7 @@ const MerchantTerminal: React.FC = () => {
     { label: 'Inventory Management', id: 'inventory', icon: Package },
     { label: 'Customer Relations', id: 'customers', icon: Users },
     { label: 'Financial Reports', id: 'financial', icon: DollarSign },
+    { label: 'Brand Partnerships', id: 'partnerships', icon: Handshake },
     { label: 'Merchant Page', id: 'page', icon: Globe },
     { label: 'Merchant Settings', id: 'account', icon: Settings },
     { label: 'Support & Resources', id: 'support', icon: HelpCircle }
@@ -211,8 +212,8 @@ const MerchantTerminal: React.FC = () => {
     <div className="min-h-screen bg-background">
       <div className="flex">
         {/* Sidebar Navigation */}
-        <div className="w-64 bg-card border-r border-border min-h-screen">
-          <div className="p-6">
+        <div className="w-64 bg-card border-r border-border min-h-screen flex flex-col">
+          <div className="p-6 flex-1">
             <h2 className="text-xl font-bold mb-6">MyDresser Terminal</h2>
             <nav className="space-y-2">
               {navigationItems.map((item) => (
@@ -227,6 +228,21 @@ const MerchantTerminal: React.FC = () => {
                 </Button>
               ))}
             </nav>
+          </div>
+          
+          {/* Logout Button at bottom */}
+          <div className="p-6 border-t border-border">
+            <Button
+              variant="outline"
+              className="w-full justify-start text-destructive hover:text-destructive"
+              onClick={async () => {
+                await supabase.auth.signOut();
+                window.location.href = '/terminal';
+              }}
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
           </div>
         </div>
 
@@ -816,6 +832,92 @@ const MerchantTerminal: React.FC = () => {
                         <p className="text-2xl font-bold">Apr 15</p>
                         <p className="text-sm text-muted-foreground">Quarterly filing</p>
                       </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* Brand Partnerships */}
+            {activeSection === 'partnerships' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl font-bold">Brand Partnerships</h1>
+                  <Button onClick={() => window.location.href = '/terminal/brand-partnerships'}>
+                    <Handshake className="h-4 w-4 mr-2" />
+                    Manage Partnerships
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Handshake className="h-4 w-4 text-primary" />
+                        <h3 className="font-semibold">Active Partners</h3>
+                      </div>
+                      <p className="text-3xl font-bold">3</p>
+                      <p className="text-sm text-muted-foreground">Brand partnerships</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-2 mb-2">
+                        <DollarSign className="h-4 w-4 text-green-500" />
+                        <h3 className="font-semibold">Partnership Revenue</h3>
+                      </div>
+                      <p className="text-3xl font-bold">$77,330</p>
+                      <p className="text-sm text-green-500">+12% this month</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Package className="h-4 w-4 text-blue-500" />
+                        <h3 className="font-semibold">Bulk Orders</h3>
+                      </div>
+                      <p className="text-3xl font-bold">390</p>
+                      <p className="text-sm text-muted-foreground">Total items ordered</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Partnership Overview</CardTitle>
+                    <CardDescription>Manage your brand partnerships and bulk orders</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="p-4 border rounded-lg">
+                          <h4 className="font-semibold mb-2">Brand Partnership Portal</h4>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            Connect with suppliers, brands, and distributors. Manage partnership agreements and track performance.
+                          </p>
+                          <Button variant="outline" className="w-full">
+                            View Partners
+                          </Button>
+                        </div>
+                        <div className="p-4 border rounded-lg">
+                          <h4 className="font-semibold mb-2">Bulk Ordering System</h4>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            Place large-scale orders from your partners. Track order status and manage inventory.
+                          </p>
+                          <Button variant="outline" className="w-full">
+                            Create Order
+                          </Button>
+                        </div>
+                      </div>
+                      <Button 
+                        className="w-full"
+                        onClick={() => window.location.href = '/terminal/brand-partnerships'}
+                      >
+                        <Handshake className="h-4 w-4 mr-2" />
+                        Access Full Partnership Dashboard
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
