@@ -1,9 +1,15 @@
+import { useState } from 'react';
 import SecondDresserMarket from '@/components/SecondDresserMarket';
 import { SustainabilityImpactCard } from '@/components/SustainabilityImpactCard';
+import { CheckoutFlow } from '@/components/CheckoutFlow';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Recycle, ShoppingBag, Star, MessageSquare } from 'lucide-react';
 
 const SecondDresserPage = () => {
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="container mx-auto px-4 py-6 space-y-6">
@@ -71,6 +77,31 @@ const SecondDresserPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Checkout Dialog */}
+      <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Complete Purchase</DialogTitle>
+          </DialogHeader>
+          {selectedItem && (
+            <CheckoutFlow
+              amount={selectedItem.price}
+              itemId={selectedItem.id}
+              sellerId={selectedItem.seller_id}
+              type="marketplace"
+              onSuccess={() => {
+                setShowCheckout(false);
+                setSelectedItem(null);
+              }}
+              onCancel={() => {
+                setShowCheckout(false);
+                setSelectedItem(null);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
