@@ -1,9 +1,6 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route, Navigate } from "react-router-dom";
-import SecurityHeaders from "@/components/SecurityHeaders";
+import { AppProviders } from "@/components/providers/AppProviders";
+import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { useProfile } from "@/hooks/useProfile";
 
 // Merchant Pages
@@ -17,36 +14,17 @@ import FinancialReports from "@/pages/FinancialReports";
 import SupportsResources from "@/pages/SupportsResources";
 import NotFound from "@/pages/NotFound";
 
-const queryClient = new QueryClient();
-
 const TerminalApp = () => {
   const { isAuthenticated, loading, profile } = useProfile();
 
-  // Show loading spinner while checking authentication
   if (loading) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <div className="min-h-screen bg-background flex items-center justify-center">
-            <div className="text-center space-y-4">
-              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-              <p className="text-muted-foreground">Loading Terminal...</p>
-            </div>
-          </div>
-        </TooltipProvider>
-      </QueryClientProvider>
-    );
+    return <LoadingSpinner message="Loading Terminal..." />;
   }
 
-  // Check if user is a merchant
   const isMerchant = isAuthenticated && profile?.role === 'merchant';
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <SecurityHeaders />
-        <Toaster />
-        <Sonner />
+    <AppProviders>
         {!isAuthenticated ? (
           <Routes>
             <Route path="/" element={<MerchantLanding />} />
@@ -76,8 +54,7 @@ const TerminalApp = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
         )}
-      </TooltipProvider>
-    </QueryClientProvider>
+    </AppProviders>
   );
 };
 

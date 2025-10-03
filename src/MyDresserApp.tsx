@@ -1,9 +1,6 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route } from "react-router-dom";
-import SecurityHeaders from "@/components/SecurityHeaders";
+import { AppProviders } from "@/components/providers/AppProviders";
+import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import Navigation from "@/components/Navigation";
 import { useProfile } from "@/hooks/useProfile";
 
@@ -34,33 +31,15 @@ import MyMirrorPage from "@/pages/MyMirrorPage";
 import WardrobeBuilder from "@/pages/WardrobeBuilder";
 import ComprehensiveSettingsPage from "@/pages/ComprehensiveSettingsPage";
 
-const queryClient = new QueryClient();
-
 const MyDresserApp = () => {
   const { isAuthenticated, loading } = useProfile();
 
-  // Show loading spinner while checking authentication
   if (loading) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <div className="min-h-screen bg-background flex items-center justify-center">
-            <div className="text-center space-y-4">
-              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-              <p className="text-muted-foreground">Loading MyDresser...</p>
-            </div>
-          </div>
-        </TooltipProvider>
-      </QueryClientProvider>
-    );
+    return <LoadingSpinner message="Loading MyDresser..." />;
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <SecurityHeaders />
-        <Toaster />
-        <Sonner />
+    <AppProviders>
         {!isAuthenticated ? (
           <Routes>
             <Route path="/" element={<Landing />} />
@@ -95,8 +74,7 @@ const MyDresserApp = () => {
             <Navigation />
           </>
         )}
-      </TooltipProvider>
-    </QueryClientProvider>
+    </AppProviders>
   );
 };
 

@@ -37,14 +37,11 @@ export const AIStyleChat = () => {
       : 'User has not added items to their wardrobe yet';
 
     try {
-      const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-      const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/ai-style-consultant`, {
+      const response = await fetch('https://bdfyrtobxkwxobjspxjo.supabase.co/functions/v1/ai-style-consultant', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJkZnlydG9ieGt3eG9ianNweGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3NjU3NzEsImV4cCI6MjA3MzM0MTc3MX0.Ck8RUCFUdezGr46gj_4caj-kBegzp_O7nzqR0AelCmc',
         },
         body: JSON.stringify({
           messages: [...messages, { role: 'user', content: userMessage }],

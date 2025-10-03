@@ -106,7 +106,7 @@ const ComprehensiveSettingsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-20 animate-fade-in">
       <div className="px-4 py-6 max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
