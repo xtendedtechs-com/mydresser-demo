@@ -93,6 +93,15 @@ export function CommandPalette() {
 
     // AI Features
     {
+      id: "ai-insights",
+      label: "AI Insights Hub",
+      description: "Access all AI-powered features",
+      icon: Sparkles,
+      action: () => navigate("/ai-insights"),
+      keywords: ["ai", "insights", "trends", "analysis", "purchase", "smart"],
+      category: "AI Features"
+    },
+    {
       id: "ai-outfit",
       label: "Generate Daily Outfit",
       description: "Get AI outfit suggestions",

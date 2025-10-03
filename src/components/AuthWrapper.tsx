@@ -54,6 +54,7 @@ import AdvancedAIPage from "@/pages/AdvancedAIPage";
 import PersonalShoppingPage from "@/pages/PersonalShoppingPage";
 import NotificationsPage from "@/pages/NotificationsPage";
 import AuthenticationSettings from "@/pages/settings/AuthenticationSettings";
+import AIInsightsPage from "@/pages/AIInsightsPage";
 
 export const AuthWrapper = () => {
   const { isAuthenticated, loading } = useProfile();
@@ -118,6 +119,7 @@ export const AuthWrapper = () => {
             <Route path="/advanced-ai" element={<AdvancedAIPage />} />
             <Route path="/personal-shopping" element={<PersonalShoppingPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/ai-insights" element={<AIInsightsPage />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

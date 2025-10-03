@@ -11,44 +11,46 @@ serve(async (req) => {
   }
 
   try {
-    const { itemData, wardrobeContext } = await req.json();
+    const { itemToAnalyze, wardrobeData, budget } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = `You are a smart purchase decision analyzer for MyDresser. Your job is to help users make informed buying decisions by analyzing:
+    const systemPrompt = `You are a smart purchase decision analyzer for MyDresser. Analyze purchases based on:
 
-1. Item quality and value-for-money
-2. Versatility and outfit potential
-3. Wardrobe gap analysis
-4. Price-to-value ratio
-5. Sustainability factors
-6. Cost-per-wear projections
+1. Value for money and quality
+2. Versatility with existing wardrobe
+3. Wardrobe gap filling
+4. Cost-per-wear estimates
+5. Style compatibility
 
-Provide objective, data-driven analysis with specific scores and actionable recommendations.`;
+Return a JSON object with:
+- recommendation: "buy" | "wait" | "skip"
+- score: number (0-100)
+- reasons: string[] (3-5 key reasons)
+- alternativeSuggestions: string[] (2-3 alternatives)
+- costPerWear: number (estimated)
+- wardrobeGapFill: string (explanation)
+- versatilityScore: number (0-100)`;
 
-    const userPrompt = `Analyze this potential purchase:
+    const userPrompt = `Analyze this purchase:
 
-Item Details:
-- Name: ${itemData.name}
-- Price: $${itemData.price}
-- Category: ${itemData.category}
-- Quality: ${itemData.quality}
-- Versatility: ${itemData.versatility}
+Item: ${itemToAnalyze.name}
+Price: $${itemToAnalyze.price}
+Description: ${itemToAnalyze.description || 'N/A'}
 
-Current Wardrobe Context:
-${JSON.stringify(wardrobeContext)}
+Current Wardrobe Summary:
+- Total items: ${wardrobeData.length}
+- Categories: ${[...new Set(wardrobeData.map((i: any) => i.category))].join(', ')}
+- Average wear count: ${Math.round(wardrobeData.reduce((sum: number, i: any) => sum + (i.wear_count || 0), 0) / wardrobeData.length)}
 
-Provide a detailed analysis with:
-1. Overall purchase score (0-100)
-2. Factor-by-factor breakdown (quality, versatility, wardrobe fit, price-value, sustainability)
-3. Each factor score (0-30 points) with reasoning
-4. Final recommendation (buy/reconsider/skip)
-5. Summary explanation
+Budget:
+- Monthly: $${budget.monthly}
+- Price range: $${budget.preferred_price_range[0]}-$${budget.preferred_price_range[1]}
 
-Format as JSON with: score, recommendation, factors (array with name, score, impact, details), summary.`;
+Provide detailed analysis in JSON format.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -62,7 +64,6 @@ Format as JSON with: score, recommendation, factors (array with name, score, imp
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
         ],
-        response_format: { type: "json_object" },
       }),
     });
 
@@ -84,17 +85,27 @@ Format as JSON with: score, recommendation, factors (array with name, score, imp
     }
 
     const data = await response.json();
-    let analysis;
     
+    // Parse the AI response
+    let analysisResult;
     try {
-      analysis = JSON.parse(data.choices[0].message.content);
+      const content = data.choices[0].message.content;
+      analysisResult = typeof content === 'string' ? JSON.parse(content) : content;
     } catch {
-      // If JSON parsing fails, return the content as-is
-      analysis = { raw: data.choices[0].message.content };
+      // Fallback if parsing fails
+      analysisResult = {
+        recommendation: 'wait',
+        score: 50,
+        reasons: ['Unable to complete full analysis'],
+        alternativeSuggestions: [],
+        costPerWear: itemToAnalyze.price / 20,
+        wardrobeGapFill: 'Analysis incomplete',
+        versatilityScore: 50
+      };
     }
 
     return new Response(
-      JSON.stringify({ analysis }),
+      JSON.stringify(analysisResult),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
