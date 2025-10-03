@@ -53,6 +53,7 @@ import VirtualFittingRoom from "@/pages/VirtualFittingRoom";
 import AdvancedAIPage from "@/pages/AdvancedAIPage";
 import PersonalShoppingPage from "@/pages/PersonalShoppingPage";
 import NotificationsPage from "@/pages/NotificationsPage";
+import AuthenticationSettings from "@/pages/settings/AuthenticationSettings";
 
 export const AuthWrapper = () => {
   const { isAuthenticated, loading } = useProfile();
@@ -91,6 +92,7 @@ export const AuthWrapper = () => {
             <Route path="/mymirror" element={<MyMirrorPage />} />
             <Route path="/wardrobe-builder" element={<WardrobeBuilder />} />
             <Route path="/settings" element={<ComprehensiveSettingsPage />} />
+            <Route path="/settings/authentication" element={<AuthenticationSettings />} />
             <Route path="/integrations" element={<IntegrationsPage />} />
             <Route path="/discovery" element={<DiscoveryPage />} />
             <Route path="/discover" element={<DiscoverPage />} />
