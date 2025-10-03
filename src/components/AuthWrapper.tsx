@@ -49,6 +49,7 @@ import GamificationPage from "@/pages/GamificationPage";
 import VirtualFittingRoom from "@/pages/VirtualFittingRoom";
 import AdvancedAIPage from "@/pages/AdvancedAIPage";
 import PersonalShoppingPage from "@/pages/PersonalShoppingPage";
+import NotificationsPage from "@/pages/NotificationsPage";
 
 export const AuthWrapper = () => {
   const { isAuthenticated, loading } = useProfile();
@@ -108,6 +109,7 @@ export const AuthWrapper = () => {
             <Route path="/virtual-fitting" element={<VirtualFittingRoom />} />
             <Route path="/advanced-ai" element={<AdvancedAIPage />} />
             <Route path="/personal-shopping" element={<PersonalShoppingPage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

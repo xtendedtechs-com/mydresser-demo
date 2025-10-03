@@ -1,5 +1,139 @@
 # MyDresser Application Changelog
 
+## Phase 17: Smart Notifications & Activity Center (January 3, 2025)
+
+### Major Features
+- **Activity Feed Center**: Comprehensive activity tracking and visualization
+- **Notification Preferences**: Granular control over notification channels
+- **Smart Filtering**: Organized activity by time periods (today/yesterday/older)
+- **Multi-Channel Notifications**: Push, email, and in-app notification management
+
+### New Components Created
+- `ActivityFeedCenter.tsx`: Unified activity feed dashboard
+  - Real-time activity tracking across all features
+  - Category-based activity types (social, shopping, wardrobe, achievement, trend)
+  - Priority-based activity sorting (high/medium/low)
+  - Read/unread status management
+  - Time-grouped activity sections (today/yesterday/older)
+  - Quick stats dashboard with category counts
+  - Mark as read functionality (individual and bulk)
+  - Activity filtering (all/unread)
+  - Color-coded activity icons
+  - Relative timestamp display (using date-fns)
+  - Action URL linking for quick navigation
+  - Responsive grid layouts for stats
+  
+- `NotificationPreferences.tsx`: Complete notification control panel
+  - 5 notification categories (Social, Shopping, Wardrobe, Trends, Messages)
+  - Multi-channel toggle (Push/Email/In-App) per category
+  - Frequency settings per category (Instant/Daily/Weekly/Never)
+  - Email digest configuration
+    - Enable/disable digest
+    - Frequency selection (Daily/Weekly/Monthly)
+    - Custom send time (6 AM/9 AM/12 PM/6 PM)
+  - Quiet hours management
+    - Enable/disable quiet hours
+    - Custom start/end time selection (24-hour format)
+    - Visual time range display
+  - Category-specific icons and descriptions
+  - Save preferences functionality with toast confirmation
+  
+- `NotificationsPage.tsx`: Notifications hub
+  - Two-tab interface (Activity Feed/Preferences)
+  - Unified notification management
+  - Mobile-optimized layouts
+  - Responsive design
+
+### Activity Tracking Features
+- **Activity Types**
+  - Social: Follows, likes, comments, mentions
+  - Shopping: Price drops, deals, recommendations
+  - Wardrobe: Outfit suggestions, wardrobe insights
+  - Achievement: Unlocked badges, milestones
+  - Trend: Fashion trends, style alerts
+  
+- **Activity Metadata**
+  - Unique ID and type classification
+  - Title and description
+  - Timestamp with relative formatting
+  - Read/unread status
+  - Priority level (high/medium/low)
+  - Action URL for navigation
+  - Custom metadata support
+
+### Notification Channel Management
+- **Push Notifications**
+  - Per-category toggle
+  - Quiet hours support
+  - Priority-based delivery
+  
+- **Email Notifications**
+  - Per-category toggle
+  - Digest mode available
+  - Custom send times
+  - Frequency control
+  
+- **In-App Notifications**
+  - Real-time activity feed
+  - Unread badge counts
+  - Instant visibility
+
+### Smart Features
+- **Time-based Grouping**
+  - Today section (last 24 hours)
+  - Yesterday section (24-48 hours ago)
+  - Older section (>48 hours)
+  - Automatic categorization
+  
+- **Priority System**
+  - High priority: Red badges, prominent display
+  - Medium priority: Standard display
+  - Low priority: Minimal emphasis
+  
+- **Filtering & Organization**
+  - All activity view
+  - Unread-only view
+  - Category-based stats
+  - Quick action buttons
+
+### UX/UI Enhancements
+- Color-coded activity types
+  - Social: Blue theme
+  - Shopping: Green theme
+  - Wardrobe: Purple theme
+  - Achievement: Amber theme
+  - Trend: Pink theme
+  
+- Interactive elements
+  - Mark as read buttons
+  - Mark all read functionality
+  - Category toggles with switches
+  - Time pickers for scheduling
+  - Frequency selectors
+  
+- Visual indicators
+  - Unread badge dots
+  - Priority badges
+  - Category icons
+  - Timestamp with clock icon
+  - Empty state messages
+
+### Technical Implementation
+- State management for activities
+- Read/unread tracking logic
+- Time-based filtering algorithms
+- Category grouping system
+- Multi-channel preference storage
+- Toast notification system
+- Responsive grid layouts
+- Date formatting with date-fns
+- Type-safe activity interfaces
+
+### Route Changes
+- Added `/notifications` route
+- Integrated with main navigation system
+- SEO-optimized page structure
+
 ## Phase 16: Real-time AI Integration with Lovable AI Gateway (January 3, 2025)
 
 ### Major Features
