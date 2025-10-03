@@ -344,6 +344,88 @@ export type Database = {
           },
         ]
       }
+      inventory_transfers: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string | null
+          from_location_id: string | null
+          id: string
+          merchant_id: string
+          merchant_item_id: string
+          notes: string | null
+          quantity: number
+          requested_at: string | null
+          requested_by: string | null
+          to_location_id: string | null
+          tracking_info: Json | null
+          transfer_status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string | null
+          from_location_id?: string | null
+          id?: string
+          merchant_id: string
+          merchant_item_id: string
+          notes?: string | null
+          quantity: number
+          requested_at?: string | null
+          requested_by?: string | null
+          to_location_id?: string | null
+          tracking_info?: Json | null
+          transfer_status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string | null
+          from_location_id?: string | null
+          id?: string
+          merchant_id?: string
+          merchant_item_id?: string
+          notes?: string | null
+          quantity?: number
+          requested_at?: string | null
+          requested_by?: string | null
+          to_location_id?: string | null
+          tracking_info?: Json | null
+          transfer_status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_transfers_from_location_id_fkey"
+            columns: ["from_location_id"]
+            isOneToOne: false
+            referencedRelation: "store_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_transfers_merchant_item_id_fkey"
+            columns: ["merchant_item_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_transfers_to_location_id_fkey"
+            columns: ["to_location_id"]
+            isOneToOne: false
+            referencedRelation: "store_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       item_matches: {
         Row: {
           created_at: string
@@ -528,6 +610,63 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      location_inventory: {
+        Row: {
+          created_at: string | null
+          id: string
+          last_count_date: string | null
+          last_restock_date: string | null
+          location_id: string
+          merchant_item_id: string
+          notes: string | null
+          quantity: number
+          reorder_point: number | null
+          reserved_quantity: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          last_count_date?: string | null
+          last_restock_date?: string | null
+          location_id: string
+          merchant_item_id: string
+          notes?: string | null
+          quantity?: number
+          reorder_point?: number | null
+          reserved_quantity?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          last_count_date?: string | null
+          last_restock_date?: string | null
+          location_id?: string
+          merchant_item_id?: string
+          notes?: string | null
+          quantity?: number
+          reorder_point?: number | null
+          reserved_quantity?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "location_inventory_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "store_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "location_inventory_merchant_item_id_fkey"
+            columns: ["merchant_item_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_items"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       market_items: {
         Row: {
@@ -997,6 +1136,62 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "merchant_profiles"
             referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      merchant_employees: {
+        Row: {
+          created_at: string | null
+          employee_email: string
+          employee_name: string
+          employee_phone: string | null
+          hire_date: string | null
+          hourly_rate: number | null
+          id: string
+          is_active: boolean | null
+          location_id: string | null
+          merchant_id: string
+          permissions: Json | null
+          position: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          employee_email: string
+          employee_name: string
+          employee_phone?: string | null
+          hire_date?: string | null
+          hourly_rate?: number | null
+          id?: string
+          is_active?: boolean | null
+          location_id?: string | null
+          merchant_id: string
+          permissions?: Json | null
+          position: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          employee_email?: string
+          employee_name?: string
+          employee_phone?: string | null
+          hire_date?: string | null
+          hourly_rate?: number | null
+          id?: string
+          is_active?: boolean | null
+          location_id?: string | null
+          merchant_id?: string
+          permissions?: Json | null
+          position?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_employees_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "store_locations"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2228,6 +2423,57 @@ export type Database = {
           outfit_items?: string[] | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      store_locations: {
+        Row: {
+          address: Json | null
+          created_at: string | null
+          email: string | null
+          id: string
+          is_active: boolean | null
+          is_primary: boolean | null
+          location_name: string
+          manager_contact: string | null
+          manager_name: string | null
+          merchant_id: string
+          metadata: Json | null
+          operating_hours: Json | null
+          phone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: Json | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          location_name: string
+          manager_contact?: string | null
+          manager_name?: string | null
+          merchant_id: string
+          metadata?: Json | null
+          operating_hours?: Json | null
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: Json | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          location_name?: string
+          manager_contact?: string | null
+          manager_name?: string | null
+          merchant_id?: string
+          metadata?: Json | null
+          operating_hours?: Json | null
+          phone?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
