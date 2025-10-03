@@ -3,9 +3,15 @@
 ## Overview
 MyDresser is a comprehensive fashion management platform with dual interfaces: a consumer app for wardrobe management and a merchant terminal for retail operations.
 
-## 🎯 Recent Enhancements (Phase 32)
+## 🎯 Recent Enhancements (Phase 33)
 
-### Customer Support & Help System
+### Advanced Reporting & Data Export
+- **Report Builder**: Custom reports with date ranges, metrics selection, and multiple formats
+- **Data Export**: Complete data export with selective options and GDPR compliance
+- **Scheduled Reports**: Automated report generation with email delivery
+- **Multiple Formats**: PDF, CSV, JSON, Excel export support
+
+### Customer Support & Help System (Phase 32)
 - **Support Tickets**: Create, manage, and track support tickets with priority levels
 - **Help Center**: Searchable knowledge base with articles, videos, and FAQs
 - **Live Chat**: Real-time support with AI bot and human agent escalation

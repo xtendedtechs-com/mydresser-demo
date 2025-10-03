@@ -248,6 +248,12 @@ const Account = () => {
       description: 'Get help, browse articles, or contact support',
       onClick: () => navigate('/support'),
       highlighted: true
+    },
+    {
+      id: 'reports',
+      label: 'Reports & Data Export',
+      description: 'Generate reports and export your data',
+      onClick: () => navigate('/reports')
     }
   ];
 

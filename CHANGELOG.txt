@@ -1,6 +1,113 @@
 # MyDresser Application Changelog
 
-## Phase 31: International Expansion (Current)
+## Phase 33: Advanced Reporting & Data Export (Current)
+**Date**: October 3, 2025
+
+### Major Features Added
+- **Custom Report Builder**
+  - Interactive report configuration interface
+  - Multiple report types: wardrobe analytics, marketplace performance, financial, user analytics, sustainability
+  - Date range selection with dual calendar pickers
+  - Customizable metrics selection with checkboxes
+  - Multiple export formats: PDF, CSV, JSON, Excel
+  - Quick report templates for common needs
+  - Real-time report generation
+  
+- **Data Export Manager**
+  - Complete data export functionality
+  - Selective data types: all data, wardrobe, marketplace, social, profile
+  - Multiple format support (JSON, CSV, XML, ZIP)
+  - Include/exclude media files option
+  - Real-time export progress tracking
+  - Export history with status tracking
+  - Download previous exports
+  - GDPR/CCPA compliance notices
+  
+- **Scheduled Reports System**
+  - Automated report scheduling
+  - Frequency options: daily, weekly, monthly, quarterly
+  - Email delivery to multiple recipients
+  - Enable/disable schedules with one click
+  - Run reports on demand
+  - Full schedule management (create, edit, delete, pause/resume)
+  - Next run and last run tracking
+  - Status badges for active/paused reports
+
+### New Components
+- `src/components/ReportBuilder.tsx`
+  - Custom report builder with metrics selection
+  - Date range pickers
+  - Format selection
+  
+- `src/components/DataExportManager.tsx`
+  - Data export configuration
+  - Export history tracking
+  - Progress indicator
+  
+- `src/components/ScheduledReportsManager.tsx`
+  - Schedule creation and management
+  - Report automation controls
+  - Email configuration
+  
+- `src/pages/ReportsAnalyticsPage.tsx`
+  - Main reports hub
+  - Three-tab interface
+  - Unified access to all reporting features
+
+### Routes Added
+- `/reports` - Access reports and data export (Main App only)
+
+### UI/UX Improvements
+- Calendar pickers with proper pointer events
+- Progress bars for export tracking
+- Status badges for report states
+- Quick action buttons for schedules
+- Responsive grid layouts
+- Clear visual hierarchy
+
+---
+
+## Phase 32: Customer Support & Help System
+**Date**: October 3, 2025
+
+### Major Features Added
+- **Support Ticket System**
+  - Create and manage support tickets
+  - Priority levels (low, medium, high, urgent)
+  - Category-based organization
+  - Status tracking (open, in-progress, resolved, closed)
+  - Conversation threading
+  - Reply functionality
+
+- **Help Center**
+  - Searchable knowledge base
+  - Category-based article organization
+  - Video tutorials
+  - FAQ section with accordion
+  - Article helpful ratings
+  - View counts and popularity metrics
+
+- **Live Chat Support**
+  - Real-time chat interface
+  - Bot assistant for common questions
+  - Quick reply suggestions
+  - Minimize/maximize functionality
+  - Typing indicators
+  - Human agent escalation
+
+- **Support Settings**
+  - Live chat preferences
+  - Email support toggle
+  - Ticket notifications
+  - Auto-reply settings
+  - Preferred contact method
+
+### Routes Added
+- `/support` - Access support resources (Main App only)
+
+---
+
+## Phase 31: International Expansion
 **Date**: October 3, 2025
 
 ### Major Features Added
