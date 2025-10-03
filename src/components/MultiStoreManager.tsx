@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useStoreLocations } from '@/hooks/useStoreLocations';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Dialog,
   DialogContent,
@@ -18,63 +20,23 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-interface StoreLocation {
-  id: string;
-  name: string;
-  address: string;
-  city: string;
-  manager: string;
-  status: 'active' | 'inactive' | 'coming-soon';
-  type: 'flagship' | 'franchise' | 'outlet';
-  revenue: number;
-  inventory: number;
-  customers: number;
-  employees: number;
-}
-
 export const MultiStoreManager = () => {
-  const [stores, setStores] = useState<StoreLocation[]>([
-    {
-      id: '1',
-      name: 'Downtown Flagship',
-      address: '123 Main St',
-      city: 'New York',
-      manager: 'Sarah Johnson',
-      status: 'active',
-      type: 'flagship',
-      revenue: 125000,
-      inventory: 1543,
-      customers: 856,
-      employees: 12,
-    },
-    {
-      id: '2',
-      name: 'West Side Branch',
-      address: '456 West Ave',
-      city: 'New York',
-      manager: 'Mike Chen',
-      status: 'active',
-      type: 'franchise',
-      revenue: 87000,
-      inventory: 892,
-      customers: 523,
-      employees: 8,
-    },
-  ]);
-
+  const { locations, loading, addLocation, deleteLocation } = useStoreLocations();
   const [isAddingStore, setIsAddingStore] = useState(false);
   const [newStore, setNewStore] = useState({
-    name: '',
-    address: '',
-    city: '',
-    manager: '',
-    type: 'franchise' as const,
+    location_name: '',
+    address: { street: '', city: '', state: '', zip: '', country: '' },
+    phone: '',
+    email: '',
+    manager_name: '',
+    manager_contact: '',
+    is_primary: false,
   });
 
   const { toast } = useToast();
 
-  const handleAddStore = () => {
-    if (!newStore.name || !newStore.address || !newStore.city || !newStore.manager) {
+  const handleAddStore = async () => {
+    if (!newStore.location_name || !newStore.address.street || !newStore.manager_name) {
       toast({
         title: 'Missing Information',
         description: 'Please fill in all store details',
@@ -83,61 +45,54 @@ export const MultiStoreManager = () => {
       return;
     }
 
-    const store: StoreLocation = {
-      id: Date.now().toString(),
-      ...newStore,
-      status: 'coming-soon',
-      revenue: 0,
-      inventory: 0,
-      customers: 0,
-      employees: 0,
-    };
-
-    setStores([...stores, store]);
-    setNewStore({ name: '', address: '', city: '', manager: '', type: 'franchise' });
-    setIsAddingStore(false);
-
-    toast({
-      title: 'Store Added',
-      description: `${store.name} has been added to your network`,
-    });
+    try {
+      await addLocation(newStore);
+      setNewStore({
+        location_name: '',
+        address: { street: '', city: '', state: '', zip: '', country: '' },
+        phone: '',
+        email: '',
+        manager_name: '',
+        manager_contact: '',
+        is_primary: false,
+      });
+      setIsAddingStore(false);
+    } catch (error) {
+      // Error handled by hook
+    }
   };
 
-  const handleDeleteStore = (id: string) => {
-    setStores(stores.filter(s => s.id !== id));
-    toast({
-      title: 'Store Removed',
-      description: 'The store has been removed from your network',
-    });
+  const handleDeleteStore = async (id: string) => {
+    const store = locations.find(s => s.id === id);
+    if (window.confirm(`Are you sure you want to delete ${store?.location_name}?`)) {
+      await deleteLocation(id);
+    }
   };
 
   const getTotalMetrics = () => ({
-    totalRevenue: stores.reduce((sum, s) => sum + s.revenue, 0),
-    totalInventory: stores.reduce((sum, s) => sum + s.inventory, 0),
-    totalCustomers: stores.reduce((sum, s) => sum + s.customers, 0),
-    totalEmployees: stores.reduce((sum, s) => sum + s.employees, 0),
-    activeStores: stores.filter(s => s.status === 'active').length,
+    activeStores: locations.filter(l => l.is_active).length,
+    totalLocations: locations.length,
   });
 
   const metrics = getTotalMetrics();
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'bg-green-500/10 text-green-600';
-      case 'inactive': return 'bg-gray-500/10 text-gray-600';
-      case 'coming-soon': return 'bg-blue-500/10 text-blue-600';
-      default: return 'bg-gray-500/10 text-gray-600';
-    }
+  const getStatusColor = (isActive: boolean) => {
+    return isActive ? 'bg-green-500/10 text-green-600' : 'bg-gray-500/10 text-gray-600';
   };
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'flagship': return 'bg-purple-500/10 text-purple-600';
-      case 'franchise': return 'bg-orange-500/10 text-orange-600';
-      case 'outlet': return 'bg-teal-500/10 text-teal-600';
-      default: return 'bg-gray-500/10 text-gray-600';
-    }
-  };
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-12 w-full" />
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+        </div>
+        <Skeleton className="h-64" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -156,7 +111,7 @@ export const MultiStoreManager = () => {
               Add Store
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Add New Store Location</DialogTitle>
               <DialogDescription>
@@ -164,62 +119,127 @@ export const MultiStoreManager = () => {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-4 py-4">
+            <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
               <div className="space-y-2">
-                <Label htmlFor="store-name">Store Name</Label>
+                <Label htmlFor="store-name">Store Name *</Label>
                 <Input
                   id="store-name"
                   placeholder="e.g., Downtown Flagship"
-                  value={newStore.name}
-                  onChange={(e) => setNewStore({ ...newStore, name: e.target.value })}
+                  value={newStore.location_name}
+                  onChange={(e) => setNewStore({ ...newStore, location_name: e.target.value })}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address">Address</Label>
+                <Label htmlFor="street">Street Address *</Label>
                 <Input
-                  id="address"
+                  id="street"
                   placeholder="e.g., 123 Main St"
-                  value={newStore.address}
-                  onChange={(e) => setNewStore({ ...newStore, address: e.target.value })}
+                  value={newStore.address.street}
+                  onChange={(e) => setNewStore({ 
+                    ...newStore, 
+                    address: { ...newStore.address, street: e.target.value }
+                  })}
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="city">City</Label>
-                <Input
-                  id="city"
-                  placeholder="e.g., New York"
-                  value={newStore.city}
-                  onChange={(e) => setNewStore({ ...newStore, city: e.target.value })}
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    placeholder="e.g., New York"
+                    value={newStore.address.city}
+                    onChange={(e) => setNewStore({ 
+                      ...newStore, 
+                      address: { ...newStore.address, city: e.target.value }
+                    })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="state">State/Province</Label>
+                  <Input
+                    id="state"
+                    placeholder="e.g., NY"
+                    value={newStore.address.state}
+                    onChange={(e) => setNewStore({ 
+                      ...newStore, 
+                      address: { ...newStore.address, state: e.target.value }
+                    })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="zip">ZIP/Postal Code</Label>
+                  <Input
+                    id="zip"
+                    placeholder="e.g., 10001"
+                    value={newStore.address.zip}
+                    onChange={(e) => setNewStore({ 
+                      ...newStore, 
+                      address: { ...newStore.address, zip: e.target.value }
+                    })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="country">Country</Label>
+                  <Input
+                    id="country"
+                    placeholder="e.g., USA"
+                    value={newStore.address.country}
+                    onChange={(e) => setNewStore({ 
+                      ...newStore, 
+                      address: { ...newStore.address, country: e.target.value }
+                    })}
+                  />
+                </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="manager">Store Manager</Label>
+                <Label htmlFor="manager">Store Manager *</Label>
                 <Input
                   id="manager"
                   placeholder="e.g., John Doe"
-                  value={newStore.manager}
-                  onChange={(e) => setNewStore({ ...newStore, manager: e.target.value })}
+                  value={newStore.manager_name}
+                  onChange={(e) => setNewStore({ ...newStore, manager_name: e.target.value })}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="type">Store Type</Label>
-                <Select
-                  value={newStore.type}
-                  onValueChange={(value: any) => setNewStore({ ...newStore, type: value })}
-                >
-                  <SelectTrigger id="type">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="flagship">Flagship Store</SelectItem>
-                    <SelectItem value="franchise">Franchise</SelectItem>
-                    <SelectItem value="outlet">Outlet Store</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="manager-contact">Manager Contact</Label>
+                <Input
+                  id="manager-contact"
+                  placeholder="e.g., +1 234 567 8900"
+                  value={newStore.manager_contact}
+                  onChange={(e) => setNewStore({ ...newStore, manager_contact: e.target.value })}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Store Phone</Label>
+                  <Input
+                    id="phone"
+                    placeholder="e.g., +1 234 567 8900"
+                    value={newStore.phone}
+                    onChange={(e) => setNewStore({ ...newStore, phone: e.target.value })}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">Store Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="e.g., store@example.com"
+                    value={newStore.email}
+                    onChange={(e) => setNewStore({ ...newStore, email: e.target.value })}
+                  />
+                </div>
               </div>
             </div>
 
@@ -234,7 +254,21 @@ export const MultiStoreManager = () => {
       </div>
 
       {/* Network Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Total Locations
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-2">
+              <Store className="h-4 w-4 text-primary" />
+              <span className="text-2xl font-bold">{metrics.totalLocations}</span>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -243,7 +277,7 @@ export const MultiStoreManager = () => {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <Store className="h-4 w-4 text-primary" />
+              <TrendingUp className="h-4 w-4 text-green-600" />
               <span className="text-2xl font-bold">{metrics.activeStores}</span>
             </div>
           </CardContent>
@@ -252,71 +286,38 @@ export const MultiStoreManager = () => {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Revenue
+              Inactive Stores
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-green-600" />
-              <span className="text-2xl font-bold">${(metrics.totalRevenue / 1000).toFixed(0)}K</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Inventory
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <Package className="h-4 w-4 text-blue-600" />
-              <span className="text-2xl font-bold">{metrics.totalInventory}</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Customers
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-purple-600" />
-              <span className="text-2xl font-bold">{metrics.totalCustomers}</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Employees
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-orange-600" />
-              <span className="text-2xl font-bold">{metrics.totalEmployees}</span>
+              <Package className="h-4 w-4 text-gray-600" />
+              <span className="text-2xl font-bold">{metrics.totalLocations - metrics.activeStores}</span>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Store List */}
-      <Tabs defaultValue="all" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="all">All Stores</TabsTrigger>
-          <TabsTrigger value="flagship">Flagship</TabsTrigger>
-          <TabsTrigger value="franchise">Franchise</TabsTrigger>
-          <TabsTrigger value="outlet">Outlet</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="all" className="space-y-4">
-          {stores.map((store) => (
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Store Locations</h3>
+        
+        {locations.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <Store className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-lg font-medium mb-2">No stores yet</p>
+              <p className="text-muted-foreground mb-4">
+                Get started by adding your first store location
+              </p>
+              <Button onClick={() => setIsAddingStore(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add First Store
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          locations.map((store) => (
             <Card key={store.id}>
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -325,18 +326,20 @@ export const MultiStoreManager = () => {
                       <Store className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg">{store.name}</CardTitle>
+                      <CardTitle className="text-lg">{store.location_name}</CardTitle>
                       <CardDescription className="flex items-center gap-2 mt-1">
                         <MapPin className="h-3 w-3" />
-                        {store.address}, {store.city}
+                        {store.address?.street && `${store.address.street}, `}
+                        {store.address?.city && `${store.address.city}`}
+                        {store.address?.state && `, ${store.address.state}`}
                       </CardDescription>
                       <div className="flex items-center gap-2 mt-2">
-                        <Badge className={getStatusColor(store.status)}>
-                          {store.status}
+                        <Badge className={getStatusColor(store.is_active)}>
+                          {store.is_active ? 'Active' : 'Inactive'}
                         </Badge>
-                        <Badge className={getTypeColor(store.type)}>
-                          {store.type}
-                        </Badge>
+                        {store.is_primary && (
+                          <Badge variant="outline">Primary Location</Badge>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -360,50 +363,26 @@ export const MultiStoreManager = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Manager</p>
-                    <p className="font-medium">{store.manager}</p>
+                    <p className="font-medium">{store.manager_name || 'Not assigned'}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Revenue</p>
-                    <p className="font-medium">${(store.revenue / 1000).toFixed(1)}K</p>
+                    <p className="text-sm text-muted-foreground mb-1">Phone</p>
+                    <p className="font-medium">{store.phone || 'Not set'}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Inventory</p>
-                    <p className="font-medium">{store.inventory} items</p>
+                    <p className="text-sm text-muted-foreground mb-1">Email</p>
+                    <p className="font-medium">{store.email || 'Not set'}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Customers</p>
-                    <p className="font-medium">{store.customers}</p>
+                    <p className="text-sm text-muted-foreground mb-1">Manager Contact</p>
+                    <p className="font-medium">{store.manager_contact || 'Not set'}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </TabsContent>
-
-        <TabsContent value="flagship" className="space-y-4">
-          {stores.filter(s => s.type === 'flagship').map((store) => (
-            <Card key={store.id}>
-              {/* ... same card content ... */}
-            </Card>
-          ))}
-        </TabsContent>
-
-        <TabsContent value="franchise" className="space-y-4">
-          {stores.filter(s => s.type === 'franchise').map((store) => (
-            <Card key={store.id}>
-              {/* ... same card content ... */}
-            </Card>
-          ))}
-        </TabsContent>
-
-        <TabsContent value="outlet" className="space-y-4">
-          {stores.filter(s => s.type === 'outlet').map((store) => (
-            <Card key={store.id}>
-              {/* ... same card content ... */}
-            </Card>
-          ))}
-        </TabsContent>
-      </Tabs>
+          ))
+        )}
+      </div>
     </div>
   );
 };
