@@ -1,6 +1,85 @@
 # MyDresser Application Changelog
 
-## Phase 25: PWA & Offline Capabilities (Current)
+## Phase 27: Third-Party Integrations & Developer API (Current)
+**Date**: October 3, 2025
+
+### Major Features Added
+- **Third-Party Integrations**
+  - Integration marketplace with popular services
+  - Shopify, Instagram, Pinterest, Google Calendar connections
+  - Amazon, TikTok marked as coming soon
+  - One-click connection flow with API key support
+  - Category-based organization (shopping, social, analytics, productivity)
+  - Connection status tracking and management
+  - Disconnect functionality for each integration
+  
+- **Developer API**
+  - API key generation with secure random tokens
+  - Key naming and permission management
+  - Secure key display with show/hide toggle
+  - Copy-to-clipboard functionality
+  - API documentation with common endpoints
+  - Usage tracking (creation date, last used)
+  - Key deletion with confirmation
+
+### New Components
+- `src/components/ThirdPartyIntegrations.tsx`
+  - Integration marketplace interface
+  - Connection management for external services
+  - Category badges and status icons
+  - API key input for services that require it
+  
+- `src/components/DeveloperAPI.tsx`
+  - API key creation and management
+  - Secure key storage and display
+  - Permission-based access control
+  - API documentation quick reference
+  
+- `src/pages/IntegrationsPage.tsx`
+  - Unified page for integrations and API
+  - Tab-based navigation between sections
+  - Clean, organized interface
+
+### Bug Fixes
+- **Mobile Browser Compatibility**
+  - Fixed camera scanner button positioning with safe-area-inset-bottom
+  - Improved bottom-positioned elements throughout app
+  - Better handling of mobile browser URL bars
+  - Enhanced touch targets for mobile devices
+
+### Routes Added
+- `/integrations` - Access third-party integrations and developer API
+- `/discovery` - Enhanced search and discovery features
+
+---
+
+## Phase 26: Sustainability & Impact Tracking
+**Date**: October 3, 2025
+
+### Major Features Added
+- **Sustainability Dashboard**
+  - CO2 savings tracking
+  - Water conservation metrics
+  - Textile waste reduction calculator
+  - Sustainability score system
+  - Monthly goals and achievements
+  
+- **AI Outfit Engine V2**
+  - Body-part based layering system (head, torso, legs, feet)
+  - Fabric/material analysis (breathable, insulating, waterproof, stretch)
+  - Weather-adaptive outfit templates (cold, cool, mild, warm)
+  - Occasion-specific recommendations (professional, formal, athletic, casual)
+  - Realistic outfit generation following apparel rules
+
+### Bug Fixes
+- Fixed wardrobe item photo thumbnails not displaying
+- Enhanced fullscreen camera scanner experience
+- Improved scan-to-wardrobe photo persistence
+- Scanned photos now properly saved as item images
+
+---
+
+## Phase 25: PWA & Offline Capabilities
 **Date**: October 3, 2025
 
 ### Major Features Added

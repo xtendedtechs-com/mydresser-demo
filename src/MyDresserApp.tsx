@@ -32,6 +32,8 @@ import SecondDresserPage from "@/pages/SecondDresserPage";
 import MyMirrorPage from "@/pages/MyMirrorPage";
 import WardrobeBuilder from "@/pages/WardrobeBuilder";
 import ComprehensiveSettingsPage from "@/pages/ComprehensiveSettingsPage";
+import IntegrationsPage from "@/pages/IntegrationsPage";
+import DiscoveryPage from "@/pages/DiscoveryPage";
 
 const MyDresserApp = () => {
   const { isAuthenticated, loading } = useProfile();
@@ -66,6 +68,8 @@ const MyDresserApp = () => {
               <Route path="/mymirror" element={<MyMirrorPage />} />
               <Route path="/wardrobe-builder" element={<WardrobeBuilder />} />
               <Route path="/settings" element={<ComprehensiveSettingsPage />} />
+              <Route path="/integrations" element={<IntegrationsPage />} />
+              <Route path="/discovery" element={<DiscoveryPage />} />
               <Route path="/account" element={<Account />} />
               <Route path="/mystyle" element={<MyStyle />} />
               <Route path="/service-settings/:service" element={<ServiceSettingsPage />} />

@@ -170,7 +170,7 @@ export const CameraScanner = ({ onScanComplete, onClose }: CameraScannerProps) =
         </div>
 
         {/* Bottom Controls */}
-        <div className="absolute bottom-0 left-0 right-0 z-10 p-6 bg-gradient-to-t from-black/70 to-transparent">
+        <div className="absolute bottom-0 left-0 right-0 z-10 p-6 pb-8 bg-gradient-to-t from-black/70 to-transparent" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
 
           <div className="flex flex-col gap-4">
             {cameraActive && !capturedImage && (

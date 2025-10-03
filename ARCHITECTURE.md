@@ -3,9 +3,15 @@
 ## Overview
 MyDresser is a comprehensive fashion management platform with dual interfaces: a consumer app for wardrobe management and a merchant terminal for retail operations.
 
-## 🎯 Recent Enhancements (Phase 25)
+## 🎯 Recent Enhancements (Phase 27)
 
-### PWA & Offline Capabilities
+### Third-Party Integrations & Developer API
+- **Integration Marketplace**: Connect with Shopify, Instagram, Pinterest, Google Calendar
+- **Developer API**: Full API access with key management and documentation
+- **API Keys**: Secure generation, storage, and permission management
+- **Mobile Fixes**: Improved button positioning for mobile browser compatibility
+
+### PWA & Offline Capabilities (Phase 25)
 - **PWA Manifest**: Complete manifest with icons, shortcuts, and share target
 - **Service Worker**: Offline caching, background sync, and push notifications
 - **PWA Components**: Install prompt, offline indicator, settings panel
