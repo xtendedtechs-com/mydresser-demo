@@ -27,11 +27,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useWardrobe } from "@/hooks/useWardrobe";
 import EditWardrobeItemDialog from "@/components/EditWardrobeItemDialog";
+import { CreateWardrobeDialog } from "@/components/CreateWardrobeDialog";
 
 const Add = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
+  const [showCreateWardrobeDialog, setShowCreateWardrobeDialog] = useState(false);
   const { toast } = useToast();
   const [params, setParams] = useSearchParams();
   const editId = params.get('edit');
@@ -109,7 +111,7 @@ const Add = () => {
       title: "Manual Wardrobe Setup",
       description: "Enter precise measurements of your wardrobe including hanging space, shelves, and drawers.",
       icon: <Ruler className="w-6 h-6" />,
-      onClick: () => handleAddOption("Manual Wardrobe Setup"),
+      onClick: () => setShowCreateWardrobeDialog(true),
       isNew: false
     },
     {
@@ -298,6 +300,11 @@ const Add = () => {
           open={editOpen}
           onOpenChange={handleEditOpenChange}
           item={editItem}
+        />
+
+        <CreateWardrobeDialog
+          open={showCreateWardrobeDialog}
+          onOpenChange={setShowCreateWardrobeDialog}
         />
       </div>
     </div>
