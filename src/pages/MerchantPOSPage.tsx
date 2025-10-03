@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { MerchantPOSTerminal } from '@/components/MerchantPOSTerminal';
+import { EnhancedMerchantPOSTerminal } from '@/components/EnhancedMerchantPOSTerminal';
 import { useToast } from '@/hooks/use-toast';
 
 const MerchantPOSPage = () => {
@@ -42,7 +42,7 @@ const MerchantPOSPage = () => {
     checkMerchantStatus();
   }, [navigate, toast]);
 
-  return <MerchantPOSTerminal />;
+  return <EnhancedMerchantPOSTerminal />;
 };
 
 export default MerchantPOSPage;
