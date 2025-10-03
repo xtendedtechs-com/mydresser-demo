@@ -1,6 +1,7 @@
 import { useProfile } from "@/hooks/useProfile";
 import { Navigate, Outlet } from "react-router-dom";
 import Navigation from "@/components/Navigation";
+import { MobileNavigation } from "@/components/MobileNavigation";
 import { Loader2 } from "lucide-react";
 
 interface LayoutProps {
@@ -40,9 +41,10 @@ export default function Layout({ requireAuth = false, requireRole }: LayoutProps
   return (
     <div className="min-h-screen bg-background">
       {user && <Navigation />}
-      <main className={user ? "pt-16" : ""}>
+      <main className={user ? "pt-16 pb-16 md:pb-0" : ""}>
         <Outlet />
       </main>
+      {user && <MobileNavigation />}
     </div>
   );
 }
