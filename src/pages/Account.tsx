@@ -125,6 +125,13 @@ const Account = () => {
       highlighted: profile.auth_level === 'base'
     },
     {
+      id: 'verification',
+      label: 'Verification Center',
+      description: 'Verify merchant or professional status',
+      onClick: () => navigate('/verification'),
+      highlighted: profile.role === 'merchant' || profile.role === 'professional'
+    },
+    {
       id: 'profile',
       label: 'My profile',
       description: 'Edit your profile information',

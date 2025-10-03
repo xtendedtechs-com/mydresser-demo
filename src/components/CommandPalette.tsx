@@ -137,6 +137,15 @@ export function CommandPalette() {
       keywords: ["ai", "chat", "assistant", "consultant", "style", "fashion", "advice"],
       category: "AI Features"
     },
+    {
+      id: "verification",
+      label: "Verification Center",
+      description: "Verify merchant or professional status",
+      icon: Shield,
+      action: () => navigate("/verification"),
+      keywords: ["verify", "merchant", "professional", "badge", "trust", "certification"],
+      category: "Account"
+    },
 
     // Social & Collaboration
     {

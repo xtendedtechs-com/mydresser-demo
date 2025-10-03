@@ -57,6 +57,7 @@ import AuthenticationSettings from "@/pages/settings/AuthenticationSettings";
 import AIInsightsPage from "@/pages/AIInsightsPage";
 import CollaborationPage from "@/pages/CollaborationPage";
 import AIStyleAssistantPage from "@/pages/AIStyleAssistantPage";
+import VerificationPage from "@/pages/VerificationPage";
 
 export const AuthWrapper = () => {
   const { isAuthenticated, loading } = useProfile();
@@ -124,6 +125,7 @@ export const AuthWrapper = () => {
             <Route path="/ai-insights" element={<AIInsightsPage />} />
             <Route path="/ai-style-assistant" element={<AIStyleAssistantPage />} />
             <Route path="/collaborate" element={<CollaborationPage />} />
+            <Route path="/verification" element={<VerificationPage />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
