@@ -59,6 +59,7 @@ import CollaborationPage from "@/pages/CollaborationPage";
 import AIStyleAssistantPage from "@/pages/AIStyleAssistantPage";
 import VerificationPage from "@/pages/VerificationPage";
 import WardrobeAnalyticsPage from "@/pages/WardrobeAnalyticsPage";
+import UnifiedAIHub from "@/components/UnifiedAIHub";
 
 export const AuthWrapper = () => {
   const { isAuthenticated, loading } = useProfile();
@@ -115,7 +116,7 @@ export const AuthWrapper = () => {
             <Route path="/wardrobe/item/:id" element={<WardrobeItemDetail />} />
             <Route path="/wardrobe/outfit/:id" element={<OutfitDetail />} />
             <Route path="/security" element={<SecurityPage />} />
-            <Route path="/ai-hub" element={<AIHub />} />
+            <Route path="/ai-hub" element={<UnifiedAIHub />} />
             <Route path="/ai-style-hub" element={<AIStyleHub />} />
             <Route path="/sustainability" element={<SustainabilityPage />} />
             <Route path="/challenges" element={<GamificationPage />} />
