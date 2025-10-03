@@ -11,8 +11,13 @@ export default defineConfig({
   },
   plugins: [react(), componentTagger()],
   resolve: {
+    dedupe: ["react", "react-dom", "react/jsx-runtime"],
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  optimizeDeps: {
+    force: true,
+    include: ["react", "react-dom", "@tanstack/react-query"],
   },
 });
