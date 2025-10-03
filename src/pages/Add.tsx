@@ -293,6 +293,12 @@ const Add = () => {
           open={showImportDialog} 
           onOpenChange={setShowImportDialog}
         />
+
+        <EditWardrobeItemDialog
+          open={editOpen}
+          onOpenChange={handleEditOpenChange}
+          item={editItem}
+        />
       </div>
     </div>
   );
