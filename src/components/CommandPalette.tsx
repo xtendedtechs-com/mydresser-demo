@@ -128,6 +128,15 @@ export function CommandPalette() {
       keywords: ["ai", "wardrobe", "insights", "analysis", "stats"],
       category: "AI Features"
     },
+    {
+      id: "ai-style-assistant",
+      label: "AI Style Assistant",
+      description: "Chat with AI fashion consultant",
+      icon: MessageSquare,
+      action: () => navigate("/ai-style-assistant"),
+      keywords: ["ai", "chat", "assistant", "consultant", "style", "fashion", "advice"],
+      category: "AI Features"
+    },
 
     // Social & Collaboration
     {
