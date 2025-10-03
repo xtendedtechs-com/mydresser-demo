@@ -1,5 +1,74 @@
 # MyDresser Application Changelog
 
+## Phase 8: Merchant Dashboard Enhancements (January 3, 2025)
+
+### Major Merchant Features
+- **Enhanced Merchant Dashboard**: Comprehensive business analytics hub
+- **Revenue Analytics**: Daily and monthly performance tracking
+- **Top Products Analysis**: Best-selling items with growth metrics
+- **Recent Orders Management**: Real-time order monitoring
+- **Alert System**: Low stock and pending order notifications
+
+### New Components Created
+- `MerchantRevenueChart.tsx`: Advanced revenue visualization
+  - Daily and monthly revenue charts
+  - Line and bar chart views
+  - Average metrics (revenue, orders, customers)
+  - Interactive chart with Recharts
+  - Toggle between time periods
+  
+- `TopProductsCard.tsx`: Product performance tracker
+  - Top 5 best-selling products
+  - Sales count and revenue per product
+  - Growth percentage indicators
+  - Visual progress bars
+  - Ranking badges
+  
+- `RecentOrdersCard.tsx`: Live order feed
+  - Real-time order updates
+  - Order status badges (completed, processing, shipped, pending)
+  - Customer information with avatars
+  - Order details (ID, items, total)
+  - Timestamp with relative dates
+  - Quick action buttons
+  
+- `EnhancedMerchantDashboard.tsx`: Main dashboard page
+  - 4-metric stats overview (revenue, orders, customers, products)
+  - Alert notifications for low stock and pending orders
+  - Grid layout with charts and product data
+  - Responsive design for all screen sizes
+
+### Merchant Analytics Features
+- **Performance Metrics**: Track key business indicators
+- **Growth Tracking**: Compare current vs previous period
+- **Visual Analytics**: Charts and graphs for data insights
+- **Product Intelligence**: Identify top performers
+- **Order Management**: Monitor order pipeline
+- **Stock Alerts**: Low inventory warnings
+- **Customer Insights**: Track customer count and engagement
+
+### Dashboard Capabilities
+- Real-time data visualization with Recharts
+- Color-coded status indicators
+- Percentage-based growth tracking
+- Multi-period comparison (daily/monthly)
+- Interactive charts with tooltips
+- Badge system for quick status recognition
+
+### Route Updates
+- Updated terminal home route (`/terminal/`) to show enhanced dashboard
+- Merchant Terminal (POS) moved to `/terminal/pos`
+- Better separation between dashboard and POS functions
+
+### UI/UX Improvements
+- Alert banners for important notifications
+- Consistent card-based layout
+- Progress bars for visual metrics
+- Avatar system for customer identification
+- Responsive grid for different screen sizes
+- Color-coded badges for status
+- Hover effects for better interactivity
+
 ## Phase 7: Advanced Wardrobe Analytics & Insights (January 3, 2025)
 
 ### Major Analytics Features

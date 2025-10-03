@@ -8,6 +8,7 @@ import MerchantAuth from "@/components/MerchantAuth";
 import MerchantTerminal from "@/pages/MerchantTerminal";
 import MerchantPage from "@/pages/MerchantPage";
 import MerchantAnalyticsPage from "@/pages/MerchantAnalyticsPage";
+import EnhancedMerchantDashboard from "@/pages/EnhancedMerchantDashboard";
 import CustomerRelations from "@/pages/CustomerRelations";
 import FinancialReports from "@/pages/FinancialReports";
 import SupportsResources from "@/pages/SupportsResources";
@@ -45,7 +46,7 @@ const TerminalApp = () => {
           </Routes>
         ) : (
           <Routes>
-            <Route path="/" element={<MerchantTerminal />} />
+            <Route path="/" element={<EnhancedMerchantDashboard />} />
             <Route path="/pos" element={<MerchantTerminal />} />
             <Route path="/analytics" element={<MerchantAnalyticsPage />} />
             <Route path="/customer-relations" element={<CustomerRelations />} />
