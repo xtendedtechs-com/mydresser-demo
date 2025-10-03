@@ -241,6 +241,13 @@ const Account = () => {
       label: 'AI Assistant',
       description: 'AI styling assistant settings',
       onClick: () => navigateToServiceSettings('assistant')
+    },
+    {
+      id: 'support',
+      label: 'Support & Help',
+      description: 'Get help, browse articles, or contact support',
+      onClick: () => navigate('/support'),
+      highlighted: true
     }
   ];
 

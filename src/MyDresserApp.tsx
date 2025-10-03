@@ -36,6 +36,7 @@ import IntegrationsPage from "@/pages/IntegrationsPage";
 import DiscoveryPage from "@/pages/DiscoveryPage";
 import CommunityPage from "@/pages/CommunityPage";
 import InternationalPage from "@/pages/InternationalPage";
+import SupportsResources from "@/pages/SupportsResources";
 
 const MyDresserApp = () => {
   const { isAuthenticated, loading } = useProfile();
@@ -74,6 +75,7 @@ const MyDresserApp = () => {
               <Route path="/discovery" element={<DiscoveryPage />} />
               <Route path="/community" element={<CommunityPage />} />
               <Route path="/international" element={<InternationalPage />} />
+              <Route path="/support" element={<SupportsResources />} />
               <Route path="/account" element={<Account />} />
               <Route path="/mystyle" element={<MyStyle />} />
               <Route path="/service-settings/:service" element={<ServiceSettingsPage />} />

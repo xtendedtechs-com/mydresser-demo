@@ -3,9 +3,15 @@
 ## Overview
 MyDresser is a comprehensive fashion management platform with dual interfaces: a consumer app for wardrobe management and a merchant terminal for retail operations.
 
-## 🎯 Recent Enhancements (Phase 31)
+## 🎯 Recent Enhancements (Phase 32)
 
-### International Expansion
+### Customer Support & Help System
+- **Support Tickets**: Create, manage, and track support tickets with priority levels
+- **Help Center**: Searchable knowledge base with articles, videos, and FAQs
+- **Live Chat**: Real-time support with AI bot and human agent escalation
+- **Support Settings**: Preferences for chat, email, tickets, and contact methods
+
+### International Expansion (Phase 31)
 - **Multi-Language**: 10 languages with real-time switching and persistent preferences
 - **Currency Converter**: Real-time conversion for 10 major currencies with quick shortcuts
 - **Regional Preferences**: Temperature, date, time formats, and measurement systems
