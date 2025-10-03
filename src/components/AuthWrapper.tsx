@@ -42,6 +42,7 @@ import OutfitDetail from "@/pages/OutfitDetail";
 import SecurityPage from "@/pages/SecurityPage";
 import AIHub from "@/pages/AIHub";
 import AdvancedWardrobeInsights from "@/pages/AdvancedWardrobeInsights";
+import AIStyleHub from "@/pages/AIStyleHub";
 
 export const AuthWrapper = () => {
   const { isAuthenticated, loading } = useProfile();
@@ -94,6 +95,7 @@ export const AuthWrapper = () => {
             <Route path="/wardrobe/outfit/:id" element={<OutfitDetail />} />
             <Route path="/security" element={<SecurityPage />} />
             <Route path="/ai-hub" element={<AIHub />} />
+            <Route path="/ai-style-hub" element={<AIStyleHub />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
