@@ -13,6 +13,7 @@ import CustomerRelations from "@/pages/CustomerRelations";
 import FinancialReports from "@/pages/FinancialReports";
 import SupportsResources from "@/pages/SupportsResources";
 import NotFound from "@/pages/NotFound";
+import MultiStoreManagementPage from "@/pages/MultiStoreManagementPage";
 
 const TerminalApp = () => {
   const { isAuthenticated, loading, profile } = useProfile();
@@ -49,6 +50,7 @@ const TerminalApp = () => {
             <Route path="/analytics" element={<MerchantAnalyticsPage />} />
             <Route path="/customer-relations" element={<CustomerRelations />} />
             <Route path="/financial-reports" element={<FinancialReports />} />
+            <Route path="/multi-store" element={<MultiStoreManagementPage />} />
             <Route path="/settings" element={<MerchantTerminal />} />
             <Route path="/support" element={<SupportsResources />} />
             <Route path="/page/:merchantId" element={<MerchantPage />} />

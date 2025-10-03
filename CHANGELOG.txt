@@ -1,6 +1,52 @@
 # MyDresser Application Changelog
 
-## Phase 27: Third-Party Integrations & Developer API (Current)
+## Phase 28: Multi-Store Management (Current)
+**Date**: October 3, 2025
+
+### Major Features Added
+- **Multi-Store Management Dashboard**
+  - Manage all store locations from one interface
+  - Add new stores with type classification (flagship, franchise, outlet)
+  - Store status tracking (active, inactive, coming-soon)
+  - Individual store performance metrics (revenue, inventory, customers)
+  - Network-wide overview with aggregated metrics
+  - Edit and delete store locations
+  - Manager assignment per location
+  
+- **Centralized Inventory System**
+  - Cross-location inventory visibility
+  - Real-time stock levels per location
+  - SKU-based product tracking
+  - Low stock and out-of-stock alerts
+  - Search and filter inventory items
+  - Reorder point management
+  - Category-based organization
+  - Price tracking across locations
+
+### New Components
+- `src/components/MultiStoreManager.tsx`
+  - Complete store location management
+  - Store addition dialog with full details
+  - Network metrics dashboard
+  - Tab-based filtering by store type
+  
+- `src/components/CentralizedInventory.tsx`
+  - Unified inventory view across all locations
+  - Stock status indicators per location
+  - Search and filter functionality
+  - Alert system for low/out-of-stock items
+  
+- `src/pages/MultiStoreManagementPage.tsx`
+  - Dedicated page for multi-store features
+  - Tab navigation between stores and inventory
+  - Merchant terminal integration
+
+### Routes Added
+- `/terminal/multi-store` - Access multi-store management (Terminal App only)
+
+---
+
+## Phase 27: Third-Party Integrations & Developer API
 **Date**: October 3, 2025
 
 ### Major Features Added
