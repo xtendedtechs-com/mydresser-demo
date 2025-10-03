@@ -59,6 +59,13 @@ const Add = () => {
       setShowAddDialog(true);
     } else if (optionName === "Link Import") {
       setShowImportDialog(true);
+    } else if (optionName === "Item Scanning") {
+      // Open add dialog - user can use the "Scan Item with Camera" button inside
+      setShowAddDialog(true);
+      toast({
+        title: "Camera Scanner Ready",
+        description: "Click 'Scan Item with Camera' to start scanning.",
+      });
     } else {
       toast({
         title: `${optionName} - Coming Soon!`,
