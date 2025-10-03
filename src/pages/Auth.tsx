@@ -440,11 +440,11 @@ const Auth = () => {
             Protected by enterprise security measures
           </div>
           <div className="text-center">
-            <Link to="/merchant">
+            <a href="/terminal">
               <Button variant="link">
                 Are you a merchant? Access MyMarket here
               </Button>
-            </Link>
+            </a>
           </div>
         </div>
       </div>

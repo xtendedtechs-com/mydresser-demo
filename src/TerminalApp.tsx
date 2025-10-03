@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import SecurityHeaders from "@/components/SecurityHeaders";
 import { useProfile } from "@/hooks/useProfile";
 
@@ -47,36 +47,34 @@ const TerminalApp = () => {
         <SecurityHeaders />
         <Toaster />
         <Sonner />
-        <BrowserRouter>
-          {!isAuthenticated ? (
-            <Routes>
-              <Route path="/" element={<MerchantLanding />} />
-              <Route path="/auth" element={<MerchantAuth />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          ) : !isMerchant ? (
-            <Routes>
-              <Route path="*" element={
-                <div className="min-h-screen bg-background flex items-center justify-center">
-                  <div className="text-center space-y-4">
-                    <h2 className="text-2xl font-bold">Access Denied</h2>
-                    <p className="text-muted-foreground">This terminal is for merchants only.</p>
-                  </div>
+        {!isAuthenticated ? (
+          <Routes>
+            <Route path="/" element={<MerchantLanding />} />
+            <Route path="/auth" element={<MerchantAuth />} />
+            <Route path="*" element={<Navigate to="/terminal" replace />} />
+          </Routes>
+        ) : !isMerchant ? (
+          <Routes>
+            <Route path="*" element={
+              <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="text-center space-y-4">
+                  <h2 className="text-2xl font-bold">Access Denied</h2>
+                  <p className="text-muted-foreground">This terminal is for merchants only.</p>
                 </div>
-              } />
-            </Routes>
-          ) : (
-            <Routes>
-              <Route path="/" element={<MerchantTerminal />} />
-              <Route path="/analytics" element={<MerchantAnalyticsPage />} />
-              <Route path="/customer-relations" element={<CustomerRelations />} />
-              <Route path="/financial-reports" element={<FinancialReports />} />
-              <Route path="/support" element={<SupportsResources />} />
-              <Route path="/page/:merchantId" element={<MerchantPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          )}
-        </BrowserRouter>
+              </div>
+            } />
+          </Routes>
+        ) : (
+          <Routes>
+            <Route path="/" element={<MerchantTerminal />} />
+            <Route path="/analytics" element={<MerchantAnalyticsPage />} />
+            <Route path="/customer-relations" element={<CustomerRelations />} />
+            <Route path="/financial-reports" element={<FinancialReports />} />
+            <Route path="/support" element={<SupportsResources />} />
+            <Route path="/page/:merchantId" element={<MerchantPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        )}
       </TooltipProvider>
     </QueryClientProvider>
   );

@@ -113,7 +113,7 @@ const MerchantAuth = () => {
           description: "You've successfully signed in to your merchant account.",
         });
 
-        navigate('/merchant-terminal');
+        navigate('/terminal');
       }
     } catch (error: any) {
       toast({
@@ -152,7 +152,7 @@ const MerchantAuth = () => {
     }
 
     try {
-      const redirectUrl = `${window.location.origin}/merchant-terminal`;
+      const redirectUrl = `${window.location.origin}/terminal`;
       
       const { data, error } = await supabase.auth.signUp({
         email: signUpData.email,
@@ -185,7 +185,7 @@ const MerchantAuth = () => {
             title: "Welcome to MyMarket!",
             description: "Your merchant account has been created successfully.",
           });
-          navigate('/merchant-terminal');
+          navigate('/terminal');
         } else {
           // Handle case where email confirmation is required but may fail
           toast({
@@ -412,9 +412,11 @@ const MerchantAuth = () => {
         </Card>
 
         <div className="text-center">
-          <Button variant="link" onClick={() => navigate('/auth')}>
-            Regular user? Sign in here
-          </Button>
+          <a href="/">
+            <Button variant="link">
+              Regular user? Sign in here
+            </Button>
+          </a>
         </div>
       </div>
     </div>

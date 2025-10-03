@@ -18,7 +18,7 @@ const MerchantLanding = () => {
               <a href="/">
                 <Button variant="ghost" size="sm">Customer App</Button>
               </a>
-              <Link to="/auth">
+              <Link to="/terminal/auth">
                 <Button>Merchant Sign In</Button>
               </Link>
             </div>
@@ -37,7 +37,7 @@ const MerchantLanding = () => {
             Manage your fashion business with powerful tools designed for modern merchants. 
             Inventory, sales, analytics, and customer relations—all in one place.
           </p>
-          <Link to="/auth">
+          <Link to="/terminal/auth">
             <Button size="lg" className="text-lg px-8 py-6">
               Access Terminal
             </Button>
@@ -115,7 +115,7 @@ const MerchantLanding = () => {
           <p className="text-lg text-muted-foreground mb-8">
             Join thousands of merchants who trust MyDresser Terminal to power their fashion business.
           </p>
-          <Link to="/auth">
+          <Link to="/terminal/auth">
             <Button size="lg" className="text-lg px-8 py-6">
               Get Started Today
             </Button>

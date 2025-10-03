@@ -1,10 +1,19 @@
 import { createRoot } from "react-dom/client";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MyDresserApp from "./MyDresserApp.tsx";
 import TerminalApp from "./TerminalApp.tsx";
 import "./index.css";
 
-// Route to the correct app based on URL
-const isTerminal = window.location.pathname.startsWith('/terminal');
-const AppComponent = isTerminal ? TerminalApp : MyDresserApp;
+// Router wrapper to handle both apps
+const AppRouter = () => {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/terminal/*" element={<TerminalApp />} />
+        <Route path="*" element={<MyDresserApp />} />
+      </Routes>
+    </BrowserRouter>
+  );
+};
 
-createRoot(document.getElementById("root")!).render(<AppComponent />);
+createRoot(document.getElementById("root")!).render(<AppRouter />);

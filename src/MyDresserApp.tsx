@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import SecurityHeaders from "@/components/SecurityHeaders";
 import Navigation from "@/components/Navigation";
 import { useProfile } from "@/hooks/useProfile";
@@ -55,37 +55,35 @@ const MyDresserApp = () => {
         <SecurityHeaders />
         <Toaster />
         <Sonner />
-        <BrowserRouter>
-          {!isAuthenticated ? (
+        {!isAuthenticated ? (
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="*" element={<Landing />} />
+          </Routes>
+        ) : (
+          <>
             <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="*" element={<Landing />} />
+              <Route path="/" element={<Index />} />
+              <Route path="/wardrobe" element={<Wardrobe />} />
+              <Route path="/market" element={<Market />} />
+              <Route path="/market/item/:id" element={<MarketItemDetail />} />
+              <Route path="/add" element={<Add />} />
+              <Route path="/outfit-generator" element={<DailyOutfitGenerator />} />
+              <Route path="/social" element={<SocialPage />} />
+              <Route path="/ai-recommendations" element={<AIRecommendationsPage />} />
+              <Route path="/account" element={<Account />} />
+              <Route path="/mystyle" element={<MyStyle />} />
+              <Route path="/service-settings/:service" element={<ServiceSettingsPage />} />
+              <Route path="/settings/:category" element={<SettingsPage />} />
+              <Route path="/item/:id" element={<ItemDetail />} />
+              <Route path="/wardrobe/item/:id" element={<WardrobeItemDetail />} />
+              <Route path="/profile-setup" element={<ProfileSetup />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
-          ) : (
-            <>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/wardrobe" element={<Wardrobe />} />
-                <Route path="/market" element={<Market />} />
-                <Route path="/market/item/:id" element={<MarketItemDetail />} />
-                <Route path="/add" element={<Add />} />
-                <Route path="/outfit-generator" element={<DailyOutfitGenerator />} />
-                <Route path="/social" element={<SocialPage />} />
-                <Route path="/ai-recommendations" element={<AIRecommendationsPage />} />
-                <Route path="/account" element={<Account />} />
-                <Route path="/mystyle" element={<MyStyle />} />
-                <Route path="/service-settings/:service" element={<ServiceSettingsPage />} />
-                <Route path="/settings/:category" element={<SettingsPage />} />
-                <Route path="/item/:id" element={<ItemDetail />} />
-                <Route path="/wardrobe/item/:id" element={<WardrobeItemDetail />} />
-                <Route path="/profile-setup" element={<ProfileSetup />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              <Navigation />
-            </>
-          )}
-        </BrowserRouter>
+            <Navigation />
+          </>
+        )}
       </TooltipProvider>
     </QueryClientProvider>
   );
