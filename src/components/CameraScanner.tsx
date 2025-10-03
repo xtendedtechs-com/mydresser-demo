@@ -117,21 +117,25 @@ export const CameraScanner = ({ onScanComplete, onClose }: CameraScannerProps) =
   });
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardContent className="p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Scan Clothing Item</h3>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-5 w-5" />
-          </Button>
+    <div className="fixed inset-0 z-50 bg-black">
+      <div className="relative h-full w-full flex flex-col">
+        {/* Header */}
+        <div className="absolute top-0 left-0 right-0 z-10 p-4 bg-gradient-to-b from-black/70 to-transparent">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold text-white">Scan Clothing Item</h3>
+            <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-white/20">
+              <X className="h-6 w-6" />
+            </Button>
+          </div>
         </div>
 
-        <div className="relative aspect-[4/3] bg-muted rounded-lg overflow-hidden mb-4">
+        {/* Camera/Image View */}
+        <div className="flex-1 relative">
           {capturedImage ? (
             <img 
               src={capturedImage} 
               alt="Captured" 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           ) : (
             <video
@@ -143,63 +147,89 @@ export const CameraScanner = ({ onScanComplete, onClose }: CameraScannerProps) =
             />
           )}
 
+          {/* Scanning overlay */}
+          {!capturedImage && cameraActive && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="border-4 border-white/50 rounded-lg w-4/5 h-3/4 relative">
+                <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-primary rounded-tl-lg"></div>
+                <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-primary rounded-tr-lg"></div>
+                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-primary rounded-bl-lg"></div>
+                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-primary rounded-br-lg"></div>
+              </div>
+            </div>
+          )}
+
           {!cameraActive && !capturedImage && (
             <div className="absolute inset-0 flex items-center justify-center">
-              <Button onClick={startCamera} size="lg">
-                <Camera className="mr-2 h-5 w-5" />
+              <Button onClick={startCamera} size="lg" className="text-lg">
+                <Camera className="mr-2 h-6 w-6" />
                 Start Camera
               </Button>
             </div>
           )}
         </div>
 
-        <div className="flex gap-2 justify-center">
-          {cameraActive && !capturedImage && (
-            <Button onClick={capturePhoto} size="lg" className="flex-1">
-              <Camera className="mr-2 h-5 w-5" />
-              Capture Photo
-            </Button>
-          )}
+        {/* Bottom Controls */}
+        <div className="absolute bottom-0 left-0 right-0 z-10 p-6 bg-gradient-to-t from-black/70 to-transparent">
 
-          {capturedImage && (
-            <>
-              <Button 
-                onClick={retakePhoto} 
-                variant="outline" 
-                size="lg"
-                disabled={isScanning}
-              >
-                <RotateCcw className="mr-2 h-5 w-5" />
-                Retake
-              </Button>
-              
-              <Button 
-                onClick={analyzeCapturedImage} 
-                size="lg" 
-                className="flex-1"
-                disabled={isScanning}
-              >
-                {isScanning ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <Camera className="mr-2 h-5 w-5" />
-                    Analyze Item
-                  </>
-                )}
-              </Button>
-            </>
-          )}
+          <div className="flex flex-col gap-4">
+            {cameraActive && !capturedImage && (
+              <>
+                <p className="text-sm text-white/80 text-center">
+                  Position the clothing item in the frame
+                </p>
+                <Button 
+                  onClick={capturePhoto} 
+                  size="lg" 
+                  className="w-full h-16 text-lg bg-white text-black hover:bg-white/90"
+                >
+                  <Camera className="mr-3 h-6 w-6" />
+                  Capture Photo
+                </Button>
+              </>
+            )}
+
+            {capturedImage && (
+              <>
+                <p className="text-sm text-white/80 text-center">
+                  Our AI will analyze this image
+                </p>
+                <div className="flex gap-3">
+                  <Button 
+                    onClick={retakePhoto} 
+                    variant="outline" 
+                    size="lg"
+                    className="flex-1 h-14 bg-white/10 text-white border-white/20 hover:bg-white/20"
+                    disabled={isScanning}
+                  >
+                    <RotateCcw className="mr-2 h-5 w-5" />
+                    Retake
+                  </Button>
+                  
+                  <Button 
+                    onClick={analyzeCapturedImage} 
+                    size="lg" 
+                    className="flex-[2] h-14 bg-white text-black hover:bg-white/90"
+                    disabled={isScanning}
+                  >
+                    {isScanning ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <Camera className="mr-2 h-5 w-5" />
+                        Analyze Item
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
-
-        <p className="text-sm text-muted-foreground text-center mt-4">
-          Position the clothing item in the frame and capture a clear photo. 
-          Our AI will identify the item and suggest details.
-        </p>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };

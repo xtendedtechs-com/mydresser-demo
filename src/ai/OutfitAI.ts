@@ -110,40 +110,118 @@ export class OutfitAI {
   }
 
   private categorizeItems(items: WardrobeItem[]): Record<string, WardrobeItem[]> {
+    // Categorize by body parts and layering logic
     const categories: Record<string, WardrobeItem[]> = {
+      // Base layer (closest to skin)
       base: [],
-      tops: [],
-      bottoms: [],
-      outerwear: [],
-      footwear: [],
-      accessories: [],
-      layering: []
+      
+      // Body parts
+      head: [],          // Hats, caps, headbands
+      torso_base: [],    // T-shirts, tank tops, undershirts
+      torso_mid: [],     // Shirts, blouses, sweaters
+      torso_outer: [],   // Jackets, coats, blazers
+      legs: [],          // Pants, jeans, shorts, skirts
+      feet: [],          // Shoes, boots, sandals, socks
+      
+      // Accessories by function
+      neck: [],          // Scarves, necklaces
+      hands: [],         // Gloves, rings, watches
+      waist: [],         // Belts
+      carry: [],         // Bags, purses
+      other: []          // Misc accessories
     };
 
     items.forEach(item => {
       const category = item.category.toLowerCase();
       const name = item.name.toLowerCase();
+      const material = item.material?.toLowerCase() || '';
 
-      if (['underwear', 'bra', 'undershirt', 'base layer'].some(base => category.includes(base) || name.includes(base))) {
+      // Base layer - underwear and foundational pieces
+      if (['underwear', 'bra', 'undershirt', 'base layer', 'thermal'].some(base => 
+          category.includes(base) || name.includes(base))) {
         categories.base.push(item);
-      } else if (['top', 'shirt', 'blouse', 't-shirt', 'tank', 'camisole'].some(top => category.includes(top))) {
-        categories.tops.push(item);
-      } else if (['bottom', 'pant', 'jean', 'skirt', 'short', 'trouser'].some(bottom => category.includes(bottom))) {
-        categories.bottoms.push(item);
-      } else if (['jacket', 'coat', 'blazer', 'cardigan', 'hoodie'].some(outer => category.includes(outer) || name.includes(outer))) {
-        if (['cardigan', 'hoodie', 'sweater', 'pullover'].some(layer => name.includes(layer))) {
-          categories.layering.push(item);
+      }
+      
+      // Head - hats, caps, headbands
+      else if (['hat', 'cap', 'beanie', 'headband', 'helmet'].some(head => 
+          category.includes(head) || name.includes(head))) {
+        categories.head.push(item);
+      }
+      
+      // Torso - layered by weight and function
+      else if (['top', 'shirt', 'blouse', 't-shirt', 'tee', 'tank', 'camisole', 'polo'].some(top => 
+          category.includes(top) || name.includes(top))) {
+        // Distinguish between base, mid, and outer layers
+        if (['tank', 'cami', 't-shirt', 'tee'].some(light => name.includes(light))) {
+          categories.torso_base.push(item);
+        } else if (['button', 'dress shirt', 'blouse'].some(formal => name.includes(formal))) {
+          categories.torso_mid.push(item);
         } else {
-          categories.outerwear.push(item);
+          categories.torso_base.push(item);
         }
-      } else if (['shoe', 'boot', 'sneaker', 'sandal', 'heel', 'flat'].some(shoe => category.includes(shoe))) {
-        categories.footwear.push(item);
-      } else if (['accessory', 'jewelry', 'bag', 'belt', 'hat', 'scarf', 'watch'].some(acc => category.includes(acc))) {
-        categories.accessories.push(item);
-      } else {
-        // Default categorization based on common patterns
-        if (name.includes('dress')) categories.tops.push(item); // Dresses go in tops
-        else categories.accessories.push(item); // Default to accessories for unknown items
+      }
+      
+      // Mid-layer tops
+      else if (['sweater', 'pullover', 'cardigan', 'hoodie', 'sweatshirt', 'vest'].some(mid => 
+          category.includes(mid) || name.includes(mid))) {
+        categories.torso_mid.push(item);
+      }
+      
+      // Outer layer
+      else if (['jacket', 'coat', 'blazer', 'parka', 'windbreaker', 'raincoat'].some(outer => 
+          category.includes(outer) || name.includes(outer))) {
+        categories.torso_outer.push(item);
+      }
+      
+      // Dresses - full torso coverage
+      else if (category.includes('dress') || name.includes('dress')) {
+        categories.torso_base.push(item);
+        categories.legs.push(item); // Dresses cover legs too
+      }
+      
+      // Legs - pants, skirts, shorts
+      else if (['bottom', 'pant', 'jean', 'trouser', 'skirt', 'short', 'legging'].some(bottom => 
+          category.includes(bottom) || name.includes(bottom))) {
+        categories.legs.push(item);
+      }
+      
+      // Feet - shoes and socks
+      else if (['shoe', 'boot', 'sneaker', 'sandal', 'heel', 'flat', 'loafer', 'oxford', 'sock'].some(foot => 
+          category.includes(foot) || name.includes(foot))) {
+        categories.feet.push(item);
+      }
+      
+      // Neck accessories
+      else if (['scarf', 'necklace', 'tie', 'bowtie'].some(neck => 
+          category.includes(neck) || name.includes(neck))) {
+        categories.neck.push(item);
+      }
+      
+      // Hand accessories
+      else if (['glove', 'ring', 'watch', 'bracelet', 'mitt'].some(hand => 
+          category.includes(hand) || name.includes(hand))) {
+        categories.hands.push(item);
+      }
+      
+      // Waist accessories
+      else if (category.includes('belt') || name.includes('belt')) {
+        categories.waist.push(item);
+      }
+      
+      // Carry items
+      else if (['bag', 'purse', 'backpack', 'tote', 'clutch', 'handbag'].some(carry => 
+          category.includes(carry) || name.includes(carry))) {
+        categories.carry.push(item);
+      }
+      
+      // Other accessories
+      else if (category.includes('accessory') || category.includes('jewelry')) {
+        categories.other.push(item);
+      }
+      
+      // Fallback
+      else {
+        categories.other.push(item);
       }
     });
 
@@ -171,50 +249,104 @@ export class OutfitAI {
 
   private getOutfitTemplates(context: AIOutfitContext): OutfitTemplate[] {
     const templates: OutfitTemplate[] = [];
+    const temp = context.weather.temperature;
 
-    // Basic templates
-    templates.push({
-      name: 'Basic Outfit',
-      requiredCategories: ['tops', 'bottoms', 'footwear'],
-      optionalCategories: ['accessories'],
-      layeringStrategy: 'minimal'
-    });
-
-    // Weather-dependent templates
-    if (context.weather.temperature < 15) {
+    // Cold weather templates (< 10°C)
+    if (temp < 10) {
       templates.push({
-        name: 'Layered Warm',
-        requiredCategories: ['tops', 'bottoms', 'layering', 'outerwear', 'footwear'],
-        optionalCategories: ['accessories'],
-        layeringStrategy: 'warm'
+        name: 'Full Winter Layering',
+        requiredCategories: ['base', 'torso_base', 'torso_mid', 'torso_outer', 'legs', 'feet'],
+        optionalCategories: ['head', 'neck', 'hands'],
+        layeringStrategy: 'maximum_warmth'
       });
-    } else if (context.weather.temperature < 25) {
+      
       templates.push({
-        name: 'Light Layer',
-        requiredCategories: ['tops', 'bottoms', 'footwear'],
-        optionalCategories: ['layering', 'accessories'],
-        layeringStrategy: 'light'
+        name: 'Winter Professional',
+        requiredCategories: ['torso_base', 'torso_mid', 'torso_outer', 'legs', 'feet'],
+        optionalCategories: ['neck', 'waist', 'carry'],
+        layeringStrategy: 'structured_warm'
       });
     }
-
-    // Occasion-specific templates
-    if (context.occasion === 'work' || context.occasion === 'formal') {
+    
+    // Cool weather templates (10-15°C)
+    else if (temp < 15) {
       templates.push({
-        name: 'Professional',
-        requiredCategories: ['tops', 'bottoms', 'footwear'],
-        optionalCategories: ['outerwear', 'accessories'],
-        layeringStrategy: 'structured'
+        name: 'Light Layering',
+        requiredCategories: ['torso_base', 'torso_mid', 'legs', 'feet'],
+        optionalCategories: ['torso_outer', 'neck', 'carry'],
+        layeringStrategy: 'transitional'
       });
-    }
-
-    if (context.occasion === 'casual') {
+      
       templates.push({
         name: 'Casual Comfort',
-        requiredCategories: ['tops', 'bottoms', 'footwear'],
-        optionalCategories: ['layering', 'accessories'],
-        layeringStrategy: 'relaxed'
+        requiredCategories: ['torso_mid', 'legs', 'feet'],
+        optionalCategories: ['torso_outer', 'head', 'carry'],
+        layeringStrategy: 'relaxed_cool'
       });
     }
+    
+    // Mild weather templates (15-25°C)
+    else if (temp < 25) {
+      templates.push({
+        name: 'Spring/Fall Essential',
+        requiredCategories: ['torso_base', 'legs', 'feet'],
+        optionalCategories: ['torso_mid', 'neck', 'carry'],
+        layeringStrategy: 'minimal_versatile'
+      });
+      
+      if (context.occasion === 'work' || context.occasion === 'formal') {
+        templates.push({
+          name: 'Business Casual',
+          requiredCategories: ['torso_base', 'torso_mid', 'legs', 'feet'],
+          optionalCategories: ['waist', 'neck', 'carry'],
+          layeringStrategy: 'professional'
+        });
+      }
+    }
+    
+    // Warm weather templates (> 25°C)
+    else {
+      templates.push({
+        name: 'Summer Light',
+        requiredCategories: ['torso_base', 'legs', 'feet'],
+        optionalCategories: ['head', 'carry'],
+        layeringStrategy: 'breathable'
+      });
+      
+      templates.push({
+        name: 'Hot Weather Casual',
+        requiredCategories: ['torso_base', 'legs', 'feet'],
+        optionalCategories: ['head', 'neck', 'carry'],
+        layeringStrategy: 'minimal_cool'
+      });
+    }
+
+    // Occasion-specific additions
+    if (context.occasion === 'formal') {
+      templates.push({
+        name: 'Formal Ensemble',
+        requiredCategories: ['torso_base', 'torso_mid', 'legs', 'feet'],
+        optionalCategories: ['torso_outer', 'waist', 'neck', 'hands'],
+        layeringStrategy: 'elegant'
+      });
+    }
+    
+    if (context.occasion === 'athletic') {
+      templates.push({
+        name: 'Athletic Wear',
+        requiredCategories: ['torso_base', 'legs', 'feet'],
+        optionalCategories: ['torso_outer', 'head', 'hands'],
+        layeringStrategy: 'performance'
+      });
+    }
+
+    // Always include a basic template as fallback
+    templates.push({
+      name: 'Basic Outfit',
+      requiredCategories: ['torso_base', 'legs', 'feet'],
+      optionalCategories: ['torso_mid', 'carry', 'other'],
+      layeringStrategy: 'simple'
+    });
 
     return templates;
   }
@@ -423,23 +555,87 @@ export class OutfitAI {
   }
 
   private analyzeLayering(items: WardrobeItem[]) {
+    const name = (item: WardrobeItem) => item.name.toLowerCase();
+    const cat = (item: WardrobeItem) => item.category.toLowerCase();
+    const mat = (item: WardrobeItem) => item.material?.toLowerCase() || '';
+    
     const layers = {
-      base: items.filter(item => ['base', 'underwear', 'bra'].some(base => item.category.toLowerCase().includes(base))),
-      middle: items.filter(item => ['top', 'shirt', 'blouse', 'sweater'].some(mid => item.category.toLowerCase().includes(mid))),
-      outer: items.filter(item => ['jacket', 'coat', 'blazer'].some(outer => item.category.toLowerCase().includes(outer))),
-      feet: items.filter(item => ['shoe', 'boot', 'sneaker', 'sandal'].some(foot => item.category.toLowerCase().includes(foot))),
-      accessories: items.filter(item => ['accessory', 'jewelry', 'bag', 'belt', 'hat'].some(acc => item.category.toLowerCase().includes(acc)))
+      // Layering by body part and function
+      base: items.filter(item => 
+        ['base', 'underwear', 'bra', 'thermal'].some(base => cat(item).includes(base) || name(item).includes(base))
+      ),
+      
+      head: items.filter(item => 
+        ['hat', 'cap', 'beanie', 'headband'].some(head => cat(item).includes(head) || name(item).includes(head))
+      ),
+      
+      torso_base: items.filter(item => 
+        ['t-shirt', 'tee', 'tank', 'cami'].some(base => name(item).includes(base)) ||
+        (cat(item).includes('top') && !name(item).includes('sweater') && !name(item).includes('jacket'))
+      ),
+      
+      torso_mid: items.filter(item => 
+        ['sweater', 'pullover', 'cardigan', 'hoodie', 'shirt', 'blouse'].some(mid => name(item).includes(mid))
+      ),
+      
+      torso_outer: items.filter(item => 
+        ['jacket', 'coat', 'blazer', 'parka'].some(outer => cat(item).includes(outer) || name(item).includes(outer))
+      ),
+      
+      legs: items.filter(item => 
+        ['pant', 'jean', 'skirt', 'short', 'trouser', 'legging', 'dress'].some(leg => 
+          cat(item).includes(leg) || name(item).includes(leg))
+      ),
+      
+      feet: items.filter(item => 
+        ['shoe', 'boot', 'sneaker', 'sandal', 'sock'].some(foot => cat(item).includes(foot) || name(item).includes(foot))
+      ),
+      
+      accessories: {
+        neck: items.filter(item => ['scarf', 'necklace', 'tie'].some(n => name(item).includes(n))),
+        hands: items.filter(item => ['glove', 'ring', 'watch', 'bracelet'].some(h => name(item).includes(h))),
+        waist: items.filter(item => name(item).includes('belt')),
+        carry: items.filter(item => ['bag', 'purse', 'backpack'].some(c => name(item).includes(c))),
+        other: items.filter(item => 
+          (cat(item).includes('accessory') || cat(item).includes('jewelry')) &&
+          !['scarf', 'necklace', 'tie', 'glove', 'ring', 'watch', 'bracelet', 'belt', 'bag', 'purse'].some(a => name(item).includes(a))
+        )
+      }
     };
 
     const layeringLogic = this.generateLayeringLogic(layers);
+    const fabricAnalysis = this.analyzeFabrics(items);
 
     return {
-      base: layers.base,
-      middle: layers.middle,
-      outer: layers.outer,
-      feet: layers.feet,
-      accessories: layers.accessories,
-      layeringLogic
+      ...layers,
+      layeringLogic,
+      fabricAnalysis,
+      totalLayers: Object.values(layers).filter(Array.isArray).reduce((sum, arr) => sum + arr.length, 0)
+    };
+  }
+
+  private analyzeFabrics(items: WardrobeItem[]) {
+    const fabrics = {
+      breathable: items.filter(item => 
+        ['cotton', 'linen', 'bamboo', 'silk'].some(f => item.material?.toLowerCase().includes(f))
+      ),
+      insulating: items.filter(item => 
+        ['wool', 'fleece', 'down', 'cashmere'].some(f => item.material?.toLowerCase().includes(f))
+      ),
+      waterproof: items.filter(item => 
+        ['polyester', 'nylon', 'gore-tex', 'vinyl'].some(f => item.material?.toLowerCase().includes(f))
+      ),
+      stretch: items.filter(item => 
+        ['spandex', 'elastane', 'lycra', 'stretch'].some(f => item.material?.toLowerCase().includes(f))
+      )
+    };
+
+    return {
+      fabrics,
+      breathability: fabrics.breathable.length > 0 ? 'high' : 'moderate',
+      insulation: fabrics.insulating.length > 0 ? 'high' : 'low',
+      weatherResistance: fabrics.waterproof.length > 0 ? 'high' : 'low',
+      comfort: fabrics.stretch.length > 0 ? 'flexible' : 'standard'
     };
   }
 

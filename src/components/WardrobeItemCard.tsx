@@ -48,32 +48,42 @@ const WardrobeItemCard = ({
     <Card className="overflow-hidden bg-background hover:shadow-lg transition-all duration-200">
       {/* Image Container */}
       <div className="relative aspect-[3/4] bg-muted">
-        {item.photos && Array.isArray(item.photos) && item.photos.length > 0 ? (
-          <img
-            src={item.photos[0]}
-            alt={item.name}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              e.currentTarget.src = '/placeholder.svg';
-            }}
-          />
-        ) : item.photos && typeof item.photos === 'object' && item.photos.main ? (
-          <img
-            src={item.photos.main}
-            alt={item.name}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              e.currentTarget.src = '/placeholder.svg';
-            }}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-            <div className="text-center">
-              <div className="text-3xl mb-2">👔</div>
-              <p className="text-sm">No photo</p>
+        {(() => {
+          let photoUrl = null;
+          
+          // Handle different photo formats
+          if (item.photos) {
+            if (typeof item.photos === 'string') {
+              photoUrl = item.photos;
+            } else if (Array.isArray(item.photos) && item.photos.length > 0) {
+              photoUrl = item.photos[0];
+            } else if (typeof item.photos === 'object') {
+              if ('main' in item.photos) {
+                photoUrl = item.photos.main;
+              } else if ('urls' in item.photos && Array.isArray(item.photos.urls) && item.photos.urls.length > 0) {
+                photoUrl = item.photos.urls[0];
+              }
+            }
+          }
+
+          return photoUrl ? (
+            <img
+              src={photoUrl}
+              alt={item.name}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.src = '/placeholder.svg';
+              }}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+              <div className="text-center">
+                <div className="text-3xl mb-2">👔</div>
+                <p className="text-sm">No photo</p>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
         
         {/* Overlay Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1">

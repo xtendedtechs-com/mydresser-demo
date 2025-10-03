@@ -70,25 +70,29 @@ const Add = () => {
     }
   };
 
-  const mapScanToWardrobeForm = (scan: any) => ({
-    name: scan.name || '',
-    category: scan.category || '',
-    brand: scan.brand || '',
-    color: scan.color || '',
-    material: scan.material || '',
-    season: scan.season ? scan.season.charAt(0).toUpperCase() + scan.season.slice(1) : '',
-    occasion: scan.occasion ? scan.occasion.charAt(0).toUpperCase() + scan.occasion.slice(1) : '',
-    condition: (() => {
-      const lc = (scan.condition || '').toLowerCase();
-      if (lc === 'new' || lc === 'like-new' || lc === 'excellent') return 'Excellent';
-      if (lc === 'good') return 'Good';
-      if (lc === 'fair') return 'Fair';
-      return 'Excellent';
-    })(),
-    description: scan.description || '',
-    style_tags: Array.isArray(scan.style_tags) ? scan.style_tags : [],
-    photo: scan.photo || ''
-  });
+  const mapScanToWardrobeForm = (scanData: any) => {
+    // Ensure photo is properly formatted as an array
+    let photoData = null;
+    if (scanData.photo) {
+      photoData = typeof scanData.photo === 'string' ? [scanData.photo] : scanData.photo;
+    }
+
+    return {
+      name: scanData.name || '',
+      category: scanData.category || 'tops',
+      brand: scanData.brand || '',
+      color: scanData.color || '',
+      size: scanData.size || '',
+      material: scanData.material || '',
+      condition: scanData.condition || 'good',
+      season: scanData.season || 'all-season',
+      occasion: scanData.occasion || 'casual',
+      tags: scanData.tags || [],
+      notes: scanData.description || '',
+      photos: photoData
+    };
+  };
+  
   const itemOptions = [
     {
       title: "Insert Item Manually",

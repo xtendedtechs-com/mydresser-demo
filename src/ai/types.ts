@@ -104,11 +104,33 @@ export interface EnhancedOutfit {
 
 export interface LayeringStructure {
   base: WardrobeItem[];
-  middle: WardrobeItem[];
-  outer: WardrobeItem[];
+  head?: WardrobeItem[];
+  torso_base: WardrobeItem[];
+  torso_mid: WardrobeItem[];
+  torso_outer: WardrobeItem[];
+  legs: WardrobeItem[];
   feet: WardrobeItem[];
-  accessories: WardrobeItem[];
+  accessories: {
+    neck?: WardrobeItem[];
+    hands?: WardrobeItem[];
+    waist?: WardrobeItem[];
+    carry?: WardrobeItem[];
+    other?: WardrobeItem[];
+  };
   layeringLogic: string;
+  fabricAnalysis?: {
+    fabrics: {
+      breathable: WardrobeItem[];
+      insulating: WardrobeItem[];
+      waterproof: WardrobeItem[];
+      stretch: WardrobeItem[];
+    };
+    breathability: string;
+    insulation: string;
+    weatherResistance: string;
+    comfort: string;
+  };
+  totalLayers?: number;
 }
 
 export interface AccessoryRecommendations {
