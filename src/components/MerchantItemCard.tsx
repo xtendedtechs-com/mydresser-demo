@@ -10,6 +10,7 @@ import {
   MoreHorizontal
 } from "lucide-react";
 import { MerchantItem } from "@/hooks/useMerchantItems";
+import { getPrimaryPhotoUrl, getCategoryPlaceholderImage } from "@/utils/photoHelpers";
 
 interface MerchantItemCardProps {
   item: MerchantItem;
@@ -21,21 +22,18 @@ const MerchantItemCard = ({ item, onAction }: MerchantItemCardProps) => {
     ? Math.round(((item.original_price - item.price) / item.original_price) * 100)
     : 0;
 
-  const getPhotoUrl = () => {
-    if (!item.photos) return '/placeholder.svg';
-    if (typeof item.photos === 'string') return item.photos;
-    if (Array.isArray(item.photos) && item.photos.length > 0) return item.photos[0];
-    return '/placeholder.svg';
-  };
-
   return (
     <Card className="overflow-hidden bg-background hover:shadow-lg transition-all duration-200">
       {/* Image Container */}
       <div className="relative aspect-[3/4] bg-muted">
         <img
-          src={getPhotoUrl()}
+          src={getPrimaryPhotoUrl(item.photos, item.category)}
           alt={item.name}
           className="w-full h-full object-cover"
+          onError={(e) => {
+            const placeholder = getCategoryPlaceholderImage(item.category);
+            e.currentTarget.src = placeholder;
+          }}
         />
         
         {/* Overlay Badges */}
