@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { AppProviders } from "@/components/providers/AppProviders";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { useProfile } from "@/hooks/useProfile";
 
@@ -26,7 +25,7 @@ const TerminalApp = () => {
   const isMerchant = isAuthenticated && profile?.role === 'merchant';
 
   return (
-    <AppProviders>
+    <>
         {!isAuthenticated ? (
           <Routes>
             <Route path="/" element={<MerchantLanding />} />
@@ -59,7 +58,7 @@ const TerminalApp = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
         )}
-    </AppProviders>
+    </>
   );
 };
 
