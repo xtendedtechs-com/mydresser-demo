@@ -1,5 +1,93 @@
 # MyDresser Application Changelog
 
+## Phase 11: Sustainability & Impact Tracking (January 3, 2025)
+
+### Major Features
+- **Carbon Footprint Tracker**: Comprehensive environmental impact monitoring
+- **Sustainability Insights**: Material and brand sustainability analysis
+- **Eco-Friendly Recommendations**: Curated sustainable fashion alternatives
+- **Circular Fashion Goals**: Track rewear, secondhand, and donation goals
+
+### New Components Created
+- `CarbonFootprintTracker.tsx`: Environmental impact dashboard
+  - Real-time CO₂ savings calculation
+  - Sustainability score (0-100)
+  - Trees equivalent impact metric
+  - Water savings tracking
+  - Monthly average displays
+  - Achievement badges
+  - Items reworn statistics
+  - Visual progress indicators
+  
+- `SustainabilityInsights.tsx`: Material and brand analysis
+  - Material impact comparison (organic cotton, recycled polyester, etc.)
+  - Water and CO₂ reduction percentages
+  - Brand sustainability scores
+  - Certification badges (B-Corp, Fair Trade, GOTS, etc.)
+  - Circular fashion goals tracking
+  - Progress toward rewear, secondhand, and donation targets
+  - Visual impact icons and metrics
+  
+- `EcoFriendlyRecommendations.tsx`: Sustainable shopping
+  - Eco-friendly product recommendations
+  - Sustainability scores for products
+  - Certification displays (GOTS, Fair Trade, FSC)
+  - Feature highlights (organic, recycled, carbon neutral)
+  - Price displays and shopping integration
+  - Wishlist/save functionality
+  - Brand credibility indicators
+
+- `SustainabilityPage.tsx`: Main sustainability hub
+  - Three-tab interface (Impact, Insights, Eco Shop)
+  - Comprehensive sustainability dashboard
+  - Responsive design for all devices
+
+### Environmental Tracking Features
+- **CO₂ Savings**: Calculate carbon emissions prevented by rewearing
+- **Water Conservation**: Track liters of water saved
+- **Tree Equivalency**: Convert CO₂ savings to trees planted equivalent
+- **Rewear Metrics**: Monitor item reuse and circular fashion practices
+- **Monthly Averages**: Track environmental impact over time
+- **Achievement System**: Badges for sustainability milestones
+
+### Material Impact Analysis
+- **Low Impact Materials**: Organic cotton, recycled polyester, Tencel
+- **Impact Comparison**: Water usage and CO₂ reduction percentages
+- **Visual Indicators**: Color-coded impact levels (low, medium, high)
+- **Educational Content**: Material sustainability information
+
+### Brand Sustainability Scoring
+- **Scoring System**: 0-100 sustainability rating for brands
+- **Certification Tracking**: B-Corp, Fair Trade, GOTS, Better Cotton, etc.
+- **Category Classification**: Excellent, good, fair, poor ratings
+- **Progress Bars**: Visual representation of brand scores
+- **Transparency**: Clear certification and practice information
+
+### Circular Fashion Goals
+- **Rewear Goals**: Track items worn 30+ times
+- **Secondhand Purchases**: Monitor pre-owned item acquisition
+- **Donation Tracking**: Keep count of items donated/recycled
+- **Progress Visualization**: Interactive progress bars
+- **Goal Setting**: Customizable sustainability targets
+
+### New Routes
+- `/sustainability`: Main sustainability and impact tracking hub
+
+### Calculations & Metrics
+- **CO₂ Calculation**: ~15kg CO₂ per new garment baseline
+- **Rewear Rate**: Dynamic calculation based on usage
+- **Water Savings**: ~2,700 liters per garment
+- **Tree Equivalency**: 21kg CO₂ absorbed per tree annually
+- **Sustainability Score**: Multi-factor algorithm (rewear + practices)
+
+### User Experience Features
+- **Real-time Updates**: Dynamic metric calculations
+- **Visual Progress**: Progress bars and charts
+- **Achievement Badges**: Gamification for engagement
+- **Educational Tooltips**: Sustainability information
+- **Action Buttons**: Save, shop, and share functionality
+- **Responsive Design**: Mobile-optimized layouts
+
 ## Phase 10: Enhanced Search & Discovery (January 3, 2025)
 
 ### Major Features
