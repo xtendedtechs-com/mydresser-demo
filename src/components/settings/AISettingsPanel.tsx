@@ -4,7 +4,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { useAISettings } from '@/hooks/useAISettings';
-import { Bot, Sparkles, TrendingUp, Image } from 'lucide-react';
+import { Bot, Sparkles, TrendingUp } from 'lucide-react';
 
 export const AISettingsPanel = () => {
   const { settings, updateSettings, isUpdating } = useAISettings();
@@ -143,6 +143,59 @@ export const AISettingsPanel = () => {
               id="usage-alerts"
               checked={settings.enable_usage_alerts}
               onCheckedChange={(checked) => updateSettings({ enable_usage_alerts: checked })}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5" />
+            Analytics Preferences
+          </CardTitle>
+          <CardDescription>Configure analytics and insights features</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="enable-analytics">Enable Analytics Tracking</Label>
+              <p className="text-sm text-muted-foreground">
+                Track wardrobe usage and style patterns
+              </p>
+            </div>
+            <Switch
+              id="enable-analytics"
+              checked={true}
+              disabled
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="daily-insights">Daily Insights</Label>
+              <p className="text-sm text-muted-foreground">
+                Receive daily wardrobe insights and recommendations
+              </p>
+            </div>
+            <Switch
+              id="daily-insights"
+              checked={settings.enable_wardrobe_insights}
+              onCheckedChange={(checked) => updateSettings({ enable_wardrobe_insights: checked })}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="usage-reports">Weekly Usage Reports</Label>
+              <p className="text-sm text-muted-foreground">
+                Get weekly analytics reports via email
+              </p>
+            </div>
+            <Switch
+              id="usage-reports"
+              checked={false}
+              disabled
             />
           </div>
         </CardContent>

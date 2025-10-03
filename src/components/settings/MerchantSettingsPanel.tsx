@@ -3,7 +3,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { useMerchantSettings } from '@/hooks/useMerchantSettings';
-import { Store, ShoppingCart, Package, Users, Tag } from 'lucide-react';
+import { Store, ShoppingCart, Package, Users, Tag, TrendingUp } from 'lucide-react';
 
 export const MerchantSettingsPanel = () => {
   const { settings, updateSettings, isUpdating } = useMerchantSettings();
@@ -211,6 +211,73 @@ export const MerchantSettingsPanel = () => {
               id="analytics"
               checked={settings.enable_analytics}
               onCheckedChange={(checked) => updateSettings({ enable_analytics: checked })}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5" />
+            Analytics & Reporting
+          </CardTitle>
+          <CardDescription>Configure merchant analytics preferences</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="enable-merchant-analytics">Enable Analytics</Label>
+              <p className="text-sm text-muted-foreground">
+                Track sales, customers, and performance metrics
+              </p>
+            </div>
+            <Switch
+              id="enable-merchant-analytics"
+              checked={settings?.enable_analytics}
+              onCheckedChange={(checked) => updateSettings({ enable_analytics: checked })}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="daily-reports">Daily Sales Reports</Label>
+              <p className="text-sm text-muted-foreground">
+                Receive daily sales summaries via email
+              </p>
+            </div>
+            <Switch
+              id="daily-reports"
+              checked={false}
+              disabled
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="customer-analytics">Customer Analytics</Label>
+              <p className="text-sm text-muted-foreground">
+                Track customer behavior and preferences
+              </p>
+            </div>
+            <Switch
+              id="customer-analytics"
+              checked={true}
+              disabled
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="inventory-alerts">Inventory Analytics</Label>
+              <p className="text-sm text-muted-foreground">
+                Monitor stock levels and sales trends
+              </p>
+            </div>
+            <Switch
+              id="inventory-alerts"
+              checked={settings?.enable_stock_alerts}
+              onCheckedChange={(checked) => updateSettings({ enable_stock_alerts: checked })}
             />
           </div>
         </CardContent>
