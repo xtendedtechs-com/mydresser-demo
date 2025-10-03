@@ -48,6 +48,7 @@ import SustainabilityPage from "@/pages/SustainabilityPage";
 import GamificationPage from "@/pages/GamificationPage";
 import VirtualFittingRoom from "@/pages/VirtualFittingRoom";
 import AdvancedAIPage from "@/pages/AdvancedAIPage";
+import PersonalShoppingPage from "@/pages/PersonalShoppingPage";
 
 export const AuthWrapper = () => {
   const { isAuthenticated, loading } = useProfile();
@@ -106,6 +107,7 @@ export const AuthWrapper = () => {
             <Route path="/challenges" element={<GamificationPage />} />
             <Route path="/virtual-fitting" element={<VirtualFittingRoom />} />
             <Route path="/advanced-ai" element={<AdvancedAIPage />} />
+            <Route path="/personal-shopping" element={<PersonalShoppingPage />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
