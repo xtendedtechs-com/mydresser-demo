@@ -125,55 +125,60 @@ export const EnhancedMerchantPOSTerminal = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">POS Terminal</h1>
-          <p className="text-muted-foreground">Process sales and manage orders</p>
+    <div className="min-h-screen bg-background p-4 sm:p-6 space-y-4 sm:space-y-6 pb-20 md:pb-6">
+      <div className="container max-w-7xl mx-auto">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold">POS Terminal</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">Process sales and manage orders</p>
+          </div>
+          <Badge variant="outline" className="text-sm sm:text-lg px-3 sm:px-4 py-1.5 sm:py-2">
+            <CheckCircle className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+            System Online
+          </Badge>
         </div>
-        <Badge variant="outline" className="text-lg px-4 py-2">
-          <CheckCircle className="mr-2 h-4 w-4" />
-          System Online
-        </Badge>
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="container max-w-7xl mx-auto">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {quickStats.map((stat) => (
           <Card key={stat.title}>
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 sm:pt-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">{stat.title}</p>
-                  <p className="text-2xl font-bold">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{stat.subtitle}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">{stat.title}</p>
+                  <p className="text-xl sm:text-2xl font-bold">{stat.value}</p>
+                  <p className="text-xs text-muted-foreground mt-1 truncate">{stat.subtitle}</p>
                 </div>
-                <stat.icon className={`h-8 w-8 ${stat.color}`} />
+                <stat.icon className={`h-6 w-6 sm:h-8 sm:w-8 flex-shrink-0 ${stat.color}`} />
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
+      </div>
 
       {/* Main POS Interface */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="checkout">
-            <ShoppingCart className="mr-2 h-4 w-4" />
-            Checkout
-          </TabsTrigger>
-          <TabsTrigger value="orders">
-            <Package className="mr-2 h-4 w-4" />
-            Orders
-          </TabsTrigger>
-          <TabsTrigger value="customers">
-            <Users className="mr-2 h-4 w-4" />
-            Customers
-          </TabsTrigger>
-        </TabsList>
+      <div className="container max-w-7xl mx-auto">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-3 mb-4">
+            <TabsTrigger value="checkout" className="text-xs sm:text-sm">
+              <ShoppingCart className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Checkout</span>
+            </TabsTrigger>
+            <TabsTrigger value="orders" className="text-xs sm:text-sm">
+              <Package className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Orders</span>
+            </TabsTrigger>
+            <TabsTrigger value="customers" className="text-xs sm:text-sm">
+              <Users className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Customers</span>
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="checkout" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <TabsContent value="checkout" className="space-y-4 mt-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Scan Item */}
             <Card>
               <CardHeader>
@@ -350,6 +355,7 @@ export const EnhancedMerchantPOSTerminal = () => {
           </Card>
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 };

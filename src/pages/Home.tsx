@@ -112,62 +112,63 @@ const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-20 md:pb-4">
       {/* Header */}
       <header className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-10">
-        <div className="px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">Welcome back, {profile?.full_name || 'Fashion Lover'}!</h1>
-              <p className="text-sm text-muted-foreground">
+        <div className="container max-w-7xl mx-auto px-4 py-4 lg:px-6">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold truncate">
+                Welcome back, {profile?.full_name || 'Fashion Lover'}!
+              </h1>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 {new Date().toLocaleDateString('en-US', { 
                   weekday: 'long', 
-                  year: 'numeric', 
                   month: 'long', 
                   day: 'numeric' 
                 })}
               </p>
             </div>
-            <Badge variant="secondary" className="flex items-center space-x-1">
+            <Badge variant="secondary" className="flex items-center space-x-1 flex-shrink-0">
               <Shield className="w-4 h-4" />
-              <span>Secured</span>
+              <span className="hidden sm:inline">Secured</span>
             </Badge>
           </div>
         </div>
       </header>
 
-      <main className="px-4 py-6 space-y-8">
+      <main className="container max-w-7xl mx-auto px-4 lg:px-6 py-4 sm:py-6 lg:py-8 space-y-6 sm:space-y-8">
         {/* Stats Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Card>
-            <CardContent className="p-4 text-center">
-              <Shirt className="w-8 h-8 mx-auto mb-2 text-primary" />
-              <p className="text-2xl font-bold">{stats.wardrobeItems}</p>
-              <p className="text-sm text-muted-foreground">Items</p>
+            <CardContent className="p-3 sm:p-4 text-center">
+              <Shirt className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-primary" />
+              <p className="text-xl sm:text-2xl font-bold">{stats.wardrobeItems}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Items</p>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="p-4 text-center">
-              <Sparkles className="w-8 h-8 mx-auto mb-2 text-green-600" />
-              <p className="text-2xl font-bold">{stats.outfitsCreated}</p>
-              <p className="text-sm text-muted-foreground">Outfits</p>
+            <CardContent className="p-3 sm:p-4 text-center">
+              <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-green-600" />
+              <p className="text-xl sm:text-2xl font-bold">{stats.outfitsCreated}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Outfits</p>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="p-4 text-center">
-              <TrendingUp className="w-8 h-8 mx-auto mb-2 text-blue-600" />
-              <p className="text-2xl font-bold">{stats.totalWears}</p>
-              <p className="text-sm text-muted-foreground">Total Wears</p>
+            <CardContent className="p-3 sm:p-4 text-center">
+              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-blue-600" />
+              <p className="text-xl sm:text-2xl font-bold">{stats.totalWears}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Total Wears</p>
             </CardContent>
           </Card>
           
           <Card>
-            <CardContent className="p-4 text-center">
-              <Star className="w-8 h-8 mx-auto mb-2 text-yellow-600" />
-              <p className="text-2xl font-bold">{stats.favoriteItems}</p>
-              <p className="text-sm text-muted-foreground">Favorites</p>
+            <CardContent className="p-3 sm:p-4 text-center">
+              <Star className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-yellow-600" />
+              <p className="text-xl sm:text-2xl font-bold">{stats.favoriteItems}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Favorites</p>
             </CardContent>
           </Card>
         </div>
@@ -179,18 +180,18 @@ const Home = () => {
             <CardDescription>Jump into your favorite features</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 sm:gap-4">
               {quickActions.map((action) => (
                 <Button
                   key={action.title}
                   variant="outline"
-                  className="h-20 flex-col space-y-2"
+                  className="h-20 sm:h-24 flex-col space-y-1.5 sm:space-y-2 p-2"
                   onClick={() => navigate(action.href)}
                 >
-                  <action.icon className="w-6 h-6" />
-                  <div className="text-center">
-                    <p className="font-medium text-sm">{action.title}</p>
-                    <p className="text-xs text-muted-foreground">{action.description}</p>
+                  <action.icon className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
+                  <div className="text-center min-w-0 w-full">
+                    <p className="font-medium text-xs sm:text-sm truncate">{action.title}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-2">{action.description}</p>
                   </div>
                 </Button>
               ))}
@@ -200,11 +201,11 @@ const Home = () => {
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="outfits">Outfits</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="laundry">Laundry</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
+            <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
+            <TabsTrigger value="outfits" className="text-xs sm:text-sm">Outfits</TabsTrigger>
+            <TabsTrigger value="analytics" className="text-xs sm:text-sm">Analytics</TabsTrigger>
+            <TabsTrigger value="laundry" className="text-xs sm:text-sm">Laundry</TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">

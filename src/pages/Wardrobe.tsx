@@ -19,47 +19,57 @@ const Wardrobe = () => {
   const [showSettings, setShowSettings] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-background pb-20 md:pb-4">
       <header className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-10">
-        <div className="px-4 py-4">
-          <h1 className="text-2xl font-bold fashion-text-gradient mb-4">My Wardrobe</h1>
+        <div className="container max-w-7xl mx-auto px-4 py-4 lg:px-6">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold fashion-text-gradient mb-3 sm:mb-4">My Wardrobe</h1>
           
-          <div className="flex justify-between items-center">
-            <div className="flex gap-1">
+          <div className="flex justify-between items-center gap-2">
+            <div className="flex gap-1 flex-wrap">
               <Button
                 variant={viewMode === "grid" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setViewMode("grid")}
+                className="px-2 sm:px-3"
               >
                 <Grid3X3 size={16} />
+                <span className="sr-only sm:not-sr-only sm:ml-1 text-xs">Grid</span>
               </Button>
               <Button
                 variant={viewMode === "vector" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setViewMode("vector")}
+                className="px-2 sm:px-3"
               >
                 <Home size={16} />
+                <span className="sr-only sm:not-sr-only sm:ml-1 text-xs">Vector</span>
               </Button>
               <Button
                 variant={viewMode === "search" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setViewMode("search")}
+                className="px-2 sm:px-3"
               >
                 <Search size={16} />
+                <span className="sr-only sm:not-sr-only sm:ml-1 text-xs">Search</span>
               </Button>
               <Button
                 variant={viewMode === "outfits" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setViewMode("outfits")}
+                className="px-2 sm:px-3"
               >
                 <Zap size={16} />
+                <span className="sr-only lg:not-sr-only lg:ml-1 text-xs">Outfits</span>
               </Button>
               <Button
                 variant={viewMode === "laundry" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setViewMode("laundry")}
+                className="px-2 sm:px-3"
               >
                 <List size={16} />
+                <span className="sr-only lg:not-sr-only lg:ml-1 text-xs">Laundry</span>
               </Button>
             </div>
             <div className="flex gap-2">
@@ -84,7 +94,7 @@ const Wardrobe = () => {
         </div>
       </header>
 
-      <main className="px-4 py-6">
+      <main className="container max-w-7xl mx-auto px-4 lg:px-6 py-4 sm:py-6">
         {viewMode === "vector" && (
           <WardrobeVector onAddItem={() => setShowAddDialog(true)} />
         )}
