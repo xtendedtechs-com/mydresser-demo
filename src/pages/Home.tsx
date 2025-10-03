@@ -53,6 +53,13 @@ const Home = () => {
 
   const quickActions = [
     {
+      title: 'AI Style Chat',
+      description: 'Get personalized fashion advice',
+      icon: Sparkles,
+      href: '/ai-assistant',
+      color: 'purple'
+    },
+    {
       title: 'Add New Item',
       description: 'Expand your digital wardrobe',
       icon: Shirt,
@@ -63,22 +70,15 @@ const Home = () => {
       title: 'Browse Market',
       description: 'Discover new fashion',
       icon: ShoppingBag,
-      href: '/marketplace',
+      href: '/market',
       color: 'green'
     },
     {
-      title: 'Smart Matcher',
-      description: 'AI-powered outfit suggestions',
-      icon: Sparkles,
-      href: '/smart-matcher',
-      color: 'purple'
-    },
-    {
-      title: 'Laundry Tracker',
-      description: 'Manage your laundry schedule',
-      icon: Droplets,
-      href: '/laundry',
-      color: 'cyan'
+      title: 'Wardrobe Insights',
+      description: 'AI-powered analytics',
+      icon: BarChart3,
+      href: '/wardrobe-insights',
+      color: 'orange'
     }
   ];
 

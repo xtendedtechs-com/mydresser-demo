@@ -11,3 +11,12 @@ verify_jwt = true
 
 [functions.security-monitor]
 verify_jwt = false
+
+[functions.ai-outfit-suggestions]
+verify_jwt = true
+
+[functions.ai-style-chat]
+verify_jwt = true
+
+[functions.ai-wardrobe-insights]
+verify_jwt = true
