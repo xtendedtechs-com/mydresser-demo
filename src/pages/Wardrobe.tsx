@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Grid3X3, List, Search, Filter, Home, Settings, Zap } from "lucide-react";
+import { Grid3X3, List, Search, Filter, Home, Settings, Zap, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
 import WardrobeVector from "@/components/WardrobeVector";
 import EnhancedWardrobeManager from "@/components/EnhancedWardrobeManager";
 import AddItemWithMatching from "@/components/AddItemWithMatching";
@@ -12,6 +13,7 @@ import SettingsDialog from "@/components/SettingsDialog";
 import { toast } from "sonner";
 
 const Wardrobe = () => {
+  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<"grid" | "wardrobe" | "vector" | "search" | "outfits" | "laundry">("grid");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -60,13 +62,24 @@ const Wardrobe = () => {
                 <List size={16} />
               </Button>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowSettings(true)}
-            >
-              <Settings size={16} />
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/wardrobe-analytics")}
+                className="flex items-center gap-1"
+              >
+                <BarChart3 size={16} />
+                <span className="hidden sm:inline">Analytics</span>
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowSettings(true)}
+              >
+                <Settings size={16} />
+              </Button>
+            </div>
           </div>
         </div>
       </header>

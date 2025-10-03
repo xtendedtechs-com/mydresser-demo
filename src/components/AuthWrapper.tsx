@@ -58,6 +58,7 @@ import AIInsightsPage from "@/pages/AIInsightsPage";
 import CollaborationPage from "@/pages/CollaborationPage";
 import AIStyleAssistantPage from "@/pages/AIStyleAssistantPage";
 import VerificationPage from "@/pages/VerificationPage";
+import WardrobeAnalyticsPage from "@/pages/WardrobeAnalyticsPage";
 
 export const AuthWrapper = () => {
   const { isAuthenticated, loading } = useProfile();
@@ -126,6 +127,7 @@ export const AuthWrapper = () => {
             <Route path="/ai-style-assistant" element={<AIStyleAssistantPage />} />
             <Route path="/collaborate" element={<CollaborationPage />} />
             <Route path="/verification" element={<VerificationPage />} />
+            <Route path="/wardrobe-analytics" element={<WardrobeAnalyticsPage />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

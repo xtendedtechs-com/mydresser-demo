@@ -232,6 +232,13 @@ const Account = () => {
       onClick: () => navigateToServiceSettings('wardrobe')
     },
     {
+      id: 'analytics',
+      label: 'Wardrobe Analytics',
+      description: 'Advanced insights and optimization',
+      onClick: () => navigate('/wardrobe-analytics'),
+      highlighted: true
+    },
+    {
       id: 'inventory',
       label: 'Inventory',
       description: 'Manage your clothing inventory',

@@ -146,6 +146,15 @@ export function CommandPalette() {
       keywords: ["verify", "merchant", "professional", "badge", "trust", "certification"],
       category: "Account"
     },
+    {
+      id: "wardrobe-analytics",
+      label: "Wardrobe Analytics",
+      description: "Advanced wardrobe insights and optimization",
+      icon: BarChart3,
+      action: () => navigate("/wardrobe-analytics"),
+      keywords: ["analytics", "wardrobe", "stats", "insights", "analysis", "frequency", "value"],
+      category: "AI Features"
+    },
 
     // Social & Collaboration
     {
