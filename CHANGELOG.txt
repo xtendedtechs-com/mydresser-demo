@@ -1,6 +1,96 @@
 # MyDresser Application Changelog
 
-## Phase 30: Community Features (Current)
+## Phase 31: International Expansion (Current)
+**Date**: October 3, 2025
+
+### Major Features Added
+- **Multi-Language Support**
+  - Language selector dropdown with 10 languages
+  - Languages: English, Spanish, French, German, Italian, Portuguese, Japanese, Korean, Chinese, Arabic
+  - Flag icons for visual identification
+  - Native language names display
+  - Persistent language preferences via localStorage
+  - Real-time language switching
+  
+- **Currency Conversion Tool**
+  - Real-time currency converter with 10 major currencies
+  - Currencies: USD, EUR, GBP, JPY, CNY, INR, AUD, CAD, CHF, BRL
+  - Bidirectional conversion with swap functionality
+  - Live exchange rate calculations
+  - Quick conversion shortcuts (100, 500, 1000)
+  - Currency symbols and proper formatting
+  - Exchange rate display
+  
+- **Regional Preferences System**
+  - Region selection (7 world regions)
+  - Temperature unit toggle (Celsius/Fahrenheit)
+  - Date format customization (4 formats: US, EU, ISO, DE)
+  - Time format selection (12h/24h)
+  - Measurement system (metric/imperial)
+  - Local trends visibility toggle
+  - Regional shipping preferences
+  - Preferences summary with badges
+  - Persistent settings storage
+  
+- **International Shipping Calculator**
+  - Shipping cost estimation between countries
+  - 12 countries supported
+  - Weight-based pricing calculations
+  - Three shipping options:
+    - Standard International (10-15 days)
+    - Express International (3-5 days)
+    - Economy Shipping (15-30 days)
+  - Tracking and insurance information
+  - Customs and duties notices
+  - Route and region information display
+  
+- **Unified International Page**
+  - Comprehensive tabbed interface
+  - Four main sections: Currency, Regional, Shipping, Language
+  - Language selector in page header
+  - Responsive design for all devices
+  - Seamless navigation between sections
+
+### New Components
+- `src/components/LanguageSelector.tsx`
+  - Dropdown language selector with flags
+  - Supports 10 languages
+  - Persistent preferences
+  
+- `src/components/CurrencyConverter.tsx`
+  - Full-featured currency converter
+  - Real-time calculations
+  - Quick conversion buttons
+  
+- `src/components/RegionalPreferences.tsx`
+  - Comprehensive regional settings
+  - Multiple format options
+  - Toggle switches for features
+  
+- `src/components/InternationalShipping.tsx`
+  - Shipping calculator with estimates
+  - Multiple shipping options
+  - Country selection system
+  
+- `src/pages/InternationalPage.tsx`
+  - Main international settings hub
+  - Tabbed navigation
+  - Integrated all international features
+
+### Routes Added
+- `/international` - Access international settings (Main App only)
+
+### UI/UX Improvements
+- Flag emojis for visual country/language identification
+- Color-coded badges for active preferences
+- Smooth animations and transitions
+- Responsive layouts for mobile and desktop
+- Clear visual hierarchy
+- Intuitive form controls
+
+---
+
+## Phase 30: Community Features
 **Date**: October 3, 2025
 
 ### Major Features Added
