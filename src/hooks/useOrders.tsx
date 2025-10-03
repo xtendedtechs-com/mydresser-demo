@@ -241,6 +241,35 @@ export const useOrders = () => {
     if (user?.id) {
       fetchOrders();
     }
+
+    // Real-time subscription for orders
+    const channel = supabase
+      .channel('orders-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders',
+        },
+        (payload) => {
+          fetchOrders();
+          
+          // Show toast for order status changes
+          if (payload.eventType === 'UPDATE') {
+            const order = payload.new as any;
+            toast({
+              title: 'Order Updated',
+              description: `Order #${order.id.slice(0, 8)} status: ${order.status}`,
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user?.id, profile?.role]);
 
   return {

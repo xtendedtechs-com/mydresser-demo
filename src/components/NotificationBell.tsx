@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import NotificationCenter from "./NotificationCenter";
 import { useNotifications } from "@/hooks/useNotifications";
+import { RealTimeIndicator } from "./RealTimeIndicator";
 
 const NotificationBell = () => {
   const [showNotifications, setShowNotifications] = useState(false);
@@ -11,7 +12,8 @@ const NotificationBell = () => {
 
   return (
     <>
-      <div className="relative">
+      <div className="relative flex items-center gap-2">
+        <RealTimeIndicator />
         <Button
           variant="ghost"
           size="icon"

@@ -299,6 +299,26 @@ export const useSocial = () => {
     if (user?.id) {
       fetchFollowData();
     }
+
+    // Real-time subscription for social feed
+    const channel = supabase
+      .channel('social-feed-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'social_posts',
+        },
+        () => {
+          fetchPosts();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user?.id]);
 
   const addReaction = async (targetId: string, targetType: string, reactionType: string = 'like') => {

@@ -238,6 +238,26 @@ export const useMerchantItems = () => {
 
   useEffect(() => {
     fetchMerchantItems();
+
+    // Real-time subscription for merchant items
+    const channel = supabase
+      .channel('merchant-items-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'merchant_items',
+        },
+        () => {
+          fetchMerchantItems();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user?.id]);
 
   const getMerchantItem = (id: string) => {
