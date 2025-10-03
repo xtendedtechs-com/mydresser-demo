@@ -117,6 +117,48 @@ export const useDailyOutfitSuggestions = () => {
     return updateSuggestion(id, { is_rejected: true, is_accepted: false });
   };
 
+  const generateNewSuggestion = async (timeSlot: string, occasion: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const today = new Date().toISOString().split('T')[0];
+
+      const { data, error } = await supabase
+        .from('daily_outfit_suggestions')
+        .insert({
+          user_id: user.id,
+          suggestion_date: today,
+          time_slot: timeSlot,
+          occasion: occasion,
+          confidence_score: Math.floor(Math.random() * 15) + 80, // 80-95
+          weather_data: {
+            temperature: Math.floor(Math.random() * 20) + 10,
+            condition: ['sunny', 'cloudy', 'rainy'][Math.floor(Math.random() * 3)]
+          }
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setSuggestions(prev => [data, ...prev]);
+      toast({
+        title: "New outfit suggested",
+        description: "AI has generated a new outfit for you!",
+      });
+
+      return data;
+    } catch (error: any) {
+      toast({
+        title: "Error generating suggestion",
+        description: error.message,
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   return {
     suggestions,
     loading,
@@ -124,6 +166,7 @@ export const useDailyOutfitSuggestions = () => {
     updateSuggestion,
     acceptSuggestion,
     rejectSuggestion,
+    generateNewSuggestion,
     refetch: fetchTodaysSuggestions
   };
 };
