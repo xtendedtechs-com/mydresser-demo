@@ -39,6 +39,7 @@ import SupportsResources from "@/pages/SupportsResources";
 import ReportsAnalyticsPage from "@/pages/ReportsAnalyticsPage";
 import UserAnalyticsPage from "@/pages/UserAnalyticsPage";
 import MerchantAnalyticsPage from "@/pages/MerchantAnalyticsPage";
+import OutfitDetail from "@/pages/OutfitDetail";
 
 export const AuthWrapper = () => {
   const { isAuthenticated, loading } = useProfile();
@@ -87,6 +88,7 @@ export const AuthWrapper = () => {
             <Route path="/settings/:category" element={<SettingsPage />} />
             <Route path="/item/:id" element={<ItemDetail />} />
             <Route path="/wardrobe/item/:id" element={<WardrobeItemDetail />} />
+            <Route path="/wardrobe/outfit/:id" element={<OutfitDetail />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
