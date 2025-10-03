@@ -90,7 +90,7 @@ export const useWardrobe = () => {
     }
   };
 
-  const addItem = async (itemData: Omit<WardrobeItem, 'id' | 'created_at' | 'updated_at'>) => {
+  const addItem = async (itemData: Omit<WardrobeItem, 'id' | 'created_at' | 'updated_at'>, files?: File[]) => {
     try {
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
@@ -114,6 +114,29 @@ export const useWardrobe = () => {
         .single();
 
       if (error) throw error;
+
+      // Upload photos if provided
+      if (files && files.length > 0 && data.id) {
+        const { fileUploadService } = await import('@/services/fileUploadService');
+        const uploadResults = await Promise.all(
+          files.map(file => fileUploadService.uploadWardrobePhoto(file, user.id, data.id))
+        );
+        
+        const photoUrls = uploadResults
+          .filter(r => r.success)
+          .map(r => r.url)
+          .filter((url): url is string => url !== undefined);
+
+        if (photoUrls.length > 0) {
+          // Update item with photo URLs
+          const { error: updateError } = await supabase
+            .from('wardrobe_items')
+            .update({ photos: { urls: photoUrls } as any })
+            .eq('id', data.id);
+
+          if (updateError) console.error('Error updating photos:', updateError);
+        }
+      }
 
       setItems(prev => [data, ...prev]);
       toast({
