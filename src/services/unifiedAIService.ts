@@ -5,7 +5,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { myDresserAI } from './myDresserAI';
-import { WardrobeItem } from '@/hooks/useWardrobe';
 
 export interface AIRequest {
   type: 'outfit' | 'style' | 'trend' | 'chat' | 'analysis' | 'recommendation';

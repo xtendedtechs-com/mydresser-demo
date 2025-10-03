@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -20,7 +20,6 @@ import { WearFrequencyAnalyzer } from '@/components/WearFrequencyAnalyzer';
 import { useWardrobe } from '@/hooks/useWardrobe';
 import { unifiedAI } from '@/services/unifiedAIService';
 import { browserML } from '@/services/browserMLService';
-import { useEffect } from 'react';
 
 export function UnifiedAIHub() {
   const { items: wardrobeItems } = useWardrobe();

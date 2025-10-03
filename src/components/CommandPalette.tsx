@@ -93,9 +93,18 @@ export function CommandPalette() {
 
     // AI Features
     {
+      id: "ai-hub",
+      label: "AI Intelligence Hub",
+      description: "Unified AI features and ML capabilities",
+      icon: Brain,
+      action: () => navigate("/ai-hub"),
+      keywords: ["ai", "artificial intelligence", "machine learning", "ml", "smart"],
+      category: "AI Features"
+    },
+    {
       id: "ai-insights",
-      label: "AI Insights Hub",
-      description: "Access all AI-powered features",
+      label: "AI Insights",
+      description: "Trend analysis and purchase advisor",
       icon: Sparkles,
       action: () => navigate("/ai-insights"),
       keywords: ["ai", "insights", "trends", "analysis", "purchase", "smart"],
