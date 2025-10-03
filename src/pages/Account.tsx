@@ -38,7 +38,7 @@ import UserAnalyticsDashboard from "@/components/UserAnalyticsDashboard";
 import ComprehensiveSettingsPanel from "@/components/ComprehensiveSettingsPanel";
 import { PaymentSettingsPanel } from "@/components/settings/PaymentSettingsPanel";
 import { AISettingsPanel } from "@/components/settings/AISettingsPanel";
-import { MerchantSettingsPanel } from "@/components/settings/MerchantSettingsPanel";
+import { AdvancedPredictiveAnalytics } from "@/components/AdvancedPredictiveAnalytics";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -333,6 +333,7 @@ const Account = () => {
           <h2 className="text-2xl font-bold">Analytics</h2>
         </div>
         <UserAnalyticsDashboard />
+        <AdvancedPredictiveAnalytics type="user" timeframe="30d" />
       </div>
     );
   };
@@ -391,14 +392,11 @@ const Account = () => {
 
           {/* Account Settings Sections */}
           <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid grid-cols-4 lg:grid-cols-7 gap-1 h-auto">
+            <TabsList className="grid grid-cols-3 lg:grid-cols-6 gap-1 h-auto">
               <TabsTrigger value="profile" className="text-xs sm:text-sm">Profile</TabsTrigger>
               <TabsTrigger value="settings" className="text-xs sm:text-sm">Settings</TabsTrigger>
               <TabsTrigger value="payments" className="text-xs sm:text-sm">Payments</TabsTrigger>
               <TabsTrigger value="ai" className="text-xs sm:text-sm">AI</TabsTrigger>
-              {profile?.role === 'merchant' && (
-                <TabsTrigger value="merchant" className="text-xs sm:text-sm">Merchant</TabsTrigger>
-              )}
               <TabsTrigger value="mystyle" className="text-xs sm:text-sm">Style</TabsTrigger>
               <TabsTrigger value="analytics" className="text-xs sm:text-sm">Analytics</TabsTrigger>
             </TabsList>
@@ -546,12 +544,6 @@ const Account = () => {
             <TabsContent value="ai" className="space-y-6">
               <AISettingsPanel />
             </TabsContent>
-
-            {profile?.role === 'merchant' && (
-              <TabsContent value="merchant" className="space-y-6">
-                <MerchantSettingsPanel />
-              </TabsContent>
-            )}
 
             <TabsContent value="mystyle" className="space-y-6">
               {renderMyStyle()}

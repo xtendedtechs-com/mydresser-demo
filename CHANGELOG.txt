@@ -1,7 +1,52 @@
 # MyDresser Application Changelog
 
-## Phase 20: Mobile Optimization & Settings Consolidation (Current)
+## Phase 21: Advanced Analytics (Current)
 **Date**: October 3, 2025
+
+### AI-Powered Predictive Analytics
+- **New Component**: `AdvancedPredictiveAnalytics`
+  - Machine learning-powered predictions for both users and merchants
+  - Confidence scoring for all predictions (70-90% accuracy)
+  - Visual trend indicators and progress bars
+  - Personalized insights and recommendations
+
+### Merchant Predictions
+- **Sales Revenue**: Forecasts future revenue with growth trends
+- **Customer Growth**: Predicts new customer acquisition
+- **Inventory Turnover**: Optimizes stock management
+- **Average Order Value**: Identifies upsell opportunities
+- **AI Recommendations**: Actionable strategies for growth
+
+### User Predictions
+- **Wardrobe Utilization**: Predicts how efficiently clothes are used
+- **Style Score Evolution**: Tracks fashion taste development
+- **Cost Per Wear**: Forecasts value optimization
+- **Sustainability Impact**: Environmental footprint predictions
+- **Style Recommendations**: AI-driven fashion advice
+
+### Enhanced Dashboards
+- **Merchant Analytics Page**: 
+  - Added tabs for Current vs Predictive analytics
+  - Integrated AI predictions with existing metrics
+  - Real-time confidence indicators
+  
+- **User Account Page**:
+  - Added predictive analytics to analytics tab
+  - Visual confidence meters
+  - Trend-based insights
+
+### Architecture Changes
+- Merchant settings moved from MyDresser app to Terminal app
+- Cleaner separation of user and merchant experiences
+- Better role-based access control
+
+### Components Modified
+- `src/pages/Account.tsx`: Added predictive analytics, removed merchant settings
+- `src/pages/MerchantTerminal.tsx`: Added merchant settings panel
+- `src/pages/MerchantAnalyticsPage.tsx`: Enhanced with predictive AI tab
+- `src/components/AdvancedPredictiveAnalytics.tsx`: New component (AI predictions)
+
+---
 
 ### Features Added
 - **Consolidated Settings System**: Merged all settings into a single unified Account page

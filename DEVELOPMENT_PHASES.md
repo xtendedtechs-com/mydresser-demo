@@ -177,7 +177,7 @@ This document tracks the development progress of the MyDresser application.
   - ✅ Enhanced visual feedback
   - ✅ Accessibility improvements
 
-## ✅ Phase 20: Mobile Optimization & Settings Consolidation (CURRENT)
+## ✅ Phase 20: Mobile Optimization & Settings Consolidation
 - **Mobile-First Design**
   - ✅ Touch-optimized interactions (larger touch targets)
   - ✅ Responsive grid layouts (adaptive columns)
@@ -186,15 +186,15 @@ This document tracks the development progress of the MyDresser application.
   - ✅ Better spacing and padding for mobile
   
 - **Settings Consolidation**
-  - ✅ Unified all settings in Account page
+  - ✅ Unified all settings in Account page (MyDresser app)
   - ✅ Added Payment Settings tab
   - ✅ Added AI Services Settings tab
-  - ✅ Added Merchant Settings tab (for merchants)
-  - ✅ Removed duplicate settings pages
-  - ✅ Better settings organization
+  - ✅ Removed merchant settings from MyDresser app
+  - ✅ Moved merchant settings to Terminal app
+  - ✅ Better settings organization and separation
   
 - **Mobile UX Improvements**
-  - ✅ Responsive tab layouts (7 tabs on desktop, scrollable on mobile)
+  - ✅ Responsive tab layouts (6 tabs on desktop, scrollable on mobile)
   - ✅ Touch-friendly buttons and cards
   - ✅ Optimized forms for mobile input
   - ✅ Improved readability on small screens
@@ -203,6 +203,34 @@ This document tracks the development progress of the MyDresser application.
   - ✅ Created CHANGELOG.txt with complete history
   - ✅ Updated ARCHITECTURE.md with recent changes
   - ✅ Updated DEVELOPMENT_PHASES.md with Phase 20
+
+## ✅ Phase 21: Advanced Analytics with AI Predictions (CURRENT)
+- **AI-Powered Predictive Analytics**
+  - ✅ Created `AdvancedPredictiveAnalytics` component
+  - ✅ Merchant predictions (sales, customers, inventory, order value)
+  - ✅ User predictions (wardrobe utilization, style score, cost-per-wear, sustainability)
+  - ✅ Confidence scoring for predictions (AI-powered)
+  - ✅ Trend analysis with visualizations
+  
+- **Enhanced Analytics Dashboards**
+  - ✅ Integrated predictive analytics in user account page
+  - ✅ Enhanced MerchantAnalyticsPage with tabs (Current/Predictive)
+  - ✅ Real-time insights and recommendations
+  - ✅ Visual progress indicators for confidence levels
+  
+- **Business Intelligence Features**
+  - ✅ Revenue growth predictions
+  - ✅ Customer growth forecasting
+  - ✅ Inventory turnover optimization
+  - ✅ Average order value trends
+  - ✅ AI-generated actionable recommendations
+  
+- **User Insights Features**
+  - ✅ Wardrobe utilization predictions
+  - ✅ Style score evolution tracking
+  - ✅ Cost efficiency analysis
+  - ✅ Sustainability impact forecasting
+  - ✅ Personalized style recommendations
 
 ## 🎯 Future Phases
 

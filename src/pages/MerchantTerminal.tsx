@@ -12,6 +12,8 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import AddMerchantProductDialog from '@/components/AddMerchantProductDialog';
 import { EnhancedMerchantPageEditor } from '@/components/EnhancedMerchantPageEditor';
+import { MerchantSettingsPanel } from '@/components/settings/MerchantSettingsPanel';
+import { AdvancedPredictiveAnalytics } from '@/components/AdvancedPredictiveAnalytics';
 import CustomerRelations from '@/pages/CustomerRelations';
 import SupportResources from '@/pages/SupportsResources';
 import FinancialReports from '@/pages/FinancialReports';
@@ -70,7 +72,6 @@ const MerchantTerminal: React.FC = () => {
   const totalOrders = 127; // Mock data
   const averageOrderValue = totalRevenue / totalOrders;
 
-  // Navigation items
   const navigationItems = [
     { label: 'Sales Overview', id: 'overview', icon: BarChart3 },
     { label: 'Checkout Terminal', id: 'checkout', icon: ShoppingBag },
@@ -79,8 +80,8 @@ const MerchantTerminal: React.FC = () => {
     { label: 'Customer Relations', id: 'customers', icon: Users },
     { label: 'Financial Reports', id: 'financial', icon: DollarSign },
     { label: 'Merchant Page', id: 'page', icon: Globe },
-    { label: 'Support & Resources', id: 'support', icon: HelpCircle },
-    { label: 'Account Settings', id: 'account', icon: Settings }
+    { label: 'Merchant Settings', id: 'account', icon: Settings },
+    { label: 'Support & Resources', id: 'support', icon: HelpCircle }
   ];
 
   // Redirect if not merchant
@@ -980,89 +981,8 @@ const MerchantTerminal: React.FC = () => {
             {/* Account Settings */}
             {activeSection === 'account' && (
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h1 className="text-2xl font-bold">Account Settings</h1>
-                  <Button 
-                    variant="outline"
-                    onClick={async () => {
-                      await supabase.auth.signOut();
-                      window.location.href = '/';
-                    }}
-                  >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Sign Out
-                  </Button>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Profile Information</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div>
-                        <label className="text-sm font-medium">Business Name</label>
-                        <Input value={merchantProfile?.business_name || ''} />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">Business Type</label>
-                        <Input value={merchantProfile?.business_type || ''} />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">Email</label>
-                        <Input value={user?.email || ''} disabled />
-                      </div>
-                      <Button>Update Profile</Button>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Security Settings</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="p-4 border rounded-lg">
-                        <h4 className="font-medium mb-2">Two-Factor Authentication</h4>
-                        <p className="text-sm text-muted-foreground mb-3">Add an extra layer of security to your account</p>
-                        <Button variant="outline" size="sm">Enable 2FA</Button>
-                      </div>
-                      <div className="p-4 border rounded-lg">
-                        <h4 className="font-medium mb-2">Change Password</h4>
-                        <p className="text-sm text-muted-foreground mb-3">Update your account password</p>
-                        <Button variant="outline" size="sm">Change Password</Button>
-                      </div>
-                      <div className="p-4 border rounded-lg">
-                        <h4 className="font-medium mb-2">Login History</h4>
-                        <p className="text-sm text-muted-foreground mb-3">View recent login activity</p>
-                        <Button variant="outline" size="sm">View History</Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Notification Preferences</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {[
-                        { label: 'Order Notifications', description: 'Get notified when you receive new orders' },
-                        { label: 'Payment Alerts', description: 'Receive alerts for successful payments and refunds' },
-                        { label: 'Inventory Warnings', description: 'Low stock and out-of-stock notifications' },
-                        { label: 'Marketing Updates', description: 'Tips and updates to grow your business' }
-                      ].map((item, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div>
-                            <h4 className="font-medium">{item.label}</h4>
-                            <p className="text-sm text-muted-foreground">{item.description}</p>
-                          </div>
-                          <input type="checkbox" className="w-4 h-4" defaultChecked />
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                <h1 className="text-2xl font-bold">Merchant Settings</h1>
+                <MerchantSettingsPanel />
               </div>
             )}
           </main>
