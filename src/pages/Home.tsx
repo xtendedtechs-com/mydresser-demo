@@ -247,14 +247,15 @@ const Home = () => {
               Advanced Analytics Dashboard
               <ArrowRight className="w-4 h-4" />
             </Button>
-            <Button 
-              variant="outline" 
-              className="w-full justify-between"
-              onClick={() => navigate('/merchant-terminal')}
-            >
-              Merchant Terminal (Pro Users)
-              <ArrowRight className="w-4 h-4" />
-            </Button>
+            <a href="/terminal">
+              <Button 
+                variant="outline" 
+                className="w-full justify-between"
+              >
+                Merchant Terminal (Pro Users)
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </a>
           </CardContent>
         </Card>
       </main>

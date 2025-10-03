@@ -15,9 +15,9 @@ const Landing = () => {
               <span className="ml-2 text-2xl font-bold">MyDresser</span>
             </div>
             <div className="flex items-center space-x-4">
-              <Link to="/merchant">
-                <Button variant="ghost" size="sm">Merchant Access</Button>
-              </Link>
+              <a href="/terminal">
+                <Button variant="ghost" size="sm">Merchant Terminal</Button>
+              </a>
               <Link to="/auth">
                 <Button variant="outline">Sign In</Button>
               </Link>
