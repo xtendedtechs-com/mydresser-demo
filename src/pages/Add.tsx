@@ -1,6 +1,6 @@
 import AddItemWithMatching from "@/components/AddItemWithMatching";
 import ImportFromLink from "@/components/ImportFromLink";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -24,12 +24,33 @@ import {
 import AddSection from "@/components/AddSection";
 import AddOption from "@/components/AddOption";
 import { useToast } from "@/hooks/use-toast";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { useWardrobe } from "@/hooks/useWardrobe";
+import EditWardrobeItemDialog from "@/components/EditWardrobeItemDialog";
 
 const Add = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const { toast } = useToast();
+  const [params, setParams] = useSearchParams();
+  const editId = params.get('edit');
+  const navigate = useNavigate();
+  const { items } = useWardrobe();
+  const editItem = items.find(i => i.id === editId) || null;
+  const [editOpen, setEditOpen] = useState<boolean>(!!editId);
+
+  useEffect(() => {
+    setEditOpen(!!editId);
+  }, [editId]);
+
+  const handleEditOpenChange = (open: boolean) => {
+    setEditOpen(open);
+    if (!open) {
+      params.delete('edit');
+      setParams(params, { replace: true });
+    }
+  };
 
   const handleAddOption = (optionName: string) => {
     if (optionName === "Manual Item Entry") {
