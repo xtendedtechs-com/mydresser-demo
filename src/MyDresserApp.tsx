@@ -77,7 +77,6 @@ const MyDresserApp = () => {
               <Route path="/add" element={<Add />} />
               <Route path="/outfit-generator" element={<DailyOutfitGenerator />} />
               <Route path="/social" element={<SocialPage />} />
-              <Route path="/ai-recommendations" element={<AIRecommendationsPage />} />
               <Route path="/ai-assistant" element={<AIAssistantPage />} />
               <Route path="/wardrobe-insights" element={<WardrobeInsightsPage />} />
               <Route path="/2nddresser" element={<SecondDresserPage />} />
