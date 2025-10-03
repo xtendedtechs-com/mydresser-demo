@@ -1,4 +1,4 @@
-import { Home, ShoppingBag, Shirt, Plus, User, Bot } from "lucide-react";
+import { Home, ShoppingBag, Shirt, Plus, User, Bot, Brain } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useProfile } from "@/hooks/useProfile";
@@ -33,10 +33,10 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
       id: "add"
     },
     { 
-      name: "AI Chat", 
-      href: "/ai-assistant", 
-      icon: Bot,
-      id: "ai-assistant"
+      name: "AI Hub", 
+      href: "/ai-hub", 
+      icon: Brain,
+      id: "ai-hub"
     },
     { 
       name: "Market", 
@@ -52,12 +52,12 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
     }
   ];
 
-  // Show 5 tabs: Home, Wardrobe, Add, AI, Account (Market accessible from elsewhere)
+  // Show 5 tabs: Home, Wardrobe, Add, AI Hub, Account (Market accessible from elsewhere)
   const navItems = [
     baseNavItems[0], // Home
     baseNavItems[1], // Wardrobe
     baseNavItems[2], // Add
-    baseNavItems[3], // AI Chat
+    baseNavItems[3], // AI Hub
     baseNavItems[5], // Account
   ];
 
