@@ -47,9 +47,12 @@ interface SettingItem {
   highlighted?: boolean;
 }
 
+import { useWardrobe } from "@/hooks/useWardrobe";
+
 const Account = () => {
   const navigate = useNavigate();
   const { profile, loading } = useProfile();
+  const { items } = useWardrobe();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [profileEditOpen, setProfileEditOpen] = useState(false);
@@ -71,11 +74,7 @@ const Account = () => {
   };
 
   const navigateToSettings = (category: string) => {
-    if (category === 'mystyle') {
-      navigate('/mystyle');
-    } else {
-      navigate(`/service-settings/${category}`);
-    }
+    navigate(`/settings/${category}`);
   };
 
   const handleMyStyleClick = () => {
@@ -360,15 +359,15 @@ const Account = () => {
             <Card className="text-center p-4">
               <div className="space-y-2">
                 <Shirt className="w-6 h-6 mx-auto text-primary" />
-                <div className="text-2xl font-bold">--</div>
+                <div className="text-2xl font-bold">{items?.length || 0}</div>
                 <div className="text-sm text-muted-foreground">Wardrobe Items</div>
               </div>
             </Card>
             <Card className="text-center p-4">
               <div className="space-y-2">
                 <Heart className="w-6 h-6 mx-auto text-primary" />
-                <div className="text-2xl font-bold">--</div>
-                <div className="text-sm text-muted-foreground">Favorite Outfits</div>
+                <div className="text-2xl font-bold">{items?.filter(i => i.is_favorite).length || 0}</div>
+                <div className="text-sm text-muted-foreground">Favorite Items</div>
               </div>
             </Card>
             <Card className="text-center p-4">
@@ -381,7 +380,7 @@ const Account = () => {
             <Card className="text-center p-4">
               <div className="space-y-2">
                 <UserCheck className="w-6 h-6 mx-auto text-primary" />
-                <div className="text-2xl font-bold">{profile.auth_level}</div>
+                <div className="text-2xl font-bold capitalize">{profile.auth_level}</div>
                 <div className="text-sm text-muted-foreground">Auth Level</div>
               </div>
             </Card>

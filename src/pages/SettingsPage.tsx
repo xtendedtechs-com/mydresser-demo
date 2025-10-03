@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
@@ -54,6 +53,31 @@ const SettingsPage = () => {
         return {
           title: 'User Preferences',
           description: 'Customize your app experience'
+        };
+      case 'data':
+        return {
+          title: 'Data Management',
+          description: 'Export or delete your personal data'
+        };
+      case 'behavior':
+        return {
+          title: 'App Behavior',
+          description: 'Customize how the app works for you'
+        };
+      case 'suggestions':
+        return {
+          title: 'Personalize Suggestions',
+          description: 'Tailor outfit recommendations to your style'
+        };
+      case 'mystyle':
+        return {
+          title: 'My Style',
+          description: 'Define your personal style preferences'
+        };
+      case 'profile':
+        return {
+          title: 'Profile Settings',
+          description: 'Edit your profile information'
         };
       default:
         return {

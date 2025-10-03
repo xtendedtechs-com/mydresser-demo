@@ -35,6 +35,8 @@ interface UserStyle {
   created_at: string;
 }
 
+import { StylePreferencesDialog } from "@/components/StylePreferencesDialog";
+
 const MyStyle = () => {
   const { profile } = useProfile();
   const { toast } = useToast();
@@ -42,6 +44,7 @@ const MyStyle = () => {
   const [loading, setLoading] = useState(true);
   const [editingStyle, setEditingStyle] = useState<UserStyle | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [showStylePrefsDialog, setShowStylePrefsDialog] = useState(false);
   
   const [formData, setFormData] = useState({
     style_name: '',
@@ -286,12 +289,25 @@ const MyStyle = () => {
     <div className="min-h-screen bg-background pb-20">
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
         {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold fashion-text-gradient flex items-center justify-center gap-2">
-            <Palette className="w-8 h-8" />
-            MY STYLE
-          </h1>
-          <p className="text-muted-foreground">Define your personal style and let AI curate perfect outfits for you</p>
+        <div className="space-y-4">
+          <div className="text-center space-y-2">
+            <h1 className="text-3xl font-bold fashion-text-gradient flex items-center justify-center gap-2">
+              <Palette className="w-8 h-8" />
+              MY STYLE
+            </h1>
+            <p className="text-muted-foreground">Define your personal style and let AI curate perfect outfits for you</p>
+          </div>
+          
+          <div className="flex justify-center gap-3">
+            <Button onClick={() => setShowStylePrefsDialog(true)} variant="outline">
+              <Sparkles className="w-4 h-4 mr-2" />
+              Style Preferences
+            </Button>
+            <Button onClick={() => { setEditingStyle(null); resetForm(); setIsDialogOpen(true); }}>
+              <Plus className="w-4 h-4 mr-2" />
+              Create New Style
+            </Button>
+          </div>
         </div>
 
         {/* Active Style Display */}
@@ -626,6 +642,11 @@ const MyStyle = () => {
           </Card>
         )}
       </div>
+
+      <StylePreferencesDialog 
+        open={showStylePrefsDialog} 
+        onOpenChange={setShowStylePrefsDialog}
+      />
     </div>
   );
 };

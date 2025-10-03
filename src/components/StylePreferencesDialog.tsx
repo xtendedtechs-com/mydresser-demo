@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
+import { useStylePreferences } from "@/hooks/useStylePreferences";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, X } from "lucide-react";
 
@@ -21,8 +21,8 @@ const OCCASIONS = ["Work", "Casual", "Party", "Sport", "Formal", "Travel", "Week
 
 export const StylePreferencesDialog = ({ open, onOpenChange }: StylePreferencesDialogProps) => {
   const [loading, setLoading] = useState(false);
-  const [fetchingData, setFetchingData] = useState(false);
   const { toast } = useToast();
+  const { preferences: stylePrefs, updatePreferences: updateStylePrefs, loading: fetchingData } = useStylePreferences();
   
   const [favoriteColors, setFavoriteColors] = useState<string[]>([]);
   const [favoriteBrands, setFavoriteBrands] = useState<string[]>([]);
@@ -33,67 +33,29 @@ export const StylePreferencesDialog = ({ open, onOpenChange }: StylePreferencesD
   const [newBrand, setNewBrand] = useState("");
 
   useEffect(() => {
-    if (open) {
-      fetchPreferences();
+    if (open && stylePrefs) {
+      setFavoriteColors(stylePrefs.favorite_colors || []);
+      setFavoriteBrands(stylePrefs.favorite_brands || []);
+      setStyleKeywords(stylePrefs.style_keywords || []);
+      setPreferredOccasions(stylePrefs.preferred_occasions || []);
+      setSustainabilityPriority(stylePrefs.sustainability_priority || 50);
     }
-  }, [open]);
-
-  const fetchPreferences = async () => {
-    setFetchingData(true);
-    try {
-      const { data, error } = await supabase
-        .from('style_preferences')
-        .select('*')
-        .single();
-
-      if (error && error.code !== 'PGRST116') throw error;
-
-      if (data) {
-        setFavoriteColors(data.favorite_colors || []);
-        setFavoriteBrands(data.favorite_brands || []);
-        setStyleKeywords(data.style_keywords || []);
-        setPreferredOccasions(data.preferred_occasions || []);
-        setSustainabilityPriority(data.sustainability_priority || 50);
-      }
-    } catch (error: any) {
-      console.error('Error fetching preferences:', error);
-    } finally {
-      setFetchingData(false);
-    }
-  };
+  }, [open, stylePrefs]);
 
   const handleSave = async () => {
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
-
-      const { error } = await supabase
-        .from('style_preferences')
-        .upsert({
-          user_id: user.id,
-          favorite_colors: favoriteColors,
-          favorite_brands: favoriteBrands,
-          style_keywords: styleKeywords,
-          preferred_occasions: preferredOccasions,
-          sustainability_priority: sustainabilityPriority,
-          updated_at: new Date().toISOString()
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Preferences saved",
-        description: "Your style preferences have been updated.",
+      await updateStylePrefs({
+        favorite_colors: favoriteColors,
+        favorite_brands: favoriteBrands,
+        style_keywords: styleKeywords,
+        preferred_occasions: preferredOccasions,
+        sustainability_priority: sustainabilityPriority,
       });
 
       onOpenChange(false);
     } catch (error: any) {
-      toast({
-        title: "Error saving preferences",
-        description: error.message,
-        variant: "destructive",
-      });
+      // Error already handled in hook
     } finally {
       setLoading(false);
     }
@@ -286,3 +248,5 @@ export const StylePreferencesDialog = ({ open, onOpenChange }: StylePreferencesD
     </Dialog>
   );
 };
+
+export default StylePreferencesDialog;
