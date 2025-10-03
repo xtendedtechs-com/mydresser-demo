@@ -323,6 +323,50 @@ export type Database = {
         }
         Relationships: []
       }
+      item_verifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          item_id: string
+          verification_notes: string | null
+          verification_photos: Json | null
+          verification_status: string
+          verification_type: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          item_id: string
+          verification_notes?: string | null
+          verification_photos?: Json | null
+          verification_status?: string
+          verification_type: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          item_id?: string
+          verification_notes?: string | null
+          verification_photos?: Json | null
+          verification_status?: string
+          verification_type?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "item_verifications_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "market_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       laundry_batches: {
         Row: {
           completed_at: string | null
@@ -513,6 +557,249 @@ export type Database = {
             columns: ["wardrobe_item_id"]
             isOneToOne: false
             referencedRelation: "wardrobe_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_disputes: {
+        Row: {
+          admin_notes: string | null
+          created_at: string | null
+          description: string
+          dispute_type: string
+          evidence: Json | null
+          filed_against: string
+          filed_by: string
+          id: string
+          resolution: string | null
+          resolved_at: string | null
+          status: string
+          transaction_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string | null
+          description: string
+          dispute_type: string
+          evidence?: Json | null
+          filed_against: string
+          filed_by: string
+          id?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          status?: string
+          transaction_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string | null
+          description?: string
+          dispute_type?: string
+          evidence?: Json | null
+          filed_against?: string
+          filed_by?: string
+          id?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          status?: string
+          transaction_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_disputes_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_messages: {
+        Row: {
+          attachments: Json | null
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          item_id: string | null
+          message: string
+          read_at: string | null
+          receiver_id: string
+          sender_id: string
+          transaction_id: string | null
+        }
+        Insert: {
+          attachments?: Json | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          item_id?: string | null
+          message: string
+          read_at?: string | null
+          receiver_id: string
+          sender_id: string
+          transaction_id?: string | null
+        }
+        Update: {
+          attachments?: Json | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          item_id?: string | null
+          message?: string
+          read_at?: string | null
+          receiver_id?: string
+          sender_id?: string
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_messages_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "market_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketplace_messages_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_reviews: {
+        Row: {
+          created_at: string | null
+          helpful_count: number | null
+          id: string
+          is_verified_purchase: boolean | null
+          rating: number
+          review_text: string | null
+          review_type: string
+          reviewee_id: string
+          reviewer_id: string
+          seller_response: string | null
+          seller_response_date: string | null
+          transaction_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          helpful_count?: number | null
+          id?: string
+          is_verified_purchase?: boolean | null
+          rating: number
+          review_text?: string | null
+          review_type: string
+          reviewee_id: string
+          reviewer_id: string
+          seller_response?: string | null
+          seller_response_date?: string | null
+          transaction_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          helpful_count?: number | null
+          id?: string
+          is_verified_purchase?: boolean | null
+          rating?: number
+          review_text?: string | null
+          review_type?: string
+          reviewee_id?: string
+          reviewer_id?: string
+          seller_response?: string | null
+          seller_response_date?: string | null
+          transaction_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_reviews_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketplace_transactions: {
+        Row: {
+          buyer_id: string
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          completed_at: string | null
+          created_at: string | null
+          delivered_at: string | null
+          id: string
+          item_id: string
+          notes: string | null
+          payment_method: string | null
+          payment_status: string | null
+          price: number
+          seller_id: string
+          shipped_at: string | null
+          shipping_address: Json | null
+          shipping_cost: number | null
+          status: string
+          total_amount: number
+          tracking_number: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          buyer_id: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          delivered_at?: string | null
+          id?: string
+          item_id: string
+          notes?: string | null
+          payment_method?: string | null
+          payment_status?: string | null
+          price: number
+          seller_id: string
+          shipped_at?: string | null
+          shipping_address?: Json | null
+          shipping_cost?: number | null
+          status?: string
+          total_amount: number
+          tracking_number?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          buyer_id?: string
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          delivered_at?: string | null
+          id?: string
+          item_id?: string
+          notes?: string | null
+          payment_method?: string | null
+          payment_status?: string | null
+          price?: number
+          seller_id?: string
+          shipped_at?: string | null
+          shipping_address?: Json | null
+          shipping_cost?: number | null
+          status?: string
+          total_amount?: number
+          tracking_number?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_transactions_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "market_items"
             referencedColumns: ["id"]
           },
         ]
@@ -1749,6 +2036,45 @@ export type Database = {
         }
         Relationships: []
       }
+      sustainability_metrics: {
+        Row: {
+          circular_economy_score: number | null
+          co2_saved_kg: number | null
+          created_at: string | null
+          id: string
+          items_purchased_secondhand: number | null
+          items_resold: number | null
+          updated_at: string | null
+          user_id: string
+          waste_prevented_kg: number | null
+          water_saved_liters: number | null
+        }
+        Insert: {
+          circular_economy_score?: number | null
+          co2_saved_kg?: number | null
+          created_at?: string | null
+          id?: string
+          items_purchased_secondhand?: number | null
+          items_resold?: number | null
+          updated_at?: string | null
+          user_id: string
+          waste_prevented_kg?: number | null
+          water_saved_liters?: number | null
+        }
+        Update: {
+          circular_economy_score?: number | null
+          co2_saved_kg?: number | null
+          created_at?: string | null
+          id?: string
+          items_purchased_secondhand?: number | null
+          items_resold?: number | null
+          updated_at?: string | null
+          user_id?: string
+          waste_prevented_kg?: number | null
+          water_saved_liters?: number | null
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount: number
@@ -1815,6 +2141,66 @@ export type Database = {
           created_at?: string | null
           id?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_credibility: {
+        Row: {
+          average_rating: number | null
+          cancelled_transactions: number | null
+          created_at: string | null
+          credibility_score: number | null
+          disputes_against: number | null
+          disputes_filed: number | null
+          email_verified: boolean | null
+          id: string
+          id_verified: boolean | null
+          negative_reviews: number | null
+          phone_verified: boolean | null
+          positive_reviews: number | null
+          successful_transactions: number | null
+          total_sales: number | null
+          updated_at: string | null
+          user_id: string
+          verified_seller: boolean | null
+        }
+        Insert: {
+          average_rating?: number | null
+          cancelled_transactions?: number | null
+          created_at?: string | null
+          credibility_score?: number | null
+          disputes_against?: number | null
+          disputes_filed?: number | null
+          email_verified?: boolean | null
+          id?: string
+          id_verified?: boolean | null
+          negative_reviews?: number | null
+          phone_verified?: boolean | null
+          positive_reviews?: number | null
+          successful_transactions?: number | null
+          total_sales?: number | null
+          updated_at?: string | null
+          user_id: string
+          verified_seller?: boolean | null
+        }
+        Update: {
+          average_rating?: number | null
+          cancelled_transactions?: number | null
+          created_at?: string | null
+          credibility_score?: number | null
+          disputes_against?: number | null
+          disputes_filed?: number | null
+          email_verified?: boolean | null
+          id?: string
+          id_verified?: boolean | null
+          negative_reviews?: number | null
+          phone_verified?: boolean | null
+          positive_reviews?: number | null
+          successful_transactions?: number | null
+          total_sales?: number | null
+          updated_at?: string | null
+          user_id?: string
+          verified_seller?: boolean | null
         }
         Relationships: []
       }
@@ -2618,6 +3004,10 @@ export type Database = {
           new_tiktok?: string
         }
         Returns: boolean
+      }
+      update_credibility_score: {
+        Args: { user_id_param: string }
+        Returns: undefined
       }
       update_encrypted_merchant_profile: {
         Args: {
