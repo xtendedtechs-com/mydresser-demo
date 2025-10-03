@@ -9,6 +9,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useProfile } from '@/hooks/useProfile';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
+import { useUserSettings } from '@/hooks/useUserSettings';
+import { PaymentSettingsPanel } from '@/components/settings/PaymentSettingsPanel';
+import { AISettingsPanel } from '@/components/settings/AISettingsPanel';
+import { MerchantSettingsPanel } from '@/components/settings/MerchantSettingsPanel';
 import { useToast } from '@/hooks/use-toast';
 import { 
   User, 
@@ -20,13 +24,19 @@ import {
   Lock,
   Eye,
   Settings2,
-  Save
+  Save,
+  CreditCard,
+  Bot,
+  Store
 } from 'lucide-react';
 
 const ComprehensiveSettingsPage = () => {
   const { profile } = useProfile();
   const { preferences, updatePreferences, loading } = useUserPreferences();
+  const { settings: userSettings } = useUserSettings();
   const { toast } = useToast();
+  
+  const isMerchant = profile?.role === 'merchant';
 
   const [notificationSettings, setNotificationSettings] = useState({
     emailNotifications: true,
@@ -110,7 +120,7 @@ const ComprehensiveSettingsPage = () => {
         </div>
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="profile">
               <User className="h-4 w-4 mr-2" />
               Profile
@@ -123,10 +133,20 @@ const ComprehensiveSettingsPage = () => {
               <Shield className="h-4 w-4 mr-2" />
               Privacy
             </TabsTrigger>
-            <TabsTrigger value="ai">
-              <Sparkles className="h-4 w-4 mr-2" />
-              AI
+            <TabsTrigger value="payments">
+              <CreditCard className="h-4 w-4 mr-2" />
+              Payments
             </TabsTrigger>
+            <TabsTrigger value="ai">
+              <Bot className="h-4 w-4 mr-2" />
+              AI Services
+            </TabsTrigger>
+            {isMerchant && (
+              <TabsTrigger value="merchant">
+                <Store className="h-4 w-4 mr-2" />
+                Merchant
+              </TabsTrigger>
+            )}
             <TabsTrigger value="appearance">
               <Palette className="h-4 w-4 mr-2" />
               Theme
@@ -427,6 +447,23 @@ const ComprehensiveSettingsPage = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Payment Settings */}
+          <TabsContent value="payments" className="space-y-4 mt-6">
+            <PaymentSettingsPanel />
+          </TabsContent>
+
+          {/* AI Services Settings */}
+          <TabsContent value="ai" className="space-y-4 mt-6">
+            <AISettingsPanel />
+          </TabsContent>
+
+          {/* Merchant Settings */}
+          {isMerchant && (
+            <TabsContent value="merchant" className="space-y-4 mt-6">
+              <MerchantSettingsPanel />
+            </TabsContent>
+          )}
 
           {/* Appearance Settings */}
           <TabsContent value="appearance" className="space-y-4 mt-6">

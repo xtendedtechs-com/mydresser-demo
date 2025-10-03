@@ -38,6 +38,63 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_service_settings: {
+        Row: {
+          brand_preferences: string[] | null
+          chat_model: string | null
+          color_preferences: string[] | null
+          created_at: string
+          daily_request_limit: number | null
+          enable_outfit_suggestions: boolean | null
+          enable_style_chat: boolean | null
+          enable_usage_alerts: boolean | null
+          enable_virtual_tryon: boolean | null
+          enable_wardrobe_insights: boolean | null
+          id: string
+          image_model: string | null
+          recommendation_model: string | null
+          style_preferences: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brand_preferences?: string[] | null
+          chat_model?: string | null
+          color_preferences?: string[] | null
+          created_at?: string
+          daily_request_limit?: number | null
+          enable_outfit_suggestions?: boolean | null
+          enable_style_chat?: boolean | null
+          enable_usage_alerts?: boolean | null
+          enable_virtual_tryon?: boolean | null
+          enable_wardrobe_insights?: boolean | null
+          id?: string
+          image_model?: string | null
+          recommendation_model?: string | null
+          style_preferences?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          brand_preferences?: string[] | null
+          chat_model?: string | null
+          color_preferences?: string[] | null
+          created_at?: string
+          daily_request_limit?: number | null
+          enable_outfit_suggestions?: boolean | null
+          enable_style_chat?: boolean | null
+          enable_usage_alerts?: boolean | null
+          enable_virtual_tryon?: boolean | null
+          enable_wardrobe_insights?: boolean | null
+          id?: string
+          image_model?: string | null
+          recommendation_model?: string | null
+          style_preferences?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       collection_items: {
         Row: {
           collection_id: string | null
@@ -1171,6 +1228,84 @@ export type Database = {
         }
         Relationships: []
       }
+      merchant_settings: {
+        Row: {
+          accepted_payment_methods: string[] | null
+          auto_accept_orders: boolean | null
+          auto_reorder: boolean | null
+          brand_colors: Json | null
+          commission_rate: number | null
+          created_at: string
+          custom_css: string | null
+          enable_analytics: boolean | null
+          enable_customer_reviews: boolean | null
+          enable_email_marketing: boolean | null
+          enable_installments: boolean | null
+          enable_loyalty_program: boolean | null
+          enable_order_tracking: boolean | null
+          enable_promotions: boolean | null
+          enable_stock_alerts: boolean | null
+          id: string
+          low_stock_threshold: number | null
+          merchant_id: string
+          order_processing_time: number | null
+          payment_gateway: string | null
+          require_review_moderation: boolean | null
+          store_theme: string | null
+          updated_at: string
+        }
+        Insert: {
+          accepted_payment_methods?: string[] | null
+          auto_accept_orders?: boolean | null
+          auto_reorder?: boolean | null
+          brand_colors?: Json | null
+          commission_rate?: number | null
+          created_at?: string
+          custom_css?: string | null
+          enable_analytics?: boolean | null
+          enable_customer_reviews?: boolean | null
+          enable_email_marketing?: boolean | null
+          enable_installments?: boolean | null
+          enable_loyalty_program?: boolean | null
+          enable_order_tracking?: boolean | null
+          enable_promotions?: boolean | null
+          enable_stock_alerts?: boolean | null
+          id?: string
+          low_stock_threshold?: number | null
+          merchant_id: string
+          order_processing_time?: number | null
+          payment_gateway?: string | null
+          require_review_moderation?: boolean | null
+          store_theme?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accepted_payment_methods?: string[] | null
+          auto_accept_orders?: boolean | null
+          auto_reorder?: boolean | null
+          brand_colors?: Json | null
+          commission_rate?: number | null
+          created_at?: string
+          custom_css?: string | null
+          enable_analytics?: boolean | null
+          enable_customer_reviews?: boolean | null
+          enable_email_marketing?: boolean | null
+          enable_installments?: boolean | null
+          enable_loyalty_program?: boolean | null
+          enable_order_tracking?: boolean | null
+          enable_promotions?: boolean | null
+          enable_stock_alerts?: boolean | null
+          id?: string
+          low_stock_threshold?: number | null
+          merchant_id?: string
+          order_processing_time?: number | null
+          payment_gateway?: string | null
+          require_review_moderation?: boolean | null
+          store_theme?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       mfa_rate_limits: {
         Row: {
           action: string
@@ -1600,6 +1735,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      payment_settings: {
+        Row: {
+          created_at: string
+          default_method: string | null
+          enable_3d_secure: boolean | null
+          enable_auto_save: boolean | null
+          enable_transaction_alerts: boolean | null
+          id: string
+          require_cvv: boolean | null
+          saved_bank_accounts: Json | null
+          saved_cards: Json | null
+          saved_wallets: Json | null
+          spending_limit: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          default_method?: string | null
+          enable_3d_secure?: boolean | null
+          enable_auto_save?: boolean | null
+          enable_transaction_alerts?: boolean | null
+          id?: string
+          require_cvv?: boolean | null
+          saved_bank_accounts?: Json | null
+          saved_cards?: Json | null
+          saved_wallets?: Json | null
+          spending_limit?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          default_method?: string | null
+          enable_3d_secure?: boolean | null
+          enable_auto_save?: boolean | null
+          enable_transaction_alerts?: boolean | null
+          id?: string
+          require_cvv?: boolean | null
+          saved_bank_accounts?: Json | null
+          saved_cards?: Json | null
+          saved_wallets?: Json | null
+          spending_limit?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       professional_applications: {
         Row: {
@@ -2336,6 +2519,75 @@ export type Database = {
           notifications?: Json | null
           privacy_settings?: Json | null
           suggestion_settings?: Json | null
+          theme?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          ai_model_preference: string | null
+          ai_suggestion_frequency: string | null
+          created_at: string
+          currency: string | null
+          default_payment_method: string | null
+          enable_ai_chat: boolean | null
+          enable_ai_suggestions: boolean | null
+          enable_email_notifications: boolean | null
+          enable_marketing_emails: boolean | null
+          enable_payment_notifications: boolean | null
+          enable_push_notifications: boolean | null
+          id: string
+          language: string | null
+          profile_visibility: string | null
+          saved_payment_methods: Json | null
+          show_activity_publicly: boolean | null
+          show_wardrobe_publicly: boolean | null
+          theme: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_model_preference?: string | null
+          ai_suggestion_frequency?: string | null
+          created_at?: string
+          currency?: string | null
+          default_payment_method?: string | null
+          enable_ai_chat?: boolean | null
+          enable_ai_suggestions?: boolean | null
+          enable_email_notifications?: boolean | null
+          enable_marketing_emails?: boolean | null
+          enable_payment_notifications?: boolean | null
+          enable_push_notifications?: boolean | null
+          id?: string
+          language?: string | null
+          profile_visibility?: string | null
+          saved_payment_methods?: Json | null
+          show_activity_publicly?: boolean | null
+          show_wardrobe_publicly?: boolean | null
+          theme?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_model_preference?: string | null
+          ai_suggestion_frequency?: string | null
+          created_at?: string
+          currency?: string | null
+          default_payment_method?: string | null
+          enable_ai_chat?: boolean | null
+          enable_ai_suggestions?: boolean | null
+          enable_email_notifications?: boolean | null
+          enable_marketing_emails?: boolean | null
+          enable_payment_notifications?: boolean | null
+          enable_push_notifications?: boolean | null
+          id?: string
+          language?: string | null
+          profile_visibility?: string | null
+          saved_payment_methods?: Json | null
+          show_activity_publicly?: boolean | null
+          show_wardrobe_publicly?: boolean | null
           theme?: string | null
           updated_at?: string
           user_id?: string
