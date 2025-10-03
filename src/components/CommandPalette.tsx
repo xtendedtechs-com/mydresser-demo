@@ -107,9 +107,49 @@ export function CommandPalette() {
       description: "Get AI outfit suggestions",
       icon: Sparkles,
       action: () => navigate("/outfit-generator"),
-      keywords: ["outfit", "ai", "suggest", "generate", "daily"],
+      keywords: ["ai", "outfit", "daily", "generate", "suggestions"],
       category: "AI Features"
     },
+    {
+      id: "ai-shopping",
+      label: "AI Shopping Assistant",
+      description: "Get smart shopping advice",
+      icon: ShoppingBag,
+      action: () => navigate("/personal-shopping"),
+      keywords: ["ai", "shopping", "assistant", "advice", "recommendations"],
+      category: "AI Features"
+    },
+    {
+      id: "ai-wardrobe",
+      label: "Wardrobe Insights",
+      description: "AI-powered wardrobe analysis",
+      icon: Sparkles,
+      action: () => navigate("/wardrobe-insights"),
+      keywords: ["ai", "wardrobe", "insights", "analysis", "stats"],
+      category: "AI Features"
+    },
+
+    // Social & Collaboration
+    {
+      id: "social-feed",
+      label: "Social Feed",
+      description: "View social feed",
+      icon: Users,
+      action: () => navigate("/social"),
+      keywords: ["social", "feed", "community"],
+      category: "Social"
+    },
+    {
+      id: "collaborate",
+      label: "Collaborate",
+      description: "Style together with friends",
+      icon: Users,
+      action: () => navigate("/collaborate"),
+      keywords: ["collaborate", "together", "friends", "challenges", "team"],
+      category: "Social"
+    },
+
+    // Quick Actions
     {
       id: "ai-style-hub",
       label: "AI Style Hub",
