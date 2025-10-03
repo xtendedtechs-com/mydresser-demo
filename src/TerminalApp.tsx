@@ -67,6 +67,7 @@ const TerminalApp = () => {
         ) : (
           <Routes>
             <Route path="/" element={<MerchantTerminal />} />
+            <Route path="/pos" element={<MerchantTerminal />} />
             <Route path="/analytics" element={<MerchantAnalyticsPage />} />
             <Route path="/customer-relations" element={<CustomerRelations />} />
             <Route path="/financial-reports" element={<FinancialReports />} />

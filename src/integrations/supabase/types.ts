@@ -233,6 +233,60 @@ export type Database = {
         }
         Relationships: []
       }
+      inventory_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string | null
+          current_value: number | null
+          id: string
+          is_resolved: boolean | null
+          item_id: string
+          merchant_id: string
+          message: string
+          resolved_at: string | null
+          threshold_value: number | null
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string | null
+          current_value?: number | null
+          id?: string
+          is_resolved?: boolean | null
+          item_id: string
+          merchant_id: string
+          message: string
+          resolved_at?: string | null
+          threshold_value?: number | null
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string | null
+          current_value?: number | null
+          id?: string
+          is_resolved?: boolean | null
+          item_id?: string
+          merchant_id?: string
+          message?: string
+          resolved_at?: string | null
+          threshold_value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_alerts_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_alerts_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       item_matches: {
         Row: {
           created_at: string
@@ -460,6 +514,118 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "wardrobe_items"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      merchant_analytics: {
+        Row: {
+          average_order_value: number | null
+          created_at: string | null
+          date: string
+          id: string
+          merchant_id: string
+          new_customers: number | null
+          returning_customers: number | null
+          revenue_by_category: Json | null
+          top_selling_items: Json | null
+          total_items_sold: number | null
+          total_orders: number | null
+          total_sales: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          average_order_value?: number | null
+          created_at?: string | null
+          date?: string
+          id?: string
+          merchant_id: string
+          new_customers?: number | null
+          returning_customers?: number | null
+          revenue_by_category?: Json | null
+          top_selling_items?: Json | null
+          total_items_sold?: number | null
+          total_orders?: number | null
+          total_sales?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          average_order_value?: number | null
+          created_at?: string | null
+          date?: string
+          id?: string
+          merchant_id?: string
+          new_customers?: number | null
+          returning_customers?: number | null
+          revenue_by_category?: Json | null
+          top_selling_items?: Json | null
+          total_items_sold?: number | null
+          total_orders?: number | null
+          total_sales?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_analytics_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      merchant_customers: {
+        Row: {
+          created_at: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone: string | null
+          id: string
+          last_order_date: string | null
+          merchant_id: string
+          notes: string | null
+          preferred_categories: string[] | null
+          tags: string[] | null
+          total_orders: number | null
+          total_spent: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone?: string | null
+          id?: string
+          last_order_date?: string | null
+          merchant_id: string
+          notes?: string | null
+          preferred_categories?: string[] | null
+          tags?: string[] | null
+          total_orders?: number | null
+          total_spent?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string | null
+          id?: string
+          last_order_date?: string | null
+          merchant_id?: string
+          notes?: string | null
+          preferred_categories?: string[] | null
+          tags?: string[] | null
+          total_orders?: number | null
+          total_spent?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merchant_customers_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_profiles"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -1085,6 +1251,69 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_records: {
+        Row: {
+          amount: number
+          created_at: string | null
+          id: string
+          merchant_id: string
+          order_id: string
+          payment_data: Json | null
+          payment_gateway: string | null
+          payment_method: string
+          payment_status: string
+          processed_at: string | null
+          refund_amount: number | null
+          refund_reason: string | null
+          transaction_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          id?: string
+          merchant_id: string
+          order_id: string
+          payment_data?: Json | null
+          payment_gateway?: string | null
+          payment_method: string
+          payment_status?: string
+          processed_at?: string | null
+          refund_amount?: number | null
+          refund_reason?: string | null
+          transaction_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          merchant_id?: string
+          order_id?: string
+          payment_data?: Json | null
+          payment_gateway?: string | null
+          payment_method?: string
+          payment_status?: string
+          processed_at?: string | null
+          refund_amount?: number | null
+          refund_reason?: string | null
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_records_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "payment_records_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       professional_applications: {
         Row: {
           application_status: string | null
@@ -1207,6 +1436,77 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      promotions: {
+        Row: {
+          applicable_categories: string[] | null
+          applicable_items: string[] | null
+          code: string | null
+          created_at: string | null
+          description: string | null
+          discount_value: number
+          end_date: string
+          id: string
+          is_active: boolean | null
+          max_discount_amount: number | null
+          merchant_id: string
+          min_purchase_amount: number | null
+          name: string
+          start_date: string
+          type: string
+          updated_at: string | null
+          usage_count: number | null
+          usage_limit: number | null
+        }
+        Insert: {
+          applicable_categories?: string[] | null
+          applicable_items?: string[] | null
+          code?: string | null
+          created_at?: string | null
+          description?: string | null
+          discount_value: number
+          end_date: string
+          id?: string
+          is_active?: boolean | null
+          max_discount_amount?: number | null
+          merchant_id: string
+          min_purchase_amount?: number | null
+          name: string
+          start_date: string
+          type: string
+          updated_at?: string | null
+          usage_count?: number | null
+          usage_limit?: number | null
+        }
+        Update: {
+          applicable_categories?: string[] | null
+          applicable_items?: string[] | null
+          code?: string | null
+          created_at?: string | null
+          description?: string | null
+          discount_value?: number
+          end_date?: string
+          id?: string
+          is_active?: boolean | null
+          max_discount_amount?: number | null
+          merchant_id?: string
+          min_purchase_amount?: number | null
+          name?: string
+          start_date?: string
+          type?: string
+          updated_at?: string | null
+          usage_count?: number | null
+          usage_limit?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotions_merchant_id_fkey"
+            columns: ["merchant_id"]
+            isOneToOne: false
+            referencedRelation: "merchant_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       rate_limits: {
         Row: {
