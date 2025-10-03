@@ -35,3 +35,12 @@ verify_jwt = true
 
 [functions.ai-clothing-scanner]
 verify_jwt = false
+
+[functions.ai-shopping-advisor]
+verify_jwt = false
+
+[functions.ai-trend-analysis]
+verify_jwt = false
+
+[functions.ai-purchase-analyzer]
+verify_jwt = false

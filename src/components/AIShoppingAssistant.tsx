@@ -124,29 +124,95 @@ export function AIShoppingAssistant() {
     setIsLoading(true);
 
     try {
-      // Simulate AI processing
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      const recommendations = generateRecommendations(input);
+      const CHAT_URL = `https://bdfyrtobxkwxobjspxjo.supabase.co/functions/v1/ai-shopping-advisor`;
       
-      const assistantMessage: Message = {
-        role: 'assistant',
-        content: `Based on your needs, I've analyzed your style profile and current wardrobe. Here are my personalized recommendations:`,
-        recommendations
-      };
+      const response = await fetch(CHAT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJkZnlydG9ieGt3eG9ianNweGpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3NjU3NzEsImV4cCI6MjA3MzM0MTc3MX0.Ck8RUCFUdezGr46gj_4caj-kBegzp_O7nzqR0AelCmc'}`,
+        },
+        body: JSON.stringify({ 
+          messages: [...messages, userMessage].map(m => ({ role: m.role, content: m.content }))
+        }),
+      });
 
-      setMessages(prev => [...prev, assistantMessage]);
+      if (response.status === 429) {
+        toast({
+          title: "Rate limit exceeded",
+          description: "Too many requests. Please try again in a moment.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
 
-      // Add follow-up suggestions
-      setTimeout(() => {
-        const followUp: Message = {
-          role: 'assistant',
-          content: "💡 Shopping Tips:\n\n• Check for items in your saved collections first\n• Consider cost-per-wear when investing\n• Look for sustainable brands when possible\n• Wait for quality pieces rather than fast fashion\n\nWould you like more specific recommendations for any category?"
-        };
-        setMessages(prev => [...prev, followUp]);
-      }, 1000);
+      if (response.status === 402) {
+        toast({
+          title: "AI Credits Depleted",
+          description: "Please add credits to continue using AI features.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      if (!response.ok || !response.body) {
+        throw new Error("Failed to start stream");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let textBuffer = "";
+      let streamDone = false;
+      let assistantContent = "";
+
+      // Add initial assistant message
+      setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+
+      while (!streamDone) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        textBuffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
+
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (line.startsWith(":") || line.trim() === "") continue;
+          if (!line.startsWith("data: ")) continue;
+
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") {
+            streamDone = true;
+            break;
+          }
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+            if (content) {
+              assistantContent += content;
+              setMessages(prev => {
+                const newMessages = [...prev];
+                const lastMsg = newMessages[newMessages.length - 1];
+                if (lastMsg?.role === 'assistant') {
+                  lastMsg.content = assistantContent;
+                }
+                return newMessages;
+              });
+            }
+          } catch {
+            textBuffer = line + "\n" + textBuffer;
+            break;
+          }
+        }
+      }
 
     } catch (error) {
+      console.error("Error in shopping assistant:", error);
       toast({
         title: "Error",
         description: "Failed to get recommendations. Please try again.",
