@@ -1,5 +1,5 @@
-const CACHE_NAME = 'mydresser-v1';
-const RUNTIME_CACHE = 'mydresser-runtime-v1';
+const CACHE_NAME = 'mydresser-v3';
+const RUNTIME_CACHE = 'mydresser-runtime-v3';
 
 // Assets to cache on install
 const PRECACHE_URLS = [
@@ -20,6 +20,13 @@ self.addEventListener('install', (event) => {
       })
       .then(() => self.skipWaiting())
   );
+});
+
+// Allow page to trigger immediate activation
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // Activate event - clean up old caches
@@ -46,6 +53,11 @@ self.addEventListener('fetch', (event) => {
 
   // Skip cross-origin requests
   if (url.origin !== location.origin) {
+    return;
+  }
+
+  // Avoid caching Vite dev chunks and runtime modules
+  if (url.pathname.startsWith('/node_modules/.vite') || url.pathname.startsWith('/@vite/')) {
     return;
   }
 

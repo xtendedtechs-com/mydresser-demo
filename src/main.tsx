@@ -12,7 +12,31 @@ if ('serviceWorker' in navigator) {
       .register('/service-worker.js')
       .then((registration) => {
         console.log('[PWA] Service Worker registered:', registration.scope);
-        
+
+        const sendSkipWaiting = () => {
+          if (registration.waiting) {
+            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+          }
+        };
+
+        // Trigger immediate activation for updated SW
+        if (registration.waiting) {
+          sendSkipWaiting();
+        }
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          if (newWorker) {
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                sendSkipWaiting();
+              }
+            });
+          }
+        });
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          window.location.reload();
+        });
+
         // Check for updates periodically
         setInterval(() => {
           registration.update();
