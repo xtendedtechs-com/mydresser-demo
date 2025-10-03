@@ -27,6 +27,8 @@ import MyStyle from "@/pages/MyStyle";
 import { DailyOutfitGenerator } from "@/components/DailyOutfitGenerator";
 import SocialPage from "@/pages/SocialPage";
 import AIRecommendationsPage from "@/pages/AIRecommendationsPage";
+import AIAssistantPage from "@/pages/AIAssistantPage";
+import WardrobeInsightsPage from "@/pages/WardrobeInsightsPage";
 
 const queryClient = new QueryClient();
 
@@ -72,6 +74,8 @@ const MyDresserApp = () => {
               <Route path="/outfit-generator" element={<DailyOutfitGenerator />} />
               <Route path="/social" element={<SocialPage />} />
               <Route path="/ai-recommendations" element={<AIRecommendationsPage />} />
+              <Route path="/ai-assistant" element={<AIAssistantPage />} />
+              <Route path="/wardrobe-insights" element={<WardrobeInsightsPage />} />
               <Route path="/account" element={<Account />} />
               <Route path="/mystyle" element={<MyStyle />} />
               <Route path="/service-settings/:service" element={<ServiceSettingsPage />} />
