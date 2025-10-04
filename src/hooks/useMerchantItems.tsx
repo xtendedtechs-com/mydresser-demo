@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useProfile } from '@/hooks/useProfile';
+import { getAllPhotoUrls } from '@/utils/photoHelpers';
 
 export interface MerchantItem {
   id: string;
@@ -55,30 +56,49 @@ export const useMerchantItems = () => {
         return;
       }
 
-      const formattedItems: MerchantItem[] = data?.map(item => ({
-        id: item.id,
-        merchant_id: item.merchant_id,
-        name: item.name,
-        description: item.description,
-        price: item.price,
-        original_price: item.original_price,
-        condition: item.condition,
-        size: Array.isArray(item.size) ? item.size : [item.size].filter(Boolean),
-        brand: item.brand,
-        category: item.category,
-        color: item.color,
-        material: item.material,
-        season: item.season,
-        occasion: item.occasion,
-        photos: item.photos ? (typeof item.photos === 'object' ? Object.values(item.photos).filter(p => typeof p === 'string') as string[] : []) : [],
-        tags: item.tags || [],
-        status: 'available',
-        stock_quantity: item.stock_quantity,
-        is_featured: item.is_featured,
-        is_premium: item.is_premium,
-        created_at: item.created_at,
-        updated_at: item.updated_at
-      })) || [];
+      const formattedItems: MerchantItem[] = data?.map(item => {
+        // Convert photos from database format to array
+        let photos: string[] = [];
+        if (item.photos) {
+          if (typeof item.photos === 'string') {
+            photos = [item.photos];
+          } else if (Array.isArray(item.photos)) {
+            photos = item.photos.filter(p => typeof p === 'string') as string[];
+          } else if (typeof item.photos === 'object') {
+            const photosObj = item.photos as any;
+            if (photosObj.urls && Array.isArray(photosObj.urls)) {
+              photos = photosObj.urls.filter(p => typeof p === 'string');
+            } else if (photosObj.main) {
+              photos = [photosObj.main];
+            }
+          }
+        }
+
+        return {
+          id: item.id,
+          merchant_id: item.merchant_id,
+          name: item.name,
+          description: item.description,
+          price: item.price,
+          original_price: item.original_price,
+          condition: item.condition,
+          size: Array.isArray(item.size) ? item.size : [item.size].filter(Boolean),
+          brand: item.brand,
+          category: item.category,
+          color: item.color,
+          material: item.material,
+          season: item.season,
+          occasion: item.occasion,
+          photos: photos,
+          tags: item.tags || [],
+          status: 'available',
+          stock_quantity: item.stock_quantity,
+          is_featured: item.is_featured,
+          is_premium: item.is_premium,
+          created_at: item.created_at,
+          updated_at: item.updated_at
+        };
+      }) || [];
 
       setItems(formattedItems);
     } catch (error) {
@@ -112,7 +132,9 @@ export const useMerchantItems = () => {
           material: itemData.material,
           season: itemData.season,
           occasion: itemData.occasion,
-          photos: itemData.photos ? { main: itemData.photos[0] } : null,
+          photos: itemData.photos && Array.isArray(itemData.photos) && itemData.photos.length > 0 
+            ? { main: itemData.photos[0], urls: itemData.photos } 
+            : null,
           tags: itemData.tags,
           stock_quantity: itemData.stock_quantity || 1,
           is_featured: itemData.is_featured || false,
@@ -146,11 +168,18 @@ export const useMerchantItems = () => {
 
   const updateItem = async (itemId: string, updates: Partial<MerchantItem>) => {
     try {
-      const updateData = {
+      const updateData: any = {
         ...updates,
         size: Array.isArray(updates.size) ? updates.size : (updates.size ? [updates.size] : undefined),
         updated_at: new Date().toISOString()
       };
+      
+      // Handle photos properly
+      if (updates.photos && Array.isArray(updates.photos) && updates.photos.length > 0) {
+        updateData.photos = { main: updates.photos[0], urls: updates.photos };
+      } else if (updates.photos) {
+        updateData.photos = updates.photos;
+      }
       
       const { error } = await supabase
         .from('merchant_items')
@@ -276,31 +305,9 @@ export const useMerchantItems = () => {
     return items.filter(item => item.color?.toLowerCase() === color?.toLowerCase());
   };
 
-  // Helper function to extract photo URLs from merchant items
+  // Helper function to extract photo URLs from merchant items (uses photoHelpers)
   const getPhotoUrls = (item: MerchantItem) => {
-    if (!item.photos) return [];
-    
-    // Handle string URL
-    if (typeof item.photos === 'string') {
-      return [item.photos];
-    }
-    
-    // Handle array of URLs
-    if (Array.isArray(item.photos)) {
-      return item.photos.filter(Boolean);
-    }
-    
-    // Handle object with urls or main property
-    if (typeof item.photos === 'object') {
-      if ((item.photos as any).urls && Array.isArray((item.photos as any).urls)) {
-        return (item.photos as any).urls.filter(Boolean);
-      }
-      if ((item.photos as any).main) {
-        return [(item.photos as any).main];
-      }
-    }
-    
-    return [];
+    return getAllPhotoUrls(item.photos);
   };
 
   return {
