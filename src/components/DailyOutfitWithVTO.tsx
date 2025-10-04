@@ -43,9 +43,10 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
             id: item.id,
             name: item.name,
             category: item.category,
+            color: item.color,
+            brand: item.brand,
             photo: getPrimaryPhotoUrl(item.photos, item.category)
-          })),
-          instruction: `Dress the person wearing: ${outfit.items.map(i => i.name).join(', ')}`
+          }))
         }
       });
 
@@ -53,6 +54,10 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
 
       if (data?.editedImageUrl) {
         setVtoImage(data.editedImageUrl);
+        toast({
+          title: "Virtual Try-On Ready",
+          description: "Your outfit preview has been generated!"
+        });
       }
     } catch (error: any) {
       console.error('VTO generation error:', error);

@@ -51,6 +51,7 @@ import AIStyleHub from "@/pages/AIStyleHub";
 import SustainabilityPage from "@/pages/SustainabilityPage";
 import GamificationPage from "@/pages/GamificationPage";
 import AdvancedAnalyticsPage from "@/pages/AdvancedAnalyticsPage";
+import PersonalizationHub from "@/pages/PersonalizationHub";
 import VirtualFittingRoom from "@/pages/VirtualFittingRoom";
 import AdvancedAIPage from "@/pages/AdvancedAIPage";
 import PersonalShoppingPage from "@/pages/PersonalShoppingPage";
@@ -109,7 +110,8 @@ export const AuthWrapper = () => {
             <Route path="/support" element={<SupportsResources />} />
             <Route path="/reports" element={<ReportsAnalyticsPage />} />
             <Route path="/analytics" element={<UserAnalyticsPage />} />
-            <Route path="/analytics/advanced" element={<AdvancedAnalyticsPage />} />
+          <Route path="/analytics/advanced" element={<AdvancedAnalyticsPage />} />
+          <Route path="/personalization" element={<PersonalizationHub />} />
             <Route path="/merchant-analytics" element={<MerchantAnalyticsPage />} />
             <Route path="/account" element={<Account />} />
             <Route path="/mystyle" element={<MyStyle />} />

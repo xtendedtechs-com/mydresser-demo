@@ -12,20 +12,26 @@ serve(async (req) => {
   }
 
   try {
-    const { userImage, clothingItem, instruction } = await req.json();
+    const { userImage, clothingItems, instruction } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    console.log('Processing virtual try-on request...');
+    console.log('Processing virtual try-on request with', clothingItems?.length || 0, 'items...');
+
+    // Build detailed outfit description
+    const outfitDescription = clothingItems?.map((item: any) => {
+      return `${item.category}: ${item.name}${item.color ? ` in ${item.color}` : ''}${item.brand ? ` by ${item.brand}` : ''}`;
+    }).join(', ') || 'outfit';
 
     // Construct the editing instruction
     const editInstruction = instruction || 
-      `Add this ${clothingItem.category} to the person in the image. Make it look natural and properly fitted. 
-       Item details: ${clothingItem.name}, ${clothingItem.color}, ${clothingItem.brand}. 
-       Ensure the clothing appears realistic and matches the person's pose and lighting.`;
+      `Transform this person's clothing to dress them in the following complete outfit: ${outfitDescription}. 
+       Make the clothing look natural, properly fitted, and realistic. 
+       Ensure all items coordinate well together and match the person's pose, body shape, and the lighting in the photo.
+       The result should look like a professional fashion photo where the person is actually wearing these clothes.`;
 
     // Call Lovable AI Gateway for image editing
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -89,7 +95,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        editedImage,
+        editedImageUrl: editedImage,
         message: "Virtual try-on completed successfully"
       }),
       { 
