@@ -2793,6 +2793,7 @@ export type Database = {
           theme: string | null
           updated_at: string
           user_id: string
+          vto_photo_url: string | null
         }
         Insert: {
           accessibility_settings?: Json | null
@@ -2809,6 +2810,7 @@ export type Database = {
           theme?: string | null
           updated_at?: string
           user_id: string
+          vto_photo_url?: string | null
         }
         Update: {
           accessibility_settings?: Json | null
@@ -2825,6 +2827,7 @@ export type Database = {
           theme?: string | null
           updated_at?: string
           user_id?: string
+          vto_photo_url?: string | null
         }
         Relationships: []
       }

@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { useMarketItems, MarketItem } from '@/hooks/useMarketItems';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { getAllPhotoUrls, getPrimaryPhotoUrl } from '@/utils/photoHelpers';
 
 const MarketItemDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -30,30 +31,87 @@ const MarketItemDetail = () => {
   const loadItem = async (itemId: string) => {
     setLoading(true);
     try {
-      const { data: fetchedItem, error } = await supabase
+      // Try to load from market_items first
+      let { data: fetchedItem, error } = await supabase
         .from('market_items')
         .select('*')
         .eq('id', itemId)
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
-      
-      setItem(fetchedItem);
-      if (fetchedItem?.size && fetchedItem.size.length > 0) {
-        setSelectedSize(fetchedItem.size.split(',')[0]);
+      // If not found, try merchant_items
+      if (!fetchedItem) {
+        const { data: merchantItem, error: merchantError } = await supabase
+          .from('merchant_items')
+          .select('*')
+          .eq('id', itemId)
+          .maybeSingle();
+        
+        if (merchantError) throw merchantError;
+        if (merchantItem) {
+          // Transform merchant item to market item format with all required fields
+          fetchedItem = {
+            ...merchantItem,
+            title: merchantItem.name,
+            seller_id: merchantItem.merchant_id,
+            likes_count: 0,
+            views_count: 0,
+            location: 'Merchant Store',
+            size: Array.isArray(merchantItem.size) ? merchantItem.size.join(',') : merchantItem.size || '',
+            shipping_options: { shipping_available: true, shipping_cost: 0, local_pickup: false },
+            sustainability_score: null,
+            status: merchantItem.status || 'available',
+            wardrobe_item_id: null
+          } as any;
+        }
+      }
+
+      if (!fetchedItem) {
+        throw new Error('Item not found');
       }
       
-      // Load similar items
-      const { data: similar } = await supabase
-        .from('market_items')
-        .select('*')
-        .eq('category', fetchedItem.category)
-        .neq('id', itemId)
-        .limit(4);
+      setItem(fetchedItem);
+      if (fetchedItem?.size) {
+        const sizes = Array.isArray(fetchedItem.size) 
+          ? fetchedItem.size 
+          : fetchedItem.size.split(',');
+        if (sizes.length > 0) {
+          setSelectedSize(sizes[0]);
+        }
+      }
       
-      setMarketItems(similar || []);
+      // Load similar items from both tables
+      const [marketSimilar, merchantSimilar] = await Promise.all([
+        supabase
+          .from('market_items')
+          .select('*')
+          .eq('category', fetchedItem.category)
+          .neq('id', itemId)
+          .limit(2),
+        supabase
+          .from('merchant_items')
+          .select('*')
+          .eq('category', fetchedItem.category)
+          .neq('id', itemId)
+          .limit(2)
+      ]);
+      
+      const allSimilar = [
+        ...(marketSimilar.data || []),
+        ...(merchantSimilar.data?.map(item => ({
+          ...item,
+          title: item.name,
+          seller_id: item.merchant_id
+        })) || [])
+      ];
+      
+      setMarketItems(allSimilar);
     } catch (error) {
       console.error('Error loading item:', error);
+      toast({
+        title: "Item not found",
+        description: "This item may have been removed or doesn't exist.",
+        variant: "destructive"
+      });
       setItem(null);
     }
     setLoading(false);
@@ -89,31 +147,9 @@ const MarketItemDetail = () => {
     });
   };
 
-  // Helper function to extract photo URLs from various formats
+  // Use photoHelpers for consistent photo handling
   const getPhotoUrls = (photos: any): string[] => {
-    if (!photos) return [];
-    
-    // Handle string URL
-    if (typeof photos === 'string') {
-      return [photos];
-    }
-    
-    // Handle array of URLs
-    if (Array.isArray(photos)) {
-      return photos.filter(Boolean);
-    }
-    
-    // Handle object with urls or main property
-    if (typeof photos === 'object') {
-      if (photos.urls && Array.isArray(photos.urls)) {
-        return photos.urls.filter(Boolean);
-      }
-      if (photos.main) {
-        return [photos.main];
-      }
-    }
-    
-    return [];
+    return getAllPhotoUrls(photos);
   };
 
   if (loading) {

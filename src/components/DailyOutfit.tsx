@@ -24,17 +24,95 @@ import { useSocial } from "@/hooks/useSocial";
 import ReactionButton from "@/components/ReactionButton";
 import { useWardrobe, WardrobeItem } from "@/hooks/useWardrobe";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
-import { outfitGenerator, OutfitContext, GeneratedOutfit } from "@/services/outfitGenerator";
 import { weatherService, WeatherData } from "@/services/weatherService";
 import { calendarService, CalendarEvent } from "@/services/calendarService";
 import { supabase } from "@/integrations/supabase/client";
+import SmartOutfitEngine from "@/services/smartOutfitEngine";
+import VirtualTryOn from "@/components/VirtualTryOn";
+import { getPrimaryPhotoUrl } from "@/utils/photoHelpers";
+
+const getTimeSlot = (timeOfDay: string): string => {
+  const times: Record<string, string> = {
+    morning: 'Morning (6AM - 12PM)',
+    afternoon: 'Afternoon (12PM - 5PM)',
+    evening: 'Evening (5PM - 10PM)',
+    night: 'Night (10PM - 6AM)'
+  };
+  return times[timeOfDay] || times.morning;
+};
+
+const getNextUpdate = (currentTime: string): string => {
+  const updates: Record<string, string> = {
+    morning: 'Afternoon at 12:00 PM',
+    afternoon: 'Evening at 5:00 PM',
+    evening: 'Tomorrow morning',
+    night: 'Tomorrow morning'
+  };
+  return updates[currentTime] || 'Tomorrow morning';
+};
+
+const getCurrentSeason = (): string => {
+  const month = new Date().getMonth();
+  if (month >= 2 && month <= 4) return 'spring';
+  if (month >= 5 && month <= 7) return 'summer';
+  if (month >= 8 && month <= 10) return 'fall';
+  return 'winter';
+};
+
+const generateOutfitName = (items: WardrobeItem[], occasion: string): string => {
+  const hasJacket = items.some(i => i.category === 'outerwear' || i.category === 'jackets');
+  const hasDress = items.some(i => i.category === 'dresses');
+  
+  if (hasDress) return `Elegant ${occasion} Dress Outfit`;
+  if (hasJacket && occasion === 'business') return 'Professional Power Suit';
+  if (hasJacket) return 'Layered Street Style';
+  if (occasion === 'casual') return 'Casual Day Look';
+  if (occasion === 'formal') return 'Formal Evening Ensemble';
+  return 'Daily Outfit';
+};
+
+const generateReasoning = (items: WardrobeItem[], weather: WeatherData | null, occasion: string): string => {
+  const temp = weather?.temperature || 20;
+  const condition = weather?.condition || 'mild';
+  
+  let reason = `Perfect ${occasion} outfit for ${condition} weather at ${temp}°C. `;
+  
+  if (temp < 15) reason += 'Layered for warmth. ';
+  if (temp > 25) reason += 'Breathable and light. ';
+  
+  const colors = items.map(i => i.color).filter(Boolean);
+  if (colors.length > 0) {
+    reason += `Features ${colors.slice(0, 2).join(' and ')} tones. `;
+  }
+  
+  return reason;
+};
+
+const extractTags = (items: WardrobeItem[], occasion: string): string[] => {
+  const tags = new Set<string>();
+  tags.add(occasion);
+  tags.add(getCurrentSeason());
+  
+  items.forEach(item => {
+    if (item.tags) {
+      item.tags.forEach(tag => tags.add(tag));
+    }
+  });
+  
+  return Array.from(tags).slice(0, 5);
+};
 
 interface OutfitItem extends WardrobeItem {
   // Additional properties specific to outfit display can be added here
 }
 
-interface DailyOutfitData extends GeneratedOutfit {
+interface DailyOutfitData {
   id: string;
+  items: WardrobeItem[];
+  name: string;
+  reasoning: string;
+  confidence: number;
+  tags: string[];
   timeSlot: string;
   weatherConditions: WeatherData;
   nextUpdate: string;
@@ -142,36 +220,39 @@ const DailyOutfit = () => {
       // Get occasion from preferences or default to casual
       const occasion = preferences?.notifications?.outfit_suggestions ? 'work' : 'casual';
 
-      const context: OutfitContext = {
-        weather: weather || {
-          temperature: 20,
-          condition: 'mild',
-          humidity: 60
-        },
+      // Use SmartOutfitEngine for intelligent outfit generation
+      const outfitItems = SmartOutfitEngine.generateOutfit(items, {
+        weather: weather ? { temp: weather.temperature, condition: weather.condition } : undefined,
         occasion,
-        timeOfDay,
-        userPreferences: {
-          favoriteColors: [], // Could be extracted from wardrobe analysis
-          preferredBrands: [], // Could be extracted from item analysis
-          styleProfile: preferences?.theme?.mode || 'casual',
-        },
-        previousOutfits: dislikedOutfits
-      };
-
-      // Generate outfit using real wardrobe items only
-      const sourceItems = items;
+        season: getCurrentSeason(),
+        avoidItems: dislikedOutfits
+      });
       
-      // Ensure we have valid items before generation
-      if (!sourceItems || sourceItems.length === 0) {
-        throw new Error('No wardrobe items available for outfit generation');
+      if (!outfitItems || outfitItems.length === 0) {
+        throw new Error('Could not generate a valid outfit');
       }
       
-      const generatedOutfit = await outfitGenerator.generateOutfit(sourceItems, context);
+      // Validate the outfit
+      const validation = SmartOutfitEngine.validateOutfit(outfitItems);
+      if (!validation.valid) {
+        console.warn('Outfit validation issues:', validation.issues);
+      }
+      
+      // Calculate compatibility score
+      const compatibility = SmartOutfitEngine.calculateCompatibility(outfitItems);
+      
+      // Create outfit description
+      const outfitName = generateOutfitName(outfitItems, occasion);
+      const reasoning = generateReasoning(outfitItems, weather, occasion);
       
       // Convert to DailyOutfitData format
       const baseOutfitData: DailyOutfitData = {
-        ...generatedOutfit,
         id: `temp-${crypto?.randomUUID?.() || Date.now()}`,
+        items: outfitItems,
+        name: outfitName,
+        reasoning: reasoning,
+        confidence: compatibility,
+        tags: extractTags(outfitItems, occasion),
         timeSlot: getTimeSlot(timeOfDay),
         weatherConditions: weather || {
           temperature: 20,
@@ -184,7 +265,7 @@ const DailyOutfit = () => {
           location: 'Current Location'
         },
         nextUpdate: getNextUpdate(timeOfDay),
-        photo: "/api/placeholder/300/400"
+        photo: userPhoto || undefined
       };
 
       // Persist the generated outfit immediately so reactions/lists work with real UUID
@@ -240,26 +321,6 @@ const DailyOutfit = () => {
     } finally {
       setIsGenerating(false);
     }
-  };
-
-  const getTimeSlot = (timeOfDay: string): string => {
-    const slots = {
-      morning: '6:00 AM - 12:00 PM',
-      afternoon: '12:00 PM - 5:00 PM', 
-      evening: '5:00 PM - 10:00 PM',
-      night: '10:00 PM - 6:00 AM'
-    };
-    return slots[timeOfDay as keyof typeof slots] || '6:00 AM - 10:00 PM';
-  };
-
-  const getNextUpdate = (timeOfDay: string): string => {
-    const nextUpdates = {
-      morning: '12:00 PM (Lunch Break)',
-      afternoon: '6:00 PM (Evening Out)',
-      evening: '10:00 PM (Night In)',
-      night: '6:00 AM (New Day)'
-    };
-    return nextUpdates[timeOfDay as keyof typeof nextUpdates] || 'Later Today';
   };
 
   // Removed placeholder items - only use real user wardrobe data
@@ -547,6 +608,14 @@ const DailyOutfit = () => {
 
   return (
     <div className="space-y-4">
+      {/* Virtual Try-On Setup */}
+      {!userPhoto && (
+        <VirtualTryOn 
+          onPhotoUploaded={(url) => setUserPhoto(url)}
+          currentPhoto={userPhoto}
+        />
+      )}
+
       {/* Main Outfit Display */}
       <Card className="overflow-hidden bg-gradient-to-b from-background to-accent/5">
         {/* Header */}
@@ -666,18 +735,12 @@ const DailyOutfit = () => {
                 {outfit.items.map((item) => (
                   <Card key={item.id} className="p-3 hover:shadow-md transition-shadow">
                     <div className="flex gap-3">
-                      <div className="w-12 h-16 bg-muted rounded overflow-hidden flex-shrink-0">
-                        {item.photos && typeof item.photos === 'object' && item.photos.main ? (
-                          <img
-                            src={item.photos.main}
-                            alt={item.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
-                            {item.category.charAt(0).toUpperCase()}
-                          </div>
-                        )}
+                       <div className="w-12 h-16 bg-muted rounded overflow-hidden flex-shrink-0">
+                        <img
+                          src={getPrimaryPhotoUrl(item.photos, item.category)}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h5 className="font-medium text-sm truncate">{item.name}</h5>
