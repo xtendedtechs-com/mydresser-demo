@@ -5,9 +5,11 @@ import { ThemeSettingsPanel } from "@/components/settings/ThemeSettingsPanel";
 import ThemeCustomizer from "@/components/ThemeCustomizer";
 import { AdvancedThemeCustomizer } from "@/components/settings/AdvancedThemeCustomizer";
 import { LanguageRegionalSettings } from "@/components/settings/LanguageRegionalSettings";
+import { useTranslation } from 'react-i18next';
 
 const ThemeSettingsPage = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -22,8 +24,8 @@ const ThemeSettingsPage = () => {
               <ChevronLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="text-3xl font-bold">Theme Settings</h1>
-              <p className="text-muted-foreground">Customize your app appearance</p>
+              <h1 className="text-3xl font-bold">{t('theme.title')}</h1>
+              <p className="text-muted-foreground">{t('theme.description')}</p>
             </div>
           </div>
 

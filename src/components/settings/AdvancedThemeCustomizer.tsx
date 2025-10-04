@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { Palette, Type, Layout, Sparkles, Shapes, Paintbrush } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from 'react-i18next';
 
 interface ThemeCustomization {
   // Colors
@@ -68,6 +69,7 @@ const defaultTheme: ThemeCustomization = {
 };
 
 export const AdvancedThemeCustomizer = () => {
+  const { t } = useTranslation();
   const [theme, setTheme] = useState<ThemeCustomization>(() => {
     const saved = localStorage.getItem('advanced-theme');
     return saved ? JSON.parse(saved) : defaultTheme;
@@ -124,7 +126,7 @@ export const AdvancedThemeCustomizer = () => {
 
   const resetTheme = () => {
     setTheme(defaultTheme);
-    toast.success("Theme reset to defaults");
+    toast.success(t('theme.reset'));
   };
 
   const presets = [
@@ -139,10 +141,10 @@ export const AdvancedThemeCustomizer = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Paintbrush className="w-5 h-5" />
-          Advanced Theme Customization
+          {t('theme.advanced')}
         </CardTitle>
         <CardDescription>
-          Complete control over your app's appearance
+          {t('theme.description')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -150,26 +152,26 @@ export const AdvancedThemeCustomizer = () => {
           <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="colors">
               <Palette className="w-4 h-4 mr-2" />
-              Colors
+              {t('theme.colors')}
             </TabsTrigger>
             <TabsTrigger value="typography">
               <Type className="w-4 h-4 mr-2" />
-              Type
+              {t('theme.typography')}
             </TabsTrigger>
             <TabsTrigger value="layout">
               <Layout className="w-4 h-4 mr-2" />
-              Layout
+              {t('theme.layout')}
             </TabsTrigger>
             <TabsTrigger value="effects">
               <Sparkles className="w-4 h-4 mr-2" />
-              Effects
+              {t('theme.effects')}
             </TabsTrigger>
             <TabsTrigger value="animations">
               <Shapes className="w-4 h-4 mr-2" />
-              Motion
+              {t('theme.animations')}
             </TabsTrigger>
             <TabsTrigger value="presets">
-              Presets
+              {t('theme.presets')}
             </TabsTrigger>
           </TabsList>
 
@@ -462,10 +464,10 @@ export const AdvancedThemeCustomizer = () => {
 
         <div className="flex gap-4 mt-6">
           <Button onClick={resetTheme} variant="outline" className="flex-1">
-            Reset to Defaults
+            {t('theme.reset')}
           </Button>
-          <Button onClick={() => toast.success("Theme applied!")} className="flex-1">
-            Apply Theme
+          <Button onClick={() => toast.success(t('common.success'))} className="flex-1">
+            {t('theme.apply')}
           </Button>
         </div>
       </CardContent>

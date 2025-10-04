@@ -4,8 +4,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { useState, useEffect } from "react";
 import { Clock, Calendar, Globe2 } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 export const LanguageRegionalSettings = () => {
+  const { t } = useTranslation();
   const [timeFormat, setTimeFormat] = useState<'12h' | '24h'>(
     (localStorage.getItem('time-format') as '12h' | '24h') || '12h'
   );
@@ -50,22 +52,22 @@ export const LanguageRegionalSettings = () => {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Globe2 className="w-5 h-5 text-primary" />
-            <CardTitle>Language & Region</CardTitle>
+            <CardTitle>{t('language.title')}</CardTitle>
           </div>
           <CardDescription>
-            Customize language and regional preferences
+            {t('language.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <Label className="text-base font-semibold mb-3 block">App Language</Label>
+            <Label className="text-base font-semibold mb-3 block">{t('language.appLanguage')}</Label>
             <LanguageSelector />
           </div>
 
           <div>
             <Label htmlFor="timezone" className="text-base font-semibold mb-3 block">
               <Clock className="w-4 h-4 inline mr-2" />
-              Timezone
+              {t('language.timezone')}
             </Label>
             <Select value={timezone} onValueChange={setTimezone}>
               <SelectTrigger id="timezone">
@@ -84,7 +86,7 @@ export const LanguageRegionalSettings = () => {
           <div>
             <Label htmlFor="time-format" className="text-base font-semibold mb-3 block">
               <Clock className="w-4 h-4 inline mr-2" />
-              Time Format
+              {t('language.timeFormat')}
             </Label>
             <Select value={timeFormat} onValueChange={(v) => setTimeFormat(v as '12h' | '24h')}>
               <SelectTrigger id="time-format">
@@ -100,7 +102,7 @@ export const LanguageRegionalSettings = () => {
           <div>
             <Label htmlFor="date-format" className="text-base font-semibold mb-3 block">
               <Calendar className="w-4 h-4 inline mr-2" />
-              Date Format
+              {t('language.dateFormat')}
             </Label>
             <Select value={dateFormat} onValueChange={setDateFormat}>
               <SelectTrigger id="date-format">
