@@ -14,6 +14,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { X, Plus, Upload, Tag } from 'lucide-react';
 import React from 'react';
 import { FileUpload } from '@/components/FileUpload';
+import { getAllPhotoUrls } from '@/utils/photoHelpers';
 
 interface AddMerchantProductDialogProps {
   open: boolean;
@@ -78,7 +79,7 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
       setSizes(editProduct.size || []);
       setTags(editProduct.tags || []);
       setStyleTags(editProduct.style_tags || []);
-      setPhotos(Array.isArray(editProduct.photos) ? editProduct.photos : []);
+      setPhotos(getAllPhotoUrls(editProduct.photos));
       setVideos(Array.isArray(editProduct.videos) ? editProduct.videos : []);
     } else {
       // Reset form for new product

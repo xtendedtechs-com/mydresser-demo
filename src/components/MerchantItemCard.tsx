@@ -10,7 +10,7 @@ import {
   MoreHorizontal
 } from "lucide-react";
 import { MerchantItem } from "@/hooks/useMerchantItems";
-import { getPrimaryPhotoUrl, getCategoryPlaceholderImage } from "@/utils/photoHelpers";
+import { getPrimaryPhotoUrl } from "@/utils/photoHelpers";
 
 interface MerchantItemCardProps {
   item: MerchantItem;
@@ -30,10 +30,6 @@ const MerchantItemCard = ({ item, onAction }: MerchantItemCardProps) => {
           src={getPrimaryPhotoUrl(item.photos, item.category)}
           alt={item.name}
           className="w-full h-full object-cover"
-          onError={(e) => {
-            const placeholder = getCategoryPlaceholderImage(item.category);
-            e.currentTarget.src = placeholder;
-          }}
         />
         
         {/* Overlay Badges */}

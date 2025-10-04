@@ -30,29 +30,28 @@ export const getCategoryPlaceholderImage = (category?: string): string => {
  * @returns The primary photo URL or category-appropriate placeholder
  */
 export const getPrimaryPhotoUrl = (photos: PhotoData, category?: string): string => {
-  if (!photos) return getCategoryPlaceholderImage(category);
+  if (!photos) return '';
 
   // Handle string URL
   if (typeof photos === 'string') {
-    return photos || getCategoryPlaceholderImage(category);
+    return photos;
   }
 
   // Handle array of URLs
   if (Array.isArray(photos)) {
-    return photos.length > 0 ? photos[0] : getCategoryPlaceholderImage(category);
+    return photos[0] || '';
   }
 
-  // Handle object with main property
+  // Handle object with main/urls properties
   if (typeof photos === 'object') {
-    if ('main' in photos && photos.main) {
-      return photos.main;
-    }
-    if ('urls' in photos && Array.isArray(photos.urls) && photos.urls.length > 0) {
-      return photos.urls[0];
+    const p: any = photos;
+    if (p.main) return p.main;
+    if (Array.isArray(p.urls) && p.urls.length > 0) {
+      return p.urls[0];
     }
   }
 
-  return getCategoryPlaceholderImage(category);
+  return '';
 };
 
 /**
@@ -73,14 +72,14 @@ export const getAllPhotoUrls = (photos: PhotoData): string[] => {
     return photos.filter(Boolean);
   }
 
-  // Handle object with urls or main property
+  // Handle object with urls and/or main property
   if (typeof photos === 'object') {
-    if ('urls' in photos && Array.isArray(photos.urls)) {
-      return photos.urls.filter(Boolean);
-    }
-    if ('main' in photos && photos.main) {
-      return [photos.main];
-    }
+    const p: any = photos;
+    const main = p.main ? [p.main] : [];
+    const urls = Array.isArray(p.urls) ? p.urls.filter(Boolean) : [];
+    const combined = [...main, ...urls];
+    // Ensure uniqueness and preserve order
+    return Array.from(new Set(combined));
   }
 
   return [];

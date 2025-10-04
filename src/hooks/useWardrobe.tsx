@@ -131,7 +131,7 @@ export const useWardrobe = () => {
           // Update item with photo URLs
           const { error: updateError } = await supabase
             .from('wardrobe_items')
-            .update({ photos: { urls: photoUrls } as any })
+            .update({ photos: { main: photoUrls[0], urls: photoUrls } as any })
             .eq('id', data.id);
 
           if (updateError) console.error('Error updating photos:', updateError);
@@ -271,28 +271,18 @@ export const useWardrobe = () => {
 
   // Helper function to extract photo URLs from wardrobe items
   const getPhotoUrls = (item: WardrobeItem): string[] => {
-    if (!item.photos) return [];
-    
-    // Handle string URL
-    if (typeof item.photos === 'string') {
-      return [item.photos];
+    const p = item.photos as any;
+    if (!p) return [];
+
+    if (typeof p === 'string') return [p];
+    if (Array.isArray(p)) return p.filter(Boolean);
+
+    if (typeof p === 'object') {
+      const main = p.main ? [p.main] : [];
+      const urls = Array.isArray(p.urls) ? p.urls.filter(Boolean) : [];
+      return Array.from(new Set([...main, ...urls]));
     }
-    
-    // Handle array of URLs  
-    if (Array.isArray(item.photos)) {
-      return item.photos.filter(Boolean);
-    }
-    
-    // Handle object with urls or main property
-    if (typeof item.photos === 'object') {
-      if ((item.photos as any).urls && Array.isArray((item.photos as any).urls)) {
-        return (item.photos as any).urls.filter(Boolean);
-      }
-      if ((item.photos as any).main) {
-        return [(item.photos as any).main];
-      }
-    }
-    
+
     return [];
   };
 
