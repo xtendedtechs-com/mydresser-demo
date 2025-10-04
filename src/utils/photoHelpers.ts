@@ -5,6 +5,7 @@
 import placeholderWardrobe from '@/assets/placeholder-wardrobe.jpg';
 import placeholderTops from '@/assets/placeholder-tops.jpg';
 import placeholderBottoms from '@/assets/placeholder-bottoms.jpg';
+import { supabase } from '@/integrations/supabase/client';
 
 export type PhotoData = string | string[] | { main?: string; urls?: string[] } | null | undefined;
 
@@ -40,6 +41,47 @@ const extractUrl = (val: any): string | null => {
   return null;
 };
 
+// Resolve any Supabase Storage path (bucket/path) to a public URL
+// Leaves http(s), data URIs, and blob URLs untouched
+const resolvePublicUrl = (input: string): string => {
+  if (!input) return '';
+  const trimmed = input.trim();
+  if (trimmed.startsWith('http') || trimmed.startsWith('data:image/') || trimmed.startsWith('blob:')) {
+    return trimmed;
+  }
+
+  // Already a public storage URL
+  if (trimmed.includes('/storage/v1/object/public/')) {
+    return trimmed;
+  }
+
+  // Try to detect known bucket prefix: `${bucket}/${path}`
+  const knownBuckets = [
+    'wardrobe-items',
+    'merchant-products',
+    'outfits',
+    'user-avatars',
+    'market-items',
+    'merchant-uploads',
+    'profile-photos',
+    'user-photos',
+    'wardrobe-photos',
+    'profile-avatars'
+  ];
+
+  const firstSlash = trimmed.indexOf('/');
+  if (firstSlash > 0) {
+    const bucket = trimmed.slice(0, firstSlash);
+    const path = trimmed.slice(firstSlash + 1);
+    if (knownBuckets.includes(bucket) && path) {
+      const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+      return data.publicUrl || trimmed;
+    }
+  }
+
+  return trimmed;
+};
+
 /**
  * Extracts a primary photo URL from various photo data formats
  * @param photos - Photo data in various formats
@@ -51,15 +93,18 @@ export const getPrimaryPhotoUrl = (photos: PhotoData, category?: string): string
 
   // Handle string URL
   if (typeof photos === 'string') {
-    if (photos.startsWith('blob:')) return getCategoryPlaceholderImage(category);
-    return photos || getCategoryPlaceholderImage(category);
+    const normalized = resolvePublicUrl(photos);
+    return normalized || getCategoryPlaceholderImage(category);
   }
 
   // Handle array (strings or objects)
   if (Array.isArray(photos)) {
     for (const entry of photos) {
-      const candidate = extractUrl(entry) || (typeof entry === 'string' ? entry : null);
-      if (candidate && !candidate.startsWith('blob:')) return candidate;
+      const raw = extractUrl(entry) || (typeof entry === 'string' ? entry : null);
+      if (raw) {
+        const normalized = resolvePublicUrl(raw);
+        if (normalized) return normalized;
+      }
     }
     return getCategoryPlaceholderImage(category);
   }
@@ -69,19 +114,28 @@ export const getPrimaryPhotoUrl = (photos: PhotoData, category?: string): string
     const p: any = photos;
     // Check "main" first (string or object)
     const mainUrl = extractUrl(p.main);
-    if (mainUrl && !mainUrl.startsWith('blob:')) return mainUrl;
+    if (mainUrl) {
+      const normalized = resolvePublicUrl(mainUrl);
+      if (normalized) return normalized;
+    }
 
     // Check urls array (can be strings or objects)
     if (Array.isArray(p.urls) && p.urls.length > 0) {
       for (const u of p.urls) {
-        const candidate = extractUrl(u) || (typeof u === 'string' ? u : null);
-        if (candidate && !candidate.startsWith('blob:')) return candidate;
+        const raw = extractUrl(u) || (typeof u === 'string' ? u : null);
+        if (raw) {
+          const normalized = resolvePublicUrl(raw);
+          if (normalized) return normalized;
+        }
       }
     }
 
     // Sometimes photos could be stored as { url: "..." }
     const direct = extractUrl(p);
-    if (direct && !direct.startsWith('blob:')) return direct;
+    if (direct) {
+      const normalized = resolvePublicUrl(direct);
+      if (normalized) return normalized;
+    }
   }
 
   return getCategoryPlaceholderImage(category);
@@ -98,18 +152,18 @@ export const getAllPhotoUrls = (photos: PhotoData): string[] => {
 
   // Handle string URL
   if (typeof photos === 'string') {
-    // Filter out blob URLs
-    return (photos && !photos.startsWith('blob:')) ? [photos] : [];
+    const normalized = resolvePublicUrl(photos);
+    return normalized ? [normalized] : [];
   }
 
   // Handle array (strings or objects)
   if (Array.isArray(photos)) {
     const urls: string[] = [];
     for (const entry of photos) {
-      const candidate = extractUrl(entry) || (typeof entry === 'string' ? entry : null);
-      if (candidate && !candidate.startsWith('blob:')) urls.push(candidate);
+      const raw = extractUrl(entry) || (typeof entry === 'string' ? entry : null);
+      if (raw) urls.push(resolvePublicUrl(raw));
     }
-    return Array.from(new Set(urls));
+    return Array.from(new Set(urls.filter(Boolean)));
   }
 
   // Handle object with urls and/or main property (allow nested shapes)
@@ -117,16 +171,16 @@ export const getAllPhotoUrls = (photos: PhotoData): string[] => {
     const p: any = photos;
     const urls: string[] = [];
     const main = extractUrl(p.main);
-    if (main && !main.startsWith('blob:')) urls.push(main);
+    if (main) urls.push(resolvePublicUrl(main));
     if (Array.isArray(p.urls)) {
       for (const u of p.urls) {
-        const candidate = extractUrl(u) || (typeof u === 'string' ? u : null);
-        if (candidate && !candidate.startsWith('blob:')) urls.push(candidate);
+        const raw = extractUrl(u) || (typeof u === 'string' ? u : null);
+        if (raw) urls.push(resolvePublicUrl(raw));
       }
     }
     const direct = extractUrl(p);
-    if (direct && !direct.startsWith('blob:')) urls.push(direct);
-    return Array.from(new Set(urls));
+    if (direct) urls.push(resolvePublicUrl(direct));
+    return Array.from(new Set(urls.filter(Boolean)));
   }
 
   return [];

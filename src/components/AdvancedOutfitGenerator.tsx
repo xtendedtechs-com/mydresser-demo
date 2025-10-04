@@ -9,7 +9,7 @@ import { useWardrobe } from '@/hooks/useWardrobe';
 import { useToast } from '@/hooks/use-toast';
 import { OutfitAI } from '@/ai/OutfitAI';
 import { WeatherMatcher } from '@/ai/WeatherMatcher';
-import { getPrimaryPhotoUrl, getCategoryPlaceholderImage } from '@/utils/photoHelpers';
+import { getPrimaryPhotoUrl } from '@/utils/photoHelpers';
 
 interface GeneratedOutfit {
   items: any[];
@@ -235,10 +235,6 @@ export const AdvancedOutfitGenerator = () => {
                       loading="lazy"
                       decoding="async"
                       className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const { getCategoryPlaceholderImage } = require("@/utils/photoHelpers");
-                        (e.currentTarget as HTMLImageElement).src = getCategoryPlaceholderImage(item.category);
-                      }}
                     />
                   </div>
                   <p className="text-sm font-medium truncate">{item.name}</p>

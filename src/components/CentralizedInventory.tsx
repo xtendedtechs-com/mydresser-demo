@@ -17,7 +17,7 @@ import {
 import { useMerchantItems } from '@/hooks/useMerchantItems';
 import { useStoreLocations } from '@/hooks/useStoreLocations';
 import { useLocationInventory } from '@/hooks/useLocationInventory';
-import { getPrimaryPhotoUrl, getCategoryPlaceholderImage } from '@/utils/photoHelpers';
+import { getPrimaryPhotoUrl } from '@/utils/photoHelpers';
 
 export const CentralizedInventory = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -245,10 +245,6 @@ export const CentralizedInventory = () => {
                             loading="lazy"
                             decoding="async"
                             className="w-12 h-12 object-cover rounded"
-                            onError={(e) => {
-                              const { getCategoryPlaceholderImage } = require("@/utils/photoHelpers");
-                              (e.currentTarget as HTMLImageElement).src = getCategoryPlaceholderImage(item.category);
-                            }}
                           />
                         </TableCell>
                         <TableCell className="font-medium">{item.name}</TableCell>

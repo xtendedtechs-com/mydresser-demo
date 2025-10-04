@@ -191,10 +191,6 @@ const PersonalizedRecommendations = () => {
                         loading="lazy"
                         decoding="async"
                         className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const { getCategoryPlaceholderImage } = require("@/utils/photoHelpers");
-                          (e.currentTarget as HTMLImageElement).src = getCategoryPlaceholderImage(item.category);
-                        }}
                       />
                       <Badge className="absolute top-2 right-2 bg-primary">
                         {rec?.confidence}% Match
