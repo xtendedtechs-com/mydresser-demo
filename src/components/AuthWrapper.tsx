@@ -38,6 +38,7 @@ import DiscoveryPage from "@/pages/DiscoveryPage";
 import CommunityPage from "@/pages/CommunityPage";
 import DiscoverPage from "@/pages/DiscoverPage";
 import InternationalPage from "@/pages/InternationalPage";
+import InternationalSettingsPage from "@/pages/InternationalSettingsPage";
 import SupportsResources from "@/pages/SupportsResources";
 import ReportsAnalyticsPage from "@/pages/ReportsAnalyticsPage";
 import UserAnalyticsPage from "@/pages/UserAnalyticsPage";
@@ -103,7 +104,7 @@ export const AuthWrapper = () => {
             <Route path="/discovery" element={<DiscoveryPage />} />
             <Route path="/discover" element={<DiscoverPage />} />
             <Route path="/community" element={<CommunityPage />} />
-            <Route path="/international" element={<InternationalPage />} />
+            <Route path="/international" element={<InternationalSettingsPage />} />
             <Route path="/support" element={<SupportsResources />} />
             <Route path="/reports" element={<ReportsAnalyticsPage />} />
             <Route path="/analytics" element={<UserAnalyticsPage />} />

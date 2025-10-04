@@ -210,6 +210,45 @@ export type Database = {
         }
         Relationships: []
       }
+      currency_settings: {
+        Row: {
+          auto_convert: boolean
+          base_currency: string
+          created_at: string
+          display_currency: string
+          id: string
+          preferred_payment_method: string | null
+          tax_rate: number
+          tax_region: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_convert?: boolean
+          base_currency?: string
+          created_at?: string
+          display_currency?: string
+          id?: string
+          preferred_payment_method?: string | null
+          tax_rate?: number
+          tax_region?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_convert?: boolean
+          base_currency?: string
+          created_at?: string
+          display_currency?: string
+          id?: string
+          preferred_payment_method?: string | null
+          tax_rate?: number
+          tax_region?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_outfit_suggestions: {
         Row: {
           confidence_score: number | null
@@ -287,6 +326,33 @@ export type Database = {
           id?: string
           is_premium?: boolean | null
           name?: string
+        }
+        Relationships: []
+      }
+      exchange_rates: {
+        Row: {
+          created_at: string
+          from_currency: string
+          id: string
+          rate: number
+          to_currency: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          from_currency: string
+          id?: string
+          rate: number
+          to_currency: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          from_currency?: string
+          id?: string
+          rate?: number
+          to_currency?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -2355,6 +2421,57 @@ export type Database = {
           operation_type?: string
           user_id?: string
           window_start?: string | null
+        }
+        Relationships: []
+      }
+      shipping_zones: {
+        Row: {
+          base_rate: number
+          countries: string[]
+          created_at: string
+          currency: string
+          estimated_days_max: number
+          estimated_days_min: number
+          free_shipping_threshold: number | null
+          id: string
+          is_active: boolean
+          merchant_id: string
+          name: string
+          per_item_rate: number
+          regions: string[]
+          updated_at: string
+        }
+        Insert: {
+          base_rate?: number
+          countries?: string[]
+          created_at?: string
+          currency?: string
+          estimated_days_max?: number
+          estimated_days_min?: number
+          free_shipping_threshold?: number | null
+          id?: string
+          is_active?: boolean
+          merchant_id: string
+          name: string
+          per_item_rate?: number
+          regions?: string[]
+          updated_at?: string
+        }
+        Update: {
+          base_rate?: number
+          countries?: string[]
+          created_at?: string
+          currency?: string
+          estimated_days_max?: number
+          estimated_days_min?: number
+          free_shipping_threshold?: number | null
+          id?: string
+          is_active?: boolean
+          merchant_id?: string
+          name?: string
+          per_item_rate?: number
+          regions?: string[]
+          updated_at?: string
         }
         Relationships: []
       }
