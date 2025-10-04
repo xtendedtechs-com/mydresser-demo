@@ -32,6 +32,7 @@ import WardrobeInsightsPage from "@/pages/WardrobeInsightsPage";
 import SecondDresserPage from "@/pages/SecondDresserPage";
 import TransactionsPage from "@/pages/TransactionsPage";
 import MessagesPage from "@/pages/MessagesPage";
+import VirtualTryOnPage from "@/pages/VirtualTryOnPage";
 import MyMirrorPage from "@/pages/MyMirrorPage";
 import WardrobeBuilder from "@/pages/WardrobeBuilder";
 import ComprehensiveSettingsPage from "@/pages/ComprehensiveSettingsPage";
@@ -105,6 +106,7 @@ export const AuthWrapper = () => {
             <Route path="/2nddresser" element={<SecondDresserPage />} />
             <Route path="/transactions" element={<TransactionsPage />} />
             <Route path="/messages" element={<MessagesPage />} />
+            <Route path="/virtual-tryon" element={<VirtualTryOnPage />} />
             <Route path="/mymirror" element={<MyMirrorPage />} />
             <Route path="/wardrobe-builder" element={<WardrobeBuilder />} />
             <Route path="/settings" element={<ComprehensiveSettingsPage />} />

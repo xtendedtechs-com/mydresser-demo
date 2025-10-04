@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, Share2, Star, Edit, Plus, Calendar, MapPin, Tag, X } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, Star, Edit, Plus, Calendar, MapPin, Tag, X, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,8 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useWardrobe, WardrobeItem } from '@/hooks/useWardrobe';
 import ItemLists from '@/components/ItemLists';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { VTOStudio } from '@/components/VTOStudio';
 
 const WardrobeItemDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,6 +20,7 @@ const WardrobeItemDetail = () => {
   const [item, setItem] = useState<WardrobeItem | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isStarred, setIsStarred] = useState(false);
+  const [showVTO, setShowVTO] = useState(false);
 
   useEffect(() => {
     if (id && items.length > 0) {
@@ -383,6 +386,15 @@ const WardrobeItemDetail = () => {
             </Button>
 
             <Button 
+              variant="secondary"
+              className="w-full"
+              onClick={() => setShowVTO(true)}
+            >
+              <Sparkles className="mr-2" size={20} />
+              Virtual Try-On
+            </Button>
+
+            <Button 
               variant="destructive"
               className="w-full"
               onClick={handleDelete}
@@ -400,6 +412,21 @@ const WardrobeItemDetail = () => {
         />
       </div>
       </div>
+
+      {/* VTO Dialog */}
+      <Dialog open={showVTO} onOpenChange={setShowVTO}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Virtual Try-On: {item.name}</DialogTitle>
+          </DialogHeader>
+          <VTOStudio
+            itemId={item.id}
+            itemType="wardrobe"
+            itemName={item.name}
+            itemImage={photos[0] || '/placeholder.svg'}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

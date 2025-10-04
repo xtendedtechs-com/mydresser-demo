@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, Share2, ShoppingCart, Star, Crown, Shield, Truck, RefreshCw, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, ShoppingCart, Star, Crown, Shield, Truck, RefreshCw, MessageCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { getAllPhotoUrls, getPrimaryPhotoUrl } from '@/utils/photoHelpers';
 import { PurchaseDialog } from '@/components/PurchaseDialog';
 import { MessagingDialog } from '@/components/MessagingDialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { VTOStudio } from '@/components/VTOStudio';
 
 const MarketItemDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,6 +27,7 @@ const MarketItemDetail = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [showPurchaseDialog, setShowPurchaseDialog] = useState(false);
   const [showMessaging, setShowMessaging] = useState(false);
+  const [showVTO, setShowVTO] = useState(false);
   const [sellerName, setSellerName] = useState<string>('Seller');
 
   useEffect(() => {
@@ -377,6 +380,15 @@ const MarketItemDetail = () => {
                 <MessageCircle className="w-5 h-5 mr-2" />
                 Message Seller
               </Button>
+              <Button 
+                size="lg" 
+                variant="secondary" 
+                className="w-full"
+                onClick={() => setShowVTO(true)}
+              >
+                <Sparkles className="w-5 h-5 mr-2" />
+                Try On Virtually
+              </Button>
             </div>
 
             {/* Features */}
@@ -577,6 +589,19 @@ const MarketItemDetail = () => {
             receiverName={sellerName}
             itemId={item.id}
           />
+          <Dialog open={showVTO} onOpenChange={setShowVTO}>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Virtual Try-On: {item.title}</DialogTitle>
+              </DialogHeader>
+              <VTOStudio
+                itemId={item.id}
+                itemType="market"
+                itemName={item.title}
+                itemImage={photos[0] || '/placeholder.svg'}
+              />
+            </DialogContent>
+          </Dialog>
         </>
       )}
     </div>
