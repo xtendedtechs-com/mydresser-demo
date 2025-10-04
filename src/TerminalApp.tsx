@@ -15,6 +15,7 @@ import MerchantTerminalAnalytics from '@/pages/MerchantTerminalAnalytics';
 import MerchantTerminalPartners from '@/pages/MerchantTerminalPartners';
 import MerchantTerminalFinancial from '@/pages/MerchantTerminalFinancial';
 import MerchantTerminalCustomers from '@/pages/MerchantTerminalCustomers';
+import MerchantTerminalPage from '@/pages/MerchantTerminalPage';
 import MerchantPage from "@/pages/MerchantPage";
 import MerchantOrders from "@/pages/MerchantOrders";
 import NotFound from "@/pages/NotFound";

@@ -29,6 +29,7 @@ const MarketItemDetail = () => {
   const [showMessaging, setShowMessaging] = useState(false);
   const [showVTO, setShowVTO] = useState(false);
   const [sellerName, setSellerName] = useState<string>('Seller');
+  const [merchantInfo, setMerchantInfo] = useState<any>(null);
 
   useEffect(() => {
     if (id) {
@@ -79,15 +80,35 @@ const MarketItemDetail = () => {
       
       setItem(fetchedItem);
       
-      // Fetch seller name
-      const { data: sellerProfile } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('user_id', fetchedItem.seller_id)
-        .single();
+      // Fetch seller profile and merchant info
+      const [profileResult, merchantResult, pageResult] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('full_name, role')
+          .eq('user_id', fetchedItem.seller_id)
+          .single(),
+        supabase
+          .from('merchant_profiles')
+          .select('business_name, business_type')
+          .eq('user_id', fetchedItem.seller_id)
+          .maybeSingle(),
+        supabase
+          .from('merchant_pages')
+          .select('business_name, brand_story')
+          .eq('merchant_id', fetchedItem.seller_id)
+          .maybeSingle()
+      ]);
       
-      if (sellerProfile?.full_name) {
-        setSellerName(sellerProfile.full_name);
+      if (profileResult.data?.full_name) {
+        setSellerName(profileResult.data.full_name);
+      }
+      
+      if (merchantResult.data || pageResult.data) {
+        setMerchantInfo({
+          businessName: pageResult.data?.business_name || merchantResult.data?.business_name || 'Merchant Store',
+          brandStory: pageResult.data?.brand_story || 'Premium fashion retailer specializing in high-quality clothing and accessories.',
+          businessType: merchantResult.data?.business_type || 'Fashion Retailer'
+        });
       }
       
       if (fetchedItem?.size) {
@@ -433,24 +454,25 @@ const MarketItemDetail = () => {
         {/* About this merchant */}
         <Card className="mb-8">
           <CardContent className="p-6">
-            <h2 className="text-xl font-bold mb-4">About this merchant</h2>
+            <h2 className="text-xl font-bold mb-4">About this seller</h2>
             <div className="flex items-start gap-4">
               <div className="w-16 h-16 bg-gradient-to-br from-primary to-purple-600 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-lg">M</span>
+                <span className="text-white font-bold text-lg">
+                  {merchantInfo?.businessName?.[0] || sellerName[0] || 'S'}
+                </span>
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-lg">Merchant Store</h3>
+                <h3 className="font-semibold text-lg">
+                  {merchantInfo?.businessName || sellerName}
+                </h3>
                 <div className="flex items-center gap-2 mt-1">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-current text-yellow-400" />
-                    <span className="text-sm font-medium">4.9</span>
-                  </div>
-                  <span className="text-sm text-muted-foreground">•</span>
-                  <span className="text-sm text-muted-foreground">500+ items sold</span>
+                  <Badge variant="secondary">{merchantInfo?.businessType || 'Seller'}</Badge>
                 </div>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Premium fashion retailer specializing in high-quality clothing and accessories.
-                </p>
+                {merchantInfo?.brandStory && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {merchantInfo.brandStory}
+                  </p>
+                )}
                 <Button 
                   variant="outline" 
                   size="sm" 

@@ -74,7 +74,7 @@ const MerchantTerminalPage = () => {
     }
   };
 
-  const displayedItems = items.filter(item => item.status === 'active').slice(0, 6);
+  const displayedItems = items.filter(item => item.status === 'available').slice(0, 6);
 
   return (
     <div className="container mx-auto p-6">
