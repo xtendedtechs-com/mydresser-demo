@@ -6,7 +6,7 @@ import { useProfile } from "@/hooks/useProfile";
 // Merchant Pages
 import MerchantLanding from "@/pages/MerchantLanding";
 import MerchantAuth from "@/components/MerchantAuth";
-import MerchantTerminal from "@/pages/MerchantTerminal";
+import MerchantTerminalPage from "@/pages/MerchantTerminalPage";
 import MerchantPage from "@/pages/MerchantPage";
 import MerchantAnalyticsPage from "@/pages/MerchantAnalyticsPage";
 import EnhancedMerchantDashboard from "@/pages/EnhancedMerchantDashboard";
@@ -19,6 +19,8 @@ import NotFound from "@/pages/NotFound";
 import MultiStoreManagementPage from "@/pages/MultiStoreManagementPage";
 import BrandPartnershipsPage from "@/pages/BrandPartnershipsPage";
 import AdvancedMerchantReports from "@/pages/AdvancedMerchantReports";
+
+import MerchantToolsPage from "@/pages/MerchantToolsPage";
 
 const TerminalApp = () => {
   const { isAuthenticated, loading, profile } = useProfile();
@@ -53,7 +55,8 @@ const TerminalApp = () => {
             <MerchantNavigation />
             <main className="md:pl-64 min-h-screen bg-background">
               <Routes>
-                <Route path="/" element={<MerchantTerminal />} />
+                <Route path="/" element={<MerchantTerminalPage />} />
+                <Route path="/tools" element={<MerchantToolsPage />} />
                 <Route path="/dashboard" element={<EnhancedMerchantDashboard />} />
                 <Route path="/inventory" element={<MerchantInventoryManagement />} />
                 <Route path="/orders" element={<MerchantOrders />} />
@@ -63,7 +66,7 @@ const TerminalApp = () => {
                 <Route path="/financial-reports" element={<FinancialReports />} />
                 <Route path="/multi-store" element={<MultiStoreManagementPage />} />
                 <Route path="/brand-partnerships" element={<BrandPartnershipsPage />} />
-                <Route path="/settings" element={<MerchantTerminal />} />
+                <Route path="/settings" element={<MerchantTerminalPage />} />
                 <Route path="/support" element={<SupportsResources />} />
                 <Route path="/page/:merchantId" element={<MerchantPage />} />
                 <Route path="*" element={<NotFound />} />

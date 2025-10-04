@@ -13,7 +13,8 @@ import {
   TrendingUp,
   MessageSquare,
   Menu,
-  X
+  X,
+  Wrench
 } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -33,6 +34,11 @@ const merchantLinks = [
     title: "Inventory",
     href: "/terminal/inventory",
     icon: Package,
+  },
+  {
+    title: "Tools",
+    href: "/terminal/tools",
+    icon: Wrench,
   },
   {
     title: "Analytics",
