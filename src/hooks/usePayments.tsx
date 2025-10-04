@@ -3,6 +3,9 @@ import { useToast } from '@/hooks/use-toast';
 import { myDresserPayments, PaymentMethod, Transaction } from '@/services/myDresserPayments';
 import { supabase } from '@/integrations/supabase/client';
 
+// Re-export PaymentMethod for consumer components
+export type { PaymentMethod, Transaction };
+
 export const usePayments = () => {
   const [processing, setProcessing] = useState(false);
   const { toast } = useToast();
