@@ -24,7 +24,7 @@ export const MerchantInventoryManager = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const categories = [...new Set(items?.map(i => i.category) || [])];
+  const categories = [...new Set(items?.map(i => i.category).filter(Boolean) || [])];
   const lowStockItems = items?.filter(i => (i.stock_quantity || 0) < 10) || [];
   const outOfStockItems = items?.filter(i => (i.stock_quantity || 0) === 0) || [];
 

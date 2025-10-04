@@ -10,6 +10,7 @@ import MerchantTerminalPage from "@/pages/MerchantTerminalPage";
 import MerchantTerminalDashboard from "@/pages/MerchantTerminalDashboard";
 import MerchantTerminalRegister from "@/pages/MerchantTerminalRegister";
 import MerchantTerminalInventory from "@/pages/MerchantTerminalInventory";
+import MerchantTerminalSettings from "@/pages/MerchantTerminalSettings";
 import MerchantPage from "@/pages/MerchantPage";
 import MerchantAnalyticsPage from "@/pages/MerchantAnalyticsPage";
 import EnhancedMerchantDashboard from "@/pages/EnhancedMerchantDashboard";
@@ -65,7 +66,7 @@ const TerminalApp = () => {
                 <Route path="/financial" element={<FinancialReports />} />
                 <Route path="/partnerships" element={<BrandPartnershipsPage />} />
                 <Route path="/page" element={<MerchantPage />} />
-                <Route path="/settings" element={<MerchantTerminalPage />} />
+                <Route path="/settings" element={<MerchantTerminalSettings />} />
                 <Route path="/support" element={<SupportsResources />} />
                 <Route path="/tools" element={<MerchantToolsPage />} />
                 <Route path="/dashboard" element={<EnhancedMerchantDashboard />} />
