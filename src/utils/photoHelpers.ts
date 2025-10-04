@@ -30,32 +30,39 @@ export const getCategoryPlaceholderImage = (category?: string): string => {
  * @returns The primary photo URL or category-appropriate placeholder
  */
 export const getPrimaryPhotoUrl = (photos: PhotoData, category?: string): string => {
-  if (!photos) return '';
+  if (!photos) return getCategoryPlaceholderImage(category);
 
   // Handle string URL
   if (typeof photos === 'string') {
-    return photos;
+    // Filter out blob URLs as they're temporary
+    if (photos.startsWith('blob:')) return getCategoryPlaceholderImage(category);
+    return photos || getCategoryPlaceholderImage(category);
   }
 
   // Handle array of URLs
   if (Array.isArray(photos)) {
-    return photos[0] || '';
+    const validUrl = photos.find(url => url && !url.startsWith('blob:'));
+    return validUrl || getCategoryPlaceholderImage(category);
   }
 
   // Handle object with main/urls properties
   if (typeof photos === 'object') {
     const p: any = photos;
-    if (p.main) return p.main;
+    // Check main first
+    if (p.main && !p.main.startsWith('blob:')) return p.main;
+    // Check urls array
     if (Array.isArray(p.urls) && p.urls.length > 0) {
-      return p.urls[0];
+      const validUrl = p.urls.find((url: string) => url && !url.startsWith('blob:'));
+      if (validUrl) return validUrl;
     }
   }
 
-  return '';
+  return getCategoryPlaceholderImage(category);
 };
 
 /**
  * Extracts all photo URLs from various photo data formats
+ * Filters out blob URLs as they're temporary
  * @param photos - Photo data in various formats
  * @returns Array of photo URLs
  */
@@ -64,19 +71,20 @@ export const getAllPhotoUrls = (photos: PhotoData): string[] => {
 
   // Handle string URL
   if (typeof photos === 'string') {
-    return photos ? [photos] : [];
+    // Filter out blob URLs
+    return (photos && !photos.startsWith('blob:')) ? [photos] : [];
   }
 
   // Handle array of URLs
   if (Array.isArray(photos)) {
-    return photos.filter(Boolean);
+    return photos.filter(url => url && !url.startsWith('blob:'));
   }
 
   // Handle object with urls and/or main property
   if (typeof photos === 'object') {
     const p: any = photos;
-    const main = p.main ? [p.main] : [];
-    const urls = Array.isArray(p.urls) ? p.urls.filter(Boolean) : [];
+    const main = (p.main && !p.main.startsWith('blob:')) ? [p.main] : [];
+    const urls = Array.isArray(p.urls) ? p.urls.filter((url: string) => url && !url.startsWith('blob:')) : [];
     const combined = [...main, ...urls];
     // Ensure uniqueness and preserve order
     return Array.from(new Set(combined));

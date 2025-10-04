@@ -29,6 +29,7 @@ import { calendarService, CalendarEvent } from "@/services/calendarService";
 import { supabase } from "@/integrations/supabase/client";
 import SmartOutfitEngine from "@/services/smartOutfitEngine";
 import VirtualTryOn from "@/components/VirtualTryOn";
+import DailyOutfitWithVTO from "@/components/DailyOutfitWithVTO";
 import { getPrimaryPhotoUrl } from "@/utils/photoHelpers";
 
 const getTimeSlot = (timeOfDay: string): string => {
@@ -158,8 +159,21 @@ const DailyOutfit = () => {
   };
 
   const loadUserPhoto = async () => {
-    // Load from user profile - will be available after profile is loaded
-    setUserPhoto(null);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('user_preferences')
+        .select('vto_photo_url')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      setUserPhoto(data?.vto_photo_url || null);
+    } catch (error) {
+      console.warn('Failed to load user photo:', error);
+    }
   };
 
   const loadWeather = async () => {
@@ -607,19 +621,38 @@ const DailyOutfit = () => {
   }
 
   return (
-    <div className="space-y-4">
-      {/* Virtual Try-On Setup */}
-      {!userPhoto && (
-        <VirtualTryOn 
-          onPhotoUploaded={(url) => setUserPhoto(url)}
-          currentPhoto={userPhoto}
-        />
-      )}
+    <div className="space-y-6">
+      {/* VTO Photo Upload Section */}
+      <Card>
+        <div className="p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Star className="w-5 h-5 text-primary" />
+            <h3 className="font-semibold">Upload Your Photo for Virtual Try-On</h3>
+          </div>
+          <p className="text-sm text-muted-foreground mb-4">
+            Upload a full-body photo to see yourself wearing the AI-suggested outfits with realistic virtual try-on
+          </p>
+          <VirtualTryOn 
+            onPhotoUploaded={(url) => {
+              setUserPhoto(url);
+              loadUserPhoto();
+            }}
+            currentPhoto={userPhoto}
+          />
+        </div>
+      </Card>
 
-      {/* Main Outfit Display */}
-      <Card className="overflow-hidden bg-gradient-to-b from-background to-accent/5">
-        {/* Header */}
-        <div className="p-4 border-b bg-gradient-to-r from-primary/5 to-accent/5">
+      {/* Main Outfit Display with VTO */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left: VTO Preview */}
+        <div>
+          <DailyOutfitWithVTO outfit={outfit} userPhoto={userPhoto} />
+        </div>
+
+        {/* Right: Outfit Details */}
+        <Card className="overflow-hidden bg-gradient-to-b from-background to-accent/5">
+          {/* Header */}
+          <div className="p-4 border-b bg-gradient-to-r from-primary/5 to-accent/5">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
@@ -822,7 +855,8 @@ const DailyOutfit = () => {
             )}
           </div>
         )}
-      </Card>
+        </Card>
+      </div>
 
       {/* Social Reactions */}
       <div className="flex items-center justify-center gap-4">
