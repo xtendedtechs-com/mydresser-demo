@@ -17,6 +17,12 @@ export interface AISettings {
   style_preferences: Record<string, any>;
   color_preferences: string[];
   brand_preferences: string[];
+  // Phase 16 additions (optional until DB migration)
+  enable_daily_recommendations?: boolean;
+  enable_context_aware_suggestions?: boolean;
+  recommendation_frequency?: 'daily' | 'weekly' | 'on-demand';
+  preferred_occasions?: string[];
+  style_evolution_tracking?: boolean;
 }
 
 export const useAISettings = () => {
