@@ -3152,6 +3152,212 @@ export type Database = {
         }
         Relationships: []
       }
+      vto_analytics: {
+        Row: {
+          created_at: string
+          event_data: Json | null
+          event_type: string
+          id: string
+          item_id: string | null
+          merchant_id: string | null
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          item_id?: string | null
+          merchant_id?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          item_id?: string | null
+          merchant_id?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vto_analytics_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "vto_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vto_item_status: {
+        Row: {
+          created_at: string
+          id: string
+          image_quality_checks: Json | null
+          is_vto_ready: boolean | null
+          item_id: string
+          item_type: string
+          last_checked_at: string | null
+          material_data_complete: boolean | null
+          missing_requirements: Json | null
+          quality_score: number | null
+          size_data_complete: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_quality_checks?: Json | null
+          is_vto_ready?: boolean | null
+          item_id: string
+          item_type: string
+          last_checked_at?: string | null
+          material_data_complete?: boolean | null
+          missing_requirements?: Json | null
+          quality_score?: number | null
+          size_data_complete?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_quality_checks?: Json | null
+          is_vto_ready?: boolean | null
+          item_id?: string
+          item_type?: string
+          last_checked_at?: string | null
+          material_data_complete?: boolean | null
+          missing_requirements?: Json | null
+          quality_score?: number | null
+          size_data_complete?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      vto_merchant_settings: {
+        Row: {
+          auto_generate_vto: boolean | null
+          conversion_tracking_enabled: boolean | null
+          created_at: string
+          fit_confidence_threshold: number | null
+          id: string
+          merchant_id: string
+          require_vto_for_listing: boolean | null
+          size_recommendation_enabled: boolean | null
+          updated_at: string
+          vto_enabled: boolean | null
+        }
+        Insert: {
+          auto_generate_vto?: boolean | null
+          conversion_tracking_enabled?: boolean | null
+          created_at?: string
+          fit_confidence_threshold?: number | null
+          id?: string
+          merchant_id: string
+          require_vto_for_listing?: boolean | null
+          size_recommendation_enabled?: boolean | null
+          updated_at?: string
+          vto_enabled?: boolean | null
+        }
+        Update: {
+          auto_generate_vto?: boolean | null
+          conversion_tracking_enabled?: boolean | null
+          created_at?: string
+          fit_confidence_threshold?: number | null
+          id?: string
+          merchant_id?: string
+          require_vto_for_listing?: boolean | null
+          size_recommendation_enabled?: boolean | null
+          updated_at?: string
+          vto_enabled?: boolean | null
+        }
+        Relationships: []
+      }
+      vto_sessions: {
+        Row: {
+          confidence_score: number | null
+          created_at: string
+          fit_score: number | null
+          id: string
+          item_id: string
+          item_type: string
+          photo_data: Json | null
+          result_image_url: string | null
+          session_data: Json
+          updated_at: string
+          user_id: string
+          user_measurements: Json | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string
+          fit_score?: number | null
+          id?: string
+          item_id: string
+          item_type: string
+          photo_data?: Json | null
+          result_image_url?: string | null
+          session_data?: Json
+          updated_at?: string
+          user_id: string
+          user_measurements?: Json | null
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string
+          fit_score?: number | null
+          id?: string
+          item_id?: string
+          item_type?: string
+          photo_data?: Json | null
+          result_image_url?: string | null
+          session_data?: Json
+          updated_at?: string
+          user_id?: string
+          user_measurements?: Json | null
+        }
+        Relationships: []
+      }
+      vto_user_preferences: {
+        Row: {
+          auto_delete_after_days: number | null
+          body_measurements: Json | null
+          created_at: string
+          enable_vto: boolean | null
+          id: string
+          preferred_fit_style: string | null
+          save_try_on_photos: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_delete_after_days?: number | null
+          body_measurements?: Json | null
+          created_at?: string
+          enable_vto?: boolean | null
+          id?: string
+          preferred_fit_style?: string | null
+          save_try_on_photos?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_delete_after_days?: number | null
+          body_measurements?: Json | null
+          created_at?: string
+          enable_vto?: boolean | null
+          id?: string
+          preferred_fit_style?: string | null
+          save_try_on_photos?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       wardrobe_components: {
         Row: {
           capacity: number | null
@@ -3338,6 +3544,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_vto_roi: {
+        Args: {
+          end_date?: string
+          merchant_id_param: string
+          start_date?: string
+        }
+        Returns: Json
+      }
       check_contact_info_breach_patterns: {
         Args: Record<PropertyKey, never>
         Returns: {
