@@ -2205,6 +2205,7 @@ export type Database = {
           style_score: number | null
           updated_at: string
           user_id: string
+          vto_photo_url: string | null
         }
         Insert: {
           auth_level?: Database["public"]["Enums"]["auth_level"]
@@ -2221,6 +2222,7 @@ export type Database = {
           style_score?: number | null
           updated_at?: string
           user_id: string
+          vto_photo_url?: string | null
         }
         Update: {
           auth_level?: Database["public"]["Enums"]["auth_level"]
@@ -2237,6 +2239,7 @@ export type Database = {
           style_score?: number | null
           updated_at?: string
           user_id?: string
+          vto_photo_url?: string | null
         }
         Relationships: []
       }

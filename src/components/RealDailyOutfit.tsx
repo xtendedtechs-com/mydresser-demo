@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Sparkles, 
   RefreshCw, 
@@ -46,7 +45,27 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
   const [vtoImage, setVtoImage] = useState<string | null>(null);
   const [generatingVTO, setGeneratingVTO] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>('outfit');
+
+  // Load user photo from profile on mount
+  useEffect(() => {
+    const loadUserPhoto = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('avatar_url, vto_photo_url')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (profile?.vto_photo_url) {
+          setUserPhoto(profile.vto_photo_url);
+        } else if (profile?.avatar_url) {
+          setUserPhoto(profile.avatar_url);
+        }
+      }
+    };
+    loadUserPhoto();
+  }, []);
 
   useEffect(() => {
     if (!wardrobeLoading && !preferencesLoading && wardrobeItems.length > 0 && !outfit) {
@@ -56,6 +75,13 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
       return () => clearTimeout(timer);
     }
   }, [wardrobeLoading, preferencesLoading]);
+
+  // Generate VTO when outfit and userPhoto are both available
+  useEffect(() => {
+    if (outfit && userPhoto && !vtoImage && !generatingVTO) {
+      generateVTO();
+    }
+  }, [outfit, userPhoto]);
 
   const generateDailyOutfit = async () => {
     if (!wardrobeItems.length) return;
@@ -213,13 +239,22 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Convert to base64
     const reader = new FileReader();
-    reader.onloadend = () => {
-      setUserPhoto(reader.result as string);
-      setActiveTab('tryon');
+    reader.onloadend = async () => {
+      const photoUrl = reader.result as string;
+      setUserPhoto(photoUrl);
+      
+      // Save to profile
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase
+          .from('profiles')
+          .update({ vto_photo_url: photoUrl })
+          .eq('user_id', user.id);
+      }
+      
       toast.success('Photo uploaded! Generating virtual try-on...');
-      generateVTO(reader.result as string);
+      generateVTO(photoUrl);
     };
     reader.readAsDataURL(file);
   };
@@ -348,83 +383,38 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {/* Tabs for Outfit and Try-On */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="outfit">Outfit Details</TabsTrigger>
-            <TabsTrigger value="tryon">
-              <Camera className="w-4 h-4 mr-2" />
-              Virtual Try-On
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="outfit" className="space-y-6 mt-6">
-            {/* Weather Info */}
-            {weather && (
-              <div className="flex items-center justify-center space-x-4 p-3 bg-muted rounded-lg">
-                <Cloud className="w-5 h-5 text-muted-foreground" />
-                <div className="text-sm">
-                  <span className="font-medium">{weather.condition}</span>
-                  <span className="text-muted-foreground ml-2">
-                    {Math.round(weather.temperature)}°C
-                  </span>
+        {/* Virtual Try-On Section */}
+        <div className="relative">
+          <div className="aspect-[3/4] bg-muted rounded-lg overflow-hidden">
+            {generatingVTO ? (
+              <div className="absolute inset-0 flex items-center justify-center bg-background/80">
+                <div className="text-center space-y-2">
+                  <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+                  <p className="text-sm text-muted-foreground">Generating virtual try-on...</p>
                 </div>
               </div>
-            )}
-
-            {/* Outfit Items */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {outfit.items?.map((item: any, index: number) => (
-                <div key={item.id || index} className="text-center">
-                  <div className="relative mb-2">
-                    <Avatar className="w-20 h-20 mx-auto">
-                      <AvatarImage src={item.photos?.main || '/placeholder.svg'} />
-                      <AvatarFallback>{item.name.slice(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <Badge 
-                      variant="secondary" 
-                      className="absolute -top-1 -right-1 text-xs"
-                    >
-                      {item.category}
-                    </Badge>
+            ) : vtoImage ? (
+              <img
+                src={vtoImage}
+                alt="Virtual Try-On Result"
+                className="w-full h-full object-cover"
+              />
+            ) : userPhoto ? (
+              <img
+                src={userPhoto}
+                alt="Your Photo"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center space-y-4 p-6">
+                  <Camera className="w-12 h-12 mx-auto text-muted-foreground" />
+                  <div>
+                    <h3 className="font-semibold mb-2">Upload Your Photo</h3>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      See yourself in this outfit with AI virtual try-on
+                    </p>
                   </div>
-                  <p className="text-sm font-medium">{item.name}</p>
-                  <p className="text-xs text-muted-foreground">{item.brand}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Outfit Reasoning */}
-            {outfit.reasoning && (
-              <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
-                <h4 className="font-medium text-sm mb-2">Why this outfit works:</h4>
-                <p className="text-sm text-muted-foreground">{outfit.reasoning}</p>
-              </div>
-            )}
-
-            {/* Style Tags */}
-            {outfit.tags && (
-              <div className="flex flex-wrap gap-2">
-                {outfit.tags.map((tag: string) => (
-                  <Badge key={tag} variant="outline" className="text-xs">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="tryon" className="space-y-4 mt-6">
-            {!userPhoto ? (
-              <div className="text-center py-12 space-y-4">
-                <Camera className="w-16 h-16 mx-auto text-muted-foreground" />
-                <div>
-                  <h3 className="font-semibold text-lg mb-2">See Yourself in This Outfit</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Upload a full-body photo to virtually try on this outfit
-                  </p>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-2 justify-center">
                   <Button asChild variant="outline">
                     <label className="cursor-pointer">
                       <Upload className="w-4 h-4 mr-2" />
@@ -439,78 +429,100 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
                   </Button>
                 </div>
               </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="relative aspect-[3/4] bg-muted rounded-lg overflow-hidden">
-                  {generatingVTO ? (
-                    <div className="absolute inset-0 flex items-center justify-center bg-background/80">
-                      <div className="text-center space-y-2">
-                        <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
-                        <p className="text-sm text-muted-foreground">Generating virtual try-on...</p>
-                        <p className="text-xs text-muted-foreground">This may take a moment</p>
-                      </div>
-                    </div>
-                  ) : vtoImage ? (
-                    <img
-                      src={vtoImage}
-                      alt="Virtual Try-On Result"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <img
-                      src={userPhoto}
-                      alt="Your Photo"
-                      className="w-full h-full object-cover"
-                    />
-                  )}
-                  
-                  <div className="absolute top-2 left-2">
-                    <Badge className="bg-primary text-primary-foreground">
-                      <Sparkles className="w-3 h-3 mr-1" />
-                      AI Virtual Try-On
-                    </Badge>
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    className="flex-1"
-                    onClick={() => generateVTO()}
-                    disabled={generatingVTO}
-                  >
-                    <RefreshCw className={`w-4 h-4 mr-2 ${generatingVTO ? 'animate-spin' : ''}`} />
-                    Regenerate
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="flex-1"
-                    asChild
-                  >
-                    <label className="cursor-pointer">
-                      <Upload className="w-4 h-4 mr-2" />
-                      Change Photo
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handlePhotoUpload}
-                        className="hidden"
-                      />
-                    </label>
-                  </Button>
-                </div>
-
-                {vtoImage && (
-                  <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
-                    <p className="text-sm text-center">
-                      💡 This is an AI-generated preview. Actual fit may vary.
-                    </p>
-                  </div>
-                )}
+            )}
+            
+            {(vtoImage || userPhoto) && (
+              <div className="absolute top-2 left-2">
+                <Badge className="bg-primary text-primary-foreground">
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  AI Virtual Try-On
+                </Badge>
               </div>
             )}
-          </TabsContent>
-        </Tabs>
+
+            {userPhoto && (
+              <div className="absolute bottom-2 right-2">
+                <Button 
+                  size="sm"
+                  variant="secondary"
+                  asChild
+                >
+                  <label className="cursor-pointer">
+                    <Upload className="w-3 h-3 mr-1" />
+                    Change
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoUpload}
+                      className="hidden"
+                    />
+                  </label>
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {vtoImage && (
+            <div className="mt-2 text-center">
+              <p className="text-xs text-muted-foreground">
+                💡 AI-generated preview. Actual fit may vary.
+              </p>
+            </div>
+          )}
+        </div>
+        {/* Weather Info */}
+        {weather && (
+          <div className="flex items-center justify-center space-x-4 p-3 bg-muted rounded-lg">
+            <Cloud className="w-5 h-5 text-muted-foreground" />
+            <div className="text-sm">
+              <span className="font-medium">{weather.condition}</span>
+              <span className="text-muted-foreground ml-2">
+                {Math.round(weather.temperature)}°C
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Outfit Items */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {outfit.items?.map((item: any, index: number) => (
+            <div key={item.id || index} className="text-center">
+              <div className="relative mb-2">
+                <Avatar className="w-20 h-20 mx-auto">
+                  <AvatarImage src={item.photos?.main || '/placeholder.svg'} />
+                  <AvatarFallback>{item.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <Badge 
+                  variant="secondary" 
+                  className="absolute -top-1 -right-1 text-xs"
+                >
+                  {item.category}
+                </Badge>
+              </div>
+              <p className="text-sm font-medium">{item.name}</p>
+              <p className="text-xs text-muted-foreground">{item.brand}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Outfit Reasoning */}
+        {outfit.reasoning && (
+          <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
+            <h4 className="font-medium text-sm mb-2">Why this outfit works:</h4>
+            <p className="text-sm text-muted-foreground">{outfit.reasoning}</p>
+          </div>
+        )}
+
+        {/* Style Tags */}
+        {outfit.tags && (
+          <div className="flex flex-wrap gap-2">
+            {outfit.tags.map((tag: string) => (
+              <Badge key={tag} variant="outline" className="text-xs">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        )}
 
         {/* Actions */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
