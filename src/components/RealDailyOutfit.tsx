@@ -20,6 +20,8 @@ import {
 import { useWardrobe } from "@/hooks/useWardrobe";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { useDailyOutfitSuggestions } from "@/hooks/useDailyOutfitSuggestions";
+import { useVTOPhotos } from "@/hooks/useVTOPhotos";
+import { useUserSettings } from "@/hooks/useUserSettings";
 import { OutfitAI } from "@/ai/OutfitAI";
 import { weatherService } from "@/services/weatherService";
 import { supabase } from "@/integrations/supabase/client";
@@ -35,6 +37,8 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
   const { items: wardrobeItems, loading: wardrobeLoading } = useWardrobe();
   const { preferences, loading: preferencesLoading } = useUserPreferences();
   const { createSuggestion, acceptSuggestion, rejectSuggestion } = useDailyOutfitSuggestions();
+  const { photos, getRandomActivePhoto } = useVTOPhotos();
+  const { settings } = useUserSettings();
   
   const [outfit, setOutfit] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -46,26 +50,24 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
   const [vtoImage, setVtoImage] = useState<string | null>(null);
   const [generatingVTO, setGeneratingVTO] = useState(false);
 
-  // Load user photo from profile on mount
+  // Load VTO photo based on settings (random or first active)
   useEffect(() => {
-    const loadUserPhoto = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('avatar_url, vto_photo_url')
-          .eq('user_id', user.id)
-          .single();
-        
-        if (profile?.vto_photo_url) {
-          setUserPhoto(profile.vto_photo_url);
-        } else if (profile?.avatar_url) {
-          setUserPhoto(profile.avatar_url);
+    if (photos.length > 0) {
+      if (settings?.enable_random_vto_photo) {
+        const randomPhoto = getRandomActivePhoto();
+        if (randomPhoto) {
+          setUserPhoto(randomPhoto.photo_url);
+        }
+      } else {
+        // Use the first active photo or the most recent one
+        const activePhotos = photos.filter(p => p.is_active);
+        const photoToUse = activePhotos.length > 0 ? activePhotos[0] : photos[0];
+        if (photoToUse) {
+          setUserPhoto(photoToUse.photo_url);
         }
       }
-    };
-    loadUserPhoto();
-  }, []);
+    }
+  }, [photos, settings, getRandomActivePhoto]);
 
   useEffect(() => {
     if (!wardrobeLoading && !preferencesLoading && wardrobeItems.length > 0 && !outfit) {

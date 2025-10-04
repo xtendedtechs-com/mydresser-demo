@@ -3047,6 +3047,7 @@ export type Database = {
           ai_suggestion_frequency: string | null
           created_at: string
           currency: string | null
+          current_vto_photo_id: string | null
           default_payment_method: string | null
           enable_ai_chat: boolean | null
           enable_ai_suggestions: boolean | null
@@ -3054,6 +3055,7 @@ export type Database = {
           enable_marketing_emails: boolean | null
           enable_payment_notifications: boolean | null
           enable_push_notifications: boolean | null
+          enable_random_vto_photo: boolean | null
           id: string
           language: string | null
           profile_visibility: string | null
@@ -3069,6 +3071,7 @@ export type Database = {
           ai_suggestion_frequency?: string | null
           created_at?: string
           currency?: string | null
+          current_vto_photo_id?: string | null
           default_payment_method?: string | null
           enable_ai_chat?: boolean | null
           enable_ai_suggestions?: boolean | null
@@ -3076,6 +3079,7 @@ export type Database = {
           enable_marketing_emails?: boolean | null
           enable_payment_notifications?: boolean | null
           enable_push_notifications?: boolean | null
+          enable_random_vto_photo?: boolean | null
           id?: string
           language?: string | null
           profile_visibility?: string | null
@@ -3091,6 +3095,7 @@ export type Database = {
           ai_suggestion_frequency?: string | null
           created_at?: string
           currency?: string | null
+          current_vto_photo_id?: string | null
           default_payment_method?: string | null
           enable_ai_chat?: boolean | null
           enable_ai_suggestions?: boolean | null
@@ -3098,6 +3103,7 @@ export type Database = {
           enable_marketing_emails?: boolean | null
           enable_payment_notifications?: boolean | null
           enable_push_notifications?: boolean | null
+          enable_random_vto_photo?: boolean | null
           id?: string
           language?: string | null
           profile_visibility?: string | null
@@ -3108,7 +3114,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_settings_current_vto_photo_id_fkey"
+            columns: ["current_vto_photo_id"]
+            isOneToOne: false
+            referencedRelation: "vto_photos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_styles: {
         Row: {
@@ -3367,6 +3381,33 @@ export type Database = {
           size_recommendation_enabled?: boolean | null
           updated_at?: string
           vto_enabled?: boolean | null
+        }
+        Relationships: []
+      }
+      vto_photos: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean | null
+          photo_url: string
+          uploaded_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          photo_url: string
+          uploaded_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          photo_url?: string
+          uploaded_at?: string
+          user_id?: string
         }
         Relationships: []
       }

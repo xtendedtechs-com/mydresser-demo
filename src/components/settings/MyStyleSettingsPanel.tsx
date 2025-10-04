@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { useToast } from '@/hooks/use-toast';
 import { useStylePreferences } from '@/hooks/useStylePreferences';
+import { VTOPhotoSettings } from './VTOPhotoSettings';
 import { X } from 'lucide-react';
 
 const commonStyles = ['casual', 'formal', 'streetwear', 'minimalist', 'bohemian', 'vintage', 'athletic', 'elegant'];
@@ -63,6 +64,8 @@ export const MyStyleSettingsPanel = () => {
 
   return (
     <div className="space-y-6">
+      <VTOPhotoSettings />
+      
       <Card>
         <CardHeader>
           <CardTitle>Style Preferences</CardTitle>

@@ -21,6 +21,8 @@ export interface UserSettings {
   theme: string;
   language: string;
   currency: string;
+  enable_random_vto_photo?: boolean;
+  current_vto_photo_id?: string;
 }
 
 export const useUserSettings = () => {
