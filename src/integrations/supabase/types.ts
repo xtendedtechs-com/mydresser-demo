@@ -1366,10 +1366,13 @@ export type Database = {
       merchant_pages: {
         Row: {
           accent_color: string | null
+          active_sections: Json | null
+          background_color: string | null
           brand_story: string | null
           business_hours: Json | null
           business_name: string
           contact_info: Json | null
+          cover_video: string | null
           created_at: string
           custom_css: string | null
           enable_chat: boolean | null
@@ -1387,21 +1390,27 @@ export type Database = {
           logo: string | null
           merchant_id: string
           meta_description: string | null
+          profile_photo: string | null
           secondary_color: string | null
+          section_order: Json | null
           show_reviews: boolean | null
           show_social_proof: boolean | null
           show_stock_count: boolean | null
           social_links: Json | null
           specialties: string[] | null
+          text_color: string | null
           theme_color: string | null
           updated_at: string
         }
         Insert: {
           accent_color?: string | null
+          active_sections?: Json | null
+          background_color?: string | null
           brand_story?: string | null
           business_hours?: Json | null
           business_name: string
           contact_info?: Json | null
+          cover_video?: string | null
           created_at?: string
           custom_css?: string | null
           enable_chat?: boolean | null
@@ -1419,21 +1428,27 @@ export type Database = {
           logo?: string | null
           merchant_id: string
           meta_description?: string | null
+          profile_photo?: string | null
           secondary_color?: string | null
+          section_order?: Json | null
           show_reviews?: boolean | null
           show_social_proof?: boolean | null
           show_stock_count?: boolean | null
           social_links?: Json | null
           specialties?: string[] | null
+          text_color?: string | null
           theme_color?: string | null
           updated_at?: string
         }
         Update: {
           accent_color?: string | null
+          active_sections?: Json | null
+          background_color?: string | null
           brand_story?: string | null
           business_hours?: Json | null
           business_name?: string
           contact_info?: Json | null
+          cover_video?: string | null
           created_at?: string
           custom_css?: string | null
           enable_chat?: boolean | null
@@ -1451,12 +1466,15 @@ export type Database = {
           logo?: string | null
           merchant_id?: string
           meta_description?: string | null
+          profile_photo?: string | null
           secondary_color?: string | null
+          section_order?: Json | null
           show_reviews?: boolean | null
           show_social_proof?: boolean | null
           show_stock_count?: boolean | null
           social_links?: Json | null
           specialties?: string[] | null
+          text_color?: string | null
           theme_color?: string | null
           updated_at?: string
         }
