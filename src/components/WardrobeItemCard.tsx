@@ -51,14 +51,21 @@ const WardrobeItemCard = ({
   const [imgSrc, setImgSrc] = useState<string>(initialUrl);
 
   const deriveStoragePath = (url: string): { bucket: string; path: string } | null => {
+    if (!url) return null;
+    // Match absolute or relative Supabase storage URLs
+    const relAbsMatch = url.match(/\/storage\/v1\/object\/(?:public|sign)\/([^/]+)\/(.+)/);
+    if (relAbsMatch) {
+      return { bucket: relAbsMatch[1], path: decodeURIComponent(relAbsMatch[2]) };
+    }
     try {
       const u = new URL(url);
       const match = u.pathname.match(/\/storage\/v1\/object\/(?:public|sign)\/([^/]+)\/(.+)/);
       if (match) return { bucket: match[1], path: decodeURIComponent(match[2]) };
     } catch {}
     if (url && !url.startsWith('http') && url.includes('/')) {
-      const [bucket, ...rest] = url.split('/');
-      return { bucket, path: rest.join('/') };
+      const cleaned = url.replace(/^\/+/, '');
+      const [bucket, ...rest] = cleaned.split('/');
+      if (bucket && rest.length) return { bucket, path: rest.join('/') };
     }
     return null;
   };
@@ -91,7 +98,10 @@ const WardrobeItemCard = ({
           loading="lazy"
           decoding="async"
           className="w-full h-full object-cover"
-          onError={() => trySignUrl(initialUrl)}
+          onError={() => {
+            // Retry with signed URL or fall back to category placeholder
+            trySignUrl(initialUrl);
+          }}
         />
         
         {/* Overlay Badges */}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Globe, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 interface Language {
   code: string;
@@ -31,12 +32,24 @@ const languages: Language[] = [
 
 export const LanguageSelector = () => {
   const { toast } = useToast();
+  const { i18n } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState<Language>(languages[0]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('app-language');
+    const initial = languages.find(l => l.code === stored) || languages[0];
+    setSelectedLanguage(initial);
+    i18n.changeLanguage(initial.code);
+    document.documentElement.lang = initial.code;
+  }, [i18n]);
 
   const handleLanguageChange = (language: Language) => {
     setSelectedLanguage(language);
     // Store in localStorage
     localStorage.setItem('app-language', language.code);
+    // Apply to i18n and document
+    i18n.changeLanguage(language.code);
+    document.documentElement.lang = language.code;
     
     toast({
       title: 'Language Updated',

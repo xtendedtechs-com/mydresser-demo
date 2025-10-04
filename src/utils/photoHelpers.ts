@@ -50,9 +50,27 @@ const resolvePublicUrl = (input: string): string => {
     return trimmed;
   }
 
-  // Already a public storage URL
-  if (trimmed.includes('/storage/v1/object/public/')) {
-    return trimmed;
+  // Decode URI-encoded strings if present
+  const decoded = (() => {
+    try { return decodeURIComponent(trimmed); } catch { return trimmed; }
+  })();
+
+  // Already a public storage URL (absolute or relative) -> rebuild absolute via API to ensure domain prefix
+  const publicMatch = decoded.match(/^\/?storage\/v1\/object\/(?:public|sign)\/([^/]+)\/(.+)/);
+  if (publicMatch) {
+    const bucket = publicMatch[1];
+    const path = publicMatch[2];
+    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+    return data.publicUrl || decoded;
+  }
+
+  // storage://bucket/path scheme
+  const protoMatch = decoded.match(/^storage:\/\/([^/]+)\/(.+)/);
+  if (protoMatch) {
+    const bucket = protoMatch[1];
+    const path = protoMatch[2];
+    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+    return data.publicUrl || decoded;
   }
 
   // Try to detect known bucket prefix: `${bucket}/${path}`
@@ -69,17 +87,17 @@ const resolvePublicUrl = (input: string): string => {
     'profile-avatars'
   ];
 
-  const firstSlash = trimmed.indexOf('/');
+  const firstSlash = decoded.indexOf('/');
   if (firstSlash > 0) {
-    const bucket = trimmed.slice(0, firstSlash);
-    const path = trimmed.slice(firstSlash + 1);
+    const bucket = decoded.slice(0, firstSlash);
+    const path = decoded.slice(firstSlash + 1);
     if (knownBuckets.includes(bucket) && path) {
       const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-      return data.publicUrl || trimmed;
+      return data.publicUrl || decoded;
     }
   }
 
-  return trimmed;
+  return decoded;
 };
 
 /**

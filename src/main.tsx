@@ -5,6 +5,7 @@ import { AppProviders } from "@/components/providers/AppProviders";
 import { AuthWrapper } from "@/components/AuthWrapper";
 import TerminalApp from "./TerminalApp.tsx";
 import "./index.css";
+import "./i18n";
 
 // Ensure React default is available for libraries expecting it
 // and avoid null default in prebundled chunks
