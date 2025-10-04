@@ -110,7 +110,7 @@ const Account = () => {
       id: 'account',
       label: 'Account',
       description: 'Manage your account settings',
-      onClick: () => navigate('/settings/general')
+      onClick: () => navigate('/settings/account')
     },
     {
       id: 'authentication',
@@ -147,9 +147,9 @@ const Account = () => {
     },
     {
       id: 'preferences',
-      label: 'My preferences',
-      description: 'Customize your preferences',
-      onClick: () => navigate('/settings/general')
+      label: 'Regional Preferences',
+      description: 'Language, currency, and region settings',
+      onClick: () => navigate('/international')
     }
   ];
 
@@ -162,8 +162,8 @@ const Account = () => {
     },
     {
       id: 'permissions',
-      label: 'Permissions',
-      description: 'App permissions',
+      label: 'App Permissions',
+      description: 'PWA and device permissions',
       onClick: () => navigate('/settings/pwa')
     },
     {
@@ -171,32 +171,38 @@ const Account = () => {
       label: 'Notifications',
       description: 'Notification preferences',
       onClick: () => navigate('/settings/notifications')
+    },
+    {
+      id: 'accessibility',
+      label: 'Accessibility',
+      description: 'Accessibility features and settings',
+      onClick: () => toast({ title: "Accessibility Settings", description: "Open accessibility panel from the quick menu" })
     }
   ];
 
   const personalizationSettings: SettingItem[] = [
     {
       id: 'behavior',
-      label: 'Modify app behaviour',
+      label: 'App Behavior',
       description: 'Customize how the app works for you',
-      onClick: () => navigate('/settings/general')
+      onClick: () => navigate('/settings/app')
     },
     {
       id: 'suggestions',
-      label: 'Personalize suggestions',
-      description: 'Tailor recommendations to your style',
+      label: 'AI Suggestions',
+      description: 'Tailor AI recommendations to your style',
       onClick: () => navigate('/settings/ai')
     },
     {
       id: 'theme',
-      label: 'Customize theme',
-      description: 'Change the app appearance',
+      label: 'Theme & Appearance',
+      description: 'Customize colors, fonts, and layout',
       onClick: () => navigate('/settings/theme'),
       highlighted: true
     },
     {
       id: 'mystyle',
-      label: 'My Style',
+      label: 'My Style Profile',
       description: 'Define your personal style preferences',
       onClick: () => navigate('/settings/mystyle'),
       highlighted: true
