@@ -19,6 +19,28 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
+    // Normalize user image to a data URL to avoid external fetch failures
+    const toDataUrl = async (src: string): Promise<string> => {
+      if (typeof src !== 'string' || !src) throw new Error('Invalid user image');
+      if (src.startsWith('data:')) return src;
+      try {
+        const res = await fetch(src);
+        if (!res.ok) throw new Error(`Image fetch failed: ${res.status}`);
+        const contentType = res.headers.get('content-type') || 'image/jpeg';
+        const arrayBuffer = await res.arrayBuffer();
+        let binary = '';
+        const bytes = new Uint8Array(arrayBuffer);
+        for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+        const base64 = btoa(binary);
+        return `data:${contentType};base64,${base64}`;
+      } catch (e) {
+        console.error('Image normalization failed, passing through original URL', e);
+        return src;
+      }
+    };
+
+    const processedImage = await toDataUrl(userImage);
+
     console.log('Processing virtual try-on request with', clothingItems?.length || 0, 'items...');
 
     // Build detailed outfit description
@@ -53,7 +75,7 @@ serve(async (req) => {
               {
                 type: "image_url",
                 image_url: {
-                  url: userImage
+                  url: processedImage
                 }
               }
             ]
