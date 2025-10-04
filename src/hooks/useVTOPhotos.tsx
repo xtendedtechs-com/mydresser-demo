@@ -28,7 +28,32 @@ export const useVTOPhotos = () => {
         .order('uploaded_at', { ascending: false });
 
       if (error) throw error;
-      return data as VTOPhoto[];
+
+      // Ensure returned URLs are viewable even if the bucket is not public
+      const resolveSignedUrl = async (url: string): Promise<string> => {
+        try {
+          if (!url || url.startsWith('data:')) return url;
+          const marker = '/vto-photos/';
+          const idx = url.indexOf(marker);
+          if (idx !== -1) {
+            const path = url.substring(idx + marker.length);
+            const { data: signed, error: signErr } = await supabase.storage
+              .from('vto-photos')
+              .createSignedUrl(path, 3600);
+            if (!signErr && signed?.signedUrl) return signed.signedUrl;
+          }
+        } catch {
+          // fall through to original URL
+        }
+        return url;
+      };
+
+      const withResolved = await Promise.all((data as VTOPhoto[]).map(async (p) => ({
+        ...p,
+        photo_url: await resolveSignedUrl(p.photo_url)
+      })));
+
+      return withResolved as VTOPhoto[];
     },
   });
 
@@ -61,7 +86,13 @@ export const useVTOPhotos = () => {
         .single();
 
       if (error) throw error;
-      return data;
+
+      // Return a signed URL for immediate viewing (works even if bucket is private)
+      const { data: signed } = await supabase.storage
+        .from('vto-photos')
+        .createSignedUrl(filePath, 3600);
+
+      return { ...data, photo_url: signed?.signedUrl ?? publicUrl } as VTOPhoto;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vto-photos'] });
