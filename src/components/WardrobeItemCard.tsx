@@ -11,6 +11,8 @@ import {
   MapPin,
   Star
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { WardrobeItem } from "@/hooks/useWardrobe";
 import { getPrimaryPhotoUrl } from "@/utils/photoHelpers";
 
@@ -45,16 +47,51 @@ const WardrobeItemCard = ({
     ? Math.floor((new Date().getTime() - new Date(item.last_worn).getTime()) / (1000 * 3600 * 24))
     : null;
 
+  const initialUrl = getPrimaryPhotoUrl(item.photos, item.category);
+  const [imgSrc, setImgSrc] = useState<string>(initialUrl);
+
+  const deriveStoragePath = (url: string): { bucket: string; path: string } | null => {
+    try {
+      const u = new URL(url);
+      const match = u.pathname.match(/\/storage\/v1\/object\/(?:public|sign)\/([^/]+)\/(.+)/);
+      if (match) return { bucket: match[1], path: decodeURIComponent(match[2]) };
+    } catch {}
+    if (url && !url.startsWith('http') && url.includes('/')) {
+      const [bucket, ...rest] = url.split('/');
+      return { bucket, path: rest.join('/') };
+    }
+    return null;
+  };
+
+  const trySignUrl = async (url: string) => {
+    const parsed = deriveStoragePath(url);
+    if (!parsed) return;
+    try {
+      const { data: signed } = await supabase.storage
+        .from(parsed.bucket)
+        .createSignedUrl(parsed.path, 3600);
+      if (signed?.signedUrl) setImgSrc(signed.signedUrl);
+    } catch {}
+  };
+
+  useEffect(() => {
+    if (initialUrl.includes('/storage/v1/object/')) {
+      trySignUrl(initialUrl);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialUrl]);
+
   return (
     <Card className="overflow-hidden bg-background hover:shadow-lg transition-all duration-200">
       {/* Image Container */}
       <div className="relative aspect-[3/4] bg-muted">
         <img
-          src={getPrimaryPhotoUrl(item.photos, item.category)}
+          src={imgSrc}
           alt={`${item.name} - ${item.category}`}
           loading="lazy"
           decoding="async"
           className="w-full h-full object-cover"
+          onError={() => trySignUrl(initialUrl)}
         />
         
         {/* Overlay Badges */}
