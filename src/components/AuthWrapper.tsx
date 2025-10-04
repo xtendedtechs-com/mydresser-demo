@@ -9,6 +9,8 @@ import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { CommandPalette } from "@/components/CommandPalette";
 import { QuickActionsMenu } from "@/components/QuickActionsMenu";
 import { KeyboardShortcutsHelper } from "@/components/KeyboardShortcutsHelper";
+import { useSecurityHeaders } from "@/hooks/useSecurityHeaders";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 // Lazy load pages for code splitting
 const Index = lazy(() => import("@/pages/Index"));
@@ -92,13 +94,14 @@ const ChallengeSettingsPage = lazy(() => import("@/pages/settings/ChallengeSetti
 
 export const AuthWrapper = () => {
   const { isAuthenticated, loading } = useProfile();
+  useSecurityHeaders();
 
   if (loading) {
     return <LoadingScreen message="Loading MyDresser..." />;
   }
 
   return (
-    <>
+    <ErrorBoundary>
       <OfflineIndicator />
       {!isAuthenticated ? (
         <Suspense fallback={<LoadingScreen />}>
@@ -194,12 +197,11 @@ export const AuthWrapper = () => {
             <Route path="/wardrobe-analytics" element={<WardrobeAnalyticsPage />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
             <Route path="/auth" element={<Navigate to="/" replace />} />
-            <Route path="*" element={<NotFound />} />
           </Routes>
           </Suspense>
           <Navigation />
         </>
       )}
-    </>
+    </ErrorBoundary>
   );
 };
