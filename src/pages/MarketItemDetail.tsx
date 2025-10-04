@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, Share2, ShoppingCart, Star, Crown, Shield, Truck, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Heart, Share2, ShoppingCart, Star, Crown, Shield, Truck, RefreshCw, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { getAllPhotoUrls, getPrimaryPhotoUrl } from '@/utils/photoHelpers';
 import { PurchaseDialog } from '@/components/PurchaseDialog';
+import { MessagingDialog } from '@/components/MessagingDialog';
 
 const MarketItemDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -23,6 +24,8 @@ const MarketItemDetail = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [showPurchaseDialog, setShowPurchaseDialog] = useState(false);
+  const [showMessaging, setShowMessaging] = useState(false);
+  const [sellerName, setSellerName] = useState<string>('Seller');
 
   useEffect(() => {
     if (id) {
@@ -72,6 +75,18 @@ const MarketItemDetail = () => {
       }
       
       setItem(fetchedItem);
+      
+      // Fetch seller name
+      const { data: sellerProfile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('user_id', fetchedItem.seller_id)
+        .single();
+      
+      if (sellerProfile?.full_name) {
+        setSellerName(sellerProfile.full_name);
+      }
+      
       if (fetchedItem?.size) {
         const sizes = Array.isArray(fetchedItem.size) 
           ? fetchedItem.size 
@@ -353,6 +368,15 @@ const MarketItemDetail = () => {
               <Button size="lg" variant="outline" className="w-full" onClick={handleAddToCart}>
                 Add to Cart
               </Button>
+              <Button 
+                size="lg" 
+                variant="secondary" 
+                className="w-full"
+                onClick={() => setShowMessaging(true)}
+              >
+                <MessageCircle className="w-5 h-5 mr-2" />
+                Message Seller
+              </Button>
             </div>
 
             {/* Features */}
@@ -539,12 +563,21 @@ const MarketItemDetail = () => {
 
       {/* Purchase Dialog */}
       {item && (
-        <PurchaseDialog
-          open={showPurchaseDialog}
-          onOpenChange={setShowPurchaseDialog}
-          item={item}
-          onSuccess={handlePurchaseSuccess}
-        />
+        <>
+          <PurchaseDialog
+            open={showPurchaseDialog}
+            onOpenChange={setShowPurchaseDialog}
+            item={item}
+            onSuccess={handlePurchaseSuccess}
+          />
+          <MessagingDialog
+            open={showMessaging}
+            onOpenChange={setShowMessaging}
+            receiverId={item.seller_id}
+            receiverName={sellerName}
+            itemId={item.id}
+          />
+        </>
       )}
     </div>
   );
