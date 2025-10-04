@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyDresser - Offline</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #fff;
+    }
+    
+    .container {
+      text-align: center;
+      max-width: 500px;
+    }
+    
+    .icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+      opacity: 0.9;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+      font-weight: 700;
+    }
+    
+    p {
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+      opacity: 0.9;
+      line-height: 1.6;
+    }
+    
+    .button {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 15px 40px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+    }
+    
+    .features {
+      margin-top: 50px;
+      text-align: left;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 25px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .feature-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .feature-icon {
+      font-size: 24px;
+      margin-right: 15px;
+    }
+    
+    .status {
+      margin-top: 20px;
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">📱</div>
+    <h1>You're Offline</h1>
+    <p>
+      No internet connection detected. MyDresser needs an active connection to sync your wardrobe and get AI recommendations.
+    </p>
+    
+    <button class="button" onclick="location.reload()">
+      Try Again
+    </button>
+    
+    <div class="features">
+      <h3 style="margin-bottom: 20px;">Available Offline:</h3>
+      <div class="feature-item">
+        <span class="feature-icon">👗</span>
+        <span>View cached wardrobe items</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">💾</span>
+        <span>Changes will sync when online</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">🔄</span>
+        <span>Background sync enabled</span>
+      </div>
+    </div>
+    
+    <div class="status" id="status">
+      Checking connection...
+    </div>
+  </div>
+  
+  <script>
+    // Check online status
+    function updateStatus() {
+      const status = document.getElementById('status');
+      if (navigator.onLine) {
+        status.textContent = '✓ Connection restored! Reloading...';
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        status.textContent = '⚠ Still offline - waiting for connection';
+      }
+    }
+    
+    // Listen for online/offline events
+    window.addEventListener('online', updateStatus);
+    window.addEventListener('offline', updateStatus);
+    
+    // Initial check
+    setTimeout(updateStatus, 500);
+    
+    // Periodic check
+    setInterval(updateStatus, 5000);
+  </script>
+</body>
+</html>

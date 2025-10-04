@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -6,11 +7,52 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export const usePWA = () => {
+  const { toast } = useToast();
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
+
+  // Register service worker
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', async () => {
+        try {
+          const reg = await navigator.serviceWorker.register('/sw.js', {
+            scope: '/',
+          });
+          
+          console.log('[PWA] Service Worker registered:', reg);
+          setRegistration(reg);
+
+          // Check for updates periodically
+          setInterval(() => {
+            reg.update();
+          }, 60000);
+
+          // Handle updates
+          reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            if (newWorker) {
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  setUpdateAvailable(true);
+                  toast({
+                    title: 'Update Available',
+                    description: 'A new version is available. Refresh to update.',
+                  });
+                }
+              });
+            }
+          });
+        } catch (error) {
+          console.error('[PWA] Service Worker registration failed:', error);
+        }
+      });
+    }
+  }, [toast]);
 
   useEffect(() => {
     // Check if already installed
@@ -36,8 +78,22 @@ export const usePWA = () => {
     };
 
     // Listen for online/offline
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
+    const handleOnline = () => {
+      setIsOnline(true);
+      toast({
+        title: 'Back Online',
+        description: 'Your connection has been restored',
+      });
+    };
+    
+    const handleOffline = () => {
+      setIsOnline(false);
+      toast({
+        title: 'You\'re Offline',
+        description: 'Changes will sync when connection is restored',
+        variant: 'destructive',
+      });
+    };
 
     // Service worker update detection
     const handleControllerChange = () => {
@@ -64,18 +120,44 @@ export const usePWA = () => {
         navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
       }
     };
-  }, []);
+  }, [toast]);
 
   const install = async () => {
-    if (!deferredPrompt) return false;
+    if (!deferredPrompt) {
+      toast({
+        title: 'Installation Not Available',
+        description: 'App installation is not available on this device',
+        variant: 'destructive',
+      });
+      return false;
+    }
 
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
+    try {
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
 
-    setDeferredPrompt(null);
-    setIsInstallable(false);
-
-    return outcome === 'accepted';
+      setDeferredPrompt(null);
+      setIsInstallable(false);
+      
+      if (outcome === 'accepted') {
+        setIsInstalled(true);
+        toast({
+          title: 'App Installed',
+          description: 'MyDresser has been installed on your device',
+        });
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('[PWA] Install failed:', error);
+      toast({
+        title: 'Installation Failed',
+        description: 'Could not install the app. Please try again.',
+        variant: 'destructive',
+      });
+      return false;
+    }
   };
 
   const updateApp = () => {
@@ -90,10 +172,36 @@ export const usePWA = () => {
   };
 
   const requestNotificationPermission = async () => {
-    if (!('Notification' in window)) return false;
+    if (!('Notification' in window)) {
+      toast({
+        title: 'Notifications Not Supported',
+        description: 'Your browser does not support notifications',
+        variant: 'destructive',
+      });
+      return false;
+    }
     
-    const permission = await Notification.requestPermission();
-    return permission === 'granted';
+    if (Notification.permission === 'granted') {
+      return true;
+    }
+
+    if (Notification.permission !== 'denied') {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        toast({
+          title: 'Notifications Enabled',
+          description: 'You will now receive outfit suggestions and updates',
+        });
+        return true;
+      }
+    }
+
+    toast({
+      title: 'Notifications Blocked',
+      description: 'Enable notifications in your browser settings',
+      variant: 'destructive',
+    });
+    return false;
   };
 
   const getNetworkStatus = () => {
@@ -105,14 +213,61 @@ export const usePWA = () => {
     };
   };
 
+  const clearCache = async () => {
+    if (!registration) return;
+
+    try {
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map((name) => caches.delete(name)));
+      
+      toast({
+        title: 'Cache Cleared',
+        description: 'App cache has been cleared. Refresh to reload.',
+      });
+    } catch (error) {
+      console.error('[PWA] Cache clear failed:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to clear cache',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const triggerSync = async (tag: string = 'sync-wardrobe') => {
+    if (!registration) {
+      console.warn('[PWA] No service worker registration');
+      return false;
+    }
+
+    // Background Sync is not widely supported yet
+    if (!('sync' in registration)) {
+      console.warn('[PWA] Background sync not supported');
+      return false;
+    }
+
+    try {
+      // Type assertion for sync manager which isn't in standard types yet
+      await (registration as any).sync.register(tag);
+      console.log('[PWA] Background sync registered:', tag);
+      return true;
+    } catch (error) {
+      console.error('[PWA] Background sync failed:', error);
+      return false;
+    }
+  };
+
   return {
     isInstallable,
     isInstalled,
     isOnline,
     updateAvailable,
+    registration,
     install,
     updateApp,
     requestNotificationPermission,
-    getNetworkStatus
+    getNetworkStatus,
+    clearCache,
+    triggerSync,
   };
 };
