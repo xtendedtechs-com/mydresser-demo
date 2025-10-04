@@ -255,8 +255,42 @@ const Account = () => {
     {
       id: 'assistant',
       label: 'AI Assistant',
-      description: 'AI styling assistant settings',
-      onClick: () => navigate('/settings/ai')
+      description: 'AI styling assistant and chat settings',
+      onClick: () => navigate('/settings/ai'),
+      highlighted: true
+    },
+    {
+      id: 'ai-hub',
+      label: 'AI Style Hub',
+      description: 'Access all AI-powered features',
+      onClick: () => navigate('/ai-style-hub'),
+      highlighted: true
+    },
+    {
+      id: 'social',
+      label: 'Social & Community',
+      description: 'Manage social features and connections',
+      onClick: () => navigate('/settings/social'),
+      highlighted: true
+    },
+    {
+      id: 'events',
+      label: 'Fashion Events',
+      description: 'Discover and join fashion events',
+      onClick: () => navigate('/community')
+    },
+    {
+      id: 'challenges',
+      label: 'Style Challenges',
+      description: 'Participate in style competitions',
+      onClick: () => navigate('/style-challenges')
+    },
+    {
+      id: 'sustainability',
+      label: 'Sustainability Tracker',
+      description: 'Track your fashion carbon footprint',
+      onClick: () => navigate('/sustainability'),
+      highlighted: true
     },
     {
       id: 'support',

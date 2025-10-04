@@ -87,7 +87,7 @@ export function QuickActionsMenu() {
       icon: Target,
       label: "Style Recommendations",
       description: "Personalized tips",
-      action: () => navigate("/ai-recommendations"),
+      action: () => navigate("/ai-style-hub"),
       shortcut: "⌘R",
       category: "ai"
     },

@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles, Shirt, MessageSquare, TrendingUp, Cloud, Scan, BarChart3 } from "lucide-react";
 import { AIOutfitGenerator } from "@/components/AIOutfitGenerator";
-import { AIStyleChat } from "@/components/AIStyleChat";
+import { EnhancedAIStyleChat } from "@/components/EnhancedAIStyleChat";
 import { SmartOutfitRecommendations } from "@/components/SmartOutfitRecommendations";
 import { DailyOutfitGenerator } from "@/components/DailyOutfitGenerator";
 import { AIWardrobeAnalyzer } from "@/components/AIWardrobeAnalyzer";
@@ -103,7 +103,7 @@ const AIHub = () => {
           </TabsContent>
 
           <TabsContent value="chat" className="space-y-4 mt-6">
-            <AIStyleChat />
+            <EnhancedAIStyleChat />
           </TabsContent>
 
           <TabsContent value="analyzer" className="space-y-4 mt-6">

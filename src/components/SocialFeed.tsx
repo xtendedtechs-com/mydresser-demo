@@ -47,7 +47,7 @@ export const SocialFeed = () => {
     isFollowing, 
     likePost, 
     loading: socialLoading,
-    createPost
+    refreshSocialData
   } = useSocial();
   const [activeTab, setActiveTab] = useState('feed');
   const [posts, setPosts] = useState<OutfitPost[]>([]);
@@ -176,15 +176,21 @@ export const SocialFeed = () => {
                   
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
-                      <ReactionButton
-                        targetId={post.id}
-                        targetType="outfit_post"
-                        reactionType="like"
-                        showCount={true}
-                      />
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className={post.user_has_liked ? "text-red-500" : "text-muted-foreground"}
+                        onClick={() => handleLike(post.id)}
+                      >
+                        <Heart className={`h-4 w-4 mr-1 ${post.user_has_liked ? 'fill-current' : ''}`} />
+                        {post.likes_count}
+                      </Button>
                       <Button variant="ghost" size="sm" className="text-muted-foreground">
                         <MessageCircle className="h-4 w-4 mr-1" />
                         {post.comments_count}
+                      </Button>
+                      <Button variant="ghost" size="sm" className="text-muted-foreground">
+                        <Share2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>

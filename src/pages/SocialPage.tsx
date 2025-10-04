@@ -14,7 +14,7 @@ const SocialPage = () => {
   const [postContent, setPostContent] = useState('');
   const [isPosting, setIsPosting] = useState(false);
   const { profile } = useProfile();
-  const { createPost } = useSocial();
+  const { createPost, refreshSocialData } = useSocial();
   const { toast } = useToast();
 
   const handleCreatePost = async () => {
@@ -23,12 +23,13 @@ const SocialPage = () => {
     setIsPosting(true);
     try {
       await createPost(postContent);
-
       setPostContent('');
       toast({
         title: 'Post created',
-        description: 'Your post has been shared',
+        description: 'Your post has been shared with your community',
       });
+      // Refresh feed to show new post
+      await refreshSocialData();
     } catch (error) {
       toast({
         title: 'Error',

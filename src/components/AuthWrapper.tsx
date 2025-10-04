@@ -28,6 +28,7 @@ import PWASettingsPage from "@/pages/settings/PWASettingsPage";
 import MyStyleSettingsPage from "@/pages/settings/MyStyleSettingsPage";
 import VTOPhotoSettingsPage from "@/pages/settings/VTOPhotoSettingsPage";
 import ThemeSettingsPage from "@/pages/settings/ThemeSettingsPage";
+import SocialSettingsPage from "@/pages/settings/SocialSettingsPage";
 import ProfileSetup from "@/pages/ProfileSetup";
 import DataExportPage from "@/pages/DataExportPage";
 import Auth from "@/pages/Auth";
@@ -153,6 +154,7 @@ export const AuthWrapper = () => {
             <Route path="/settings/mystyle" element={<MyStyleSettingsPage />} />
             <Route path="/settings/vto-photos" element={<VTOPhotoSettingsPage />} />
             <Route path="/settings/theme" element={<ThemeSettingsPage />} />
+            <Route path="/settings/social" element={<SocialSettingsPage />} />
             
             <Route path="/mystyle" element={<MyStyle />} />
             <Route path="/service-settings/:service" element={<ServiceSettingsPage />} />
