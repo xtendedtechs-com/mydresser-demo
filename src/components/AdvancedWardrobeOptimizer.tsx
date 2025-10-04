@@ -1,24 +1,50 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TrendingUp, Target, Zap, Calendar, ShoppingBag, Sparkles } from "lucide-react";
-import { useWardrobe } from "@/hooks/useWardrobe";
+import { 
+  TrendingUp, 
+  AlertTriangle, 
+  CheckCircle2, 
+  Sparkles,
+  ShoppingBag,
+  Shirt,
+  Package,
+  BarChart3
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useWardrobe } from "@/hooks/useWardrobe";
 
-interface OptimizationInsight {
+interface GapAnalysis {
   category: string;
-  score: number;
-  recommendation: string;
-  impact: "high" | "medium" | "low";
-  actionable: boolean;
+  current: number;
+  recommended: number;
+  gap: number;
+  priority: 'high' | 'medium' | 'low';
+  suggestions: string[];
 }
 
-export const AdvancedWardrobeOptimizer = () => {
+interface OptimizationScore {
+  overall: number;
+  versatility: number;
+  balance: number;
+  quality: number;
+  sustainability: number;
+}
+
+const AdvancedWardrobeOptimizer = () => {
+  const [gaps, setGaps] = useState<GapAnalysis[]>([]);
+  const [scores, setScores] = useState<OptimizationScore>({
+    overall: 0,
+    versatility: 0,
+    balance: 0,
+    quality: 0,
+    sustainability: 0
+  });
+  const [loading, setLoading] = useState(false);
   const { items } = useWardrobe();
-  const [insights, setInsights] = useState<OptimizationInsight[]>([]);
-  const [optimizationScore, setOptimizationScore] = useState(0);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -27,259 +53,285 @@ export const AdvancedWardrobeOptimizer = () => {
     }
   }, [items]);
 
-  const analyzeWardrobe = () => {
-    const analysis: OptimizationInsight[] = [];
-    let totalScore = 0;
+  const analyzeWardrobe = async () => {
+    setLoading(true);
+    try {
+      // Analyze wardrobe composition
+      const categoryCounts: { [key: string]: number } = {};
+      items.forEach(item => {
+        categoryCounts[item.category] = (categoryCounts[item.category] || 0) + 1;
+      });
 
-    // Category Distribution Analysis
-    const categoryCount: Record<string, number> = {};
-    items.forEach(item => {
-      categoryCount[item.category] = (categoryCount[item.category] || 0) + 1;
-    });
+      // Define ideal wardrobe composition
+      const idealComposition: { [key: string]: number } = {
+        'tops': 12,
+        'bottoms': 8,
+        'dresses': 6,
+        'outerwear': 4,
+        'shoes': 6,
+        'accessories': 10
+      };
 
-    const categories = Object.keys(categoryCount);
-    const avgItemsPerCategory = items.length / categories.length;
+      // Calculate gaps
+      const gapAnalysis: GapAnalysis[] = Object.entries(idealComposition).map(([category, recommended]) => {
+        const current = categoryCounts[category] || 0;
+        const gap = Math.max(0, recommended - current);
+        const priority = gap > 4 ? 'high' : gap > 2 ? 'medium' : 'low';
 
-    categories.forEach(cat => {
-      const count = categoryCount[cat];
-      const score = Math.min(100, (count / avgItemsPerCategory) * 100);
-      
-      if (count < avgItemsPerCategory * 0.5) {
-        analysis.push({
-          category: cat,
-          score,
-          recommendation: `Your ${cat} collection could be expanded. Consider adding 2-3 versatile pieces.`,
-          impact: "medium",
-          actionable: true
-        });
-      }
-    });
+        return {
+          category,
+          current,
+          recommended,
+          gap,
+          priority,
+          suggestions: generateSuggestions(category, gap)
+        };
+      });
 
-    // Color Harmony Analysis
-    const colors = items.map(item => item.color?.toLowerCase() || 'unknown');
-    const colorFrequency: Record<string, number> = {};
-    colors.forEach(color => {
-      colorFrequency[color] = (colorFrequency[color] || 0) + 1;
-    });
+      setGaps(gapAnalysis.sort((a, b) => b.gap - a.gap));
 
-    const dominantColors = Object.entries(colorFrequency)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 3);
+      // Calculate optimization scores
+      const versatilityScore = calculateVersatilityScore(items);
+      const balanceScore = calculateBalanceScore(categoryCounts, idealComposition);
+      const qualityScore = calculateQualityScore(items);
+      const sustainabilityScore = calculateSustainabilityScore(items);
+      const overallScore = Math.round((versatilityScore + balanceScore + qualityScore + sustainabilityScore) / 4);
 
-    const colorScore = (dominantColors.length / 3) * 100;
-    analysis.push({
-      category: "Color Palette",
-      score: colorScore,
-      recommendation: `Your wardrobe is anchored by ${dominantColors.map(([c]) => c).join(', ')}. These create excellent mixing opportunities.`,
-      impact: "high",
-      actionable: false
-    });
+      setScores({
+        overall: overallScore,
+        versatility: versatilityScore,
+        balance: balanceScore,
+        quality: qualityScore,
+        sustainability: sustainabilityScore
+      });
 
-    // Versatility Score
-    const versatileItems = items.filter(item => 
-      item.tags?.includes('versatile') || 
-      item.tags?.includes('basic') ||
-      item.category === 'Tops' ||
-      item.category === 'Bottoms'
-    );
-    const versatilityScore = (versatileItems.length / items.length) * 100;
-
-    analysis.push({
-      category: "Versatility",
-      score: versatilityScore,
-      recommendation: versatilityScore < 40 
-        ? "Add more versatile basics that can be mixed and matched easily."
-        : "Great job! Your wardrobe has strong versatile pieces.",
-      impact: "high",
-      actionable: versatilityScore < 40
-    });
-
-    // Season Coverage
-    const seasons = ['spring', 'summer', 'fall', 'winter'];
-    const seasonCoverage = seasons.filter(season => 
-      items.some(item => item.tags?.includes(season))
-    );
-    const seasonScore = (seasonCoverage.length / 4) * 100;
-
-    analysis.push({
-      category: "Season Coverage",
-      score: seasonScore,
-      recommendation: seasonScore < 75 
-        ? `Missing pieces for ${seasons.filter(s => !seasonCoverage.includes(s)).join(', ')} seasons.`
-        : "Excellent year-round wardrobe coverage!",
-      impact: "medium",
-      actionable: seasonScore < 75
-    });
-
-    // Calculate overall optimization score
-    const avgScore = analysis.reduce((sum, insight) => sum + insight.score, 0) / analysis.length;
-    setOptimizationScore(Math.round(avgScore));
-    setInsights(analysis);
-  };
-
-  const getImpactColor = (impact: string) => {
-    switch (impact) {
-      case 'high': return 'bg-red-500';
-      case 'medium': return 'bg-yellow-500';
-      default: return 'bg-blue-500';
+    } catch (error) {
+      console.error('Error analyzing wardrobe:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-blue-600';
-    if (score >= 40) return 'text-yellow-600';
-    return 'text-red-600';
+  const generateSuggestions = (category: string, gap: number): string[] => {
+    const suggestions: { [key: string]: string[] } = {
+      tops: ['Basic white t-shirt', 'Button-down shirt', 'Casual sweater', 'Blouse'],
+      bottoms: ['Dark jeans', 'Black trousers', 'Casual shorts', 'Skirt'],
+      dresses: ['Little black dress', 'Casual day dress', 'Maxi dress'],
+      outerwear: ['Denim jacket', 'Light cardigan', 'Winter coat', 'Blazer'],
+      shoes: ['White sneakers', 'Black boots', 'Comfortable flats', 'Dress shoes'],
+      accessories: ['Statement necklace', 'Leather bag', 'Sunglasses', 'Watch', 'Scarf']
+    };
+
+    return (suggestions[category] || []).slice(0, gap);
   };
 
-  const handleOptimizeAction = (insight: OptimizationInsight) => {
-    toast({
-      title: "Optimization Tip",
-      description: `Working on: ${insight.recommendation}`,
-    });
+  const calculateVersatilityScore = (items: any[]): number => {
+    // Items with neutral colors and basic styles score higher
+    const versatileColors = ['black', 'white', 'navy', 'gray', 'beige'];
+    const versatileItems = items.filter(item => 
+      versatileColors.some(color => item.color?.toLowerCase().includes(color))
+    );
+    return Math.min(100, Math.round((versatileItems.length / Math.max(items.length, 1)) * 100));
   };
+
+  const calculateBalanceScore = (current: { [key: string]: number }, ideal: { [key: string]: number }): number => {
+    let totalDiff = 0;
+    let totalIdeal = 0;
+
+    Object.entries(ideal).forEach(([category, idealCount]) => {
+      const currentCount = current[category] || 0;
+      totalDiff += Math.abs(currentCount - idealCount);
+      totalIdeal += idealCount;
+    });
+
+    const balanceRatio = 1 - (totalDiff / (totalIdeal * 2));
+    return Math.max(0, Math.min(100, Math.round(balanceRatio * 100)));
+  };
+
+  const calculateQualityScore = (items: any[]): number => {
+    // Items marked as favorite or with high wear count indicate quality
+    const qualityItems = items.filter(item => item.is_favorite || (item.wear_count && item.wear_count > 5));
+    return Math.min(100, Math.round((qualityItems.length / Math.max(items.length, 1)) * 100));
+  };
+
+  const calculateSustainabilityScore = (items: any[]): number => {
+    // Mock calculation - in production, check for eco tags, second-hand, etc.
+    const sustainableItems = items.filter(item => 
+      item.tags?.some((tag: string) => ['sustainable', 'eco', 'organic', 'recycled'].includes(tag.toLowerCase()))
+    );
+    return Math.min(100, Math.round((sustainableItems.length / Math.max(items.length, 1)) * 100));
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'bg-red-500/10 text-red-500 border-red-500/20';
+      case 'medium': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
+      case 'low': return 'bg-green-500/10 text-green-500 border-green-500/20';
+      default: return 'bg-muted';
+    }
+  };
+
+  const ScoreCard = ({ title, score, icon: Icon }: { title: string; score: number; icon: any }) => (
+    <Card className="p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Icon className="w-4 h-4 text-primary" />
+          <span className="text-sm font-medium">{title}</span>
+        </div>
+        <Badge variant={score >= 80 ? "default" : score >= 60 ? "secondary" : "destructive"}>
+          {score}%
+        </Badge>
+      </div>
+      <Progress value={score} className="h-2" />
+    </Card>
+  );
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5" />
-                Advanced Wardrobe Optimizer
-              </CardTitle>
-              <CardDescription>
-                AI-powered insights to maximize your wardrobe potential
-              </CardDescription>
-            </div>
-            <div className="text-center">
-              <div className={`text-3xl font-bold ${getScoreColor(optimizationScore)}`}>
-                {optimizationScore}%
-              </div>
-              <p className="text-xs text-muted-foreground">Optimization Score</p>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="insights" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="insights">
-                <Sparkles className="h-4 w-4 mr-2" />
-                Insights
-              </TabsTrigger>
-              <TabsTrigger value="recommendations">
-                <ShoppingBag className="h-4 w-4 mr-2" />
-                Recommendations
-              </TabsTrigger>
-              <TabsTrigger value="trends">
-                <TrendingUp className="h-4 w-4 mr-2" />
-                Trends
-              </TabsTrigger>
-            </TabsList>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <TrendingUp className="w-6 h-6 text-primary" />
+            Wardrobe Optimizer
+          </h2>
+          <p className="text-muted-foreground">AI-powered insights to perfect your wardrobe</p>
+        </div>
+        <Button onClick={analyzeWardrobe} disabled={loading}>
+          <Sparkles className="w-4 h-4 mr-2" />
+          Analyze
+        </Button>
+      </div>
 
-            <TabsContent value="insights" className="space-y-4 mt-4">
-              {insights.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">
-                  Add items to your wardrobe to see optimization insights
-                </p>
-              ) : (
-                insights.map((insight, index) => (
-                  <Card key={index}>
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-base">{insight.category}</CardTitle>
-                        <div className="flex items-center gap-2">
-                          <Badge className={getImpactColor(insight.impact)}>
-                            {insight.impact} impact
-                          </Badge>
-                          <span className={`text-lg font-bold ${getScoreColor(insight.score)}`}>
-                            {Math.round(insight.score)}%
-                          </span>
+      {/* Overall Score */}
+      <Card className="p-6 bg-gradient-to-br from-primary/10 to-accent/10">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold mb-1">Overall Optimization Score</h3>
+            <p className="text-sm text-muted-foreground">Based on versatility, balance, quality & sustainability</p>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl font-bold text-primary">{scores.overall}%</div>
+            <Badge variant={scores.overall >= 80 ? "default" : "secondary"} className="mt-2">
+              {scores.overall >= 80 ? 'Excellent' : scores.overall >= 60 ? 'Good' : 'Needs Work'}
+            </Badge>
+          </div>
+        </div>
+      </Card>
+
+      {/* Detailed Scores */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <ScoreCard title="Versatility" score={scores.versatility} icon={Sparkles} />
+        <ScoreCard title="Balance" score={scores.balance} icon={BarChart3} />
+        <ScoreCard title="Quality" score={scores.quality} icon={CheckCircle2} />
+        <ScoreCard title="Sustainability" score={scores.sustainability} icon={Package} />
+      </div>
+
+      {/* Gap Analysis */}
+      <Tabs defaultValue="gaps" className="w-full">
+        <TabsList>
+          <TabsTrigger value="gaps">Wardrobe Gaps</TabsTrigger>
+          <TabsTrigger value="recommendations">AI Recommendations</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="gaps" className="space-y-3 mt-4">
+          {gaps.length > 0 ? (
+            gaps.map((gap, idx) => (
+              <Card key={idx} className="p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Shirt className="w-5 h-5 text-primary" />
+                      <h4 className="font-semibold capitalize">{gap.category}</h4>
+                      <Badge className={getPriorityColor(gap.priority)}>
+                        {gap.priority} priority
+                      </Badge>
+                    </div>
+                    
+                    <div className="flex items-center gap-4 mb-3 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Current: </span>
+                        <span className="font-medium">{gap.current}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Recommended: </span>
+                        <span className="font-medium">{gap.recommended}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Gap: </span>
+                        <span className="font-medium text-primary">{gap.gap}</span>
+                      </div>
+                    </div>
+
+                    {gap.suggestions.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Suggestions:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {gap.suggestions.map((suggestion, i) => (
+                            <Badge key={i} variant="outline">
+                              {suggestion}
+                            </Badge>
+                          ))}
                         </div>
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm text-muted-foreground mb-3">
-                        {insight.recommendation}
-                      </p>
-                      {insight.actionable && (
-                        <Button 
-                          size="sm" 
-                          onClick={() => handleOptimizeAction(insight)}
-                          className="w-full"
-                        >
-                          <Zap className="h-4 w-4 mr-2" />
-                          Take Action
-                        </Button>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </TabsContent>
+                    )}
+                  </div>
 
-            <TabsContent value="recommendations" className="space-y-4 mt-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Smart Purchase Suggestions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="p-3 border rounded-lg">
-                    <h4 className="font-semibold text-sm mb-1">Essential Basics</h4>
-                    <p className="text-xs text-muted-foreground">
-                      White button-down shirt, black jeans, neutral blazer
-                    </p>
-                  </div>
-                  <div className="p-3 border rounded-lg">
-                    <h4 className="font-semibold text-sm mb-1">Color Gaps</h4>
-                    <p className="text-xs text-muted-foreground">
-                      Navy blue items, earth tones, pastels for spring
-                    </p>
-                  </div>
-                  <div className="p-3 border rounded-lg">
-                    <h4 className="font-semibold text-sm mb-1">Style Evolution</h4>
-                    <p className="text-xs text-muted-foreground">
-                      Statement accessories, layering pieces, seasonal trends
-                    </p>
-                  </div>
-                </CardContent>
+                  {gap.gap > 0 && (
+                    <Button size="sm" variant="outline">
+                      <ShoppingBag className="w-4 h-4 mr-2" />
+                      Shop
+                    </Button>
+                  )}
+                </div>
               </Card>
-            </TabsContent>
+            ))
+          ) : (
+            <Card className="p-8 text-center">
+              <CheckCircle2 className="w-12 h-12 mx-auto text-green-500 mb-3" />
+              <p className="font-semibold mb-1">Your wardrobe is well-balanced!</p>
+              <p className="text-sm text-muted-foreground">No major gaps detected</p>
+            </Card>
+          )}
+        </TabsContent>
 
-            <TabsContent value="trends" className="space-y-4 mt-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Your Wardrobe Trends</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <h4 className="font-semibold text-sm">Most Worn Category</h4>
-                      <p className="text-xs text-muted-foreground">Casual Tops</p>
-                    </div>
-                    <TrendingUp className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <h4 className="font-semibold text-sm">Style Preference</h4>
-                      <p className="text-xs text-muted-foreground">Minimalist Casual</p>
-                    </div>
-                    <Calendar className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <h4 className="font-semibold text-sm">Growth Area</h4>
-                      <p className="text-xs text-muted-foreground">Evening Wear</p>
-                    </div>
-                    <Target className="h-5 w-5 text-orange-600" />
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+        <TabsContent value="recommendations" className="space-y-3 mt-4">
+          <Card className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold mb-1">Focus on Basics</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Build a foundation with versatile neutral pieces that work with everything
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold mb-1">Quality Over Quantity</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Invest in well-made pieces that will last longer and look better
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <Sparkles className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold mb-1">Add Statement Pieces</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Include a few unique items to express your personal style
+                  </p>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
+
+export default AdvancedWardrobeOptimizer;

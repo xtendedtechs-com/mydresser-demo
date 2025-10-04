@@ -52,6 +52,9 @@ import SustainabilityPage from "@/pages/SustainabilityPage";
 import GamificationPage from "@/pages/GamificationPage";
 import AdvancedAnalyticsPage from "@/pages/AdvancedAnalyticsPage";
 import PersonalizationHub from "@/pages/PersonalizationHub";
+import AdvancedAnalyticsPage from "@/pages/AdvancedAnalyticsPage";
+import StyleChallengesPage from "@/pages/StyleChallengesPage";
+import WardrobeOptimizerPage from "@/pages/WardrobeOptimizerPage";
 import VirtualFittingRoom from "@/pages/VirtualFittingRoom";
 import AdvancedAIPage from "@/pages/AdvancedAIPage";
 import PersonalShoppingPage from "@/pages/PersonalShoppingPage";
@@ -124,7 +127,8 @@ export const AuthWrapper = () => {
             <Route path="/ai-hub" element={<UnifiedAIHub />} />
             <Route path="/ai-style-hub" element={<AIStyleHub />} />
             <Route path="/sustainability" element={<SustainabilityPage />} />
-            <Route path="/challenges" element={<GamificationPage />} />
+            <Route path="/challenges" element={<StyleChallengesPage />} />
+            <Route path="/wardrobe/optimizer" element={<WardrobeOptimizerPage />} />
             <Route path="/virtual-fitting" element={<VirtualFittingRoom />} />
             <Route path="/advanced-ai" element={<AdvancedAIPage />} />
             <Route path="/personal-shopping" element={<PersonalShoppingPage />} />

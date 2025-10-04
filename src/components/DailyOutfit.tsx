@@ -374,6 +374,124 @@ const DailyOutfit = () => {
     }
   };
 
+  const handleRematch = async () => {
+    if (!outfit) return;
+    
+    toast({
+      title: "Finding new combinations...",
+      description: "Generating a fresh outfit with different items!",
+    });
+    
+    // Temporarily avoid current outfit items for this generation
+    const tempAvoidItems = [...dislikedOutfits, ...outfit.items.map(item => item.id)];
+    
+    setIsGenerating(true);
+    try {
+      const currentHour = new Date().getHours();
+      let timeOfDay: 'morning' | 'afternoon' | 'evening' | 'night';
+      if (currentHour < 12) timeOfDay = 'morning';
+      else if (currentHour < 17) timeOfDay = 'afternoon';
+      else if (currentHour < 22) timeOfDay = 'evening';
+      else timeOfDay = 'night';
+
+      const occasion = preferences?.notifications?.outfit_suggestions ? 'work' : 'casual';
+
+      // Generate outfit avoiding current items
+      const outfitItems = SmartOutfitEngine.generateOutfit(items, {
+        weather: weather ? { temp: weather.temperature, condition: weather.condition } : undefined,
+        occasion,
+        season: getCurrentSeason(),
+        avoidItems: tempAvoidItems
+      });
+      
+      if (!outfitItems || outfitItems.length === 0) {
+        throw new Error('Could not generate a different outfit');
+      }
+      
+      const validation = SmartOutfitEngine.validateOutfit(outfitItems);
+      if (!validation.valid) {
+        console.warn('Outfit validation issues:', validation.issues);
+      }
+      
+      const compatibility = SmartOutfitEngine.calculateCompatibility(outfitItems);
+      const outfitName = generateOutfitName(outfitItems, occasion);
+      const reasoning = generateReasoning(outfitItems, weather, occasion);
+      
+      const baseOutfitData: DailyOutfitData = {
+        id: `temp-${crypto?.randomUUID?.() || Date.now()}`,
+        items: outfitItems,
+        name: outfitName,
+        reasoning: reasoning,
+        confidence: compatibility,
+        tags: extractTags(outfitItems, occasion),
+        timeSlot: getTimeSlot(timeOfDay),
+        weatherConditions: weather || {
+          temperature: 20,
+          condition: 'Mild',
+          humidity: 60,
+          windSpeed: 5,
+          description: 'Pleasant weather',
+          icon: '🌤️',
+          feelsLike: 20,
+          location: 'Current Location'
+        },
+        nextUpdate: getNextUpdate(timeOfDay),
+        photo: userPhoto || undefined
+      };
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const { data: savedOutfit, error: outfitInsertError } = await supabase
+        .from('outfits')
+        .insert({
+          user_id: user.id,
+          name: baseOutfitData.name,
+          occasion: 'casual',
+          season: 'all-season',
+          is_ai_generated: true,
+          ai_generation_prompt: baseOutfitData.reasoning,
+          weather_conditions: baseOutfitData.weatherConditions as any,
+          notes: `Auto-generated at ${new Date().toISOString()}`,
+          is_favorite: false
+        })
+        .select()
+        .maybeSingle();
+
+      if (outfitInsertError) throw outfitInsertError;
+
+      if (savedOutfit) {
+        for (const item of baseOutfitData.items) {
+          await supabase.from('outfit_items').insert({
+            outfit_id: savedOutfit.id,
+            wardrobe_item_id: item.id,
+            item_type: item.category
+          });
+        }
+      }
+
+      const finalOutfit: DailyOutfitData = savedOutfit 
+        ? { ...baseOutfitData, id: savedOutfit.id }
+        : baseOutfitData;
+
+      setOutfit(finalOutfit);
+      
+      toast({
+        title: "New outfit ready!",
+        description: `${finalOutfit.confidence}% match - ${finalOutfit.name}`,
+      });
+    } catch (error) {
+      console.error('Rematch error:', error);
+      toast({
+        title: "Could not find new combination",
+        description: "Try adding more items to your wardrobe for more variety",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const handleRegenerate = () => {
     toast({
       title: "Generating new outfit...",
@@ -723,8 +841,8 @@ const DailyOutfit = () => {
 
         {/* Actions Bar */}
         <div className="p-4 border-t bg-background">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="flex gap-2 flex-wrap">
               <Button 
                 variant="outline" 
                 size="sm"
@@ -737,11 +855,21 @@ const DailyOutfit = () => {
               <Button 
                 variant="outline" 
                 size="sm"
+                onClick={handleRematch}
+                disabled={isGenerating}
+                className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Rematch
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
                 onClick={handleDislike}
                 disabled={isGenerating}
               >
                 <ThumbsDown className="w-4 h-4 mr-2" />
-                Not Today
+                Dislike
               </Button>
             </div>
             <div className="flex gap-2">
