@@ -1,121 +1,95 @@
-import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card } from "@/components/ui/card";
-import { useSettings } from "@/hooks/useSettings";
+import { Label } from "@/components/ui/label";
+import { Trophy, Bell, Users, Target } from "lucide-react";
+import { useState } from "react";
 
 const ChallengeSettingsPanel = () => {
-  const { settings, updateSettings, loading } = useSettings();
-
-  const challengeSettings = settings?.challenges;
-
-  const handleToggle = (key: string, value: boolean) => {
-    updateSettings({
-      challenges: { ...challengeSettings, [key]: value }
-    });
-  };
-
-  if (loading) {
-    return <div className="text-muted-foreground">Loading settings...</div>;
-  }
+  const [notifyNewChallenges, setNotifyNewChallenges] = useState(true);
+  const [notifyCompletions, setNotifyCompletions] = useState(true);
+  const [showLeaderboard, setShowLeaderboard] = useState(true);
+  const [autoJoin, setAutoJoin] = useState(false);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold mb-4">Challenge Participation</h3>
-        <Card className="p-4 space-y-4">
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Trophy className="w-5 h-5" />
+          Challenge Preferences
+        </CardTitle>
+        <CardDescription>
+          Manage your style challenge settings and notifications
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Enable Challenges</Label>
+              <Label htmlFor="notify-new" className="flex items-center gap-2">
+                <Bell className="w-4 h-4" />
+                New Challenge Notifications
+              </Label>
               <p className="text-sm text-muted-foreground">
-                Participate in style challenges and competitions
+                Get notified when new style challenges are available
               </p>
             </div>
             <Switch
-              checked={challengeSettings?.participateInCommunity !== false}
-              onCheckedChange={(checked) => handleToggle('participateInCommunity', checked)}
+              id="notify-new"
+              checked={notifyNewChallenges}
+              onCheckedChange={setNotifyNewChallenges}
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Join Daily Challenges</Label>
+              <Label htmlFor="notify-complete" className="flex items-center gap-2">
+                <Target className="w-4 h-4" />
+                Completion Notifications
+              </Label>
               <p className="text-sm text-muted-foreground">
-                Participate in daily style challenges
+                Get notified when you complete a challenge
               </p>
             </div>
             <Switch
-              checked={challengeSettings?.participateInDaily !== false}
-              onCheckedChange={(checked) => handleToggle('participateInDaily', checked)}
+              id="notify-complete"
+              checked={notifyCompletions}
+              onCheckedChange={setNotifyCompletions}
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Join Weekly Challenges</Label>
+              <Label htmlFor="leaderboard" className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Show on Leaderboard
+              </Label>
               <p className="text-sm text-muted-foreground">
-                Participate in weekly competitions
+                Display your progress on public leaderboards
               </p>
             </div>
             <Switch
-              checked={challengeSettings?.participateInWeekly !== false}
-              onCheckedChange={(checked) => handleToggle('participateInWeekly', checked)}
+              id="leaderboard"
+              checked={showLeaderboard}
+              onCheckedChange={setShowLeaderboard}
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Auto-Accept Challenges</Label>
+              <Label htmlFor="auto-join">Auto-Join Challenges</Label>
               <p className="text-sm text-muted-foreground">
-                Automatically join new challenges
+                Automatically join challenges that match your preferences
               </p>
             </div>
             <Switch
-              checked={challengeSettings?.autoAcceptChallenges === true}
-              onCheckedChange={(checked) => handleToggle('autoAcceptChallenges', checked)}
+              id="auto-join"
+              checked={autoJoin}
+              onCheckedChange={setAutoJoin}
             />
           </div>
-        </Card>
-      </div>
-
-      <div>
-        <h3 className="text-lg font-semibold mb-4">Notifications</h3>
-        <Card className="p-4 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>New Challenge Alerts</Label>
-              <p className="text-sm text-muted-foreground">
-                Get notified when new challenges are available
-              </p>
-            </div>
-            <Switch
-              checked={challengeSettings?.notifyOnNewChallenges !== false}
-              onCheckedChange={(checked) => handleToggle('notifyOnNewChallenges', checked)}
-            />
-          </div>
-
-        </Card>
-      </div>
-
-      <div>
-        <h3 className="text-lg font-semibold mb-4">Social & Competition</h3>
-        <Card className="p-4 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Show in Leaderboards</Label>
-              <p className="text-sm text-muted-foreground">
-                Display your ranking in public leaderboards
-              </p>
-            </div>
-            <Switch
-              checked={challengeSettings?.showOnLeaderboard !== false}
-              onCheckedChange={(checked) => handleToggle('showOnLeaderboard', checked)}
-            />
-          </div>
-
-        </Card>
-      </div>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

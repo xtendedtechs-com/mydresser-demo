@@ -11,7 +11,7 @@ import SocialSettingsPanel from "@/components/settings/SocialSettingsPanel";
 import MarketplaceSettingsPanel from "@/components/settings/MarketplaceSettingsPanel";
 import MyMirrorSettingsPanel from "@/components/settings/MyMirrorSettingsPanel";
 import ChallengeSettingsPanel from "@/components/settings/ChallengeSettingsPanel";
-import { AccessibilitySettingsPanel } from "@/components/settings/AccessibilitySettingsPanel";
+import AccessibilitySettingsPanel from "@/components/settings/AccessibilitySettingsPanel";
 import { MerchantSettingsPanel } from "@/components/settings/MerchantSettingsPanel";
 import { PWASettingsPanel } from "@/components/settings/PWASettingsPanel";
 import { PaymentSettingsPanel } from "@/components/settings/PaymentSettingsPanel";

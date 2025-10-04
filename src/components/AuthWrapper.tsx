@@ -84,6 +84,10 @@ import WardrobeAnalyticsPage from "@/pages/WardrobeAnalyticsPage";
 import UnifiedAIHub from "@/components/UnifiedAIHub";
 import AIStyleInsightsPage from "@/pages/AIStyleInsightsPage";
 import { MerchantPage } from "@/pages/MerchantPage";
+import AccountSettings from "@/pages/settings/AccountSettings";
+import AppSettings from "@/pages/settings/AppSettings";
+import AccessibilitySettingsPage from "@/pages/settings/AccessibilitySettingsPage";
+import ChallengeSettingsPage from "@/pages/settings/ChallengeSettingsPage";
 
 export const AuthWrapper = () => {
   const { isAuthenticated, loading } = useProfile();
@@ -143,6 +147,8 @@ export const AuthWrapper = () => {
             <Route path="/data-export" element={<DataExportPage />} />
             
             {/* Settings Pages */}
+            <Route path="/settings/account" element={<AccountSettings />} />
+            <Route path="/settings/app" element={<AppSettings />} />
             <Route path="/settings/general" element={<GeneralSettings />} />
             <Route path="/settings/privacy" element={<PrivacySettingsPage />} />
             <Route path="/settings/notifications" element={<NotificationsSettingsPage />} />
@@ -155,6 +161,8 @@ export const AuthWrapper = () => {
             <Route path="/settings/vto-photos" element={<VTOPhotoSettingsPage />} />
             <Route path="/settings/theme" element={<ThemeSettingsPage />} />
             <Route path="/settings/social" element={<SocialSettingsPage />} />
+            <Route path="/settings/accessibility" element={<AccessibilitySettingsPage />} />
+            <Route path="/settings/challenges" element={<ChallengeSettingsPage />} />
             
             <Route path="/mystyle" element={<MyStyle />} />
             <Route path="/service-settings/:service" element={<ServiceSettingsPage />} />
@@ -167,6 +175,7 @@ export const AuthWrapper = () => {
             <Route path="/ai-style-hub" element={<AIStyleHub />} />
             <Route path="/sustainability" element={<SustainabilityPage />} />
             <Route path="/challenges" element={<StyleChallengesPage />} />
+            <Route path="/style-challenges" element={<StyleChallengesPage />} />
             <Route path="/wardrobe/optimizer" element={<WardrobeOptimizerPage />} />
             <Route path="/virtual-fitting" element={<VirtualFittingRoom />} />
             <Route path="/advanced-ai" element={<AdvancedAIPage />} />

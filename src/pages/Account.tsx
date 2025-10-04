@@ -176,7 +176,7 @@ const Account = () => {
       id: 'accessibility',
       label: 'Accessibility',
       description: 'Accessibility features and settings',
-      onClick: () => toast({ title: "Accessibility Settings", description: "Open accessibility panel from the quick menu" })
+      onClick: () => navigate('/settings/accessibility')
     }
   ];
 
@@ -290,6 +290,12 @@ const Account = () => {
       label: 'Style Challenges',
       description: 'Participate in style competitions',
       onClick: () => navigate('/style-challenges')
+    },
+    {
+      id: 'challenge-settings',
+      label: 'Challenge Settings',
+      description: 'Customize challenge notifications and preferences',
+      onClick: () => navigate('/settings/challenges')
     },
     {
       id: 'sustainability',

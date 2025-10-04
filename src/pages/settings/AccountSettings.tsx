@@ -1,109 +1,178 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChevronLeft, User, Mail, Phone, Calendar, Shield } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useProfile } from "@/hooks/useProfile";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useProfile } from "@/hooks/useProfile";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, User, Mail, Phone } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { AccountDeletionDialog } from "@/components/AccountDeletionDialog";
 
 const AccountSettings = () => {
-  const { profile, updateProfile, loading } = useProfile();
+  const navigate = useNavigate();
+  const { profile, loading, user } = useProfile();
   const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    full_name: profile?.full_name || "",
-    bio: profile?.bio || "",
-    avatar_url: profile?.avatar_url || ""
-  });
+  const [email, setEmail] = useState(user?.email || "");
+  const [fullName, setFullName] = useState(profile?.full_name || "");
+  const [saving, setSaving] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const handleSave = async () => {
+    setSaving(true);
     try {
-      await updateProfile(formData);
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          full_name: fullName,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("user_id", profile?.user_id);
+
+      if (error) throw error;
+
       toast({
-        title: "Profile updated",
-        description: "Your account information has been saved successfully."
+        title: "Account updated",
+        description: "Your account information has been saved successfully.",
       });
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to update profile. Please try again.",
-        variant: "destructive"
+        description: "Failed to update account information.",
+        variant: "destructive",
       });
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background pb-20 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading account settings...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile Information</CardTitle>
-          <CardDescription>
-            Update your personal information and profile details
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center space-x-4">
-            <Avatar className="w-20 h-20">
-              <AvatarImage src={formData.avatar_url} />
-              <AvatarFallback>
-                <User className="w-8 h-8" />
-              </AvatarFallback>
-            </Avatar>
-            <Button variant="outline" size="sm">
-              <Upload className="w-4 h-4 mr-2" />
-              Change Photo
+    <div className="min-h-screen bg-background pb-20">
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/account')}
+            >
+              <ChevronLeft className="w-5 h-5" />
             </Button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="full_name">Full Name</Label>
-              <Input
-                id="full_name"
-                value={formData.full_name}
-                onChange={(e) => handleInputChange("full_name", e.target.value)}
-                placeholder="Enter your full name"
-              />
+            <div>
+              <h1 className="text-3xl font-bold">Account Settings</h1>
+              <p className="text-muted-foreground">Manage your account information and security</p>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="bio">Bio</Label>
-            <Textarea
-              id="bio"
-              value={formData.bio}
-              onChange={(e) => handleInputChange("bio", e.target.value)}
-              placeholder="Tell us about yourself..."
-              rows={3}
-            />
-          </div>
+          {/* Account Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="w-5 h-5" />
+                Account Information
+              </CardTitle>
+              <CardDescription>
+                Update your basic account information
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Full Name</Label>
+                <Input
+                  id="fullName"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Enter your full name"
+                />
+              </div>
 
-          <Button onClick={handleSave} disabled={loading}>
-            Save Changes
-          </Button>
-        </CardContent>
-      </Card>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <div className="flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    disabled
+                    className="flex-1"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Email cannot be changed from this page. Please contact support.
+                </p>
+              </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Contact Information</CardTitle>
-          <CardDescription>
-            Manage your contact preferences and information
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center space-x-2 p-4 bg-muted rounded-lg">
-            <Mail className="w-4 h-4" />
-            <span className="text-sm">Email: Contact information managed by system</span>
-          </div>
-        </CardContent>
-      </Card>
+              <div className="space-y-2">
+                <Label>Account Role</Label>
+                <div className="flex items-center gap-2 p-3 border rounded-lg bg-muted/50">
+                  <Shield className="w-4 h-4 text-primary" />
+                  <span className="capitalize font-medium">{profile?.role || "User"}</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Member Since</Label>
+                <div className="flex items-center gap-2 p-3 border rounded-lg bg-muted/50">
+                  <Calendar className="w-4 h-4 text-muted-foreground" />
+                  <span>{new Date(profile?.created_at || "").toLocaleDateString()}</span>
+                </div>
+              </div>
+
+              <Button onClick={handleSave} disabled={saving} className="w-full">
+                {saving ? "Saving..." : "Save Changes"}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Authentication Level */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5" />
+                Authentication Level
+              </CardTitle>
+              <CardDescription>
+                Current security level: <span className="font-medium capitalize">{profile?.auth_level || "Base"}</span>
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => navigate('/settings/authentication')}
+              >
+                Manage Authentication
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Danger Zone */}
+          <Card className="border-destructive">
+            <CardHeader>
+              <CardTitle className="text-destructive">Danger Zone</CardTitle>
+              <CardDescription>
+                Irreversible actions for your account
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <AccountDeletionDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen} />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 };

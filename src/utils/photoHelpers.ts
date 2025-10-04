@@ -84,7 +84,10 @@ const resolvePublicUrl = (input: string): string => {
     'profile-photos',
     'user-photos',
     'wardrobe-photos',
-    'profile-avatars'
+    'profile-avatars',
+    'avatars',
+    'products',
+    'items'
   ];
 
   const firstSlash = decoded.indexOf('/');
@@ -94,6 +97,14 @@ const resolvePublicUrl = (input: string): string => {
     if (knownBuckets.includes(bucket) && path) {
       const { data } = supabase.storage.from(bucket).getPublicUrl(path);
       return data.publicUrl || decoded;
+    }
+  }
+
+  // If it's just a path without bucket, try common buckets
+  if (!decoded.startsWith('http') && !decoded.includes('://')) {
+    for (const bucket of ['wardrobe-items', 'wardrobe-photos', 'items']) {
+      const { data } = supabase.storage.from(bucket).getPublicUrl(decoded);
+      if (data.publicUrl) return data.publicUrl;
     }
   }
 

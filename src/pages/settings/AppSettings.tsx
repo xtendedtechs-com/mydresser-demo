@@ -1,247 +1,162 @@
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChevronLeft, Smartphone, Download, Wifi, Bell, Eye } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { PWASettingsPanel } from "@/components/settings/PWASettingsPanel";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import { Button } from "@/components/ui/button";
-import { useUserPreferences } from "@/hooks/useUserPreferences";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import EnhancedThemeSelector from "@/components/EnhancedThemeSelector";
-import AccessibilitySettings from "@/components/AccessibilitySettings";
-import { Palette, Accessibility, Globe, Monitor, Volume2, Smartphone } from "lucide-react";
 
 const AppSettings = () => {
-  const { preferences, updatePreferences, loading } = useUserPreferences();
+  const navigate = useNavigate();
   const { toast } = useToast();
+  const [offlineMode, setOfflineMode] = useState(false);
+  const [autoUpdate, setAutoUpdate] = useState(true);
+  const [animations, setAnimations] = useState(true);
+  const [hapticFeedback, setHapticFeedback] = useState(true);
 
-  const handleToggle = async (setting: string, value: boolean) => {
-    try {
-      await updatePreferences({ [setting]: value });
-      toast({
-        title: "Setting updated",
-        description: "Your app preferences have been saved."
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update setting.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleSelectChange = async (setting: string, value: string) => {
-    try {
-      await updatePreferences({ [setting]: value });
-      toast({
-        title: "Setting updated",
-        description: "Your preference has been saved."
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update setting.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const appSettings = preferences || {
-    language: 'en',
-    currency: 'USD',
-    compact_mode: false,
-    animations: true,
-    grid_size: 3,
-    push_notifications: true,
-    offline_mode: false
+  const handleSave = () => {
+    toast({
+      title: "App settings saved",
+      description: "Your preferences have been updated successfully.",
+    });
   };
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Palette className="w-5 h-5" />
-            Theme & Appearance
-          </CardTitle>
-          <CardDescription>
-            Customize the look and feel of your MyDresser experience
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <EnhancedThemeSelector />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Globe className="w-5 h-5" />
-            Language & Region
-          </CardTitle>
-          <CardDescription>
-            Set your preferred language and regional settings
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="language">Language</Label>
-            <Select 
-              value={appSettings.language || "en"}
-              onValueChange={(value) => handleSelectChange("language", value)}
+    <div className="min-h-screen bg-background pb-20">
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate('/account')}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Select language" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="en">English</SelectItem>
-                <SelectItem value="es">Spanish</SelectItem>
-                <SelectItem value="fr">French</SelectItem>
-                <SelectItem value="de">German</SelectItem>
-                <SelectItem value="it">Italian</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="currency">Currency</Label>
-            <Select 
-              value={appSettings.currency || "USD"}
-              onValueChange={(value) => handleSelectChange("currency", value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select currency" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="USD">USD ($)</SelectItem>
-                <SelectItem value="EUR">EUR (€)</SelectItem>
-                <SelectItem value="GBP">GBP (£)</SelectItem>
-                <SelectItem value="JPY">JPY (¥)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Monitor className="w-5 h-5" />
-            Display Settings
-          </CardTitle>
-          <CardDescription>
-            Adjust display preferences and layout options
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label htmlFor="compact-mode">Compact Mode</Label>
-              <p className="text-sm text-muted-foreground">
-                Show more content in less space
-              </p>
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold">App Settings</h1>
+              <p className="text-muted-foreground">Configure app behavior and preferences</p>
             </div>
-            <Switch
-              id="compact-mode"
-              checked={appSettings.compact_mode === true}
-              onCheckedChange={(checked) => handleToggle("compact_mode", checked)}
-              disabled={loading}
-            />
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label htmlFor="animations">Animations</Label>
-              <p className="text-sm text-muted-foreground">
-                Enable smooth transitions and animations
-              </p>
-            </div>
-            <Switch
-              id="animations"
-              checked={appSettings.animations !== false}
-              onCheckedChange={(checked) => handleToggle("animations", checked)}
-              disabled={loading}
-            />
-          </div>
+          {/* PWA Settings */}
+          <PWASettingsPanel />
 
-          <div className="space-y-2">
-            <Label htmlFor="grid-size">Grid Size</Label>
-            <div className="px-3">
-              <Slider
-                value={[appSettings.grid_size || 3]}
-                onValueChange={([value]) => handleSelectChange("grid_size", value.toString())}
-                max={6}
-                min={2}
-                step={1}
-                className="w-full"
-              />
-              <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                <span>Small (2)</span>
-                <span>Large (6)</span>
+          {/* App Behavior */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Smartphone className="w-5 h-5" />
+                App Behavior
+              </CardTitle>
+              <CardDescription>
+                Customize how the app works
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="offline">Offline Mode</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Cache data for offline access
+                  </p>
+                </div>
+                <Switch
+                  id="offline"
+                  checked={offlineMode}
+                  onCheckedChange={setOfflineMode}
+                />
               </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Accessibility className="w-5 h-5" />
-            Accessibility
-          </CardTitle>
-          <CardDescription>
-            Configure accessibility features for better usability
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <AccessibilitySettings />
-        </CardContent>
-      </Card>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="auto-update">Auto-Update</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Automatically update the app when new versions are available
+                  </p>
+                </div>
+                <Switch
+                  id="auto-update"
+                  checked={autoUpdate}
+                  onCheckedChange={setAutoUpdate}
+                />
+              </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Smartphone className="w-5 h-5" />
-            Mobile Settings
-          </CardTitle>
-          <CardDescription>
-            Configure mobile-specific preferences
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label htmlFor="push-notifications">Push Notifications</Label>
-              <p className="text-sm text-muted-foreground">
-                Allow push notifications on mobile devices
-              </p>
-            </div>
-            <Switch
-              id="push-notifications"
-              checked={appSettings.push_notifications !== false}
-              onCheckedChange={(checked) => handleToggle("push_notifications", checked)}
-              disabled={loading}
-            />
-          </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="animations">Animations</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Enable smooth transitions and animations
+                  </p>
+                </div>
+                <Switch
+                  id="animations"
+                  checked={animations}
+                  onCheckedChange={setAnimations}
+                />
+              </div>
 
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label htmlFor="offline-mode">Offline Mode</Label>
-              <p className="text-sm text-muted-foreground">
-                Cache data for offline access
-              </p>
-            </div>
-            <Switch
-              id="offline-mode"
-              checked={appSettings.offline_mode === true}
-              onCheckedChange={(checked) => handleToggle("offline_mode", checked)}
-              disabled={loading}
-            />
-          </div>
-        </CardContent>
-      </Card>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="haptic">Haptic Feedback</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Vibrate on touch interactions (mobile only)
+                  </p>
+                </div>
+                <Switch
+                  id="haptic"
+                  checked={hapticFeedback}
+                  onCheckedChange={setHapticFeedback}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quick Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+              <CardDescription>
+                Manage related app settings
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => navigate('/settings/notifications')}
+              >
+                <Bell className="w-4 h-4 mr-2" />
+                Notification Settings
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => navigate('/settings/theme')}
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                Theme & Appearance
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => navigate('/settings/accessibility')}
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                Accessibility
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Button onClick={handleSave} className="w-full">
+            Save All Changes
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

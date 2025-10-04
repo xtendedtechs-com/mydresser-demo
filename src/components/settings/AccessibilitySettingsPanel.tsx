@@ -1,101 +1,123 @@
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { useSettings } from '@/hooks/useSettings';
-import type { AccessibilitySettings } from '@/types/settings';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Eye, Type, Mouse, Volume2 } from "lucide-react";
+import { useState } from "react";
+import { Slider } from "@/components/ui/slider";
 
-export const AccessibilitySettingsPanel = () => {
-  const { accessibility, updateFeatureSettings, saving } = useSettings();
-
-  const handleUpdate = (updates: Partial<AccessibilitySettings>) => {
-    updateFeatureSettings('accessibility', updates);
-  };
+const AccessibilitySettingsPanel = () => {
+  const [highContrast, setHighContrast] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [screenReader, setScreenReader] = useState(false);
+  const [keyboardNav, setKeyboardNav] = useState(true);
+  const [fontSize, setFontSize] = useState([100]);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <Label htmlFor="screen-reader">Screen Reader Support</Label>
-          <p className="text-sm text-muted-foreground">Enhanced ARIA labels</p>
-        </div>
-        <Switch
-          id="screen-reader"
-          checked={accessibility?.screenReader || false}
-          onCheckedChange={(checked) => handleUpdate({ screenReader: checked })}
-          disabled={saving}
-        />
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Eye className="w-5 h-5" />
+            Visual Accessibility
+          </CardTitle>
+          <CardDescription>
+            Adjust visual settings for better readability
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="high-contrast">High Contrast Mode</Label>
+              <p className="text-sm text-muted-foreground">
+                Increase contrast for better visibility
+              </p>
+            </div>
+            <Switch
+              id="high-contrast"
+              checked={highContrast}
+              onCheckedChange={setHighContrast}
+            />
+          </div>
 
-      <div className="flex items-center justify-between">
-        <div>
-          <Label htmlFor="keyboard-nav">Keyboard Navigation</Label>
-          <p className="text-sm text-muted-foreground">Enhanced keyboard shortcuts</p>
-        </div>
-        <Switch
-          id="keyboard-nav"
-          checked={accessibility?.keyboardNavigation || false}
-          onCheckedChange={(checked) => handleUpdate({ keyboardNavigation: checked })}
-          disabled={saving}
-        />
-      </div>
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="reduced-motion">Reduce Motion</Label>
+              <p className="text-sm text-muted-foreground">
+                Minimize animations and transitions
+              </p>
+            </div>
+            <Switch
+              id="reduced-motion"
+              checked={reducedMotion}
+              onCheckedChange={setReducedMotion}
+            />
+          </div>
 
-      <div className="flex items-center justify-between">
-        <Label htmlFor="high-contrast">High Contrast</Label>
-        <Switch
-          id="high-contrast"
-          checked={accessibility?.highContrast || false}
-          onCheckedChange={(checked) => handleUpdate({ highContrast: checked })}
-          disabled={saving}
-        />
-      </div>
+          <div className="space-y-3">
+            <Label htmlFor="font-size" className="flex items-center gap-2">
+              <Type className="w-4 h-4" />
+              Font Size: {fontSize[0]}%
+            </Label>
+            <Slider
+              id="font-size"
+              min={80}
+              max={150}
+              step={10}
+              value={fontSize}
+              onValueChange={setFontSize}
+            />
+            <p className="text-sm text-muted-foreground">
+              Adjust text size for better readability
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="flex items-center justify-between">
-        <Label htmlFor="reduced-motion">Reduced Motion</Label>
-        <Switch
-          id="reduced-motion"
-          checked={accessibility?.reducedMotion || false}
-          onCheckedChange={(checked) => handleUpdate({ reducedMotion: checked })}
-          disabled={saving}
-        />
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Mouse className="w-5 h-5" />
+            Navigation & Input
+          </CardTitle>
+          <CardDescription>
+            Control how you interact with the app
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="keyboard-nav">Keyboard Navigation</Label>
+              <p className="text-sm text-muted-foreground">
+                Enable keyboard shortcuts and navigation
+              </p>
+            </div>
+            <Switch
+              id="keyboard-nav"
+              checked={keyboardNav}
+              onCheckedChange={setKeyboardNav}
+            />
+          </div>
 
-      <div>
-        <Label>Font Size</Label>
-        <Select
-          value={accessibility?.fontSize || 'medium'}
-          onValueChange={(value) => handleUpdate({ fontSize: value as any })}
-          disabled={saving}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="small">Small</SelectItem>
-            <SelectItem value="medium">Medium</SelectItem>
-            <SelectItem value="large">Large</SelectItem>
-            <SelectItem value="extra-large">Extra Large</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div>
-        <Label>Color Blind Mode</Label>
-        <Select
-          value={accessibility?.colorBlindMode || 'none'}
-          onValueChange={(value) => handleUpdate({ colorBlindMode: value as any })}
-          disabled={saving}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">None</SelectItem>
-            <SelectItem value="deuteranopia">Deuteranopia (Red-Green)</SelectItem>
-            <SelectItem value="protanopia">Protanopia (Red-Green)</SelectItem>
-            <SelectItem value="tritanopia">Tritanopia (Blue-Yellow)</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label htmlFor="screen-reader" className="flex items-center gap-2">
+                <Volume2 className="w-4 h-4" />
+                Screen Reader Support
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Optimize for screen reader use
+              </p>
+            </div>
+            <Switch
+              id="screen-reader"
+              checked={screenReader}
+              onCheckedChange={setScreenReader}
+            />
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
+
+export default AccessibilitySettingsPanel;
