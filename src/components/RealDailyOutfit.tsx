@@ -14,8 +14,7 @@ import {
   Loader2,
   Edit,
   ShoppingBag,
-  Camera,
-  Upload
+  Settings
 } from "lucide-react";
 import { useWardrobe } from "@/hooks/useWardrobe";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
@@ -166,6 +165,7 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
 
   const regenerateOutfit = async () => {
     setRegenerating(true);
+    setVtoImage(null); // Clear old VTO
     await generateDailyOutfit();
     setRegenerating(false);
     toast.success('New outfit generated!');
@@ -235,30 +235,6 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
     if (hour < 12) return 'morning';
     if (hour < 17) return 'afternoon';
     return 'evening';
-  };
-
-  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const photoUrl = reader.result as string;
-      setUserPhoto(photoUrl);
-      
-      // Save to profile
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase
-          .from('profiles')
-          .update({ vto_photo_url: photoUrl })
-          .eq('user_id', user.id);
-      }
-      
-      toast.success('Photo uploaded! Generating virtual try-on...');
-      generateVTO(photoUrl);
-    };
-    reader.readAsDataURL(file);
   };
 
   const generateVTO = async (photoUrl?: string) => {
@@ -410,24 +386,16 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
             ) : (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center space-y-4 p-6">
-                  <Camera className="w-12 h-12 mx-auto text-muted-foreground" />
+                  <Settings className="w-12 h-12 mx-auto text-muted-foreground" />
                   <div>
-                    <h3 className="font-semibold mb-2">Upload Your Photo</h3>
+                    <h3 className="font-semibold mb-2">No VTO Photo Set</h3>
                     <p className="text-sm text-muted-foreground mb-4">
-                      See yourself in this outfit with AI virtual try-on
+                      Upload a photo in Settings → My Style to enable virtual try-on
                     </p>
                   </div>
-                  <Button asChild variant="outline">
-                    <label className="cursor-pointer">
-                      <Upload className="w-4 h-4 mr-2" />
-                      Upload Photo
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handlePhotoUpload}
-                        className="hidden"
-                      />
-                    </label>
+                  <Button onClick={() => window.location.href = '/settings/my-style'} variant="outline">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Go to Settings
                   </Button>
                 </div>
               </div>
@@ -441,35 +409,12 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
                 </Badge>
               </div>
             )}
-
-            {userPhoto && (
-              <div className="absolute bottom-2 right-2">
-                <Button 
-                  size="sm"
-                  variant="secondary"
-                  asChild
-                >
-                  <label className="cursor-pointer">
-                    <Upload className="w-3 h-3 mr-1" />
-                    Change
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handlePhotoUpload}
-                      className="hidden"
-                    />
-                  </label>
-                </Button>
-              </div>
-            )}
           </div>
 
           {vtoImage && (
-            <div className="mt-2 text-center">
-              <p className="text-xs text-muted-foreground">
-                💡 AI-generated preview. Actual fit may vary.
-              </p>
-            </div>
+            <p className="mt-2 text-xs text-muted-foreground text-center">
+              💡 AI-generated preview. Actual fit may vary.
+            </p>
           )}
         </div>
         {/* Weather Info */}

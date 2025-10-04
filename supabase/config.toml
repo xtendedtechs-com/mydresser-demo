@@ -44,3 +44,6 @@ verify_jwt = false
 
 [functions.ai-purchase-analyzer]
 verify_jwt = false
+
+[functions.ai-style-insights]
+verify_jwt = true

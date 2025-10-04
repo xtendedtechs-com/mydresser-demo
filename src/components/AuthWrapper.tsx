@@ -80,6 +80,7 @@ import MerchantToolsPage from "@/pages/MerchantToolsPage";
 import VerificationPage from "@/pages/VerificationPage";
 import WardrobeAnalyticsPage from "@/pages/WardrobeAnalyticsPage";
 import UnifiedAIHub from "@/components/UnifiedAIHub";
+import AIStyleInsightsPage from "@/pages/AIStyleInsightsPage";
 
 export const AuthWrapper = () => {
   const { isAuthenticated, loading } = useProfile();
@@ -167,6 +168,7 @@ export const AuthWrapper = () => {
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/ai-insights" element={<AIInsightsPage />} />
             <Route path="/ai-style-assistant" element={<AIStylingAssistantPage />} />
+            <Route path="/ai-style-insights" element={<AIStyleInsightsPage />} />
             <Route path="/merchant/tools" element={<MerchantToolsPage />} />
             <Route path="/collaborate" element={<CollaborationPage />} />
             <Route path="/verification" element={<VerificationPage />} />
