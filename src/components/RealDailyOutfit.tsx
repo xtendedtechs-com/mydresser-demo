@@ -49,23 +49,48 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
   const [vtoImage, setVtoImage] = useState<string | null>(null);
   const [generatingVTO, setGeneratingVTO] = useState(false);
 
-  // Load VTO photo based on settings (random or first active)
+  // Load VTO photo from new system or fallback to old profile photo
   useEffect(() => {
-    if (photos.length > 0) {
-      if (settings?.enable_random_vto_photo) {
-        const randomPhoto = getRandomActivePhoto();
-        if (randomPhoto) {
-          setUserPhoto(randomPhoto.photo_url);
-        }
-      } else {
-        // Use the first active photo or the most recent one
-        const activePhotos = photos.filter(p => p.is_active);
-        const photoToUse = activePhotos.length > 0 ? activePhotos[0] : photos[0];
-        if (photoToUse) {
-          setUserPhoto(photoToUse.photo_url);
+    const loadVTOPhoto = async () => {
+      // Try new VTO photos system first
+      if (photos.length > 0) {
+        if (settings?.enable_random_vto_photo) {
+          const randomPhoto = getRandomActivePhoto();
+          if (randomPhoto) {
+            setUserPhoto(randomPhoto.photo_url);
+            return;
+          }
+        } else {
+          // Use the first active photo or the most recent one
+          const activePhotos = photos.filter(p => p.is_active);
+          const photoToUse = activePhotos.length > 0 ? activePhotos[0] : photos[0];
+          if (photoToUse) {
+            setUserPhoto(photoToUse.photo_url);
+            return;
+          }
         }
       }
-    }
+
+      // Fallback to old system - check profile.vto_photo_url
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('vto_photo_url')
+            .eq('user_id', user.id)
+            .single();
+          
+          if (profile?.vto_photo_url) {
+            setUserPhoto(profile.vto_photo_url);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading VTO photo:', error);
+      }
+    };
+
+    loadVTOPhoto();
   }, [photos, settings, getRandomActivePhoto]);
 
   useEffect(() => {
@@ -393,7 +418,7 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
                       Upload a photo in Settings → My Style to enable virtual try-on
                     </p>
                   </div>
-                  <Button onClick={() => window.location.href = '/settings/my-style'} variant="outline">
+                  <Button onClick={() => window.location.href = '/settings/vto-photos'} variant="outline">
                     <Settings className="w-4 h-4 mr-2" />
                     Go to Settings
                   </Button>
