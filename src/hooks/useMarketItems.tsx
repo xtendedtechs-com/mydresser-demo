@@ -98,11 +98,8 @@ export const useMarketItems = () => {
   };
 
   const getPhotoUrls = (photos: any): string[] => {
-    if (!photos) return [];
-    if (Array.isArray(photos)) return photos;
-    if (typeof photos === 'string') return [photos];
-    if (photos.main) return [photos.main];
-    return [];
+    const { getAllPhotoUrls } = require('@/utils/photoHelpers');
+    return getAllPhotoUrls(photos);
   };
 
   useEffect(() => {

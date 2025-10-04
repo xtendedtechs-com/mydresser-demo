@@ -185,13 +185,17 @@ const PersonalizedRecommendations = () => {
                 return (
                   <Card key={item.id} className="overflow-hidden">
                     <div className="aspect-square bg-muted relative">
-                      {item.photos?.[0] && (
-                        <img
-                          src={getPrimaryPhotoUrl(item.photos, item.category)}
-                          alt={item.name}
-                          className="w-full h-full object-cover"
-                        />
-                      )}
+                      <img
+                        src={getPrimaryPhotoUrl(item.photos, item.category)}
+                        alt={`${item.name} - ${item.category}`}
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const { getCategoryPlaceholderImage } = require("@/utils/photoHelpers");
+                          (e.currentTarget as HTMLImageElement).src = getCategoryPlaceholderImage(item.category);
+                        }}
+                      />
                       <Badge className="absolute top-2 right-2 bg-primary">
                         {rec?.confidence}% Match
                       </Badge>

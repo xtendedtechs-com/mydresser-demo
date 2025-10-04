@@ -9,6 +9,7 @@ import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { myDresserWeather } from '@/services/myDresserWeather';
 import { OutfitAI } from '@/ai/OutfitAI';
 import { toast } from 'sonner';
+import { getPrimaryPhotoUrl } from '@/utils/photoHelpers';
 
 interface DailyOutfitProps {
   date?: Date;
@@ -157,7 +158,7 @@ export const DailyOutfitGenerator = ({ date = new Date() }: DailyOutfitProps) =>
             <div key={index} className="text-center">
               <div className="relative mb-2">
                 <Avatar className="w-20 h-20 mx-auto">
-                  <AvatarImage src={item.photos?.main || '/placeholder.svg'} />
+                  <AvatarImage src={getPrimaryPhotoUrl(item.photos, item.category)} />
                   <AvatarFallback>{item.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <Badge 

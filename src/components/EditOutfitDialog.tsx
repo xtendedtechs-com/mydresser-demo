@@ -19,6 +19,7 @@ import {
 import { useWardrobe } from "@/hooks/useWardrobe";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { getPrimaryPhotoUrl } from "@/utils/photoHelpers";
 
 interface EditOutfitDialogProps {
   open: boolean;
@@ -253,7 +254,7 @@ const EditOutfitDialog = ({ open, onOpenChange, outfit, onOutfitUpdated }: EditO
                 <Card key={item.id} className="relative">
                   <CardContent className="p-3 text-center">
                     <Avatar className="w-16 h-16 mx-auto mb-2">
-                      <AvatarImage src={item.photos?.main || '/placeholder.svg'} />
+                      <AvatarImage src={getPrimaryPhotoUrl(item.photos, item.category)} />
                       <AvatarFallback>{item.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <p className="text-sm font-medium line-clamp-1">{item.name}</p>
