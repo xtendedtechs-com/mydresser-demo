@@ -83,6 +83,18 @@ export const VTOPhotoSettings = () => {
                 Selected: {selectedFile.name}
               </p>
             )}
+
+            {/* Tips Section */}
+            <div className="p-4 bg-muted rounded-lg">
+              <h4 className="text-sm font-semibold mb-2">Tips for best results:</h4>
+              <ul className="text-xs text-muted-foreground space-y-1">
+                <li>• Use a full-body photo with good lighting</li>
+                <li>• Stand against a plain background</li>
+                <li>• Wear form-fitting clothes</li>
+                <li>• Face the camera directly</li>
+                <li>• Photos will be used for all outfit suggestions</li>
+              </ul>
+            </div>
           </div>
 
           {/* Random Selection Toggle */}

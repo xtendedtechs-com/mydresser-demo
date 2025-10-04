@@ -26,6 +26,7 @@ import AISettingsPage from "@/pages/settings/AISettingsPage";
 import MarketplaceSettingsPage from "@/pages/settings/MarketplaceSettingsPage";
 import PWASettingsPage from "@/pages/settings/PWASettingsPage";
 import MyStyleSettingsPage from "@/pages/settings/MyStyleSettingsPage";
+import VTOPhotoSettingsPage from "@/pages/settings/VTOPhotoSettingsPage";
 import ThemeSettingsPage from "@/pages/settings/ThemeSettingsPage";
 import ProfileSetup from "@/pages/ProfileSetup";
 import DataExportPage from "@/pages/DataExportPage";
@@ -148,6 +149,7 @@ export const AuthWrapper = () => {
             <Route path="/settings/marketplace" element={<MarketplaceSettingsPage />} />
             <Route path="/settings/pwa" element={<PWASettingsPage />} />
             <Route path="/settings/mystyle" element={<MyStyleSettingsPage />} />
+            <Route path="/settings/vto-photos" element={<VTOPhotoSettingsPage />} />
             <Route path="/settings/theme" element={<ThemeSettingsPage />} />
             
             <Route path="/mystyle" element={<MyStyle />} />

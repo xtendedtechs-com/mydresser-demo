@@ -39,18 +39,18 @@ export const useVTOPhotos = () => {
 
       // Upload to storage
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `vto-photos/${fileName}`;
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('wardrobe-images')
+        .from('vto-photos')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('wardrobe-images')
+        .from('vto-photos')
         .getPublicUrl(filePath);
 
       // Save to database

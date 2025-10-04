@@ -1630,7 +1630,16 @@ This document tracks the development progress of the MyDresser application.
 - [x] Add error handling and rate limit management
 - [x] Display insights in organized card layout
 
-## 🚧 Phase 70: Final Testing & Launch Preparation
+## ✅ Phase 70: VTO Photo Management & Storage
+- [x] Fix VTO photo bucket configuration (vto-photos bucket)
+- [x] Update useVTOPhotos hook to use correct storage bucket
+- [x] Create dedicated VTOPhotoSettingsPage
+- [x] Add photo upload tips and best practices guidance
+- [x] Remove old VTO upload UI from Account page
+- [x] Move VTO settings to dedicated page accessible from Account
+- [x] Implement proper storage RLS policies
+
+## 🚧 Phase 71: Final Testing & Launch Preparation
 - [ ] Comprehensive end-to-end testing
 - [ ] Performance optimization
 - [ ] Security audit and fixes

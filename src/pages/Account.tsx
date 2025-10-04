@@ -384,26 +384,22 @@ const Account = () => {
               </CardContent>
             </Card>
 
-            {/* VTO Photo Settings */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-primary" />
-                  Virtual Try-On Photo
-                </CardTitle>
-                <CardDescription>
-                  Upload a full-body photo to see AI-generated outfits on yourself
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <VirtualTryOn 
-                  onPhotoUploaded={(url) => {
-                    toast({
-                      title: "Photo Updated",
-                      description: "Your VTO photo has been saved successfully",
-                    });
-                  }}
-                />
+            {/* VTO Photo Settings - Now a dedicated page */}
+            <Card className="cursor-pointer hover:shadow-md transition-all" onClick={() => navigate('/settings/vto-photos')}>
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1 flex-1">
+                    <div className="font-medium flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-primary" />
+                      Virtual Try-On Photos
+                      <Badge variant="secondary" className="text-xs">AI</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Manage photos for AI outfit visualization
+                    </p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0 ml-2" />
+                </div>
               </CardContent>
             </Card>
 
