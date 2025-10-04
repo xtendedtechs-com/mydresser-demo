@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { useSettings } from "@/hooks/useSettings";
 
 const MarketplaceSettingsPanel = () => {
-  const { settings, updateSettings, isLoading } = useSettings();
+  const { settings, updateSettings, loading } = useSettings();
 
-  const marketSettings = settings?.marketplace || {};
+  const marketSettings = settings?.marketplace;
 
   const handleToggle = (key: string, value: boolean) => {
     updateSettings({
@@ -22,13 +22,7 @@ const MarketplaceSettingsPanel = () => {
     });
   };
 
-  const handleInputChange = (key: string, value: string) => {
-    updateSettings({
-      marketplace: { ...marketSettings, [key]: value }
-    });
-  };
-
-  if (isLoading) {
+  if (loading) {
     return <div className="text-muted-foreground">Loading settings...</div>;
   }
 
@@ -45,8 +39,8 @@ const MarketplaceSettingsPanel = () => {
               </p>
             </div>
             <Switch
-              checked={marketSettings.enable_selling !== false}
-              onCheckedChange={(checked) => handleToggle('enable_selling', checked)}
+              checked={marketSettings?.enableSelling !== false}
+              onCheckedChange={(checked) => handleToggle('enableSelling', checked)}
             />
           </div>
 
@@ -58,35 +52,21 @@ const MarketplaceSettingsPanel = () => {
               </p>
             </div>
             <Switch
-              checked={marketSettings.auto_accept_offers === true}
-              onCheckedChange={(checked) => handleToggle('auto_accept_offers', checked)}
+              checked={marketSettings?.autoAcceptOffers === true}
+              onCheckedChange={(checked) => handleToggle('autoAcceptOffers', checked)}
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Shipping Method</Label>
-            <Select
-              value={marketSettings.default_shipping_method || 'standard'}
-              onValueChange={(value) => handleSelectChange('default_shipping_method', value)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="local_pickup">Local Pickup Only</SelectItem>
-                <SelectItem value="standard">Standard Shipping</SelectItem>
-                <SelectItem value="express">Express Shipping</SelectItem>
-                <SelectItem value="both">Both Options</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Default Shipping Location</Label>
-            <Input
-              placeholder="City, State/Country"
-              value={marketSettings.shipping_location || ''}
-              onChange={(e) => handleInputChange('shipping_location', e.target.value)}
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Show Local Items Only</Label>
+              <p className="text-sm text-muted-foreground">
+                Filter marketplace to nearby sellers
+              </p>
+            </div>
+            <Switch
+              checked={marketSettings?.showLocalOnly === true}
+              onCheckedChange={(checked) => handleToggle('showLocalOnly', checked)}
             />
           </div>
         </Card>
@@ -103,38 +83,25 @@ const MarketplaceSettingsPanel = () => {
               </p>
             </div>
             <Switch
-              checked={marketSettings.enable_vto_before_purchase !== false}
-              onCheckedChange={(checked) => handleToggle('enable_vto_before_purchase', checked)}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Save Search Preferences</Label>
-              <p className="text-sm text-muted-foreground">
-                Remember your filters and search criteria
-              </p>
-            </div>
-            <Switch
-              checked={marketSettings.save_search_preferences !== false}
-              onCheckedChange={(checked) => handleToggle('save_search_preferences', checked)}
+              checked={marketSettings?.enablePurchases !== false}
+              onCheckedChange={(checked) => handleToggle('enablePurchases', checked)}
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Preferred Condition</Label>
+            <Label>Default Currency</Label>
             <Select
-              value={marketSettings.preferred_condition || 'any'}
-              onValueChange={(value) => handleSelectChange('preferred_condition', value)}
+              value={marketSettings?.defaultCurrency || 'USD'}
+              onValueChange={(value) => handleSelectChange('defaultCurrency', value)}
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="any">Any Condition</SelectItem>
-                <SelectItem value="new">New Only</SelectItem>
-                <SelectItem value="excellent">Excellent+</SelectItem>
-                <SelectItem value="good">Good+</SelectItem>
+                <SelectItem value="USD">USD ($)</SelectItem>
+                <SelectItem value="EUR">EUR (€)</SelectItem>
+                <SelectItem value="GBP">GBP (£)</SelectItem>
+                <SelectItem value="JPY">JPY (¥)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -152,8 +119,8 @@ const MarketplaceSettingsPanel = () => {
               </p>
             </div>
             <Switch
-              checked={marketSettings.notify_price_drops !== false}
-              onCheckedChange={(checked) => handleToggle('notify_price_drops', checked)}
+              checked={marketSettings?.notifyOnPriceDrops !== false}
+              onCheckedChange={(checked) => handleToggle('notifyOnPriceDrops', checked)}
             />
           </div>
 
@@ -165,8 +132,8 @@ const MarketplaceSettingsPanel = () => {
               </p>
             </div>
             <Switch
-              checked={marketSettings.notify_new_listings === true}
-              onCheckedChange={(checked) => handleToggle('notify_new_listings', checked)}
+              checked={marketSettings?.notifyOnNewListings === true}
+              onCheckedChange={(checked) => handleToggle('notifyOnNewListings', checked)}
             />
           </div>
 
@@ -178,8 +145,8 @@ const MarketplaceSettingsPanel = () => {
               </p>
             </div>
             <Switch
-              checked={marketSettings.notify_transactions !== false}
-              onCheckedChange={(checked) => handleToggle('notify_transactions', checked)}
+              checked={marketSettings?.notifyOnSales !== false}
+              onCheckedChange={(checked) => handleToggle('notifyOnSales', checked)}
             />
           </div>
         </Card>

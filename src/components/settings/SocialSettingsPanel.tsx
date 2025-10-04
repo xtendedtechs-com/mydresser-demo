@@ -5,9 +5,9 @@ import { Card } from "@/components/ui/card";
 import { useSettings } from "@/hooks/useSettings";
 
 const SocialSettingsPanel = () => {
-  const { settings, updateSettings, isLoading } = useSettings();
+  const { settings, updateSettings, loading } = useSettings();
 
-  const socialSettings = settings?.social || {};
+  const socialSettings = settings?.social;
 
   const handleToggle = (key: string, value: boolean) => {
     updateSettings({
@@ -21,7 +21,7 @@ const SocialSettingsPanel = () => {
     });
   };
 
-  if (isLoading) {
+  if (loading) {
     return <div className="text-muted-foreground">Loading settings...</div>;
   }
 
@@ -38,8 +38,8 @@ const SocialSettingsPanel = () => {
               </p>
             </div>
             <Switch
-              checked={socialSettings.show_in_feed !== false}
-              onCheckedChange={(checked) => handleToggle('show_in_feed', checked)}
+              checked={socialSettings?.shareToFeed !== false}
+              onCheckedChange={(checked) => handleToggle('shareToFeed', checked)}
             />
           </div>
 
@@ -51,26 +51,22 @@ const SocialSettingsPanel = () => {
               </p>
             </div>
             <Switch
-              checked={socialSettings.show_following_activity !== false}
-              onCheckedChange={(checked) => handleToggle('show_following_activity', checked)}
+              checked={socialSettings?.profilePublic !== false}
+              onCheckedChange={(checked) => handleToggle('profilePublic', checked)}
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Default Post Visibility</Label>
-            <Select
-              value={socialSettings.default_post_visibility || 'public'}
-              onValueChange={(value) => handleSelectChange('default_post_visibility', value)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="public">Public</SelectItem>
-                <SelectItem value="followers">Followers Only</SelectItem>
-                <SelectItem value="private">Private</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Auto-Share Outfits</Label>
+              <p className="text-sm text-muted-foreground">
+                Automatically share new outfits to feed
+              </p>
+            </div>
+            <Switch
+              checked={socialSettings?.autoShareOutfits === true}
+              onCheckedChange={(checked) => handleToggle('autoShareOutfits', checked)}
+            />
           </div>
         </Card>
       </div>
@@ -86,49 +82,36 @@ const SocialSettingsPanel = () => {
               </p>
             </div>
             <Switch
-              checked={socialSettings.allow_comments !== false}
-              onCheckedChange={(checked) => handleToggle('allow_comments', checked)}
+              checked={socialSettings?.allowComments !== false}
+              onCheckedChange={(checked) => handleToggle('allowComments', checked)}
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Allow Likes</Label>
+              <Label>Allow Reactions</Label>
               <p className="text-sm text-muted-foreground">
-                Let others like your posts
+                Let others react to your posts
               </p>
             </div>
             <Switch
-              checked={socialSettings.allow_likes !== false}
-              onCheckedChange={(checked) => handleToggle('allow_likes', checked)}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Allow Sharing</Label>
-              <p className="text-sm text-muted-foreground">
-                Let others share your posts
-              </p>
-            </div>
-            <Switch
-              checked={socialSettings.allow_sharing !== false}
-              onCheckedChange={(checked) => handleToggle('allow_sharing', checked)}
+              checked={socialSettings?.allowReactions !== false}
+              onCheckedChange={(checked) => handleToggle('allowReactions', checked)}
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Who Can Tag You</Label>
+            <Label>Who Can Message You</Label>
             <Select
-              value={socialSettings.who_can_tag || 'everyone'}
-              onValueChange={(value) => handleSelectChange('who_can_tag', value)}
+              value={socialSettings?.allowMessages || 'following'}
+              onValueChange={(value) => handleSelectChange('allowMessages', value)}
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="everyone">Everyone</SelectItem>
-                <SelectItem value="followers">Followers Only</SelectItem>
+                <SelectItem value="following">Followers Only</SelectItem>
                 <SelectItem value="none">No One</SelectItem>
               </SelectContent>
             </Select>
@@ -141,40 +124,40 @@ const SocialSettingsPanel = () => {
         <Card className="p-4 space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Show Wardrobe Count</Label>
-              <p className="text-sm text-muted-foreground">
-                Display number of items in your wardrobe
-              </p>
-            </div>
-            <Switch
-              checked={socialSettings.show_wardrobe_count !== false}
-              onCheckedChange={(checked) => handleToggle('show_wardrobe_count', checked)}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
               <Label>Show Follower Count</Label>
               <p className="text-sm text-muted-foreground">
                 Display your follower count publicly
               </p>
             </div>
             <Switch
-              checked={socialSettings.show_follower_count !== false}
-              onCheckedChange={(checked) => handleToggle('show_follower_count', checked)}
+              checked={socialSettings?.showFollowerCount !== false}
+              onCheckedChange={(checked) => handleToggle('showFollowerCount', checked)}
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Show Style Preferences</Label>
+              <Label>Show Following Count</Label>
               <p className="text-sm text-muted-foreground">
-                Display your style tags on your profile
+                Display who you're following
               </p>
             </div>
             <Switch
-              checked={socialSettings.show_style_preferences !== false}
-              onCheckedChange={(checked) => handleToggle('show_style_preferences', checked)}
+              checked={socialSettings?.showFollowingCount !== false}
+              onCheckedChange={(checked) => handleToggle('showFollowingCount', checked)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Show Style Score</Label>
+              <p className="text-sm text-muted-foreground">
+                Display your style score on profile
+              </p>
+            </div>
+            <Switch
+              checked={socialSettings?.showStyleScore !== false}
+              onCheckedChange={(checked) => handleToggle('showStyleScore', checked)}
             />
           </div>
         </Card>

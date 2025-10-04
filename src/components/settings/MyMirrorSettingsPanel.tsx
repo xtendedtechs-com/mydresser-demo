@@ -6,29 +6,29 @@ import { Slider } from "@/components/ui/slider";
 import { useSettings } from "@/hooks/useSettings";
 
 const MyMirrorSettingsPanel = () => {
-  const { settings, updateSettings, isLoading } = useSettings();
+  const { settings, updateSettings, loading } = useSettings();
 
-  const mirrorSettings = settings?.mymirror || {};
+  const mirrorSettings = settings?.myMirror;
 
   const handleToggle = (key: string, value: boolean) => {
     updateSettings({
-      mymirror: { ...mirrorSettings, [key]: value }
+      myMirror: { ...mirrorSettings, [key]: value }
     });
   };
 
   const handleSelectChange = (key: string, value: string) => {
     updateSettings({
-      mymirror: { ...mirrorSettings, [key]: value }
+      myMirror: { ...mirrorSettings, [key]: value }
     });
   };
 
   const handleSliderChange = (key: string, value: number[]) => {
     updateSettings({
-      mymirror: { ...mirrorSettings, [key]: value[0] }
+      myMirror: { ...mirrorSettings, [key]: value[0] }
     });
   };
 
-  if (isLoading) {
+  if (loading) {
     return <div className="text-muted-foreground">Loading settings...</div>;
   }
 
@@ -45,50 +45,50 @@ const MyMirrorSettingsPanel = () => {
               </p>
             </div>
             <Switch
-              checked={mirrorSettings.enable_vto !== false}
-              onCheckedChange={(checked) => handleToggle('enable_vto', checked)}
+              checked={mirrorSettings?.enableARTryOn !== false}
+              onCheckedChange={(checked) => handleToggle('enableARTryOn', checked)}
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Show Fit Score</Label>
+              <Label>Show Size Recommendations</Label>
               <p className="text-sm text-muted-foreground">
-                Display AI-calculated fit scores
+                Display AI-powered size suggestions
               </p>
             </div>
             <Switch
-              checked={mirrorSettings.show_fit_score !== false}
-              onCheckedChange={(checked) => handleToggle('show_fit_score', checked)}
+              checked={mirrorSettings?.showSizeRecommendations !== false}
+              onCheckedChange={(checked) => handleToggle('showSizeRecommendations', checked)}
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Auto-Save Results</Label>
+              <Label>Save Try-On History</Label>
               <p className="text-sm text-muted-foreground">
-                Automatically save try-on sessions
+                Keep a record of virtual try-ons
               </p>
             </div>
             <Switch
-              checked={mirrorSettings.auto_save_sessions === true}
-              onCheckedChange={(checked) => handleToggle('auto_save_sessions', checked)}
+              checked={mirrorSettings?.saveTryOnHistory !== false}
+              onCheckedChange={(checked) => handleToggle('saveTryOnHistory', checked)}
             />
           </div>
 
           <div className="space-y-2">
-            <Label>VTO Quality</Label>
+            <Label>Photo Quality</Label>
             <Select
-              value={mirrorSettings.vto_quality || 'high'}
-              onValueChange={(value) => handleSelectChange('vto_quality', value)}
+              value={mirrorSettings?.photoQuality || 'medium'}
+              onValueChange={(value) => handleSelectChange('photoQuality', value)}
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="standard">Standard (Faster)</SelectItem>
+                <SelectItem value="low">Low (Faster)</SelectItem>
+                <SelectItem value="medium">Medium</SelectItem>
                 <SelectItem value="high">High Quality</SelectItem>
-                <SelectItem value="ultra">Ultra (Slower)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -98,53 +98,20 @@ const MyMirrorSettingsPanel = () => {
       <div>
         <h3 className="text-lg font-semibold mb-4">Size & Fit</h3>
         <Card className="p-4 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Enable Size Recommendations</Label>
-              <p className="text-sm text-muted-foreground">
-                Get AI-powered size suggestions
-              </p>
-            </div>
-            <Switch
-              checked={mirrorSettings.enable_size_recommendations !== false}
-              onCheckedChange={(checked) => handleToggle('enable_size_recommendations', checked)}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Show Alternative Sizes</Label>
-              <p className="text-sm text-muted-foreground">
-                Display nearby size recommendations
-              </p>
-            </div>
-            <Switch
-              checked={mirrorSettings.show_alternative_sizes === true}
-              onCheckedChange={(checked) => handleToggle('show_alternative_sizes', checked)}
-            />
-          </div>
-
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label>Fit Preference</Label>
-              <span className="text-sm text-muted-foreground">
-                {mirrorSettings.fit_preference === 0 ? 'Fitted' : 
-                 mirrorSettings.fit_preference === 50 ? 'Regular' : 
-                 mirrorSettings.fit_preference === 100 ? 'Loose' : 'Regular'}
-              </span>
-            </div>
-            <Slider
-              value={[mirrorSettings.fit_preference || 50]}
-              onValueChange={(value) => handleSliderChange('fit_preference', value)}
-              min={0}
-              max={100}
-              step={25}
-            />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Fitted</span>
-              <span>Regular</span>
-              <span>Loose</span>
-            </div>
+            <Label>Preferred Camera</Label>
+            <Select
+              value={mirrorSettings?.preferredCamera || 'front'}
+              onValueChange={(value) => handleSelectChange('preferredCamera', value)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="front">Front Camera</SelectItem>
+                <SelectItem value="back">Back Camera</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </Card>
       </div>
@@ -154,40 +121,27 @@ const MyMirrorSettingsPanel = () => {
         <Card className="p-4 space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Save Body Measurements</Label>
+              <Label>Auto-Delete Photos</Label>
               <p className="text-sm text-muted-foreground">
-                Store measurements for better recommendations
+                Automatically delete photos after try-on
               </p>
             </div>
             <Switch
-              checked={mirrorSettings.save_measurements !== false}
-              onCheckedChange={(checked) => handleToggle('save_measurements', checked)}
+              checked={mirrorSettings?.autoDeletePhotos === true}
+              onCheckedChange={(checked) => handleToggle('autoDeletePhotos', checked)}
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Share VTO Analytics</Label>
+              <Label>Auto-Capture</Label>
               <p className="text-sm text-muted-foreground">
-                Help improve VTO accuracy with anonymous data
+                Automatically take photo when ready
               </p>
             </div>
             <Switch
-              checked={mirrorSettings.share_vto_analytics === true}
-              onCheckedChange={(checked) => handleToggle('share_vto_analytics', checked)}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Delete Photos After Session</Label>
-              <p className="text-sm text-muted-foreground">
-                Automatically delete uploaded photos
-              </p>
-            </div>
-            <Switch
-              checked={mirrorSettings.auto_delete_photos === true}
-              onCheckedChange={(checked) => handleToggle('auto_delete_photos', checked)}
+              checked={mirrorSettings?.autoCapture === true}
+              onCheckedChange={(checked) => handleToggle('autoCapture', checked)}
             />
           </div>
         </Card>
