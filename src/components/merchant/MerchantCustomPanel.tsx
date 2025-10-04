@@ -1,19 +1,56 @@
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useMerchantProfile } from '@/hooks/useMerchantProfile';
+import { useMerchantItems } from '@/hooks/useMerchantItems';
+import { useOrders } from '@/hooks/useOrders';
+import { useMerchantAnalytics } from '@/hooks/useMerchantAnalytics';
 import { Bell, AlertTriangle, CheckCircle, Info, Plus, ExternalLink } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 export const MerchantCustomPanel = () => {
   const { profile } = useMerchantProfile();
+  const { items } = useMerchantItems();
+  const { orders } = useOrders();
+  const { analytics } = useMerchantAnalytics();
+  
+  const [notifications, setNotifications] = useState<Array<{
+    type: string;
+    message: string;
+    icon: any;
+  }>>([]);
 
-  const notifications = [
-    { type: 'warning', message: '3 items below low stock threshold', icon: AlertTriangle },
-    { type: 'info', message: '5 new orders awaiting fulfillment', icon: Info },
-    { type: 'success', message: 'Payment gateway active', icon: CheckCircle },
-  ];
+  useEffect(() => {
+    const newNotifs = [];
+    const lowStockItems = items?.filter(i => (i.stock_quantity || 0) < 10 && (i.stock_quantity || 0) > 0).length || 0;
+    const pendingOrders = orders?.filter(o => o.status === 'pending').length || 0;
+    
+    if (lowStockItems > 0) {
+      newNotifs.push({
+        type: 'warning',
+        message: `${lowStockItems} items below low stock threshold`,
+        icon: AlertTriangle
+      });
+    }
+    
+    if (pendingOrders > 0) {
+      newNotifs.push({
+        type: 'info',
+        message: `${pendingOrders} new orders awaiting fulfillment`,
+        icon: Info
+      });
+    }
+    
+    newNotifs.push({
+      type: 'success',
+      message: 'Payment gateway active',
+      icon: CheckCircle
+    });
+    
+    setNotifications(newNotifs);
+  }, [items, orders]);
 
   const quickLinks = [
     { label: 'Add New Item', href: '/terminal/inventory' },
@@ -58,9 +95,22 @@ export const MerchantCustomPanel = () => {
           <div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">Daily Sales Target</span>
-              <span className="text-sm">65%</span>
+              <span className="text-sm">
+                {analytics?.[0]?.total_sales 
+                  ? Math.min(100, Math.round((analytics[0].total_sales / 1000) * 100))
+                  : 0}%
+              </span>
             </div>
-            <Progress value={65} className="h-2" />
+            <Progress 
+              value={analytics?.[0]?.total_sales 
+                ? Math.min(100, Math.round((analytics[0].total_sales / 1000) * 100))
+                : 0
+              } 
+              className="h-2" 
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              ${analytics?.[0]?.total_sales?.toFixed(2) || '0.00'} of $1,000 target
+            </p>
           </div>
 
           <div className="pt-2 border-t">
@@ -107,15 +157,21 @@ export const MerchantCustomPanel = () => {
         <CardContent className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm">Total Revenue</span>
-            <span className="font-bold">$0.00</span>
+            <span className="font-bold">
+              ${analytics?.[0]?.total_sales?.toFixed(2) || '0.00'}
+            </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm">Orders Fulfilled</span>
-            <span className="font-bold">0</span>
+            <span className="font-bold">
+              {orders?.filter(o => o.status === 'completed').length || 0}
+            </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-sm">New Customers</span>
-            <span className="font-bold">0</span>
+            <span className="font-bold">
+              {analytics?.[0]?.new_customers || 0}
+            </span>
           </div>
         </CardContent>
       </Card>

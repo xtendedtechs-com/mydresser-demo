@@ -44,7 +44,7 @@ interface MerchantPageData {
 }
 
 export const MerchantPage: React.FC = () => {
-  const { merchantId } = useParams<{ merchantId: string }>();
+  const { merchantId: paramMerchantId } = useParams<{ merchantId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { items, loading: itemsLoading } = useMerchantItems();
@@ -55,11 +55,28 @@ export const MerchantPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'newest' | 'price-low' | 'price-high' | 'popular'>('newest');
+  const [followerCount, setFollowerCount] = useState(0);
+  const [averageRating, setAverageRating] = useState(0);
+
+  // Get current merchant ID from auth if not in params (terminal context)
+  const [merchantId, setMerchantId] = useState<string | undefined>(paramMerchantId);
+
+  useEffect(() => {
+    const getCurrentMerchant = async () => {
+      if (!paramMerchantId) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) setMerchantId(user.id);
+      }
+    };
+    getCurrentMerchant();
+  }, [paramMerchantId]);
 
   useEffect(() => {
     if (merchantId) {
       fetchMerchantData();
       checkFollowStatus();
+      fetchFollowerCount();
+      fetchAverageRating();
     }
   }, [merchantId]);
 
@@ -192,6 +209,31 @@ export const MerchantPage: React.FC = () => {
     }
   };
 
+  const fetchFollowerCount = async () => {
+    if (!merchantId) return;
+    
+    const { count } = await supabase
+      .from('user_follows')
+      .select('*', { count: 'exact', head: true })
+      .eq('following_id', merchantId);
+    
+    setFollowerCount(count || 0);
+  };
+
+  const fetchAverageRating = async () => {
+    if (!merchantId) return;
+    
+    const { data } = await supabase
+      .from('marketplace_reviews')
+      .select('rating')
+      .eq('reviewee_id', merchantId);
+    
+    if (data && data.length > 0) {
+      const avg = data.reduce((sum, r) => sum + r.rating, 0) / data.length;
+      setAverageRating(Math.round(avg * 10) / 10);
+    }
+  };
+
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
@@ -312,12 +354,14 @@ export const MerchantPage: React.FC = () => {
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
               <Users className="h-4 w-4" />
-              1.2K followers
+              {followerCount} follower{followerCount !== 1 ? 's' : ''}
             </span>
-            <span className="flex items-center gap-1">
-              <Star className="h-4 w-4" />
-              4.8 rating
-            </span>
+            {averageRating > 0 && (
+              <span className="flex items-center gap-1">
+                <Star className="h-4 w-4 fill-current text-yellow-500" />
+                {averageRating} rating
+              </span>
+            )}
           </div>
         </div>
 
