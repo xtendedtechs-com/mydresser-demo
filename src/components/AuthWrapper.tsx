@@ -28,6 +28,7 @@ import PWASettingsPage from "@/pages/settings/PWASettingsPage";
 import MyStyleSettingsPage from "@/pages/settings/MyStyleSettingsPage";
 import ThemeSettingsPage from "@/pages/settings/ThemeSettingsPage";
 import ProfileSetup from "@/pages/ProfileSetup";
+import DataExportPage from "@/pages/DataExportPage";
 import Auth from "@/pages/Auth";
 import Landing from "@/pages/Landing";
 import NotFound from "@/pages/NotFound";
@@ -134,6 +135,7 @@ export const AuthWrapper = () => {
             <Route path="/merchant-analytics" element={<MerchantAnalyticsPage />} />
             <Route path="/account" element={<Account />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
+            <Route path="/data-export" element={<DataExportPage />} />
             
             {/* Settings Pages */}
             <Route path="/settings/general" element={<GeneralSettings />} />

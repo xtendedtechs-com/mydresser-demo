@@ -621,6 +621,29 @@ This document tracks the development progress of the MyDresser application.
 ## Phase 58: Profile Photos Storage & Enhanced Quick Actions (COMPLETED)
 
 ## Phase 59: Settings Navigation Refactor & Enhanced Daily Outfits (COMPLETED)
+
+## Phase 60: Account Page Consolidation & 404 Fixes (COMPLETED)
+**Objective**: Fix all 404 errors in account page and consolidate layout to single scrollable page.
+
+**404 Fixes**:
+- Fixed authentication link from `/auth-settings` to `/settings/authentication`
+- Created `/data-export` page with `DataExportPage` component
+- Added data export route to AuthWrapper
+- All account page links now functional
+
+**Layout Consolidation**:
+- Removed tabbed interface (Profile/Settings/Payments/AI/App/Style/Analytics tabs)
+- Unified all settings into single scrollable page
+- All sections now visible simultaneously on one page
+- Maintained existing card-based design and functionality
+- Improved navigation flow with consistent back buttons
+- Better user experience with no context switching between tabs
+
+**Design Improvements**:
+- Clean, unified layout with all options accessible at once
+- Consistent styling across all setting sections
+- Improved visual hierarchy with clear section headers
+- Responsive grid layouts for different screen sizes
 **Objective**: Restructure settings to use page navigation and improve daily outfit generation with weather context.
 
 **Settings Navigation Changes**:

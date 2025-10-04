@@ -116,7 +116,7 @@ const Account = () => {
       id: 'authentication',
       label: 'Authentication',
       description: `Current level: ${profile.auth_level}`,
-      onClick: () => navigate('/auth-settings'),
+      onClick: () => navigate('/settings/authentication'),
       highlighted: profile.auth_level === 'base'
     },
     {
@@ -306,74 +306,6 @@ const Account = () => {
     });
   }
 
-  const renderProfile = () => {
-    return (
-      <div className="space-y-6">
-        <div className="text-center">
-          <h1 className="text-2xl lg:text-3xl font-bold fashion-text-gradient flex items-center justify-center gap-2">
-            <span>👤</span>
-            MYDRESSER ACCOUNT
-          </h1>
-        </div>
-
-        <Button
-          variant="outline"
-          onClick={() => navigate('/settings/general')}
-          className="w-full mb-4"
-        >
-          <Settings className="w-4 h-4 mr-2" />
-          Open Settings
-        </Button>
-
-        <div className="pt-6">
-          <Button
-            variant="outline"
-            onClick={handleSignOut}
-            className="w-full"
-          >
-            Sign out
-          </Button>
-        </div>
-      </div>
-    );
-  };
-
-  const renderMyStyle = () => {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-primary" />
-          <h2 className="text-2xl font-bold">My Style</h2>
-        </div>
-        <Card>
-          <CardContent className="p-6">
-            <p className="text-muted-foreground mb-4">
-              Define your personal style preferences and let our AI learn from your choices.
-            </p>
-            <Button onClick={handleMyStyleClick} className="w-full">
-              <Palette className="w-4 h-4 mr-2" />
-              Manage My Style
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  };
-
-  const renderAnalytics = () => {
-    if (!profile) return null;
-
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-2">
-          <BarChart3 className="w-5 h-5 text-primary" />
-          <h2 className="text-2xl font-bold">Analytics</h2>
-        </div>
-        <UserAnalyticsDashboard />
-        <AdvancedPredictiveAnalytics type="user" timeframe="30d" />
-      </div>
-    );
-  };
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -427,264 +359,238 @@ const Account = () => {
             </Card>
           </div>
 
-          {/* Account Settings Sections */}
-          <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid grid-cols-3 lg:grid-cols-7 gap-1 h-auto">
-              <TabsTrigger value="profile" className="text-xs sm:text-sm">Profile</TabsTrigger>
-              <TabsTrigger value="settings" className="text-xs sm:text-sm">Settings</TabsTrigger>
-              <TabsTrigger value="payments" className="text-xs sm:text-sm">Payments</TabsTrigger>
-              <TabsTrigger value="ai" className="text-xs sm:text-sm">AI</TabsTrigger>
-              <TabsTrigger value="pwa" className="text-xs sm:text-sm">App</TabsTrigger>
-              <TabsTrigger value="mystyle" className="text-xs sm:text-sm">Style</TabsTrigger>
-              <TabsTrigger value="analytics" className="text-xs sm:text-sm">Analytics</TabsTrigger>
-            </TabsList>
+          {/* Unified Settings Layout - All in One Page */}
+          <div className="space-y-6">
+            {/* Profile Management Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="w-5 h-5" />
+                  Profile Management
+                </CardTitle>
+                <CardDescription>
+                  Edit your profile information and account details
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Dialog open={profileEditOpen} onOpenChange={setProfileEditOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="w-full">
+                      Edit Profile Information
+                    </Button>
+                  </DialogTrigger>
+                  <ProfileEditDialog open={profileEditOpen} onOpenChange={setProfileEditOpen} />
+                </Dialog>
+              </CardContent>
+            </Card>
 
-            <TabsContent value="profile" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="w-5 h-5" />
-                    Profile Management
-                  </CardTitle>
-                  <CardDescription>
-                    Edit your profile information and account details
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Dialog open={profileEditOpen} onOpenChange={setProfileEditOpen}>
-                    <DialogTrigger asChild>
-                      <Button className="w-full">
-                        Edit Profile Information
-                      </Button>
-                    </DialogTrigger>
-                    <ProfileEditDialog open={profileEditOpen} onOpenChange={setProfileEditOpen} />
-                  </Dialog>
-                </CardContent>
-              </Card>
+            {/* VTO Photo Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                  Virtual Try-On Photo
+                </CardTitle>
+                <CardDescription>
+                  Upload a full-body photo to see AI-generated outfits on yourself
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <VirtualTryOn 
+                  onPhotoUploaded={(url) => {
+                    toast({
+                      title: "Photo Updated",
+                      description: "Your VTO photo has been saved successfully",
+                    });
+                  }}
+                />
+              </CardContent>
+            </Card>
 
-              {/* VTO Photo Settings */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-primary" />
-                    Virtual Try-On Photo
-                  </CardTitle>
-                  <CardDescription>
-                    Upload a full-body photo to see AI-generated outfits on yourself
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <VirtualTryOn 
-                    onPhotoUploaded={(url) => {
-                      toast({
-                        title: "Photo Updated",
-                        description: "Your VTO photo has been saved successfully",
-                      });
-                    }}
-                  />
-                </CardContent>
-              </Card>
-
-              {/* Currency & International Settings */}
-              <Card className="cursor-pointer hover:shadow-md transition-all" onClick={() => navigate('/international')}>
-                <CardContent className="p-5">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1 flex-1">
-                      <div className="font-medium flex items-center gap-2">
-                        Currency & International
-                        <Badge variant="secondary" className="text-xs">New</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        Multi-currency support and shipping settings
-                      </p>
+            {/* Currency & International Settings */}
+            <Card className="cursor-pointer hover:shadow-md transition-all" onClick={() => navigate('/international')}>
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1 flex-1">
+                    <div className="font-medium flex items-center gap-2">
+                      Currency & International
+                      <Badge variant="secondary" className="text-xs">New</Badge>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0 ml-2" />
+                    <p className="text-sm text-muted-foreground">
+                      Multi-currency support and shipping settings
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
+                  <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0 ml-2" />
+                </div>
+              </CardContent>
+            </Card>
 
-              {/* Account Settings Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                {accountSettings.map((setting) => (
-                  <Card key={setting.id} className="cursor-pointer hover:shadow-md transition-all active:scale-95">
-                    <CardContent className="p-4 md:p-5" onClick={setting.onClick}>
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-1 flex-1 min-w-0">
-                          <div className="font-medium flex items-center gap-2 text-sm md:text-base">
-                            {setting.label}
-                            {setting.highlighted && <Badge variant="secondary" className="text-xs">Important</Badge>}
-                          </div>
-                          {setting.description && (
-                            <p className="text-xs md:text-sm text-muted-foreground line-clamp-1">{setting.description}</p>
-                          )}
+            {/* Account Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Account Settings</CardTitle>
+                <CardDescription>Manage your account and security</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                  {accountSettings.map((setting) => (
+                    <div 
+                      key={setting.id} 
+                      className="flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-muted/50 active:scale-98 transition-all" 
+                      onClick={setting.onClick}
+                    >
+                      <div className="space-y-1 flex-1 min-w-0">
+                        <div className="font-medium flex items-center gap-2 text-sm md:text-base">
+                          {setting.label}
+                          {setting.highlighted && <Badge variant="secondary" className="text-xs">Important</Badge>}
                         </div>
-                        <ChevronRight className="w-4 h-4 md:w-5 md:h-5 text-muted-foreground flex-shrink-0 ml-2" />
+                        {setting.description && (
+                          <p className="text-xs md:text-sm text-muted-foreground line-clamp-1">{setting.description}</p>
+                        )}
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
+                      <ChevronRight className="w-4 h-4 md:w-5 md:h-5 text-muted-foreground flex-shrink-0 ml-2" />
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
 
-            <TabsContent value="settings" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* App Settings */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Settings className="w-5 h-5" />
-                      App Settings
-                    </CardTitle>
-                    <CardDescription>Configure app behavior and preferences</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {appSettings.map((setting) => (
-                      <div 
-                        key={setting.id} 
-                        className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50 active:scale-98 transition-all" 
-                        onClick={setting.onClick}
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm md:text-base">{setting.label}</div>
-                          <div className="text-xs md:text-sm text-muted-foreground line-clamp-1">{setting.description}</div>
-                        </div>
-                        <ChevronRight className="w-4 h-4 flex-shrink-0 ml-2" />
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-
-                {/* Personalization Settings */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Palette className="w-5 h-5" />
-                      Personalization
-                    </CardTitle>
-                    <CardDescription>Customize your MyDresser experience</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {personalizationSettings.map((setting) => (
-                      <div 
-                        key={setting.id} 
-                        className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50 active:scale-98 transition-all" 
-                        onClick={setting.onClick}
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium flex items-center gap-2 text-sm md:text-base">
-                            {setting.label}
-                            {setting.highlighted && <Badge variant="outline" className="text-xs">New</Badge>}
-                          </div>
-                          <div className="text-xs md:text-sm text-muted-foreground line-clamp-1">{setting.description}</div>
-                        </div>
-                        <ChevronRight className="w-4 h-4 flex-shrink-0 ml-2" />
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Service Settings */}
+            {/* App Settings */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Sparkles className="w-5 h-5" />
-                    MyDresser Services
+                    <Settings className="w-5 h-5" />
+                    App Settings
                   </CardTitle>
-                  <CardDescription>Configure AI-powered features and services</CardDescription>
+                  <CardDescription>Configure app behavior and preferences</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-                    {serviceSettings.map((setting) => (
-                      <div 
-                        key={setting.id} 
-                        className="flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-muted/50 active:scale-98 transition-all" 
-                        onClick={setting.onClick}
-                      >
-                        <div className="space-y-1 flex-1 min-w-0">
-                          <div className="font-medium flex items-center gap-2 text-sm md:text-base">
-                            {setting.label}
-                            {setting.highlighted && <Badge variant="secondary" className="text-xs">Featured</Badge>}
-                          </div>
-                          <div className="text-xs md:text-sm text-muted-foreground line-clamp-1">{setting.description}</div>
-                        </div>
-                        <ChevronRight className="w-4 h-4 flex-shrink-0 ml-2" />
+                <CardContent className="space-y-3">
+                  {appSettings.map((setting) => (
+                    <div 
+                      key={setting.id} 
+                      className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50 active:scale-98 transition-all" 
+                      onClick={setting.onClick}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm md:text-base">{setting.label}</div>
+                        <div className="text-xs md:text-sm text-muted-foreground line-clamp-1">{setting.description}</div>
                       </div>
-                    ))}
-                  </div>
+                      <ChevronRight className="w-4 h-4 flex-shrink-0 ml-2" />
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
-            </TabsContent>
 
-            <TabsContent value="payments" className="space-y-6">
+              {/* Personalization Settings */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Payment Settings</CardTitle>
-                  <CardDescription>Manage your payment methods and preferences</CardDescription>
+                  <CardTitle className="flex items-center gap-2">
+                    <Palette className="w-5 h-5" />
+                    Personalization
+                  </CardTitle>
+                  <CardDescription>Customize your MyDresser experience</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <Button onClick={() => navigate('/settings/payment')} className="w-full">
-                    <Settings className="w-4 h-4 mr-2" />
-                    Manage Payment Settings
-                  </Button>
+                <CardContent className="space-y-3">
+                  {personalizationSettings.map((setting) => (
+                    <div 
+                      key={setting.id} 
+                      className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50 active:scale-98 transition-all" 
+                      onClick={setting.onClick}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium flex items-center gap-2 text-sm md:text-base">
+                          {setting.label}
+                          {setting.highlighted && <Badge variant="outline" className="text-xs">New</Badge>}
+                        </div>
+                        <div className="text-xs md:text-sm text-muted-foreground line-clamp-1">{setting.description}</div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 flex-shrink-0 ml-2" />
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
-            </TabsContent>
+            </div>
 
-            <TabsContent value="ai" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>AI Settings</CardTitle>
-                  <CardDescription>Configure AI assistant preferences</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button onClick={() => navigate('/settings/ai')} className="w-full">
-                    <Settings className="w-4 h-4 mr-2" />
-                    Manage AI Settings
-                  </Button>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="pwa" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>App Settings</CardTitle>
-                  <CardDescription>Configure app permissions and features</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button onClick={() => navigate('/settings/pwa')} className="w-full">
-                    <Settings className="w-4 h-4 mr-2" />
-                    Manage App Settings
-                  </Button>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="mystyle" className="space-y-6">
-              {renderMyStyle()}
-            </TabsContent>
-
-            <TabsContent value="analytics" className="space-y-6">
-              {renderAnalytics()}
-            </TabsContent>
-          </Tabs>
-
-          {/* Sign Out */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">Sign Out</h3>
-                  <p className="text-sm text-muted-foreground">Sign out of your MyDresser account</p>
+            {/* Service Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5" />
+                  MyDresser Services
+                </CardTitle>
+                <CardDescription>Configure AI-powered features and services</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+                  {serviceSettings.map((setting) => (
+                    <div 
+                      key={setting.id} 
+                      className="flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-muted/50 active:scale-98 transition-all" 
+                      onClick={setting.onClick}
+                    >
+                      <div className="space-y-1 flex-1 min-w-0">
+                        <div className="font-medium flex items-center gap-2 text-sm md:text-base">
+                          {setting.label}
+                          {setting.highlighted && <Badge variant="secondary" className="text-xs">Featured</Badge>}
+                        </div>
+                        <div className="text-xs md:text-sm text-muted-foreground line-clamp-1">{setting.description}</div>
+                      </div>
+                      <ChevronRight className="w-4 h-4 flex-shrink-0 ml-2" />
+                    </div>
+                  ))}
                 </div>
-                <Button variant="outline" onClick={handleSignOut}>
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
+              </CardContent>
+            </Card>
+
+            {/* My Style Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                  My Style
+                </CardTitle>
+                <CardDescription>Define your personal style preferences</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button onClick={handleMyStyleClick} className="w-full">
+                  <Palette className="w-4 h-4 mr-2" />
+                  Manage My Style
                 </Button>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            {/* Analytics Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5 text-primary" />
+                  Analytics & Insights
+                </CardTitle>
+                <CardDescription>View your wardrobe and style analytics</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <UserAnalyticsDashboard />
+                <AdvancedPredictiveAnalytics type="user" timeframe="30d" />
+              </CardContent>
+            </Card>
+
+            {/* Sign Out */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-medium">Sign Out</h3>
+                    <p className="text-sm text-muted-foreground">Sign out of your MyDresser account</p>
+                  </div>
+                  <Button variant="outline" onClick={handleSignOut}>
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
