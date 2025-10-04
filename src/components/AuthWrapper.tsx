@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import { lazy, Suspense } from "react";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
+import { LoadingScreen } from "@/components/LoadingScreen";
 import Navigation from "@/components/Navigation";
 import { useProfile } from "@/hooks/useProfile";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
@@ -8,110 +10,112 @@ import { CommandPalette } from "@/components/CommandPalette";
 import { QuickActionsMenu } from "@/components/QuickActionsMenu";
 import { KeyboardShortcutsHelper } from "@/components/KeyboardShortcutsHelper";
 
-// Pages
-import Index from "@/pages/Index";
-import Wardrobe from "@/pages/Wardrobe";
-import Account from "@/pages/Account";
-import Add from "@/pages/Add";
-import Market from "@/pages/Market";
-import MarketItemDetail from "@/pages/MarketItemDetail";
-import ItemDetail from "@/pages/ItemDetail";
-import WardrobeItemDetail from "@/pages/WardrobeItemDetail";
-import GeneralSettings from "@/pages/settings/GeneralSettings";
-import PrivacySettingsPage from "@/pages/settings/PrivacySettingsPage";
-import NotificationsSettingsPage from "@/pages/settings/NotificationsSettingsPage";
-import WardrobeSettingsPage from "@/pages/settings/WardrobeSettingsPage";
-import OutfitSettingsPage from "@/pages/settings/OutfitSettingsPage";
-import AISettingsPage from "@/pages/settings/AISettingsPage";
-import MarketplaceSettingsPage from "@/pages/settings/MarketplaceSettingsPage";
-import PWASettingsPage from "@/pages/settings/PWASettingsPage";
-import MyStyleSettingsPage from "@/pages/settings/MyStyleSettingsPage";
-import VTOPhotoSettingsPage from "@/pages/settings/VTOPhotoSettingsPage";
-import ThemeSettingsPage from "@/pages/settings/ThemeSettingsPage";
-import SocialSettingsPage from "@/pages/settings/SocialSettingsPage";
-import ProfileSetup from "@/pages/ProfileSetup";
-import DataExportPage from "@/pages/DataExportPage";
-import Auth from "@/pages/Auth";
-import Landing from "@/pages/Landing";
-import NotFound from "@/pages/NotFound";
-import ServiceSettingsPage from "@/pages/ServiceSettingsPage";
-
-import MyStyle from "@/pages/MyStyle";
-import { DailyOutfitGenerator } from "@/components/DailyOutfitGenerator";
-import SocialPage from "@/pages/SocialPage";
-import AIRecommendationsPage from "@/pages/AIRecommendationsPage";
-import AIAssistantPage from "@/pages/AIAssistantPage";
-import WardrobeInsightsPage from "@/pages/WardrobeInsightsPage";
-import SecondDresserPage from "@/pages/SecondDresserPage";
-import TransactionsPage from "@/pages/TransactionsPage";
-import MessagesPage from "@/pages/MessagesPage";
-import VirtualTryOnPage from "@/pages/VirtualTryOnPage";
-import MyMirrorPage from "@/pages/MyMirrorPage";
-import WardrobeBuilder from "@/pages/WardrobeBuilder";
-import ComprehensiveSettingsPage from "@/pages/ComprehensiveSettingsPage";
-import IntegrationsPage from "@/pages/IntegrationsPage";
-import DiscoveryPage from "@/pages/DiscoveryPage";
-import CommunityPage from "@/pages/CommunityPage";
-import DiscoverPage from "@/pages/DiscoverPage";
-import InternationalPage from "@/pages/InternationalPage";
-import InternationalSettingsPage from "@/pages/InternationalSettingsPage";
-import SupportsResources from "@/pages/SupportsResources";
-import ReportsAnalyticsPage from "@/pages/ReportsAnalyticsPage";
-import UserAnalyticsPage from "@/pages/UserAnalyticsPage";
-import MerchantAnalyticsPage from "@/pages/MerchantAnalyticsPage";
-import OutfitDetail from "@/pages/OutfitDetail";
-import SecurityPage from "@/pages/SecurityPage";
-import AIHub from "@/pages/AIHub";
-import AdvancedWardrobeInsights from "@/pages/AdvancedWardrobeInsights";
-import AIStyleHub from "@/pages/AIStyleHub";
-import SustainabilityPage from "@/pages/SustainabilityPage";
-import GamificationPage from "@/pages/GamificationPage";
-import AdvancedAnalyticsPage from "@/pages/AdvancedAnalyticsPage";
-import PersonalizationHub from "@/pages/PersonalizationHub";
-import StyleChallengesPage from "@/pages/StyleChallengesPage";
-import WardrobeOptimizerPage from "@/pages/WardrobeOptimizerPage";
-import VirtualFittingRoom from "@/pages/VirtualFittingRoom";
-import AdvancedAIPage from "@/pages/AdvancedAIPage";
-import PersonalShoppingPage from "@/pages/PersonalShoppingPage";
-import NotificationsPage from "@/pages/NotificationsPage";
-import AuthenticationSettings from "@/pages/settings/AuthenticationSettings";
-import AIInsightsPage from "@/pages/AIInsightsPage";
-import CollaborationPage from "@/pages/CollaborationPage";
-import AIStylingAssistantPage from "@/pages/AIStylingAssistantPage";
-import MerchantToolsPage from "@/pages/MerchantToolsPage";
-import VerificationPage from "@/pages/VerificationPage";
-import WardrobeAnalyticsPage from "@/pages/WardrobeAnalyticsPage";
-import UnifiedAIHub from "@/components/UnifiedAIHub";
-import AIStyleInsightsPage from "@/pages/AIStyleInsightsPage";
-import { MerchantPage } from "@/pages/MerchantPage";
-import AccountSettings from "@/pages/settings/AccountSettings";
-import AppSettings from "@/pages/settings/AppSettings";
-import AccessibilitySettingsPage from "@/pages/settings/AccessibilitySettingsPage";
-import ChallengeSettingsPage from "@/pages/settings/ChallengeSettingsPage";
+// Lazy load pages for code splitting
+const Index = lazy(() => import("@/pages/Index"));
+const Wardrobe = lazy(() => import("@/pages/Wardrobe"));
+const Account = lazy(() => import("@/pages/Account"));
+const Add = lazy(() => import("@/pages/Add"));
+const Market = lazy(() => import("@/pages/Market"));
+const MarketItemDetail = lazy(() => import("@/pages/MarketItemDetail"));
+const ItemDetail = lazy(() => import("@/pages/ItemDetail"));
+const WardrobeItemDetail = lazy(() => import("@/pages/WardrobeItemDetail"));
+const GeneralSettings = lazy(() => import("@/pages/settings/GeneralSettings"));
+const PrivacySettingsPage = lazy(() => import("@/pages/settings/PrivacySettingsPage"));
+const NotificationsSettingsPage = lazy(() => import("@/pages/settings/NotificationsSettingsPage"));
+const WardrobeSettingsPage = lazy(() => import("@/pages/settings/WardrobeSettingsPage"));
+const OutfitSettingsPage = lazy(() => import("@/pages/settings/OutfitSettingsPage"));
+const AISettingsPage = lazy(() => import("@/pages/settings/AISettingsPage"));
+const MarketplaceSettingsPage = lazy(() => import("@/pages/settings/MarketplaceSettingsPage"));
+const PWASettingsPage = lazy(() => import("@/pages/settings/PWASettingsPage"));
+const MyStyleSettingsPage = lazy(() => import("@/pages/settings/MyStyleSettingsPage"));
+const VTOPhotoSettingsPage = lazy(() => import("@/pages/settings/VTOPhotoSettingsPage"));
+const ThemeSettingsPage = lazy(() => import("@/pages/settings/ThemeSettingsPage"));
+const SocialSettingsPage = lazy(() => import("@/pages/settings/SocialSettingsPage"));
+const ProfileSetup = lazy(() => import("@/pages/ProfileSetup"));
+const DataExportPage = lazy(() => import("@/pages/DataExportPage"));
+const Auth = lazy(() => import("@/pages/Auth"));
+const Landing = lazy(() => import("@/pages/Landing"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
+const ServiceSettingsPage = lazy(() => import("@/pages/ServiceSettingsPage"));
+const MyStyle = lazy(() => import("@/pages/MyStyle"));
+const DailyOutfitGenerator = lazy(() => import("@/components/DailyOutfitGenerator").then(m => ({ default: m.DailyOutfitGenerator })));
+const SocialPage = lazy(() => import("@/pages/SocialPage"));
+const AIRecommendationsPage = lazy(() => import("@/pages/AIRecommendationsPage"));
+const AIAssistantPage = lazy(() => import("@/pages/AIAssistantPage"));
+const WardrobeInsightsPage = lazy(() => import("@/pages/WardrobeInsightsPage"));
+const SecondDresserPage = lazy(() => import("@/pages/SecondDresserPage"));
+const TransactionsPage = lazy(() => import("@/pages/TransactionsPage"));
+const MessagesPage = lazy(() => import("@/pages/MessagesPage"));
+const VirtualTryOnPage = lazy(() => import("@/pages/VirtualTryOnPage"));
+const MyMirrorPage = lazy(() => import("@/pages/MyMirrorPage"));
+const WardrobeBuilder = lazy(() => import("@/pages/WardrobeBuilder"));
+const ComprehensiveSettingsPage = lazy(() => import("@/pages/ComprehensiveSettingsPage"));
+const IntegrationsPage = lazy(() => import("@/pages/IntegrationsPage"));
+const DiscoveryPage = lazy(() => import("@/pages/DiscoveryPage"));
+const CommunityPage = lazy(() => import("@/pages/CommunityPage"));
+const DiscoverPage = lazy(() => import("@/pages/DiscoverPage"));
+const InternationalPage = lazy(() => import("@/pages/InternationalPage"));
+const InternationalSettingsPage = lazy(() => import("@/pages/InternationalSettingsPage"));
+const SupportsResources = lazy(() => import("@/pages/SupportsResources"));
+const ReportsAnalyticsPage = lazy(() => import("@/pages/ReportsAnalyticsPage"));
+const UserAnalyticsPage = lazy(() => import("@/pages/UserAnalyticsPage"));
+const MerchantAnalyticsPage = lazy(() => import("@/pages/MerchantAnalyticsPage"));
+const OutfitDetail = lazy(() => import("@/pages/OutfitDetail"));
+const SecurityPage = lazy(() => import("@/pages/SecurityPage"));
+const AIHub = lazy(() => import("@/pages/AIHub"));
+const AdvancedWardrobeInsights = lazy(() => import("@/pages/AdvancedWardrobeInsights"));
+const AIStyleHub = lazy(() => import("@/pages/AIStyleHub"));
+const SustainabilityPage = lazy(() => import("@/pages/SustainabilityPage"));
+const GamificationPage = lazy(() => import("@/pages/GamificationPage"));
+const AdvancedAnalyticsPage = lazy(() => import("@/pages/AdvancedAnalyticsPage"));
+const PersonalizationHub = lazy(() => import("@/pages/PersonalizationHub"));
+const StyleChallengesPage = lazy(() => import("@/pages/StyleChallengesPage"));
+const WardrobeOptimizerPage = lazy(() => import("@/pages/WardrobeOptimizerPage"));
+const VirtualFittingRoom = lazy(() => import("@/pages/VirtualFittingRoom"));
+const AdvancedAIPage = lazy(() => import("@/pages/AdvancedAIPage"));
+const PersonalShoppingPage = lazy(() => import("@/pages/PersonalShoppingPage"));
+const NotificationsPage = lazy(() => import("@/pages/NotificationsPage"));
+const AuthenticationSettings = lazy(() => import("@/pages/settings/AuthenticationSettings"));
+const AIInsightsPage = lazy(() => import("@/pages/AIInsightsPage"));
+const CollaborationPage = lazy(() => import("@/pages/CollaborationPage"));
+const AIStylingAssistantPage = lazy(() => import("@/pages/AIStylingAssistantPage"));
+const MerchantToolsPage = lazy(() => import("@/pages/MerchantToolsPage"));
+const VerificationPage = lazy(() => import("@/pages/VerificationPage"));
+const WardrobeAnalyticsPage = lazy(() => import("@/pages/WardrobeAnalyticsPage"));
+const UnifiedAIHub = lazy(() => import("@/components/UnifiedAIHub"));
+const AIStyleInsightsPage = lazy(() => import("@/pages/AIStyleInsightsPage"));
+const MerchantPage = lazy(() => import("@/pages/MerchantPage").then(m => ({ default: m.MerchantPage })));
+const AccountSettings = lazy(() => import("@/pages/settings/AccountSettings"));
+const AppSettings = lazy(() => import("@/pages/settings/AppSettings"));
+const AccessibilitySettingsPage = lazy(() => import("@/pages/settings/AccessibilitySettingsPage"));
+const ChallengeSettingsPage = lazy(() => import("@/pages/settings/ChallengeSettingsPage"));
 
 export const AuthWrapper = () => {
   const { isAuthenticated, loading } = useProfile();
 
   if (loading) {
-    return <LoadingSpinner message="Loading MyDresser..." />;
+    return <LoadingScreen message="Loading MyDresser..." />;
   }
 
   return (
     <>
       <OfflineIndicator />
       {!isAuthenticated ? (
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="*" element={<Landing />} />
-        </Routes>
+        <Suspense fallback={<LoadingScreen />}>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="*" element={<Landing />} />
+          </Routes>
+        </Suspense>
       ) : (
         <>
           <PWAInstallPrompt />
           <CommandPalette />
           <QuickActionsMenu />
           <KeyboardShortcutsHelper />
-          <Routes>
+          <Suspense fallback={<LoadingScreen />}>
+            <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/wardrobe" element={<Wardrobe />} />
             <Route path="/market" element={<Market />} />
@@ -192,6 +196,7 @@ export const AuthWrapper = () => {
             <Route path="/auth" element={<Navigate to="/" replace />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
           <Navigation />
         </>
       )}
