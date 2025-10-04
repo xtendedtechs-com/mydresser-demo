@@ -1,0 +1,302 @@
+/* RTL Support for Hebrew and Arabic */
+
+/* RTL-specific overrides */
+[dir="rtl"] {
+  /* Text alignment */
+  text-align: right;
+}
+
+[dir="rtl"] .text-left {
+  text-align: right;
+}
+
+[dir="rtl"] .text-right {
+  text-align: left;
+}
+
+/* Margins */
+[dir="rtl"] .ml-auto {
+  margin-left: unset;
+  margin-right: auto;
+}
+
+[dir="rtl"] .mr-auto {
+  margin-right: unset;
+  margin-left: auto;
+}
+
+/* Padding */
+[dir="rtl"] .pl-4 {
+  padding-left: unset;
+  padding-right: 1rem;
+}
+
+[dir="rtl"] .pr-4 {
+  padding-right: unset;
+  padding-left: 1rem;
+}
+
+/* Flex */
+[dir="rtl"] .flex-row {
+  flex-direction: row-reverse;
+}
+
+/* Border radius */
+[dir="rtl"] .rounded-l {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+[dir="rtl"] .rounded-r {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+}
+
+/* Icons and elements that should not flip */
+[dir="rtl"] .no-flip {
+  transform: scaleX(1) !important;
+  direction: ltr;
+}
+
+/* Arrows and directional icons should flip */
+[dir="rtl"] .flip-rtl {
+  transform: scaleX(-1);
+}
+
+/* Dropdown menus */
+[dir="rtl"] .dropdown-menu {
+  left: auto;
+  right: 0;
+}
+
+/* Tooltips */
+[dir="rtl"] .tooltip-right {
+  left: auto;
+  right: 100%;
+}
+
+[dir="rtl"] .tooltip-left {
+  right: auto;
+  left: 100%;
+}
+
+/* Shadows */
+[dir="rtl"] .shadow-left {
+  box-shadow: -4px 0 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+[dir="rtl"] .shadow-right {
+  box-shadow: 4px 0 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Transform */
+[dir="rtl"] .rotate-90 {
+  transform: rotate(-90deg);
+}
+
+[dir="rtl"] .rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* Grid gaps and spacing */
+[dir="rtl"] .gap-x-4 > * + * {
+  margin-left: unset;
+  margin-right: 1rem;
+}
+
+/* Form inputs */
+[dir="rtl"] input[type="text"],
+[dir="rtl"] input[type="email"],
+[dir="rtl"] input[type="password"],
+[dir="rtl"] input[type="search"],
+[dir="rtl"] textarea,
+[dir="rtl"] select {
+  text-align: right;
+  padding-left: 0.75rem;
+  padding-right: 2.5rem; /* For icons */
+}
+
+[dir="rtl"] input[type="checkbox"],
+[dir="rtl"] input[type="radio"] {
+  margin-left: 0.5rem;
+  margin-right: 0;
+}
+
+/* Navigation */
+[dir="rtl"] nav ul {
+  padding-right: 0;
+}
+
+[dir="rtl"] .breadcrumb {
+  direction: rtl;
+}
+
+[dir="rtl"] .breadcrumb-item + .breadcrumb-item::before {
+  padding-left: 0.5rem;
+  padding-right: 0;
+  content: "/";
+  transform: scaleX(-1);
+}
+
+/* Sidebar */
+[dir="rtl"] .sidebar {
+  left: auto;
+  right: 0;
+}
+
+[dir="rtl"] .sidebar-left {
+  left: auto;
+  right: 0;
+}
+
+[dir="rtl"] .sidebar-right {
+  right: auto;
+  left: 0;
+}
+
+/* Modal */
+[dir="rtl"] .modal-content {
+  text-align: right;
+}
+
+/* Cards */
+[dir="rtl"] .card-img-left {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: calc(0.375rem - 1px);
+  border-bottom-right-radius: calc(0.375rem - 1px);
+}
+
+[dir="rtl"] .card-img-right {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-top-left-radius: calc(0.375rem - 1px);
+  border-bottom-left-radius: calc(0.375rem - 1px);
+}
+
+/* Tabs */
+[dir="rtl"] .nav-tabs .nav-link {
+  margin-left: 0.25rem;
+  margin-right: unset;
+}
+
+/* Badges */
+[dir="rtl"] .badge-left {
+  left: auto;
+  right: 0;
+}
+
+[dir="rtl"] .badge-right {
+  right: auto;
+  left: 0;
+}
+
+/* Progress bar */
+[dir="rtl"] .progress-bar {
+  right: 0;
+  left: auto;
+}
+
+/* List groups */
+[dir="rtl"] .list-group-item {
+  text-align: right;
+}
+
+/* Tables */
+[dir="rtl"] table {
+  direction: rtl;
+}
+
+[dir="rtl"] th,
+[dir="rtl"] td {
+  text-align: right;
+}
+
+/* Carousel */
+[dir="rtl"] .carousel-control-prev {
+  left: auto;
+  right: 0;
+}
+
+[dir="rtl"] .carousel-control-next {
+  right: auto;
+  left: 0;
+}
+
+/* Pagination */
+[dir="rtl"] .pagination {
+  flex-direction: row-reverse;
+}
+
+/* Toast notifications */
+[dir="rtl"] .toast {
+  left: auto;
+  right: 1rem;
+}
+
+/* Specific component overrides */
+[dir="rtl"] .lucide {
+  /* Lucide icons that need flipping */
+}
+
+[dir="rtl"] .lucide-arrow-right,
+[dir="rtl"] .lucide-chevron-right,
+[dir="rtl"] .lucide-arrow-left,
+[dir="rtl"] .lucide-chevron-left {
+  transform: scaleX(-1);
+}
+
+/* Prevent number flipping */
+[dir="rtl"] .number,
+[dir="rtl"] .price,
+[dir="rtl"] .count {
+  direction: ltr;
+  display: inline-block;
+}
+
+/* Date and time */
+[dir="rtl"] .date,
+[dir="rtl"] .time {
+  direction: ltr;
+  display: inline-block;
+}
+
+/* English text in RTL context */
+[dir="rtl"] .english-text {
+  direction: ltr;
+  display: inline-block;
+}
+
+/* Animations */
+@media (prefers-reduced-motion: no-preference) {
+  [dir="rtl"] .animate-slide-in-right {
+    animation-name: slideInLeft;
+  }
+  
+  [dir="rtl"] .animate-slide-in-left {
+    animation-name: slideInRight;
+  }
+}
+
+/* Utility classes for manual RTL control */
+.rtl-flip {
+  transform: scaleX(-1);
+}
+
+.rtl-no-flip {
+  transform: none !important;
+}
+
+.ltr-only {
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+.rtl-only {
+  direction: rtl !important;
+  text-align: right !important;
+}
