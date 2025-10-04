@@ -27,6 +27,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import EditOutfitDialog from "./EditOutfitDialog";
 import MarketOutfitSuggestions from "./MarketOutfitSuggestions";
+import DailyOutfitWithVTO from "@/components/DailyOutfitWithVTO";
 
 interface DailyOutfitProps {
   date?: Date;
@@ -102,12 +103,8 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
     }
   }, [wardrobeLoading, preferencesLoading]);
 
-  // Generate VTO when outfit and userPhoto are both available
-  useEffect(() => {
-    if (outfit && userPhoto && !vtoImage && !generatingVTO) {
-      generateVTO();
-    }
-  }, [outfit, userPhoto]);
+  // VTO generation is now handled by the legacy, stable component (DailyOutfitWithVTO)
+  // to ensure reliability after dashboard redesign.
 
   const generateDailyOutfit = async () => {
     if (!wardrobeItems.length) return;
@@ -398,63 +395,7 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {/* Virtual Try-On Section */}
-        <div className="relative">
-          <div className="aspect-[3/4] bg-muted rounded-lg overflow-hidden">
-            {generatingVTO ? (
-              <div className="absolute inset-0 flex items-center justify-center bg-background/80">
-                <div className="text-center space-y-2">
-                  <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
-                  <p className="text-sm text-muted-foreground">Generating virtual try-on...</p>
-                </div>
-              </div>
-            ) : vtoImage ? (
-              <img
-                src={vtoImage}
-                alt="Virtual Try-On Result"
-                className="w-full h-full object-cover"
-              />
-            ) : userPhoto ? (
-              <img
-                src={userPhoto}
-                alt="Your Photo"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center space-y-4 p-6">
-                  <Settings className="w-12 h-12 mx-auto text-muted-foreground" />
-                  <div>
-                    <h3 className="font-semibold mb-2">No VTO Photo Set</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Upload a photo in Settings → My Style to enable virtual try-on
-                    </p>
-                  </div>
-                  <Button onClick={() => window.location.href = '/settings/vto-photos'} variant="outline">
-                    <Settings className="w-4 h-4 mr-2" />
-                    Go to Settings
-                  </Button>
-                </div>
-              </div>
-            )}
-            
-            {(vtoImage || userPhoto) && (
-              <div className="absolute top-2 left-2">
-                <Badge className="bg-primary text-primary-foreground">
-                  <Sparkles className="w-3 h-3 mr-1" />
-                  AI Virtual Try-On
-                </Badge>
-              </div>
-            )}
-          </div>
-
-          {vtoImage && (
-            <p className="mt-2 text-xs text-muted-foreground text-center">
-              💡 AI-generated preview. Actual fit may vary.
-            </p>
-          )}
-        </div>
-        {/* Weather Info */}
+        <DailyOutfitWithVTO outfit={outfit} userPhoto={userPhoto || undefined} />
         {weather && (
           <div className="flex items-center justify-center space-x-4 p-3 bg-muted rounded-lg">
             <Cloud className="w-5 h-5 text-muted-foreground" />
