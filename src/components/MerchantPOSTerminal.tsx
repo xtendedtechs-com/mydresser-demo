@@ -10,11 +10,21 @@ import {
   Tag, 
   TrendingUp,
   DollarSign,
-  Activity
+  Activity,
+  Globe,
+  Settings,
+  HelpCircle,
+  Handshake
 } from 'lucide-react';
 import { useMerchantAnalytics } from '@/hooks/useMerchantAnalytics';
 import { useOrders } from '@/hooks/useOrders';
 import { useMerchantItems } from '@/hooks/useMerchantItems';
+import { EnhancedMerchantPageEditor } from '@/components/EnhancedMerchantPageEditor';
+import { MerchantSettingsPanel } from '@/components/settings/MerchantSettingsPanel';
+import CustomerRelations from '@/pages/CustomerRelations';
+import FinancialReports from '@/pages/FinancialReports';
+import SupportResources from '@/pages/SupportsResources';
+import BrandPartnershipsPage from '@/pages/BrandPartnershipsPage';
 
 export const MerchantPOSTerminal = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -103,26 +113,42 @@ export const MerchantPOSTerminal = () => {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="dashboard" className="gap-2">
-            <BarChart3 className="h-4 w-4" />
+        <TabsList className="grid w-full grid-cols-9 gap-1">
+          <TabsTrigger value="dashboard" className="gap-1 text-xs">
+            <BarChart3 className="h-3 w-3" />
             Dashboard
           </TabsTrigger>
-          <TabsTrigger value="orders" className="gap-2">
-            <ShoppingCart className="h-4 w-4" />
+          <TabsTrigger value="orders" className="gap-1 text-xs">
+            <ShoppingCart className="h-3 w-3" />
             Orders
           </TabsTrigger>
-          <TabsTrigger value="inventory" className="gap-2">
-            <Package className="h-4 w-4" />
+          <TabsTrigger value="inventory" className="gap-1 text-xs">
+            <Package className="h-3 w-3" />
             Inventory
           </TabsTrigger>
-          <TabsTrigger value="customers" className="gap-2">
-            <Users className="h-4 w-4" />
+          <TabsTrigger value="customers" className="gap-1 text-xs">
+            <Users className="h-3 w-3" />
             Customers
           </TabsTrigger>
-          <TabsTrigger value="promotions" className="gap-2">
-            <Tag className="h-4 w-4" />
+          <TabsTrigger value="promotions" className="gap-1 text-xs">
+            <Tag className="h-3 w-3" />
             Promotions
+          </TabsTrigger>
+          <TabsTrigger value="financial" className="gap-1 text-xs">
+            <DollarSign className="h-3 w-3" />
+            Financial
+          </TabsTrigger>
+          <TabsTrigger value="partnerships" className="gap-1 text-xs">
+            <Handshake className="h-3 w-3" />
+            Partners
+          </TabsTrigger>
+          <TabsTrigger value="page" className="gap-1 text-xs">
+            <Globe className="h-3 w-3" />
+            Page
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="gap-1 text-xs">
+            <Settings className="h-3 w-3" />
+            Settings
           </TabsTrigger>
         </TabsList>
 
@@ -217,6 +243,22 @@ export const MerchantPOSTerminal = () => {
               <p className="text-muted-foreground">Promotions management interface coming soon...</p>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="financial">
+          <FinancialReports />
+        </TabsContent>
+
+        <TabsContent value="partnerships">
+          <BrandPartnershipsPage />
+        </TabsContent>
+
+        <TabsContent value="page">
+          <EnhancedMerchantPageEditor />
+        </TabsContent>
+
+        <TabsContent value="settings">
+          <MerchantSettingsPanel />
         </TabsContent>
       </Tabs>
     </div>

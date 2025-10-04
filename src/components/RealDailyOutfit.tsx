@@ -140,7 +140,7 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
         occasion: 'daily'
       });
 
-      // Save outfit to database
+      // Save outfit to database with AI-generated name and description
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: savedOutfit } = await supabase
@@ -153,7 +153,7 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
             is_ai_generated: true,
             ai_generation_prompt: generatedOutfit.reasoning,
             weather_conditions: weatherData,
-            notes: `Generated on ${new Date().toLocaleDateString()}`,
+            notes: generatedOutfit.reasoning || `Generated on ${new Date().toLocaleDateString()}`,
             is_favorite: false
           })
           .select()

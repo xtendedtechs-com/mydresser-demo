@@ -78,7 +78,22 @@ export const useWardrobe = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setItems(data || []);
+      
+      // Resolve photo URLs for all items to fix display issues after reload
+      const itemsWithResolvedPhotos = await Promise.all((data || []).map(async (item) => {
+        if (item.photos && typeof item.photos === 'string' && !item.photos.startsWith('http') && !item.photos.startsWith('data:')) {
+          // It's a storage path like "bucket/path", resolve it to public URL
+          const [bucket, ...pathParts] = item.photos.split('/');
+          if (bucket && pathParts.length > 0) {
+            const path = pathParts.join('/');
+            const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
+            return { ...item, photos: urlData.publicUrl };
+          }
+        }
+        return item;
+      }));
+      
+      setItems(itemsWithResolvedPhotos);
     } catch (error: any) {
       toast({
         title: "Error loading wardrobe items",
