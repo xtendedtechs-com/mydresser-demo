@@ -31,15 +31,132 @@ export class OutfitAI {
     preferences?: any;
     occasion?: string;
   }): Promise<any> {
-    // Simple outfit generation for now
-    const items = params.wardrobeItems.slice(0, 4); // Take first 4 items
+    const { wardrobeItems, weather, occasion = 'casual' } = params;
+    
+    // Filter items by weather appropriateness
+    const suitableItems = wardrobeItems.filter(item => {
+      if (!weather) return true;
+      
+      const temp = weather.temperature;
+      const itemName = item.name.toLowerCase();
+      const category = item.category.toLowerCase();
+      
+      // Filter out inappropriate items for weather
+      if (temp < 10) {
+        // Cold weather - avoid summer items
+        if (['shorts', 'tank', 'sandal', 'flip-flop'].some(w => itemName.includes(w) || category.includes(w))) {
+          return false;
+        }
+      } else if (temp > 25) {
+        // Hot weather - avoid winter items
+        if (['coat', 'parka', 'heavy', 'wool', 'thermal', 'boot'].some(w => itemName.includes(w))) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+    
+    if (suitableItems.length === 0) {
+      return {
+        items: wardrobeItems.slice(0, 4),
+        name: 'Basic Daily Outfit',
+        reasoning: 'Selected from available items in your wardrobe.',
+        tags: [occasion, 'everyday'],
+        confidence: 0.65
+      };
+    }
+    
+    // Use SmartOutfitEngine for better selection
+    const { SmartOutfitEngine } = await import('@/services/smartOutfitEngine');
+    const selectedItems = SmartOutfitEngine.generateOutfit(suitableItems, {
+      weather,
+      occasion,
+      season: this.getCurrentSeason()
+    });
+    
+    // Generate contextual name and description
+    const temp = weather?.temperature;
+    const condition = weather?.condition?.toLowerCase() || '';
+    const location = weather?.location || 'your location';
+    
+    // Weather-based outfit name
+    let weatherPrefix = '';
+    if (temp !== undefined) {
+      if (temp < 5) weatherPrefix = 'Cozy Winter';
+      else if (temp < 15) weatherPrefix = 'Cool Day';
+      else if (temp < 25) weatherPrefix = 'Perfect Spring';
+      else weatherPrefix = 'Summer Breeze';
+    }
+    
+    if (condition.includes('rain')) weatherPrefix = 'Rainy Day';
+    else if (condition.includes('sun')) weatherPrefix = 'Sunny';
+    
+    const occasionStyles: Record<string, string> = {
+      work: 'Professional',
+      formal: 'Elegant',
+      casual: 'Casual',
+      athletic: 'Active',
+      date: 'Chic',
+      party: 'Party',
+      daily: 'Everyday'
+    };
+    
+    const style = occasionStyles[occasion] || 'Stylish';
+    const outfitName = weatherPrefix ? `${weatherPrefix} ${style} Look` : `${style} Daily Ensemble`;
+    
+    // Generate reasoning
+    let reasoning = `This outfit is perfectly curated for ${occasion} occasions. `;
+    
+    if (temp !== undefined) {
+      if (temp < 10) {
+        reasoning += `With temperatures at ${Math.round(temp)}°C in ${location}, these layers will keep you warm and stylish. `;
+      } else if (temp < 20) {
+        reasoning += `At ${Math.round(temp)}°C in ${location}, this combination offers the perfect balance of comfort and style. `;
+      } else {
+        reasoning += `Perfect for ${Math.round(temp)}°C weather in ${location}, keeping you cool and comfortable. `;
+      }
+    }
+    
+    reasoning += `The ${selectedItems.length} carefully selected pieces work together harmoniously`;
+    
+    const colors = selectedItems.map(i => i.color).filter(Boolean);
+    if (colors.length > 2) {
+      reasoning += ` with complementary colors`;
+    }
+    
+    reasoning += `. ${condition.charAt(0).toUpperCase() + condition.slice(1)} conditions taken into account.`;
+    
+    // Generate tags
+    const tags: string[] = [occasion];
+    if (temp !== undefined) {
+      if (temp < 10) tags.push('warm', 'layered');
+      else if (temp < 20) tags.push('transitional', 'versatile');
+      else tags.push('lightweight', 'breathable');
+    }
+    
+    const categories = selectedItems.map(i => i.category.toLowerCase());
+    if (categories.some(c => c.includes('dress'))) tags.push('dressy');
+    if (categories.some(c => c.includes('jean'))) tags.push('denim');
+    if (categories.some(c => c.includes('sneaker'))) tags.push('sporty');
+    
+    tags.push('comfortable', 'weather-appropriate');
     
     return {
-      items,
-      reasoning: `Generated outfit for ${params.occasion || 'casual'} occasion with current weather conditions.`,
-      tags: [params.occasion || 'casual', 'comfortable', 'stylish'],
+      items: selectedItems,
+      name: outfitName,
+      reasoning,
+      tags: [...new Set(tags)].slice(0, 5),
       confidence: 0.85
     };
+  }
+  
+  private getCurrentSeason(): string {
+    const month = new Date().getMonth();
+    if (month >= 2 && month <= 4) return 'spring';
+    if (month >= 5 && month <= 7) return 'summer';
+    if (month >= 8 && month <= 10) return 'fall';
+    return 'winter';
   }
 
   public async generateOutfitRecommendation(

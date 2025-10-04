@@ -35,7 +35,7 @@ import EnhancedWardrobeManager from "@/components/EnhancedWardrobeManager";
 import ProfileHeader from "@/components/ProfileHeader";
 import SettingsSection from "@/components/SettingsSection";
 import UserAnalyticsDashboard from "@/components/UserAnalyticsDashboard";
-import SettingsDialog from "@/components/SettingsDialog";
+
 import { AdvancedPredictiveAnalytics } from "@/components/AdvancedPredictiveAnalytics";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -58,8 +58,6 @@ const Account = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [profileEditOpen, setProfileEditOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settingsTab, setSettingsTab] = useState("general");
 
   const handleSignOut = async () => {
     try {
@@ -77,10 +75,6 @@ const Account = () => {
     }
   };
 
-  const openSettings = (tab: string) => {
-    setSettingsTab(tab);
-    setSettingsOpen(true);
-  };
 
   const handleMyStyleClick = () => {
     navigate('/mystyle');
@@ -116,7 +110,7 @@ const Account = () => {
       id: 'account',
       label: 'Account',
       description: 'Manage your account settings',
-      onClick: () => openSettings('general')
+      onClick: () => navigate('/settings/general')
     },
     {
       id: 'authentication',
@@ -142,7 +136,7 @@ const Account = () => {
       id: 'privacy',
       label: 'Privacy & Data Rights',
       description: 'GDPR/CCPA compliance & data management',
-      onClick: () => openSettings('privacy'),
+      onClick: () => navigate('/settings/privacy'),
       highlighted: true
     },
     {
@@ -155,7 +149,7 @@ const Account = () => {
       id: 'preferences',
       label: 'My preferences',
       description: 'Customize your preferences',
-      onClick: () => openSettings('general')
+      onClick: () => navigate('/settings/general')
     }
   ];
 
@@ -164,19 +158,19 @@ const Account = () => {
       id: 'general',
       label: 'General',
       description: 'General app settings',
-      onClick: () => openSettings('general')
+      onClick: () => navigate('/settings/general')
     },
     {
       id: 'permissions',
       label: 'Permissions',
       description: 'App permissions',
-      onClick: () => openSettings('pwa')
+      onClick: () => navigate('/settings/pwa')
     },
     {
       id: 'notifications',
       label: 'Notifications',
       description: 'Notification preferences',
-      onClick: () => openSettings('notifications')
+      onClick: () => navigate('/settings/notifications')
     }
   ];
 
@@ -185,26 +179,26 @@ const Account = () => {
       id: 'behavior',
       label: 'Modify app behaviour',
       description: 'Customize how the app works for you',
-      onClick: () => openSettings('general')
+      onClick: () => navigate('/settings/general')
     },
     {
       id: 'suggestions',
       label: 'Personalize suggestions',
       description: 'Tailor recommendations to your style',
-      onClick: () => openSettings('ai')
+      onClick: () => navigate('/settings/ai')
     },
     {
       id: 'theme',
       label: 'Customize theme',
       description: 'Change the app appearance',
-      onClick: () => openSettings('general'),
+      onClick: () => navigate('/settings/theme'),
       highlighted: true
     },
     {
       id: 'mystyle',
       label: 'My Style',
       description: 'Define your personal style preferences',
-      onClick: () => openSettings('mystyle'),
+      onClick: () => navigate('/settings/mystyle'),
       highlighted: true
     }
   ];
@@ -218,19 +212,19 @@ const Account = () => {
       id: 'weather',
       label: 'Weather settings',
       description: 'Configure weather-based recommendations',
-      onClick: () => openSettings('outfit')
+      onClick: () => navigate('/settings/outfit')
     },
     {
       id: 'outfit',
       label: "Today's Outfit",
       description: 'Daily outfit generation settings',
-      onClick: () => openSettings('outfit')
+      onClick: () => navigate('/settings/outfit')
     },
     {
       id: 'wardrobe',
       label: 'My Wardrobe',
       description: 'Wardrobe management settings',
-      onClick: () => openSettings('wardrobe')
+      onClick: () => navigate('/settings/wardrobe')
     },
     {
       id: 'analytics',
@@ -250,19 +244,19 @@ const Account = () => {
       id: 'inventory',
       label: 'Inventory',
       description: 'Manage your clothing inventory',
-      onClick: () => openSettings('wardrobe')
+      onClick: () => navigate('/settings/wardrobe')
     },
     {
       id: 'market',
       label: 'Market & 2ndDresser',
       description: 'Marketplace and second-hand settings',
-      onClick: () => openSettings('marketplace')
+      onClick: () => navigate('/settings/marketplace')
     },
     {
       id: 'assistant',
       label: 'AI Assistant',
       description: 'AI styling assistant settings',
-      onClick: () => openSettings('ai')
+      onClick: () => navigate('/settings/ai')
     },
     {
       id: 'support',
@@ -324,7 +318,7 @@ const Account = () => {
 
         <Button
           variant="outline"
-          onClick={() => openSettings('general')}
+          onClick={() => navigate('/settings/general')}
           className="w-full mb-4"
         >
           <Settings className="w-4 h-4 mr-2" />
@@ -629,7 +623,7 @@ const Account = () => {
                   <CardDescription>Manage your payment methods and preferences</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button onClick={() => openSettings('payment')} className="w-full">
+                  <Button onClick={() => navigate('/settings/payment')} className="w-full">
                     <Settings className="w-4 h-4 mr-2" />
                     Manage Payment Settings
                   </Button>
@@ -644,7 +638,7 @@ const Account = () => {
                   <CardDescription>Configure AI assistant preferences</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button onClick={() => openSettings('ai')} className="w-full">
+                  <Button onClick={() => navigate('/settings/ai')} className="w-full">
                     <Settings className="w-4 h-4 mr-2" />
                     Manage AI Settings
                   </Button>
@@ -659,7 +653,7 @@ const Account = () => {
                   <CardDescription>Configure app permissions and features</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button onClick={() => openSettings('pwa')} className="w-full">
+                  <Button onClick={() => navigate('/settings/pwa')} className="w-full">
                     <Settings className="w-4 h-4 mr-2" />
                     Manage App Settings
                   </Button>
@@ -693,13 +687,6 @@ const Account = () => {
           </Card>
         </div>
       </div>
-
-      {/* Settings Dialog */}
-      <SettingsDialog 
-        open={settingsOpen} 
-        onOpenChange={setSettingsOpen}
-        defaultTab={settingsTab}
-      />
     </div>
   );
 };

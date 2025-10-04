@@ -17,6 +17,16 @@ import Market from "@/pages/Market";
 import MarketItemDetail from "@/pages/MarketItemDetail";
 import ItemDetail from "@/pages/ItemDetail";
 import WardrobeItemDetail from "@/pages/WardrobeItemDetail";
+import GeneralSettings from "@/pages/settings/GeneralSettings";
+import PrivacySettingsPage from "@/pages/settings/PrivacySettingsPage";
+import NotificationsSettingsPage from "@/pages/settings/NotificationsSettingsPage";
+import WardrobeSettingsPage from "@/pages/settings/WardrobeSettingsPage";
+import OutfitSettingsPage from "@/pages/settings/OutfitSettingsPage";
+import AISettingsPage from "@/pages/settings/AISettingsPage";
+import MarketplaceSettingsPage from "@/pages/settings/MarketplaceSettingsPage";
+import PWASettingsPage from "@/pages/settings/PWASettingsPage";
+import MyStyleSettingsPage from "@/pages/settings/MyStyleSettingsPage";
+import ThemeSettingsPage from "@/pages/settings/ThemeSettingsPage";
 import ProfileSetup from "@/pages/ProfileSetup";
 import Auth from "@/pages/Auth";
 import Landing from "@/pages/Landing";
@@ -123,6 +133,20 @@ export const AuthWrapper = () => {
           <Route path="/personalization" element={<PersonalizationHub />} />
             <Route path="/merchant-analytics" element={<MerchantAnalyticsPage />} />
             <Route path="/account" element={<Account />} />
+            <Route path="/profile-setup" element={<ProfileSetup />} />
+            
+            {/* Settings Pages */}
+            <Route path="/settings/general" element={<GeneralSettings />} />
+            <Route path="/settings/privacy" element={<PrivacySettingsPage />} />
+            <Route path="/settings/notifications" element={<NotificationsSettingsPage />} />
+            <Route path="/settings/wardrobe" element={<WardrobeSettingsPage />} />
+            <Route path="/settings/outfit" element={<OutfitSettingsPage />} />
+            <Route path="/settings/ai" element={<AISettingsPage />} />
+            <Route path="/settings/marketplace" element={<MarketplaceSettingsPage />} />
+            <Route path="/settings/pwa" element={<PWASettingsPage />} />
+            <Route path="/settings/mystyle" element={<MyStyleSettingsPage />} />
+            <Route path="/settings/theme" element={<ThemeSettingsPage />} />
+            
             <Route path="/mystyle" element={<MyStyle />} />
             <Route path="/service-settings/:service" element={<ServiceSettingsPage />} />
             
