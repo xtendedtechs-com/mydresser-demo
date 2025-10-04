@@ -2,6 +2,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -45,7 +47,7 @@ const MerchantTerminalSettings = () => {
       </div>
 
       <Tabs defaultValue="business" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="business">
             <Store className="w-4 h-4 mr-2" />
             Business
@@ -69,6 +71,14 @@ const MerchantTerminalSettings = () => {
           <TabsTrigger value="advanced">
             <Shield className="w-4 h-4 mr-2" />
             Advanced
+          </TabsTrigger>
+          <TabsTrigger value="notifications">
+            <Bell className="w-4 h-4 mr-2" />
+            Notifications
+          </TabsTrigger>
+          <TabsTrigger value="security">
+            <Shield className="w-4 h-4 mr-2" />
+            Security
           </TabsTrigger>
         </TabsList>
 
@@ -789,6 +799,200 @@ const MerchantTerminalSettings = () => {
                     <SelectItem value="ja">日本語</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Notifications */}
+        <TabsContent value="notifications" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5" />
+                Notification Preferences
+              </CardTitle>
+              <CardDescription>Configure how and when you receive notifications</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="email-notifications">Email Notifications</Label>
+                  <p className="text-sm text-muted-foreground">Receive updates via email</p>
+                </div>
+                <Switch id="email-notifications" defaultChecked />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="order-notifications">New Order Alerts</Label>
+                  <p className="text-sm text-muted-foreground">Get notified when you receive new orders</p>
+                </div>
+                <Switch id="order-notifications" defaultChecked />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="low-stock-alerts">Low Stock Alerts</Label>
+                  <p className="text-sm text-muted-foreground">Alert when inventory is running low</p>
+                </div>
+                <Switch 
+                  id="low-stock-alerts" 
+                  checked={settings.enable_stock_alerts}
+                  onCheckedChange={(checked) => updateSettings({ enable_stock_alerts: checked })}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="customer-messages">Customer Messages</Label>
+                  <p className="text-sm text-muted-foreground">Notify about customer inquiries</p>
+                </div>
+                <Switch id="customer-messages" defaultChecked />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="payment-alerts">Payment Alerts</Label>
+                  <p className="text-sm text-muted-foreground">Notifications for successful payments</p>
+                </div>
+                <Switch id="payment-alerts" defaultChecked />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="marketing-emails">Marketing Emails</Label>
+                  <p className="text-sm text-muted-foreground">Receive marketing and promotional content</p>
+                </div>
+                <Switch 
+                  id="marketing-emails" 
+                  checked={settings.enable_email_marketing}
+                  onCheckedChange={(checked) => updateSettings({ enable_email_marketing: checked })}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mail className="w-5 h-5" />
+                Email Digest Settings
+              </CardTitle>
+              <CardDescription>Configure periodic email summaries</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="digest-frequency">Digest Frequency</Label>
+                <Select defaultValue="daily">
+                  <SelectTrigger id="digest-frequency">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="realtime">Real-time</SelectItem>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="never">Never</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="digest-time">Preferred Time</Label>
+                <Select defaultValue="09:00">
+                  <SelectTrigger id="digest-time">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="06:00">6:00 AM</SelectItem>
+                    <SelectItem value="09:00">9:00 AM</SelectItem>
+                    <SelectItem value="12:00">12:00 PM</SelectItem>
+                    <SelectItem value="18:00">6:00 PM</SelectItem>
+                    <SelectItem value="21:00">9:00 PM</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Security */}
+        <TabsContent value="security" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5" />
+                Security Settings
+              </CardTitle>
+              <CardDescription>Protect your merchant account</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="two-factor">Two-Factor Authentication</Label>
+                  <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
+                </div>
+                <Switch id="two-factor" />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="login-alerts">Login Alerts</Label>
+                  <p className="text-sm text-muted-foreground">Get notified of new login attempts</p>
+                </div>
+                <Switch id="login-alerts" defaultChecked />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="session-timeout">Auto Logout</Label>
+                  <p className="text-sm text-muted-foreground">Automatically log out after inactivity</p>
+                </div>
+                <Switch id="session-timeout" defaultChecked />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>API & Integration Security</CardTitle>
+              <CardDescription>Manage API keys and integrations</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>API Key</Label>
+                <div className="flex gap-2">
+                  <Input type="password" value="••••••••••••••••" readOnly />
+                  <Button variant="outline">Regenerate</Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Keep your API key secure and never share it publicly
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Webhook Secret</Label>
+                <div className="flex gap-2">
+                  <Input type="password" value="••••••••••••••••" readOnly />
+                  <Button variant="outline">Regenerate</Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Active Sessions</CardTitle>
+              <CardDescription>Manage your active login sessions</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium">Current Session</p>
+                  <p className="text-sm text-muted-foreground">Last active: Just now</p>
+                </div>
+                <Badge>Active</Badge>
               </div>
             </CardContent>
           </Card>

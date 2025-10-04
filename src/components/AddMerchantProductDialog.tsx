@@ -42,7 +42,7 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
     stock_quantity: '1',
     is_featured: false,
     is_premium: false,
-    status: 'draft'
+    status: 'active'
   });
   
   const [sizes, setSizes] = useState<string[]>([]);
@@ -74,7 +74,7 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
         stock_quantity: editProduct.stock_quantity?.toString() || '1',
         is_featured: editProduct.is_featured || false,
         is_premium: editProduct.is_premium || false,
-        status: editProduct.status || 'draft'
+        status: editProduct.status || 'active'
       });
       setSizes(editProduct.size || []);
       setTags(editProduct.tags || []);
@@ -87,7 +87,7 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
         name: '', description: '', category: '', brand: '', price: '',
         original_price: '', condition: 'new', color: '', material: '',
         occasion: '', season: '', stock_quantity: '1', is_featured: false,
-        is_premium: false, status: 'draft'
+        is_premium: false, status: 'active'
       });
       setSizes([]);
       setTags([]);
@@ -197,7 +197,7 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
         name: '', description: '', category: '', brand: '', price: '',
         original_price: '', condition: 'new', color: '', material: '',
         occasion: '', season: '', stock_quantity: '1', is_featured: false,
-        is_premium: false, status: 'draft'
+        is_premium: false, status: 'active'
       });
       setSizes([]);
       setTags([]);
@@ -411,9 +411,9 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="draft">Draft (Not visible to customers)</SelectItem>
-                        <SelectItem value="available">Published (Visible in market)</SelectItem>
-                        <SelectItem value="archived">Archived</SelectItem>
+                        <SelectItem value="active">Active (Visible to customers)</SelectItem>
+                        <SelectItem value="inactive">Inactive (Not visible)</SelectItem>
+                        <SelectItem value="out_of_stock">Out of Stock</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
