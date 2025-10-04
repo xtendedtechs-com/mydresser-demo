@@ -1,6 +1,10 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Download, Trash2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Download, FileJson, FileSpreadsheet, Info, Loader2, ChevronLeft, Trash2 } from "lucide-react";
+import { useDataExport } from "@/hooks/useDataExport";
 import { useNavigate } from "react-router-dom";
 import PrivacyComplianceManager from "@/components/PrivacyComplianceManager";
 

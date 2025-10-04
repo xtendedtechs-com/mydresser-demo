@@ -95,6 +95,27 @@ export type Database = {
         }
         Relationships: []
       }
+      blocked_users: {
+        Row: {
+          blocked_at: string
+          blocked_user_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          blocked_at?: string
+          blocked_user_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          blocked_at?: string
+          blocked_user_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       collection_items: {
         Row: {
           collection_id: string | null
@@ -1621,6 +1642,30 @@ export type Database = {
         }
         Relationships: []
       }
+      muted_users: {
+        Row: {
+          id: string
+          muted_at: string
+          muted_until: string | null
+          muted_user_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          muted_at?: string
+          muted_until?: string | null
+          muted_user_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          muted_at?: string
+          muted_until?: string | null
+          muted_user_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           action_url: string | null
@@ -2330,6 +2375,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      reports: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          id: string
+          report_type: string
+          reported_id: string
+          reported_user_id: string | null
+          reporter_id: string
+          resolution_notes: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          id?: string
+          report_type: string
+          reported_id: string
+          reported_user_id?: string | null
+          reporter_id: string
+          resolution_notes?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          report_type?: string
+          reported_id?: string
+          reported_user_id?: string | null
+          reporter_id?: string
+          resolution_notes?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       security_audit_log: {
         Row: {

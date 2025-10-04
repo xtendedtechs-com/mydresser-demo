@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -38,18 +38,11 @@ const Home = () => {
   const { items: wardrobeItems } = useWardrobe();
   const [activeTab, setActiveTab] = useState('today');
 
-  if (!isAuthenticated || !user) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <Shield className="mx-auto h-12 w-12 text-muted-foreground" />
-          <h2 className="text-xl font-semibold">Authentication Required</h2>
-          <p className="text-muted-foreground">Please sign in to access your fashion dashboard.</p>
-          <Button onClick={() => navigate('/auth')}>Sign In</Button>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!isAuthenticated || !user) {
+      navigate('/auth');
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const stats = {
     wardrobeItems: wardrobeItems.length,

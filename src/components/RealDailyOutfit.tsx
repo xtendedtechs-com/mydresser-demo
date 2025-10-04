@@ -42,10 +42,13 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
   const [showMarketSuggestions, setShowMarketSuggestions] = useState(false);
 
   useEffect(() => {
-    if (!wardrobeLoading && !preferencesLoading && wardrobeItems.length > 0) {
-      generateDailyOutfit();
+    if (!wardrobeLoading && !preferencesLoading && wardrobeItems.length > 0 && !outfit) {
+      const timer = setTimeout(() => {
+        generateDailyOutfit();
+      }, 500);
+      return () => clearTimeout(timer);
     }
-  }, [wardrobeLoading, preferencesLoading, wardrobeItems]);
+  }, [wardrobeLoading, preferencesLoading]);
 
   const generateDailyOutfit = async () => {
     if (!wardrobeItems.length) return;
@@ -201,7 +204,7 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
 
   if (wardrobeLoading || preferencesLoading) {
     return (
-      <Card className="w-full max-w-2xl mx-auto">
+      <Card className="w-full">
         <CardContent className="flex items-center justify-center py-8">
           <div className="flex flex-col items-center space-y-4">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -214,7 +217,7 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
 
   if (loading && !outfit) {
     return (
-      <Card className="w-full max-w-2xl mx-auto">
+      <Card className="w-full">
         <CardContent className="flex items-center justify-center py-8">
           <div className="flex flex-col items-center space-y-4">
             <Sparkles className="w-8 h-8 animate-spin text-primary" />
@@ -227,7 +230,7 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
 
   if (!outfit && wardrobeItems.length === 0) {
     return (
-      <Card className="w-full max-w-2xl mx-auto">
+      <Card className="w-full">
         <CardContent className="text-center py-8">
           <Sparkles className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
           <p className="text-muted-foreground mb-4">
@@ -243,7 +246,7 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
 
   if (!outfit) {
     return (
-      <Card className="w-full max-w-2xl mx-auto">
+      <Card className="w-full">
         <CardContent className="text-center py-8">
           <Button onClick={generateDailyOutfit} disabled={loading}>
             <Sparkles className="w-4 h-4 mr-2" />
@@ -255,7 +258,7 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="w-full">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
