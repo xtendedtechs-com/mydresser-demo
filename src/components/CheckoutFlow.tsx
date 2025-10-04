@@ -39,15 +39,11 @@ export const CheckoutFlow = ({
 
   const handlePayment = async () => {
     const paymentMethod: PaymentMethod = {
-      id: `temp-${Date.now()}`,
       type: paymentType,
-      last4: cardNumber.slice(-4) || '0000',
-      isDefault: true,
       ...(paymentType === 'card' && {
         cardNumber,
-        expiryDate: cardExpiry,
-        cvv: cardCvv,
-        cardholderName: cardHolder,
+        cardExpiry,
+        cardCVV: cardCvv,
       }),
     };
 

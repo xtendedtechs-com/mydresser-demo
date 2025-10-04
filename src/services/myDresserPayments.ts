@@ -1,55 +1,53 @@
 /**
- * MyDresser Payment System - Original IP
- * Complete payment processing without external dependencies
+ * MyDresser Payment System
+ * Custom payment processing service for the MyDresser platform
+ * Handles all payment operations without external dependencies
  */
 
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-
-interface PaymentMethod {
-  id: string;
+export interface PaymentMethod {
   type: 'card' | 'bank' | 'digital_wallet';
-  last4?: string;
-  brand?: string;
-  expiryMonth?: number;
-  expiryYear?: number;
-  isDefault: boolean;
-  nickname?: string;
+  cardNumber?: string;
+  cardExpiry?: string;
+  cardCVV?: string;
+  bankAccount?: string;
+  bankRouting?: string;
+  walletId?: string;
+  walletProvider?: string;
 }
 
-interface Transaction {
+export interface Transaction {
   id: string;
   userId: string;
-  merchantId?: string;
   amount: number;
   currency: string;
-  type: 'purchase' | 'subscription' | 'commission' | 'payout';
   status: 'pending' | 'completed' | 'failed' | 'refunded';
+  type: 'purchase' | 'refund' | 'subscription';
+  paymentMethod: PaymentMethod;
   description: string;
-  metadata: Record<string, any>;
+  metadata?: Record<string, any>;
   createdAt: Date;
   completedAt?: Date;
 }
 
-interface SubscriptionPlan {
+export interface SubscriptionPlan {
   id: string;
   name: string;
+  description: string;
   price: number;
   currency: string;
   interval: 'monthly' | 'yearly';
   features: string[];
-  maxItems?: number;
-  maxOutfits?: number;
-  aiRecommendations: boolean;
-  prioritySupport: boolean;
-  marketplaceAccess: boolean;
 }
 
+/**
+ * MyDresser Payment System - Singleton Class
+ */
 class MyDresserPaymentSystem {
   private static instance: MyDresserPaymentSystem;
-  private subscriptionPlans: SubscriptionPlan[] = [];
-  
-  constructor() {
+  private transactions: Map<string, Transaction> = new Map();
+  private subscriptionPlans: Map<string, SubscriptionPlan> = new Map();
+
+  private constructor() {
     this.initializeSubscriptionPlans();
   }
 
@@ -61,123 +59,157 @@ class MyDresserPaymentSystem {
   }
 
   private initializeSubscriptionPlans() {
-    this.subscriptionPlans = [
-      {
-        id: 'private-free',
-        name: 'Private (Free)',
-        price: 0,
-        currency: 'USD',
-        interval: 'monthly',
-        features: [
-          'Basic wardrobe management',
-          'Up to 50 items',
-          '5 AI outfit suggestions/month',
-          'Basic style analytics'
-        ],
-        maxItems: 50,
-        maxOutfits: 10,
-        aiRecommendations: true,
-        prioritySupport: false,
-        marketplaceAccess: false
-      },
-      {
-        id: 'professional-premium',
-        name: 'Professional Premium',
-        price: 19.99,
-        currency: 'USD',
-        interval: 'monthly',
-        features: [
-          'Unlimited wardrobe items',
-          'Advanced AI styling',
-          'Weather-based recommendations',
-          'Style trend analysis',
-          'Priority customer support',
-          'Export/import wardrobe data'
-        ],
-        aiRecommendations: true,
-        prioritySupport: true,
-        marketplaceAccess: true
-      },
-      {
-        id: 'merchant-pro',
-        name: 'Merchant Pro',
-        price: 49.99,
-        currency: 'USD',
-        interval: 'monthly',
-        features: [
-          'All Professional features',
-          'Merchant storefront',
-          'Inventory management',
-          'Sales analytics',
-          'Customer management',
-          'Commission-based selling (5%)',
-          'Featured listing priority'
-        ],
-        aiRecommendations: true,
-        prioritySupport: true,
-        marketplaceAccess: true
-      }
-    ];
+    this.subscriptionPlans.set('basic', {
+      id: 'basic',
+      name: 'MyDresser Basic',
+      description: 'Essential wardrobe management features',
+      price: 9.99,
+      currency: 'USD',
+      interval: 'monthly',
+      features: [
+        'Unlimited wardrobe items',
+        'Daily outfit suggestions',
+        'Basic AI styling',
+        'Virtual try-on (10/month)'
+      ]
+    });
+
+    this.subscriptionPlans.set('premium', {
+      id: 'premium',
+      name: 'MyDresser Premium',
+      description: 'Advanced features for fashion enthusiasts',
+      price: 19.99,
+      currency: 'USD',
+      interval: 'monthly',
+      features: [
+        'All Basic features',
+        'Unlimited virtual try-on',
+        'Advanced AI styling',
+        'Personalized shopping assistant',
+        'Priority support'
+      ]
+    });
+
+    this.subscriptionPlans.set('merchant', {
+      id: 'merchant',
+      name: 'MyDresser Merchant',
+      description: 'Complete merchant solution',
+      price: 49.99,
+      currency: 'USD',
+      interval: 'monthly',
+      features: [
+        'Full POS system',
+        'Inventory management',
+        'Analytics dashboard',
+        'Customer management',
+        'Multi-location support'
+      ]
+    });
   }
 
+  /**
+   * Process a payment transaction
+   */
   async processPayment(
     amount: number,
-    currency: string = 'USD',
+    currency: string,
     paymentMethod: PaymentMethod,
     description: string,
-    metadata: Record<string, any> = {}
+    metadata?: Record<string, any>
   ): Promise<{ success: boolean; transactionId?: string; error?: string }> {
     try {
-      // Simulate successful payment for demo (no actual Supabase calls)
+      // Validate payment amount
+      if (amount <= 0) {
+        throw new Error('Invalid payment amount');
+      }
+
+      // Validate payment method
+      if (!this.validatePaymentMethod(paymentMethod)) {
+        throw new Error('Invalid payment method');
+      }
+
+      // Generate transaction ID
       const transactionId = this.generateTransactionId();
-      
-      // Simulate processing delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Return success for demo purposes
-      return { success: true, transactionId };
+
+      // Create transaction record
+      const transaction: Transaction = {
+        id: transactionId,
+        userId: metadata?.userId || 'anonymous',
+        amount,
+        currency,
+        status: 'pending',
+        type: 'purchase',
+        paymentMethod,
+        description,
+        metadata,
+        createdAt: new Date()
+      };
+
+      // Simulate payment processing (in production, this would connect to payment gateway)
+      await this.simulatePaymentProcessing();
+
+      // Mark as completed
+      transaction.status = 'completed';
+      transaction.completedAt = new Date();
+
+      // Store transaction
+      this.transactions.set(transactionId, transaction);
+
+      return {
+        success: true,
+        transactionId
+      };
     } catch (error) {
       console.error('Payment processing error:', error);
-      return { success: false, error: 'Payment system error. Please try again later.' };
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Payment processing failed'
+      };
     }
   }
 
+  /**
+   * Create a subscription
+   */
   async createSubscription(
     userId: string,
     planId: string,
     paymentMethod: PaymentMethod
   ): Promise<{ success: boolean; subscriptionId?: string; error?: string }> {
     try {
-      const plan = this.subscriptionPlans.find(p => p.id === planId);
+      const plan = this.subscriptionPlans.get(planId);
       if (!plan) {
-        return { success: false, error: 'Invalid subscription plan' };
+        throw new Error('Invalid subscription plan');
       }
 
-      // Process initial payment if not free
-      if (plan.price > 0) {
-        const paymentResult = await this.processPayment(
-          plan.price,
-          plan.currency,
-          paymentMethod,
-          `Subscription: ${plan.name}`,
-          { type: 'subscription', planId, userId }
-        );
+      // Process initial payment
+      const paymentResult = await this.processPayment(
+        plan.price,
+        plan.currency,
+        paymentMethod,
+        `Subscription: ${plan.name}`,
+        { userId, planId, type: 'subscription' }
+      );
 
-        if (!paymentResult.success) {
-          return paymentResult;
-        }
+      if (!paymentResult.success) {
+        throw new Error(paymentResult.error || 'Payment failed');
       }
 
-      // Create subscription record (demo version)
-      const subscriptionId = this.generateSubscriptionId();
-
-      return { success: true, subscriptionId };
+      return {
+        success: true,
+        subscriptionId: this.generateSubscriptionId()
+      };
     } catch (error) {
-      console.error('Subscription creation error:', error);
-      return { success: false, error: 'Failed to create subscription' };
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Subscription creation failed'
+      };
     }
   }
 
+  /**
+   * Process a marketplace sale with commission
+   */
   async processMarketplaceSale(
     sellerId: string,
     buyerId: string,
@@ -186,75 +218,89 @@ class MyDresserPaymentSystem {
     paymentMethod: PaymentMethod
   ): Promise<{ success: boolean; transactionId?: string; error?: string }> {
     try {
-      const commission = amount * 0.05; // 5% commission
-      const sellerAmount = amount - commission;
+      const commissionRate = 0.15; // 15% platform commission
+      const commissionAmount = amount * commissionRate;
+      const sellerAmount = amount - commissionAmount;
 
       // Process buyer payment
-      const buyerPayment = await this.processPayment(
+      const result = await this.processPayment(
         amount,
         'USD',
         paymentMethod,
-        `Marketplace purchase: Item ${itemId}`,
-        { type: 'purchase', itemId, sellerId, buyerId }
+        `Marketplace purchase - Item ${itemId}`,
+        {
+          sellerId,
+          buyerId,
+          itemId,
+          commission: commissionAmount,
+          sellerPayout: sellerAmount,
+          type: 'marketplace_sale'
+        }
       );
 
-      if (!buyerPayment.success) {
-        return buyerPayment;
-      }
-
-      // Demo: simulate commission and payout processing
-      console.log(`Commission: $${commission}, Seller payout: $${sellerAmount}`);
-
-      return { success: true, transactionId: buyerPayment.transactionId };
+      return result;
     } catch (error) {
-      console.error('Marketplace sale error:', error);
-      return { success: false, error: 'Failed to process marketplace sale' };
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Marketplace sale failed'
+      };
     }
   }
 
-  async getUserTransactions(userId: string, limit: number = 50): Promise<Transaction[]> {
-    // Demo: return mock transactions
-    return [
-      {
-        id: 'demo_txn_1',
-        userId,
-        amount: 49.99,
-        currency: 'USD',
-        type: 'purchase',
-        status: 'completed',
-        description: 'Vintage Denim Jacket',
-        metadata: {},
-        createdAt: new Date()
-      }
-    ];
+  /**
+   * Get user transactions
+   */
+  async getUserTransactions(userId: string, limit?: number): Promise<Transaction[]> {
+    const userTransactions = Array.from(this.transactions.values())
+      .filter(t => t.userId === userId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+    return limit ? userTransactions.slice(0, limit) : userTransactions;
   }
 
+  /**
+   * Get subscription plans
+   */
   async getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
-    return this.subscriptionPlans;
+    return Array.from(this.subscriptionPlans.values());
   }
 
+  /**
+   * Get current subscription for user
+   */
   async getCurrentSubscription(userId: string): Promise<SubscriptionPlan | null> {
-    // Demo: return free plan by default
-    return this.subscriptionPlans.find(plan => plan.id === 'private-free') || null;
+    // This would query the database for active subscription
+    // For now, return a mock subscription
+    return this.subscriptionPlans.get('basic') || null;
+  }
+
+  // Private helper methods
+  private validatePaymentMethod(method: PaymentMethod): boolean {
+    switch (method.type) {
+      case 'card':
+        return !!(method.cardNumber && method.cardExpiry && method.cardCVV);
+      case 'bank':
+        return !!(method.bankAccount && method.bankRouting);
+      case 'digital_wallet':
+        return !!(method.walletId && method.walletProvider);
+      default:
+        return false;
+    }
+  }
+
+  private async simulatePaymentProcessing(): Promise<void> {
+    // Simulate network delay
+    return new Promise(resolve => setTimeout(resolve, 1000));
   }
 
   private generateTransactionId(): string {
-    return 'txn_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    return `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
   private generateSubscriptionId(): string {
-    return 'sub_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-  }
-
-  private calculateExpiryDate(interval: 'monthly' | 'yearly'): Date {
-    const now = new Date();
-    if (interval === 'yearly') {
-      return new Date(now.setFullYear(now.getFullYear() + 1));
-    } else {
-      return new Date(now.setMonth(now.getMonth() + 1));
-    }
+    return `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 }
 
+// Export singleton instance
 export const myDresserPayments = MyDresserPaymentSystem.getInstance();
-export type { PaymentMethod, Transaction, SubscriptionPlan };

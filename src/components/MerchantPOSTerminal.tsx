@@ -21,6 +21,7 @@ import { useOrders } from '@/hooks/useOrders';
 import { useMerchantItems } from '@/hooks/useMerchantItems';
 import { EnhancedMerchantPageEditor } from '@/components/EnhancedMerchantPageEditor';
 import { MerchantSettingsPanel } from '@/components/settings/MerchantSettingsPanel';
+import AddMerchantProductDialog from '@/components/AddMerchantProductDialog';
 import CustomerRelations from '@/pages/CustomerRelations';
 import FinancialReports from '@/pages/FinancialReports';
 import SupportResources from '@/pages/SupportsResources';
@@ -28,9 +29,11 @@ import BrandPartnershipsPage from '@/pages/BrandPartnershipsPage';
 
 export const MerchantPOSTerminal = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [showAddProduct, setShowAddProduct] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
   const { analytics, calculateDailyAnalytics, isCalculating } = useMerchantAnalytics();
   const { orders } = useOrders();
-  const { items } = useMerchantItems();
+  const { items, refetch } = useMerchantItems();
 
   const todayAnalytics = analytics?.[0];
   const pendingOrders = orders?.filter(o => o.status === 'pending').length || 0;
@@ -211,12 +214,60 @@ export const MerchantPOSTerminal = () => {
 
         <TabsContent value="inventory">
           <Card>
-            <CardHeader>
-              <CardTitle>Inventory Management</CardTitle>
-              <CardDescription>Track and manage your stock</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Inventory Management</CardTitle>
+                <CardDescription>Track and manage your stock</CardDescription>
+              </div>
+              <Button onClick={() => setShowAddProduct(true)}>
+                <Package className="w-4 h-4 mr-2" />
+                Add Product
+              </Button>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">Inventory management interface coming soon...</p>
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {items?.slice(0, 12).map((item) => (
+                  <Card key={item.id} className="overflow-hidden">
+                    <CardContent className="p-4">
+                      <div className="space-y-2">
+                        <h4 className="font-semibold truncate">{item.name}</h4>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {item.description}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-lg font-bold">${item.price}</span>
+                          <span className="text-sm text-muted-foreground">
+                            Stock: {item.stock_quantity}
+                          </span>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                          onClick={() => {
+                            setEditingProduct(item);
+                            setShowAddProduct(true);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              {items && items.length === 0 && (
+                <div className="text-center py-12">
+                  <Package className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No products yet</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Start by adding your first product to the inventory
+                  </p>
+                  <Button onClick={() => setShowAddProduct(true)}>
+                    Add Your First Product
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -261,6 +312,19 @@ export const MerchantPOSTerminal = () => {
           <MerchantSettingsPanel />
         </TabsContent>
       </Tabs>
+
+      <AddMerchantProductDialog
+        open={showAddProduct}
+        onOpenChange={(open) => {
+          setShowAddProduct(open);
+          if (!open) setEditingProduct(null);
+        }}
+        onProductAdded={() => {
+          refetch();
+          setEditingProduct(null);
+        }}
+        editProduct={editingProduct}
+      />
     </div>
   );
 };
