@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import Navigation from "@/components/Navigation";
 import { useProfile } from "@/hooks/useProfile";
@@ -172,6 +172,7 @@ export const AuthWrapper = () => {
             <Route path="/verification" element={<VerificationPage />} />
             <Route path="/wardrobe-analytics" element={<WardrobeAnalyticsPage />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
+            <Route path="/auth" element={<Navigate to="/" replace />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Navigation />
