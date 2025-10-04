@@ -1,118 +1,136 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft } from 'lucide-react';
-import SettingsContentHandler from '@/components/SettingsContentHandler';
+import { ArrowLeft } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ThemeSettingsPanel } from '@/components/settings/ThemeSettingsPanel';
+import { PrivacySettingsPanel } from '@/components/settings/PrivacySettingsPanel';
+import { NotificationSettingsPanel } from '@/components/settings/NotificationSettingsPanel';
+import { WardrobeSettingsPanel } from '@/components/settings/WardrobeSettingsPanel';
+import { OutfitSettingsPanel } from '@/components/settings/OutfitSettingsPanel';
+import { AISettingsPanel } from '@/components/settings/AISettingsPanel';
+import { MyStyleSettingsPanel } from '@/components/settings/MyStyleSettingsPanel';
+import { AccessibilitySettingsPanel } from '@/components/settings/AccessibilitySettingsPanel';
+import { MerchantSettingsPanel } from '@/components/settings/MerchantSettingsPanel';
+import { PWASettingsPanel } from '@/components/settings/PWASettingsPanel';
+import { PaymentSettingsPanel } from '@/components/settings/PaymentSettingsPanel';
+import { useSettings } from '@/hooks/useSettings';
 
-const SettingsPage = () => {
-  const { category } = useParams<{ category: string }>();
+export default function SettingsPage() {
+  const { category } = useParams();
   const navigate = useNavigate();
-
-  const getSettingInfo = (category: string) => {
-    switch (category) {
-      case 'account':
-        return {
-          title: 'Account Settings',
-          description: 'Manage your account information and profile'
-        };
-      case 'authentication':
-        return {
-          title: 'Authentication & Security',
-          description: 'Manage your authentication methods and security settings'
-        };
-      case 'theme':
-        return {
-          title: 'Theme Customization',
-          description: 'Personalize your app appearance and theme'
-        };
-      case 'notifications':
-        return {
-          title: 'Notification Settings',
-          description: 'Control what notifications you receive'
-        };
-      case 'privacy':
-        return {
-          title: 'Privacy & Data',
-          description: 'Manage your privacy settings and data sharing'
-        };
-      case 'accessibility':
-        return {
-          title: 'Accessibility',
-          description: 'Configure accessibility features'
-        };
-      case 'general':
-        return {
-          title: 'General Settings',
-          description: 'General app configuration and preferences'
-        };
-      case 'permissions':
-        return {
-          title: 'App Permissions',
-          description: 'Manage app permissions and access'
-        };
-      case 'preferences':
-        return {
-          title: 'User Preferences',
-          description: 'Customize your app experience'
-        };
-      case 'data':
-        return {
-          title: 'Data Management',
-          description: 'Export or delete your personal data'
-        };
-      case 'behavior':
-        return {
-          title: 'App Behavior',
-          description: 'Customize how the app works for you'
-        };
-      case 'suggestions':
-        return {
-          title: 'Personalize Suggestions',
-          description: 'Tailor outfit recommendations to your style'
-        };
-      case 'mystyle':
-        return {
-          title: 'My Style',
-          description: 'Define your personal style preferences'
-        };
-      case 'profile':
-        return {
-          title: 'Profile Settings',
-          description: 'Edit your profile information'
-        };
-      default:
-        return {
-          title: 'Settings',
-          description: 'Application settings'
-        };
-    }
-  };
-
-  const settingInfo = getSettingInfo(category || 'general');
+  const { loading } = useSettings();
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="container mx-auto px-4 py-6">
-        <div className="mb-6">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/account')}
-            className="mb-4"
-          >
-            <ChevronLeft className="w-4 h-4 mr-2" />
-            Back to Account
-          </Button>
-          <h1 className="text-2xl font-bold">{settingInfo.title}</h1>
-          <p className="text-muted-foreground">{settingInfo.description}</p>
-        </div>
-
-        <SettingsContentHandler
-          settingType={category || 'general'}
-          settingTitle={settingInfo.title}
-          settingDescription={settingInfo.description}
-        />
+    <div className="container max-w-6xl py-8 space-y-6">
+      <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate('/account')}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Account
+        </Button>
       </div>
+
+      <div>
+        <h1 className="text-3xl font-bold">Settings</h1>
+        <p className="text-muted-foreground">Manage your account preferences and settings</p>
+      </div>
+
+      {loading ? (
+        <Card className="p-8 text-center">Loading settings...</Card>
+      ) : (
+        <Tabs defaultValue={category || 'general'} className="space-y-6">
+          <TabsList className="grid grid-cols-2 lg:grid-cols-5 gap-2">
+            <TabsTrigger value="general" onClick={() => navigate('/settings/general')}>General</TabsTrigger>
+            <TabsTrigger value="privacy" onClick={() => navigate('/settings/privacy')}>Privacy</TabsTrigger>
+            <TabsTrigger value="notifications" onClick={() => navigate('/settings/notifications')}>Notifications</TabsTrigger>
+            <TabsTrigger value="wardrobe" onClick={() => navigate('/settings/wardrobe')}>Wardrobe</TabsTrigger>
+            <TabsTrigger value="outfit" onClick={() => navigate('/settings/outfit')}>Outfit</TabsTrigger>
+            <TabsTrigger value="ai" onClick={() => navigate('/settings/ai')}>AI</TabsTrigger>
+            <TabsTrigger value="mystyle" onClick={() => navigate('/settings/mystyle')}>My Style</TabsTrigger>
+            <TabsTrigger value="accessibility" onClick={() => navigate('/settings/accessibility')}>Accessibility</TabsTrigger>
+            <TabsTrigger value="merchant" onClick={() => navigate('/settings/merchant')}>Merchant</TabsTrigger>
+            <TabsTrigger value="pwa" onClick={() => navigate('/settings/pwa')}>PWA</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="general" className="space-y-6">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Theme & Appearance</h2>
+              <ThemeSettingsPanel />
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="privacy" className="space-y-6">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Privacy Settings</h2>
+              <PrivacySettingsPanel />
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="notifications" className="space-y-6">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Notification Preferences</h2>
+              <NotificationSettingsPanel />
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="wardrobe" className="space-y-6">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Wardrobe Settings</h2>
+              <WardrobeSettingsPanel />
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="outfit" className="space-y-6">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Outfit Generator Settings</h2>
+              <OutfitSettingsPanel />
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="ai" className="space-y-6">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">AI Assistant Settings</h2>
+              <AISettingsPanel />
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="mystyle" className="space-y-6">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">My Style Preferences</h2>
+              <MyStyleSettingsPanel />
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="accessibility" className="space-y-6">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Accessibility Options</h2>
+              <AccessibilitySettingsPanel />
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="merchant" className="space-y-6">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Merchant Settings</h2>
+              <MerchantSettingsPanel />
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="pwa" className="space-y-6">
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">PWA Settings</h2>
+              <PWASettingsPanel />
+            </Card>
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Payment Settings</h2>
+              <PaymentSettingsPanel />
+            </Card>
+          </TabsContent>
+        </Tabs>
+      )}
     </div>
   );
-};
-
-export default SettingsPage;
+}
