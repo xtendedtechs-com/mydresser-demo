@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Shield, Users, Mail, Activity, AlertTriangle, CheckCircle, X } from 'lucide-react';
+import { useUserRoles } from '@/hooks/useUserRoles';
+import { SecurityStatusAlert } from './SecurityStatusAlert';
 
 interface SecurityLog {
   id: string;
@@ -36,12 +38,35 @@ const AdminPanel = () => {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [signupEnabled, setSignupEnabled] = useState(false);
   const { toast } = useToast();
+  const { isAdmin, isLoading: rolesLoading } = useUserRoles();
 
   useEffect(() => {
-    loadSecurityLogs();
-    loadInvitations();
-    checkSignupStatus();
-  }, []);
+    if (!rolesLoading && isAdmin) {
+      loadSecurityLogs();
+      loadInvitations();
+      checkSignupStatus();
+    }
+  }, [isAdmin, rolesLoading]);
+
+  // Prevent non-admins from viewing
+  if (rolesLoading) {
+    return (
+      <div className="max-w-6xl mx-auto p-8 text-center">
+        <Shield className="h-12 w-12 mx-auto mb-4 text-primary animate-pulse" />
+        <p className="text-muted-foreground">Verifying admin access...</p>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="max-w-6xl mx-auto p-8 text-center">
+        <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-destructive" />
+        <h2 className="text-2xl font-bold mb-2">Access Denied</h2>
+        <p className="text-muted-foreground">You do not have admin privileges to view this panel.</p>
+      </div>
+    );
+  }
 
   const loadSecurityLogs = async () => {
     try {
@@ -182,6 +207,8 @@ const AdminPanel = () => {
         </div>
       </div>
 
+      <SecurityStatusAlert />
+
       <Tabs defaultValue="invitations" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="invitations">Invitations</TabsTrigger>
@@ -315,6 +342,18 @@ const AdminPanel = () => {
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <CheckCircle className="h-5 w-5 text-green-500" />
+                  <span>User roles system with RLS protection ✅ NEW</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  <span>Session validation with security definer ✅ NEW</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  <span>Sensitive data masking functions ✅ NEW</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-green-500" />
                   <span>Row Level Security (RLS) enabled on all tables</span>
                 </div>
                 <div className="flex items-center gap-3">
@@ -323,7 +362,7 @@ const AdminPanel = () => {
                 </div>
                 <div className="flex items-center gap-3">
                   <CheckCircle className="h-5 w-5 text-green-500" />
-                  <span>Security audit logging enabled</span>
+                  <span>Security audit logging with field tracking ✅ IMPROVED</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <CheckCircle className="h-5 w-5 text-green-500" />

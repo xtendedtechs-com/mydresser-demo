@@ -3041,6 +3041,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_settings: {
         Row: {
           ai_model_preference: string | null
@@ -3801,6 +3825,10 @@ export type Database = {
           shipping_address: Json
         }[]
       }
+      get_merchant_contact_public: {
+        Args: { page_id: string }
+        Returns: Json
+      }
       get_merchant_contact_safe: {
         Args: { page_id: string; requesting_user_id: string }
         Returns: Json
@@ -3858,6 +3886,15 @@ export type Database = {
           business_address: Json
           contact_info: Json
           tax_id: string
+        }[]
+      }
+      get_profile_contact_safe: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          email: string
+          social_facebook: string
+          social_instagram: string
+          social_tiktok: string
         }[]
       }
       get_provider_subscriptions: {
@@ -3929,6 +3966,13 @@ export type Database = {
           social_tiktok: string
         }[]
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       hash_backup_code: {
         Args: { code: string }
         Returns: string
@@ -3946,6 +3990,10 @@ export type Database = {
           tax_id_param?: string
         }
         Returns: string
+      }
+      is_admin: {
+        Args: { _user_id?: string }
+        Returns: boolean
       }
       is_merchant: {
         Args: { _user_id?: string }
@@ -3989,6 +4037,14 @@ export type Database = {
       }
       mask_contact_data: {
         Args: { data_text: string; data_type: string }
+        Returns: string
+      }
+      mask_email: {
+        Args: { email: string }
+        Returns: string
+      }
+      mask_phone: {
+        Args: { phone: string }
         Returns: string
       }
       revoke_invitation_admin: {
@@ -4081,6 +4137,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin" | "merchant" | "professional" | "user"
       auth_level: "base" | "intermediate" | "advanced"
       user_role: "private" | "professional" | "merchant" | "admin"
     }
@@ -4210,6 +4267,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "merchant", "professional", "user"],
       auth_level: ["base", "intermediate", "advanced"],
       user_role: ["private", "professional", "merchant", "admin"],
     },

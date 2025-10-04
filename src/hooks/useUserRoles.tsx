@@ -4,11 +4,19 @@ import { useToast } from '@/hooks/use-toast';
 
 type AppRole = 'admin' | 'merchant' | 'professional' | 'user';
 
+interface UserRole {
+  id: string;
+  user_id: string;
+  role: AppRole;
+  assigned_at: string;
+  assigned_by: string | null;
+}
+
 export const useUserRoles = (userId?: string) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch user roles
+  // Fetch user roles from the new user_roles table
   const { data: roles = [], isLoading } = useQuery({
     queryKey: ['user-roles', userId],
     queryFn: async () => {
@@ -16,12 +24,12 @@ export const useUserRoles = (userId?: string) => {
       if (!targetUserId) return [];
       
       const { data, error } = await supabase
-        .from('user_roles' as any)
+        .from('user_roles')
         .select('*')
         .eq('user_id', targetUserId);
       
       if (error) throw error;
-      return (data || []) as any[];
+      return (data || []) as UserRole[];
     },
     enabled: !!userId || true,
   });
@@ -43,8 +51,8 @@ export const useUserRoles = (userId?: string) => {
   const addRole = useMutation({
     mutationFn: async ({ targetUserId, role }: { targetUserId: string; role: AppRole }) => {
       const { data, error } = await supabase
-        .from('user_roles' as any)
-        .insert({ user_id: targetUserId, role })
+        .from('user_roles')
+        .insert({ user_id: targetUserId, role, assigned_by: (await supabase.auth.getUser()).data.user?.id })
         .select()
         .single();
       
@@ -71,7 +79,7 @@ export const useUserRoles = (userId?: string) => {
   const removeRole = useMutation({
     mutationFn: async ({ targetUserId, role }: { targetUserId: string; role: AppRole }) => {
       const { error } = await supabase
-        .from('user_roles' as any)
+        .from('user_roles')
         .delete()
         .eq('user_id', targetUserId)
         .eq('role', role);
