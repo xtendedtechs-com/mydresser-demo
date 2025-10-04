@@ -269,18 +269,30 @@ export const useWardrobe = () => {
     );
   };
 
+  // Helper function to extract photo URLs from wardrobe items
   const getPhotoUrls = (item: WardrobeItem): string[] => {
     if (!item.photos) return [];
-    if (Array.isArray(item.photos)) return item.photos;
-    if (typeof item.photos === 'string') return [item.photos];
-    if (typeof item.photos === 'object' && item.photos.main) {
-      // Handle { main: "url" } format
-      return [item.photos.main];
+    
+    // Handle string URL
+    if (typeof item.photos === 'string') {
+      return [item.photos];
     }
-    if (typeof item.photos === 'object' && item.photos.urls) {
-      // Handle { urls: ["url1", "url2"] } format
-      return Array.isArray(item.photos.urls) ? item.photos.urls : [];
+    
+    // Handle array of URLs  
+    if (Array.isArray(item.photos)) {
+      return item.photos.filter(Boolean);
     }
+    
+    // Handle object with urls or main property
+    if (typeof item.photos === 'object') {
+      if ((item.photos as any).urls && Array.isArray((item.photos as any).urls)) {
+        return (item.photos as any).urls.filter(Boolean);
+      }
+      if ((item.photos as any).main) {
+        return [(item.photos as any).main];
+      }
+    }
+    
     return [];
   };
 

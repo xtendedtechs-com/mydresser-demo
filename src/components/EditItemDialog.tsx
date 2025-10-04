@@ -159,17 +159,17 @@ export const EditItemDialog = ({ item, open, onClose, onItemUpdated }: EditItemD
     setLoading(true);
 
     try {
-      // Prepare photos object from uploaded files
-      const photosObject = uploadedPhotos.length > 0 ? {
-        main: uploadedPhotos[0]?.url,
-        additional: uploadedPhotos.slice(1).map(file => file.url),
-        files: uploadedPhotos
-      } : null;
+      // Prepare photos object from uploaded files - consistent format
+      const photoUrls = uploadedPhotos.map(file => file.url).filter(Boolean);
+      const photosObject = photoUrls.length > 0 
+        ? (photoUrls.length === 1 ? { main: photoUrls[0] } : { main: photoUrls[0], urls: photoUrls })
+        : null;
 
       // Prepare videos object from uploaded files
-      const videosObject = uploadedVideos.length > 0 ? {
-        files: uploadedVideos
-      } : null;
+      const videoUrls = uploadedVideos.map(file => file.url).filter(Boolean);
+      const videosObject = videoUrls.length > 0 
+        ? (videoUrls.length === 1 ? { main: videoUrls[0] } : { main: videoUrls[0], urls: videoUrls })
+        : null;
 
       const { error } = await supabase
         .from('merchant_items')

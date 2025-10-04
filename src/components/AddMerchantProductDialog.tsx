@@ -164,8 +164,8 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
         size: sizes,
         tags,
         style_tags: styleTags,
-        photos: photos.length > 0 ? photos : null,
-        videos: videos.length > 0 ? videos : null,
+        photos: photos.length > 0 ? (photos.length === 1 ? { main: photos[0] } : { main: photos[0], urls: photos }) : null,
+        videos: videos.length > 0 ? (videos.length === 1 ? { main: videos[0] } : { main: videos[0], urls: videos }) : null,
       };
 
       let result;

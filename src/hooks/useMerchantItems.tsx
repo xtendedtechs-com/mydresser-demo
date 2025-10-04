@@ -276,9 +276,30 @@ export const useMerchantItems = () => {
     return items.filter(item => item.color?.toLowerCase() === color?.toLowerCase());
   };
 
+  // Helper function to extract photo URLs from merchant items
   const getPhotoUrls = (item: MerchantItem) => {
     if (!item.photos) return [];
-    if (Array.isArray(item.photos)) return item.photos;
+    
+    // Handle string URL
+    if (typeof item.photos === 'string') {
+      return [item.photos];
+    }
+    
+    // Handle array of URLs
+    if (Array.isArray(item.photos)) {
+      return item.photos.filter(Boolean);
+    }
+    
+    // Handle object with urls or main property
+    if (typeof item.photos === 'object') {
+      if ((item.photos as any).urls && Array.isArray((item.photos as any).urls)) {
+        return (item.photos as any).urls.filter(Boolean);
+      }
+      if ((item.photos as any).main) {
+        return [(item.photos as any).main];
+      }
+    }
+    
     return [];
   };
 

@@ -89,11 +89,30 @@ const MarketItemDetail = () => {
     });
   };
 
+  // Helper function to extract photo URLs from various formats
   const getPhotoUrls = (photos: any): string[] => {
     if (!photos) return [];
-    if (Array.isArray(photos)) return photos;
-    if (typeof photos === 'string') return [photos];
-    if (photos.main) return [photos.main];
+    
+    // Handle string URL
+    if (typeof photos === 'string') {
+      return [photos];
+    }
+    
+    // Handle array of URLs
+    if (Array.isArray(photos)) {
+      return photos.filter(Boolean);
+    }
+    
+    // Handle object with urls or main property
+    if (typeof photos === 'object') {
+      if (photos.urls && Array.isArray(photos.urls)) {
+        return photos.urls.filter(Boolean);
+      }
+      if (photos.main) {
+        return [photos.main];
+      }
+    }
+    
     return [];
   };
 
