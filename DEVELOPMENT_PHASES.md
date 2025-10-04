@@ -1469,7 +1469,7 @@ This document tracks the development progress of the MyDresser application.
   - ✅ Export includes: profile, wardrobe, outfits, posts, transactions, settings
   - ✅ GDPR-compliant data portability
 
-## ✅ Phase 64: Account Deletion Workflow & Privacy Policy (CURRENT)
+## ✅ Phase 64: Account Deletion Workflow & Privacy Policy
 - **Account Deletion**
   - ✅ Created AccountDeletionDialog with 3-step confirmation process
   - ✅ Implemented data export reminder before deletion
@@ -1489,6 +1489,35 @@ This document tracks the development progress of the MyDresser application.
   - ✅ Added "Privacy Policy" button
   - ✅ Connected Data Export feature
   - ✅ Improved UI with responsive layout
+
+- **Home Page & VTO Restoration**
+  - ✅ Fixed redirect loop in Home.tsx
+  - ✅ Restored Virtual Try-On to Daily Outfit feature
+  - ✅ Added tabbed interface (Outfit Details / Virtual Try-On)
+  - ✅ Photo upload functionality for VTO
+  - ✅ Integrated ai-virtual-tryon edge function
+  - ✅ Real-time VTO generation with loading states
+
+## 🚧 Phase 65: Merchant Terminal Navigation & POS Integration (CURRENT)
+- **Merchant Navigation System**
+  - ✅ Created MerchantNavigation component
+  - ✅ Added navigation to TerminalApp
+  - ✅ Implemented responsive merchant menu with mobile drawer
+  - ✅ Added merchant-specific quick actions
+  - ✅ Terminal status indicator
+  
+- **Orders Management**
+  - ✅ Created MerchantOrders page
+  - ✅ Order status tracking with badges
+  - ✅ Order search and filtering
+  - ✅ Order details dialog
+  - ✅ Status update functionality
+  - ✅ Order statistics dashboard
+  
+- **Navigation Routes**
+  - ✅ Integrated Inventory Management route
+  - ✅ Added Orders route
+  - ✅ Organized all merchant routes with navigation
 
 ## 📋 Remaining Implementation Tasks
 

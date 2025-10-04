@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Sparkles, 
   RefreshCw, 
@@ -13,7 +14,9 @@ import {
   Cloud,
   Loader2,
   Edit,
-  ShoppingBag
+  ShoppingBag,
+  Camera,
+  Upload
 } from "lucide-react";
 import { useWardrobe } from "@/hooks/useWardrobe";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
@@ -40,6 +43,10 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
   const [regenerating, setRegenerating] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [showMarketSuggestions, setShowMarketSuggestions] = useState(false);
+  const [userPhoto, setUserPhoto] = useState<string | null>(null);
+  const [vtoImage, setVtoImage] = useState<string | null>(null);
+  const [generatingVTO, setGeneratingVTO] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>('outfit');
 
   useEffect(() => {
     if (!wardrobeLoading && !preferencesLoading && wardrobeItems.length > 0 && !outfit) {
@@ -202,6 +209,55 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
     return 'evening';
   };
 
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Convert to base64
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setUserPhoto(reader.result as string);
+      setActiveTab('tryon');
+      toast.success('Photo uploaded! Generating virtual try-on...');
+      generateVTO(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const generateVTO = async (photoUrl?: string) => {
+    const photo = photoUrl || userPhoto;
+    if (!photo || !outfit) return;
+
+    setGeneratingVTO(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-virtual-tryon', {
+        body: {
+          userImage: photo,
+          clothingItems: outfit.items.map((item: any) => ({
+            id: item.id,
+            name: item.name,
+            category: item.category,
+            color: item.color,
+            brand: item.brand,
+            photo: item.photos?.main || item.photos?.[0] || '/placeholder.svg'
+          }))
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.editedImageUrl) {
+        setVtoImage(data.editedImageUrl);
+        toast.success('Virtual try-on ready!');
+      }
+    } catch (error: any) {
+      console.error('VTO generation error:', error);
+      toast.error(error.message || 'Failed to generate virtual try-on');
+    } finally {
+      setGeneratingVTO(false);
+    }
+  };
+
   if (wardrobeLoading || preferencesLoading) {
     return (
       <Card className="w-full">
@@ -292,59 +348,169 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {/* Weather Info */}
-        {weather && (
-          <div className="flex items-center justify-center space-x-4 p-3 bg-muted rounded-lg">
-            <Cloud className="w-5 h-5 text-muted-foreground" />
-            <div className="text-sm">
-              <span className="font-medium">{weather.condition}</span>
-              <span className="text-muted-foreground ml-2">
-                {Math.round(weather.temperature)}°C
-              </span>
-            </div>
-          </div>
-        )}
+        {/* Tabs for Outfit and Try-On */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="outfit">Outfit Details</TabsTrigger>
+            <TabsTrigger value="tryon">
+              <Camera className="w-4 h-4 mr-2" />
+              Virtual Try-On
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Outfit Items */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {outfit.items?.map((item: any, index: number) => (
-            <div key={item.id || index} className="text-center">
-              <div className="relative mb-2">
-                <Avatar className="w-20 h-20 mx-auto">
-                  <AvatarImage src={item.photos?.main || '/placeholder.svg'} />
-                  <AvatarFallback>{item.name.slice(0, 2).toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <Badge 
-                  variant="secondary" 
-                  className="absolute -top-1 -right-1 text-xs"
-                >
-                  {item.category}
-                </Badge>
+          <TabsContent value="outfit" className="space-y-6 mt-6">
+            {/* Weather Info */}
+            {weather && (
+              <div className="flex items-center justify-center space-x-4 p-3 bg-muted rounded-lg">
+                <Cloud className="w-5 h-5 text-muted-foreground" />
+                <div className="text-sm">
+                  <span className="font-medium">{weather.condition}</span>
+                  <span className="text-muted-foreground ml-2">
+                    {Math.round(weather.temperature)}°C
+                  </span>
+                </div>
               </div>
-              <p className="text-sm font-medium">{item.name}</p>
-              <p className="text-xs text-muted-foreground">{item.brand}</p>
+            )}
+
+            {/* Outfit Items */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {outfit.items?.map((item: any, index: number) => (
+                <div key={item.id || index} className="text-center">
+                  <div className="relative mb-2">
+                    <Avatar className="w-20 h-20 mx-auto">
+                      <AvatarImage src={item.photos?.main || '/placeholder.svg'} />
+                      <AvatarFallback>{item.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <Badge 
+                      variant="secondary" 
+                      className="absolute -top-1 -right-1 text-xs"
+                    >
+                      {item.category}
+                    </Badge>
+                  </div>
+                  <p className="text-sm font-medium">{item.name}</p>
+                  <p className="text-xs text-muted-foreground">{item.brand}</p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        {/* Outfit Reasoning */}
-        {outfit.reasoning && (
-          <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
-            <h4 className="font-medium text-sm mb-2">Why this outfit works:</h4>
-            <p className="text-sm text-muted-foreground">{outfit.reasoning}</p>
-          </div>
-        )}
+            {/* Outfit Reasoning */}
+            {outfit.reasoning && (
+              <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
+                <h4 className="font-medium text-sm mb-2">Why this outfit works:</h4>
+                <p className="text-sm text-muted-foreground">{outfit.reasoning}</p>
+              </div>
+            )}
 
-        {/* Style Tags */}
-        {outfit.tags && (
-          <div className="flex flex-wrap gap-2">
-            {outfit.tags.map((tag: string) => (
-              <Badge key={tag} variant="outline" className="text-xs">
-                {tag}
-              </Badge>
-            ))}
-          </div>
-        )}
+            {/* Style Tags */}
+            {outfit.tags && (
+              <div className="flex flex-wrap gap-2">
+                {outfit.tags.map((tag: string) => (
+                  <Badge key={tag} variant="outline" className="text-xs">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="tryon" className="space-y-4 mt-6">
+            {!userPhoto ? (
+              <div className="text-center py-12 space-y-4">
+                <Camera className="w-16 h-16 mx-auto text-muted-foreground" />
+                <div>
+                  <h3 className="font-semibold text-lg mb-2">See Yourself in This Outfit</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Upload a full-body photo to virtually try on this outfit
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                  <Button asChild variant="outline">
+                    <label className="cursor-pointer">
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload Photo
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="relative aspect-[3/4] bg-muted rounded-lg overflow-hidden">
+                  {generatingVTO ? (
+                    <div className="absolute inset-0 flex items-center justify-center bg-background/80">
+                      <div className="text-center space-y-2">
+                        <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+                        <p className="text-sm text-muted-foreground">Generating virtual try-on...</p>
+                        <p className="text-xs text-muted-foreground">This may take a moment</p>
+                      </div>
+                    </div>
+                  ) : vtoImage ? (
+                    <img
+                      src={vtoImage}
+                      alt="Virtual Try-On Result"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img
+                      src={userPhoto}
+                      alt="Your Photo"
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                  
+                  <div className="absolute top-2 left-2">
+                    <Badge className="bg-primary text-primary-foreground">
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      AI Virtual Try-On
+                    </Badge>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={() => generateVTO()}
+                    disabled={generatingVTO}
+                  >
+                    <RefreshCw className={`w-4 h-4 mr-2 ${generatingVTO ? 'animate-spin' : ''}`} />
+                    Regenerate
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="flex-1"
+                    asChild
+                  >
+                    <label className="cursor-pointer">
+                      <Upload className="w-4 h-4 mr-2" />
+                      Change Photo
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </Button>
+                </div>
+
+                {vtoImage && (
+                  <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
+                    <p className="text-sm text-center">
+                      💡 This is an AI-generated preview. Actual fit may vary.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
 
         {/* Actions */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
