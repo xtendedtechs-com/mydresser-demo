@@ -86,8 +86,11 @@ export class SmartOutfitEngine {
       shoes: null as WardrobeItem | null
     };
     
-    // 1. Select bottom (required) - never two pants/jeans
-    const bottoms = this.filterByCategory(available, ['bottoms', 'jeans', 'pants', 'skirts', 'shorts']);
+    // 1. Select bottom (required) - expanded categories for more variety
+    const bottoms = this.filterByCategory(available, [
+      'bottoms', 'jeans', 'pants', 'skirts', 'shorts', 'trousers', 
+      'leggings', 'joggers', 'chinos', 'slacks'
+    ]);
     const bottomsFiltered = this.filterBySeason(bottoms, season);
     outfit.bottom = this.selectBestMatch(bottomsFiltered, { occasion, weather });
     
@@ -100,8 +103,11 @@ export class SmartOutfitEngine {
       outfit.top = selectedDress;
       outfit.bottom = null; // Dress replaces bottom
     } else {
-      // 3. Select top (required if no dress)
-      const tops = this.filterByCategory(available, ['tops']);
+      // 3. Select top (required if no dress) - expanded for variety
+      const tops = this.filterByCategory(available, [
+        'tops', 'shirts', 'blouses', 't-shirts', 'sweaters', 
+        'hoodies', 'tank tops', 'vests', 'tunics'
+      ]);
       const topsFiltered = this.filterBySeason(tops, season);
       outfit.top = this.selectBestMatch(topsFiltered, { occasion, weather });
     }
@@ -112,22 +118,32 @@ export class SmartOutfitEngine {
       outfit.base = this.selectBestMatch(base, { weather });
     }
     
-    // 5. Add outer layer based on weather
+    // 5. Add outer layer based on weather - expanded variety
     if (this.needsOuterLayer(weather)) {
-      const outer = this.filterByCategory(available, ['outerwear', 'jackets', 'coats', 'blazers', 'cardigans']);
+      const outer = this.filterByCategory(available, [
+        'outerwear', 'jackets', 'coats', 'blazers', 'cardigans',
+        'windbreakers', 'parkas', 'bombers', 'pullovers', 'shawls'
+      ]);
       const outerFiltered = this.filterBySeason(outer, season);
       outfit.outer = this.selectBestMatch(outerFiltered, { occasion, weather });
     }
     
-    // 6. Select shoes (required)
-    const shoes = this.filterByCategory(available, ['shoes']);
+    // 6. Select shoes (required) - expanded categories
+    const shoes = this.filterByCategory(available, [
+      'shoes', 'sneakers', 'boots', 'sandals', 'heels', 
+      'flats', 'loafers', 'oxfords', 'trainers'
+    ]);
     const shoesFiltered = this.filterBySeason(shoes, season);
     outfit.shoes = this.selectBestMatch(shoesFiltered, { occasion, weather });
     
-    // 7. Add accessories (optional, max 2)
-    const accessories = this.filterByCategory(available, ['accessories', 'bags', 'jewelry', 'hats', 'scarves']);
+    // 7. Add accessories (optional, max 2-3 for variety)
+    const accessories = this.filterByCategory(available, [
+      'accessories', 'bags', 'jewelry', 'hats', 'scarves', 
+      'belts', 'watches', 'sunglasses', 'gloves'
+    ]);
     const accessoriesFiltered = this.filterBySeason(accessories, season);
-    const selectedAccessories = this.selectAccessories(accessoriesFiltered, 2, { occasion, weather });
+    const maxAccessories = Math.random() > 0.5 ? 3 : 2; // Vary accessory count
+    const selectedAccessories = this.selectAccessories(accessoriesFiltered, maxAccessories, { occasion, weather });
     
     // Compile final outfit - filter out null/undefined items
     const finalOutfit: WardrobeItem[] = [
@@ -163,33 +179,61 @@ export class SmartOutfitEngine {
   ): WardrobeItem | null {
     if (items.length === 0) return null;
     
-    // Score each item based on criteria
-    const scored = items.map(item => {
-      let score = 0;
+    // Add variety by filtering out recently worn items more aggressively
+    const lessWornItems = items.filter(item => (item.wear_count || 0) < 5);
+    const candidatePool = lessWornItems.length > 3 ? lessWornItems : items;
+    
+    // Score each item based on criteria with increased randomness for variety
+    const scored = candidatePool.map(item => {
+      let score = Math.random() * 15; // Increased random factor for more variety
       
-      // Match occasion
+      // Match occasion (reduced weight to allow more variety)
       if (criteria.occasion && item.occasion) {
-        score += item.occasion.toLowerCase() === criteria.occasion.toLowerCase() ? 10 : 0;
+        score += item.occasion.toLowerCase() === criteria.occasion.toLowerCase() ? 8 : 0;
       }
       
       // Match weather appropriateness
       if (criteria.weather) {
-        if (criteria.weather.temp < 10 && item.material?.includes('wool')) score += 5;
-        if (criteria.weather.temp > 25 && item.material?.includes('cotton')) score += 5;
+        const temp = criteria.weather.temp;
+        // Cold weather scoring
+        if (temp < 10) {
+          if (item.material?.includes('wool')) score += 6;
+          if (item.material?.includes('fleece')) score += 6;
+        }
+        // Moderate weather - wider range
+        else if (temp >= 10 && temp <= 25) {
+          if (item.material?.includes('cotton')) score += 4;
+          if (item.material?.includes('denim')) score += 4;
+          if (item.material?.includes('polyester')) score += 3;
+        }
+        // Warm weather scoring
+        else if (temp > 25) {
+          if (item.material?.includes('cotton')) score += 6;
+          if (item.material?.includes('linen')) score += 7;
+          if (item.material?.includes('silk')) score += 5;
+        }
       }
       
-      // Prefer unworn items
-      score += (item.wear_count || 0) < 3 ? 5 : 0;
+      // Strongly prefer unworn items to increase variety
+      const wearCount = item.wear_count || 0;
+      if (wearCount === 0) score += 12; // Unworn items get big boost
+      else if (wearCount < 2) score += 8;
+      else if (wearCount < 4) score += 4;
       
-      // Prefer favorites
-      score += item.is_favorite ? 3 : 0;
+      // Slight boost for favorites
+      score += item.is_favorite ? 2 : 0;
       
       return { item, score };
     });
     
-    // Sort by score and return best
+    // Sort by score and add more randomness by selecting from top candidates
     scored.sort((a, b) => b.score - a.score);
-    return scored[0].item;
+    
+    // Instead of always picking the best, randomly select from top 30% for variety
+    const topCandidates = scored.slice(0, Math.max(1, Math.ceil(scored.length * 0.3)));
+    const randomIndex = Math.floor(Math.random() * topCandidates.length);
+    
+    return topCandidates[randomIndex].item;
   }
   
   private static shouldSelectDress(weather?: any, occasion?: string): boolean {

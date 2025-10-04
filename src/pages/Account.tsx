@@ -35,10 +35,7 @@ import EnhancedWardrobeManager from "@/components/EnhancedWardrobeManager";
 import ProfileHeader from "@/components/ProfileHeader";
 import SettingsSection from "@/components/SettingsSection";
 import UserAnalyticsDashboard from "@/components/UserAnalyticsDashboard";
-import ComprehensiveSettingsPanel from "@/components/ComprehensiveSettingsPanel";
-import { PaymentSettingsPanel } from "@/components/settings/PaymentSettingsPanel";
-import { AISettingsPanel } from "@/components/settings/AISettingsPanel";
-import { PWASettingsPanel } from "@/components/settings/PWASettingsPanel";
+import SettingsDialog from "@/components/SettingsDialog";
 import { AdvancedPredictiveAnalytics } from "@/components/AdvancedPredictiveAnalytics";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -61,6 +58,8 @@ const Account = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [profileEditOpen, setProfileEditOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsTab, setSettingsTab] = useState("general");
 
   const handleSignOut = async () => {
     try {
@@ -78,8 +77,9 @@ const Account = () => {
     }
   };
 
-  const navigateToSettings = (category: string) => {
-    navigate(`/settings/${category}`);
+  const openSettings = (tab: string) => {
+    setSettingsTab(tab);
+    setSettingsOpen(true);
   };
 
   const handleMyStyleClick = () => {
@@ -116,13 +116,13 @@ const Account = () => {
       id: 'account',
       label: 'Account',
       description: 'Manage your account settings',
-      onClick: () => navigateToSettings('account')
+      onClick: () => openSettings('general')
     },
     {
       id: 'authentication',
       label: 'Authentication',
       description: `Current level: ${profile.auth_level}`,
-      onClick: () => navigateToSettings('authentication'),
+      onClick: () => navigate('/auth-settings'),
       highlighted: profile.auth_level === 'base'
     },
     {
@@ -136,26 +136,26 @@ const Account = () => {
       id: 'profile',
       label: 'My profile',
       description: 'Edit your profile information',
-      onClick: () => navigateToSettings('profile')
+      onClick: () => setProfileEditOpen(true)
     },
     {
       id: 'privacy',
       label: 'Privacy & Data Rights',
       description: 'GDPR/CCPA compliance & data management',
-      onClick: () => navigateToSettings('privacy'),
+      onClick: () => openSettings('privacy'),
       highlighted: true
     },
     {
       id: 'data',
       label: 'My data',
       description: 'Export or delete your personal data',
-      onClick: () => navigateToSettings('data')
+      onClick: () => navigate('/data-export')
     },
     {
       id: 'preferences',
       label: 'My preferences',
       description: 'Customize your preferences',
-      onClick: () => navigateToSettings('preferences')
+      onClick: () => openSettings('general')
     }
   ];
 
@@ -164,19 +164,19 @@ const Account = () => {
       id: 'general',
       label: 'General',
       description: 'General app settings',
-      onClick: () => navigateToSettings('general')
+      onClick: () => openSettings('general')
     },
     {
       id: 'permissions',
       label: 'Permissions',
       description: 'App permissions',
-      onClick: () => navigateToSettings('permissions')
+      onClick: () => openSettings('pwa')
     },
     {
       id: 'notifications',
       label: 'Notifications',
       description: 'Notification preferences',
-      onClick: () => navigateToSettings('notifications')
+      onClick: () => openSettings('notifications')
     }
   ];
 
@@ -185,26 +185,26 @@ const Account = () => {
       id: 'behavior',
       label: 'Modify app behaviour',
       description: 'Customize how the app works for you',
-      onClick: () => navigateToSettings('behavior')
+      onClick: () => openSettings('general')
     },
     {
       id: 'suggestions',
       label: 'Personalize suggestions',
       description: 'Tailor recommendations to your style',
-      onClick: () => navigateToSettings('suggestions')
+      onClick: () => openSettings('ai')
     },
     {
       id: 'theme',
       label: 'Customize theme',
       description: 'Change the app appearance',
-      onClick: () => navigateToSettings('theme'),
+      onClick: () => openSettings('general'),
       highlighted: true
     },
     {
       id: 'mystyle',
       label: 'My Style',
       description: 'Define your personal style preferences',
-      onClick: () => navigateToSettings('mystyle'),
+      onClick: () => openSettings('mystyle'),
       highlighted: true
     }
   ];
@@ -218,19 +218,19 @@ const Account = () => {
       id: 'weather',
       label: 'Weather settings',
       description: 'Configure weather-based recommendations',
-      onClick: () => navigateToServiceSettings('weather')
+      onClick: () => openSettings('outfit')
     },
     {
       id: 'outfit',
       label: "Today's Outfit",
       description: 'Daily outfit generation settings',
-      onClick: () => navigateToServiceSettings('outfit')
+      onClick: () => openSettings('outfit')
     },
     {
       id: 'wardrobe',
       label: 'My Wardrobe',
       description: 'Wardrobe management settings',
-      onClick: () => navigateToServiceSettings('wardrobe')
+      onClick: () => openSettings('wardrobe')
     },
     {
       id: 'analytics',
@@ -250,19 +250,19 @@ const Account = () => {
       id: 'inventory',
       label: 'Inventory',
       description: 'Manage your clothing inventory',
-      onClick: () => navigateToServiceSettings('wardrobe')
+      onClick: () => openSettings('wardrobe')
     },
     {
       id: 'market',
       label: 'Market & 2ndDresser',
       description: 'Marketplace and second-hand settings',
-      onClick: () => navigateToServiceSettings('market')
+      onClick: () => openSettings('marketplace')
     },
     {
       id: 'assistant',
       label: 'AI Assistant',
       description: 'AI styling assistant settings',
-      onClick: () => navigateToServiceSettings('assistant')
+      onClick: () => openSettings('ai')
     },
     {
       id: 'support',
@@ -285,7 +285,7 @@ const Account = () => {
       id: 'security',
       label: 'Security Dashboard',
       description: 'Manage platform security and invitations',
-      onClick: () => navigateToServiceSettings('security'),
+      onClick: () => navigate('/security'),
       highlighted: true
     });
   }
@@ -322,7 +322,14 @@ const Account = () => {
           </h1>
         </div>
 
-        <ComprehensiveSettingsPanel />
+        <Button
+          variant="outline"
+          onClick={() => openSettings('general')}
+          className="w-full mb-4"
+        >
+          <Settings className="w-4 h-4 mr-2" />
+          Open Settings
+        </Button>
 
         <div className="pt-6">
           <Button
@@ -616,15 +623,48 @@ const Account = () => {
             </TabsContent>
 
             <TabsContent value="payments" className="space-y-6">
-              <PaymentSettingsPanel />
+              <Card>
+                <CardHeader>
+                  <CardTitle>Payment Settings</CardTitle>
+                  <CardDescription>Manage your payment methods and preferences</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button onClick={() => openSettings('payment')} className="w-full">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Manage Payment Settings
+                  </Button>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="ai" className="space-y-6">
-              <AISettingsPanel />
+              <Card>
+                <CardHeader>
+                  <CardTitle>AI Settings</CardTitle>
+                  <CardDescription>Configure AI assistant preferences</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button onClick={() => openSettings('ai')} className="w-full">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Manage AI Settings
+                  </Button>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="pwa" className="space-y-6">
-              <PWASettingsPanel />
+              <Card>
+                <CardHeader>
+                  <CardTitle>App Settings</CardTitle>
+                  <CardDescription>Configure app permissions and features</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button onClick={() => openSettings('pwa')} className="w-full">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Manage App Settings
+                  </Button>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="mystyle" className="space-y-6">
@@ -653,6 +693,13 @@ const Account = () => {
           </Card>
         </div>
       </div>
+
+      {/* Settings Dialog */}
+      <SettingsDialog 
+        open={settingsOpen} 
+        onOpenChange={setSettingsOpen}
+        defaultTab={settingsTab}
+      />
     </div>
   );
 };
