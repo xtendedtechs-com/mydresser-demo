@@ -136,11 +136,7 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
         </div>
       </div>
 
-      <div className="p-4 space-y-2">
-        <h3 className="font-semibold">{outfit.name}</h3>
-        <p className="text-sm text-muted-foreground">{outfit.reasoning}</p>
-        
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between p-4">
           <Badge variant="outline">{outfit.confidence}% Match</Badge>
           <Button 
             size="sm" 
@@ -155,7 +151,6 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
             )}
           </Button>
         </div>
-      </div>
     </Card>
   );
 };

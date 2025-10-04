@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { VirtualTryOnStudio } from "@/components/VirtualTryOnStudio";
+import { UnifiedTryOnStudio } from "@/components/UnifiedTryOnStudio";
 import { FitPredictionEngine } from "@/components/FitPredictionEngine";
 import { SizeGuideComparison } from "@/components/SizeGuideComparison";
 import { Scan, Ruler, BookOpen } from "lucide-react";
@@ -31,7 +31,7 @@ export default function VirtualFittingRoom() {
         </TabsList>
 
         <TabsContent value="tryon" className="space-y-6">
-          <VirtualTryOnStudio />
+          <UnifiedTryOnStudio />
         </TabsContent>
 
         <TabsContent value="fit" className="space-y-6">
