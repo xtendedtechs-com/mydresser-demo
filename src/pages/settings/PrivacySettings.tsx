@@ -3,14 +3,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { AccountDeletionDialog } from "@/components/AccountDeletionDialog";
+import { PrivacyPolicyDialog } from "@/components/PrivacyPolicyDialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useUserPreferences } from "@/hooks/useUserPreferences";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Eye, Users, Share2, Download, Trash2 } from "lucide-react";
+import { Shield, Eye, Users, Share2, Download, Trash2, FileText } from "lucide-react";
 
 const PrivacySettings = () => {
   const { preferences, updatePreferences, loading } = useUserPreferences();
   const { toast } = useToast();
+  const [deletionDialogOpen, setDeletionDialogOpen] = useState(false);
+  const [privacyPolicyOpen, setPrivacyPolicyOpen] = useState(false);
 
   const handleToggle = async (setting: string, value: boolean) => {
     try {
@@ -157,19 +161,45 @@ const PrivacySettings = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-4">
-            <Button variant="outline" className="w-full">
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button 
+              variant="outline" 
+              className="flex-1"
+              onClick={() => window.open('/data-export', '_blank')}
+            >
               <Download className="w-4 h-4 mr-2" />
               Download My Data
             </Button>
             
-            <Button variant="destructive" className="w-full">
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete My Account
+            <Button 
+              variant="outline" 
+              className="flex-1"
+              onClick={() => setPrivacyPolicyOpen(true)}
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Privacy Policy
             </Button>
           </div>
+          
+          <Button 
+            variant="destructive" 
+            className="w-full"
+            onClick={() => setDeletionDialogOpen(true)}
+          >
+            <Trash2 className="w-4 h-4 mr-2" />
+            Delete My Account
+          </Button>
         </CardContent>
       </Card>
+
+      <AccountDeletionDialog 
+        open={deletionDialogOpen} 
+        onOpenChange={setDeletionDialogOpen} 
+      />
+      <PrivacyPolicyDialog 
+        open={privacyPolicyOpen} 
+        onOpenChange={setPrivacyPolicyOpen} 
+      />
     </div>
   );
 };

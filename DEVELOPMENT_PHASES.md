@@ -1449,7 +1449,7 @@ This document tracks the development progress of the MyDresser application.
   - ✅ Improved component lifecycle management
   - ✅ Better error boundaries and fallbacks
 
-## ✅ Phase 63: Safety & Privacy Features (CURRENT)
+## ✅ Phase 63: Safety & Privacy Features
 - **Block/Mute System**
   - ✅ Created blocked_users and muted_users database tables with RLS
   - ✅ Implemented BlockMuteManager component
@@ -1468,6 +1468,27 @@ This document tracks the development progress of the MyDresser application.
   - ✅ Complete data export functionality (JSON & CSV)
   - ✅ Export includes: profile, wardrobe, outfits, posts, transactions, settings
   - ✅ GDPR-compliant data portability
+
+## ✅ Phase 64: Account Deletion Workflow & Privacy Policy (CURRENT)
+- **Account Deletion**
+  - ✅ Created AccountDeletionDialog with 3-step confirmation process
+  - ✅ Implemented data export reminder before deletion
+  - ✅ Password verification for security
+  - ✅ Created delete-user-account edge function
+  - ✅ Comprehensive data cleanup (all user tables)
+  - ✅ GDPR-compliant permanent deletion
+  
+- **Privacy Policy**
+  - ✅ Created PrivacyPolicyDialog component
+  - ✅ Comprehensive GDPR-compliant privacy policy
+  - ✅ Sections: Data collection, usage, sharing, security, rights
+  - ✅ Integrated into Privacy Settings page
+  
+- **Privacy Settings Enhancement**
+  - ✅ Added "Delete My Account" button with dialog
+  - ✅ Added "Privacy Policy" button
+  - ✅ Connected Data Export feature
+  - ✅ Improved UI with responsive layout
 
 ## 📋 Remaining Implementation Tasks
 
@@ -1504,8 +1525,8 @@ This document tracks the development progress of the MyDresser application.
 ### Data & Privacy
 - [x] GDPR compliance features
 - [x] Data export functionality  
-- [ ] Account deletion workflow
-- [ ] Privacy policy integration
+- [x] Account deletion workflow
+- [x] Privacy policy integration
 
 ### Testing & Quality
 - [ ] End-to-end testing (user flows)
