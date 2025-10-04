@@ -4416,3 +4416,57 @@ Following MyDresser's core principles:
 - Updated photoHelpers.ts for better URL validation
 - Improved photo storage to use proper Supabase URLs
 - Integration with ai-virtual-tryon edge function
+
+---
+
+## Phase 42: Advanced Merchant Analytics & Reporting (October 4, 2025)
+
+### Advanced Reporting System
+- Created AdvancedMerchantReports page with comprehensive reporting
+- Report templates for common reporting needs (Sales, Inventory, Customers, Products)
+- Custom report builder with date range, metrics, and format selection
+- Report generation with PDF, Excel, CSV, JSON formats
+
+### Scheduled Reports
+- Scheduled reports manager for automated report generation
+- Frequency options (daily, weekly, monthly)
+- Email distribution to multiple recipients
+- Enable/disable scheduled reports
+- Run reports manually on demand
+
+### Report History
+- View previously generated reports
+- Download historical reports
+- Report metadata (size, format, generation date)
+- Filter and search report history
+
+### Quick Stats Dashboard
+- Reports generated counter
+- Active scheduled reports count
+- Data points tracked
+- Average report generation time
+- Performance trends
+
+### UI/UX Enhancements
+- Home page now uses enhanced DailyOutfit with VTO
+- Fixed DOM nesting warning in RealDailyOutfit
+- Improved VTO avatar display in daily AI pick
+- Tab-based interface for report management
+- Report template cards with quick actions
+- Responsive design for all screen sizes
+
+### Technical Implementation
+- Created AdvancedMerchantReports.tsx page
+- Added /terminal/reports route
+- Integrated ReportBuilder and ScheduledReportsManager components
+- Used existing useMerchantAnalytics hook
+- Report template system for common reports
+- Fixed Home.tsx to use DailyOutfit instead of RealDailyOutfit
+
+### Merchant Features
+- Sales performance reports with trends
+- Inventory analysis with reorder recommendations
+- Customer insights and retention analysis
+- Product performance and category analysis
+- Schedule recurring reports
+- Export to multiple formats

@@ -24,7 +24,7 @@ import { useWardrobe } from '@/hooks/useWardrobe';
 import { DailyOutfitGenerator } from '@/components/DailyOutfitGenerator';
 import { WardrobeAnalytics } from '@/components/WardrobeAnalytics';
 import { SmartLaundryTracker } from '@/components/SmartLaundryTracker';
-import { RealDailyOutfit } from '@/components/RealDailyOutfit';
+import DailyOutfit from '@/components/DailyOutfit';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -209,8 +209,8 @@ const Home = () => {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
-            {/* Daily Outfit */}
-            <RealDailyOutfit />
+            {/* Daily Outfit with VTO */}
+            <DailyOutfit />
 
             {/* Recent Activity */}
             <Card>
