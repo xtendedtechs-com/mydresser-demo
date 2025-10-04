@@ -35,11 +35,12 @@ import EnhancedWardrobeManager from "@/components/EnhancedWardrobeManager";
 import ProfileHeader from "@/components/ProfileHeader";
 import SettingsSection from "@/components/SettingsSection";
 import UserAnalyticsDashboard from "@/components/UserAnalyticsDashboard";
-
 import { AdvancedPredictiveAnalytics } from "@/components/AdvancedPredictiveAnalytics";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VirtualTryOn from "@/components/VirtualTryOn";
+import { useWardrobe } from "@/hooks/useWardrobe";
+import { useTranslation } from 'react-i18next';
 
 interface SettingItem {
   id: string;
@@ -49,13 +50,12 @@ interface SettingItem {
   highlighted?: boolean;
 }
 
-import { useWardrobe } from "@/hooks/useWardrobe";
-
 const Account = () => {
   const navigate = useNavigate();
   const { profile, loading } = useProfile();
   const { items } = useWardrobe();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [profileEditOpen, setProfileEditOpen] = useState(false);
 
@@ -63,12 +63,12 @@ const Account = () => {
     try {
       await supabase.auth.signOut();
       toast({
-        title: "Signed out successfully",
+        title: t('account.logout'),
         description: "You have been signed out of your account.",
       });
     } catch (error) {
       toast({
-        title: "Error signing out",
+        title: t('common.error'),
         description: "There was an error signing out. Please try again.",
         variant: "destructive",
       });

@@ -31,11 +31,13 @@ import { RealDailyOutfit } from '@/components/RealDailyOutfit';
 import { WardrobeAnalytics } from '@/components/WardrobeAnalytics';
 import { SmartLaundryTracker } from '@/components/SmartLaundryTracker';
 import PersonalizedRecommendations from '@/components/PersonalizedRecommendations';
+import { useTranslation } from 'react-i18next';
 
 const Home = () => {
   const navigate = useNavigate();
   const { profile } = useProfile();
   const { items: wardrobeItems } = useWardrobe();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('today');
 
   const stats = {

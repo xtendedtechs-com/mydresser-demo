@@ -11,9 +11,11 @@ import SmartOutfitMatcher from "@/components/SmartOutfitMatcher";
 import LaundryTracker from "@/components/LaundryTracker";
 import SettingsDialog from "@/components/SettingsDialog";
 import { toast } from "sonner";
+import { useTranslation } from 'react-i18next';
 
 const Wardrobe = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [viewMode, setViewMode] = useState<"grid" | "wardrobe" | "vector" | "search" | "outfits" | "laundry">("grid");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -22,7 +24,7 @@ const Wardrobe = () => {
     <div className="min-h-screen bg-background pb-20 md:pb-4">
       <header className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-10">
         <div className="container max-w-7xl mx-auto px-4 py-4 lg:px-6">
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold fashion-text-gradient mb-3 sm:mb-4">My Wardrobe</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold fashion-text-gradient mb-3 sm:mb-4">{t('wardrobe.title')}</h1>
           
           <div className="flex justify-between items-center gap-2">
             <div className="flex gap-1 flex-wrap">
@@ -33,7 +35,7 @@ const Wardrobe = () => {
                 className="px-2 sm:px-3"
               >
                 <Grid3X3 size={16} />
-                <span className="sr-only sm:not-sr-only sm:ml-1 text-xs">Grid</span>
+                <span className="sr-only sm:not-sr-only sm:ml-1 text-xs">{t('common.view')}</span>
               </Button>
               <Button
                 variant={viewMode === "vector" ? "default" : "outline"}
@@ -51,7 +53,7 @@ const Wardrobe = () => {
                 className="px-2 sm:px-3"
               >
                 <Search size={16} />
-                <span className="sr-only sm:not-sr-only sm:ml-1 text-xs">Search</span>
+                <span className="sr-only sm:not-sr-only sm:ml-1 text-xs">{t('common.search')}</span>
               </Button>
               <Button
                 variant={viewMode === "outfits" ? "default" : "outline"}
@@ -60,7 +62,7 @@ const Wardrobe = () => {
                 className="px-2 sm:px-3"
               >
                 <Zap size={16} />
-                <span className="sr-only lg:not-sr-only lg:ml-1 text-xs">Outfits</span>
+                <span className="sr-only lg:not-sr-only lg:ml-1 text-xs">{t('nav.outfits')}</span>
               </Button>
               <Button
                 variant={viewMode === "laundry" ? "default" : "outline"}
@@ -80,7 +82,7 @@ const Wardrobe = () => {
                 className="flex items-center gap-1"
               >
                 <BarChart3 size={16} />
-                <span className="hidden sm:inline">Analytics</span>
+                <span className="hidden sm:inline">{t('nav.analytics')}</span>
               </Button>
               <Button
                 variant="outline"

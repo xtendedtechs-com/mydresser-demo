@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useProfile } from "@/hooks/useProfile";
 import { EnhancedNotificationBell } from './EnhancedNotificationBell';
+import { useTranslation } from 'react-i18next';
 
 interface NavigationProps {
   activeTab?: string;
@@ -12,22 +13,23 @@ interface NavigationProps {
 const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   const location = useLocation();
   const { profile } = useProfile();
+  const { t } = useTranslation();
   
   const baseNavItems = [
     { 
-      name: "Home", 
+      name: t('nav.home'), 
       href: "/", 
       icon: Home,
       id: "home"
     },
     { 
-      name: "Wardrobe", 
+      name: t('nav.wardrobe'), 
       href: "/wardrobe", 
       icon: Shirt,
       id: "wardrobe"
     },
     { 
-      name: "Add", 
+      name: t('common.add'), 
       href: "/add", 
       icon: Plus,
       id: "add"
@@ -39,13 +41,13 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
       id: "ai-hub"
     },
     { 
-      name: "Market", 
+      name: t('nav.market'), 
       href: "/market", 
       icon: ShoppingBag,
       id: "market"
     },
     { 
-      name: "Account", 
+      name: t('nav.account'), 
       href: "/account", 
       icon: User,
       id: "account"
