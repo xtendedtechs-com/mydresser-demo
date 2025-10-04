@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { 
   Sparkles, 
   BarChart3, 
-  Droplets, 
   Shirt, 
   TrendingUp, 
   Calendar,
@@ -17,20 +17,26 @@ import {
   Users,
   Shield,
   Star,
-  Trophy
+  Trophy,
+  Heart,
+  Plus,
+  Eye,
+  Palette,
+  Cloud,
+  Flame
 } from 'lucide-react';
 import { useProfile } from '@/hooks/useProfile';
 import { useWardrobe } from '@/hooks/useWardrobe';
-import { DailyOutfitGenerator } from '@/components/DailyOutfitGenerator';
+import { RealDailyOutfit } from '@/components/RealDailyOutfit';
 import { WardrobeAnalytics } from '@/components/WardrobeAnalytics';
 import { SmartLaundryTracker } from '@/components/SmartLaundryTracker';
-import DailyOutfit from '@/components/DailyOutfit';
+import PersonalizedRecommendations from '@/components/PersonalizedRecommendations';
 
 const Home = () => {
   const navigate = useNavigate();
   const { user, profile, isAuthenticated } = useProfile();
   const { items: wardrobeItems } = useWardrobe();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('today');
 
   if (!isAuthenticated || !user) {
     return (
@@ -47,192 +53,236 @@ const Home = () => {
 
   const stats = {
     wardrobeItems: wardrobeItems.length,
-    outfitsCreated: 5, // This would come from actual data
+    outfitsCreated: wardrobeItems.filter(i => i.is_favorite).length,
     totalWears: wardrobeItems.reduce((sum, item) => sum + (item.wear_count || 0), 0),
-    favoriteItems: wardrobeItems.filter(item => item.is_favorite).length
+    favoriteItems: wardrobeItems.filter(item => item.is_favorite).length,
+    styleScore: profile?.style_score || 0
   };
 
-  const quickActions = [
+  const trendingActions = [
     {
-      title: 'AI Style Chat',
-      description: 'Get personalized fashion advice',
+      title: 'Today\'s Outfit',
+      description: 'AI-curated for you',
       icon: Sparkles,
-      href: '/ai-assistant',
-      color: 'purple'
+      href: '#today',
+      badge: 'New',
+      color: 'from-purple-500 to-pink-500'
     },
     {
-      title: 'Add New Item',
-      description: 'Expand your digital wardrobe',
-      icon: Shirt,
+      title: 'Add Item',
+      description: 'Scan or upload',
+      icon: Plus,
       href: '/add',
-      color: 'blue'
+      badge: null,
+      color: 'from-blue-500 to-cyan-500'
     },
     {
-      title: 'Browse Market',
-      description: 'Discover new fashion',
-      icon: ShoppingBag,
-      href: '/market',
-      color: 'green'
-    },
-    {
-      title: 'Community',
-      description: 'Challenges, events & more',
-      icon: Trophy,
-      href: '/community',
-      color: 'pink'
-    },
-    {
-      title: 'Wardrobe Insights',
-      description: 'AI-powered analytics',
-      icon: BarChart3,
-      href: '/wardrobe-insights',
-      color: 'orange'
-    },
-    {
-      title: '2ndDresser',
-      description: 'Sustainable marketplace',
-      icon: Users,
-      href: '/2nddresser',
-      color: 'emerald'
-    },
-    {
-      title: 'MyMirror',
-      description: 'Virtual try-on',
-      icon: Calendar,
+      title: 'Virtual Try-On',
+      description: 'See before you wear',
+      icon: Eye,
       href: '/mymirror',
-      color: 'cyan'
+      badge: 'Hot',
+      color: 'from-green-500 to-emerald-500'
+    },
+    {
+      title: 'Style Challenges',
+      description: 'Earn rewards',
+      icon: Trophy,
+      href: '/challenges',
+      badge: 'Live',
+      color: 'from-yellow-500 to-orange-500'
     }
   ];
 
-  const recentActivity = [
-    { action: 'Added', item: 'Black Leather Jacket', time: '2 hours ago' },
-    { action: 'Wore', item: 'Blue Denim Jeans', time: '1 day ago' },
-    { action: 'Favorited', item: 'White Sneakers', time: '2 days ago' },
-    { action: 'Created outfit', item: 'Casual Friday Look', time: '3 days ago' }
+  const quickLinks = [
+    { icon: ShoppingBag, label: 'Market', href: '/market' },
+    { icon: Users, label: 'Community', href: '/community' },
+    { icon: BarChart3, label: 'Analytics', href: '/wardrobe-analytics' },
+    { icon: Palette, label: 'My Style', href: '/mystyle' },
+    { icon: Heart, label: '2ndDresser', href: '/2nddresser' },
+    { icon: Zap, label: 'AI Hub', href: '/ai-hub' }
   ];
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-4">
-      {/* Header */}
-      <header className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-10">
-        <div className="container max-w-7xl mx-auto px-4 py-4 lg:px-6">
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="flex-1 min-w-0">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold truncate">
-                Welcome back, {profile?.full_name || 'Fashion Lover'}!
-              </h1>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                {new Date().toLocaleDateString('en-US', { 
-                  weekday: 'long', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}
-              </p>
+      {/* Hero Header with Gradient */}
+      <div className="bg-gradient-to-br from-primary/10 via-secondary/5 to-background border-b">
+        <div className="container max-w-7xl mx-auto px-4 py-6 lg:px-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <Avatar className="h-12 w-12 border-2 border-primary/20">
+                  <AvatarImage src={profile?.avatar_url || ''} />
+                  <AvatarFallback>{profile?.full_name?.charAt(0) || 'U'}</AvatarFallback>
+                </Avatar>
+                <div>
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">
+                    Welcome, {profile?.full_name?.split(' ')[0] || 'Fashionista'}!
+                  </h1>
+                  <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-2">
+                    <Calendar className="w-3 h-3" />
+                    {new Date().toLocaleDateString('en-US', { 
+                      weekday: 'long', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Style Score Badge */}
+              <Badge className="bg-gradient-to-r from-primary to-secondary text-primary-foreground">
+                <Star className="w-3 h-3 mr-1" />
+                Style Score: {stats.styleScore}
+              </Badge>
             </div>
-            <Badge variant="secondary" className="flex items-center space-x-1 flex-shrink-0">
-              <Shield className="w-4 h-4" />
-              <span className="hidden sm:inline">Secured</span>
-            </Badge>
+            
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => navigate('/account')}
+              className="flex-shrink-0"
+            >
+              <Shield className="w-4 h-4 mr-2" />
+              Account
+            </Button>
           </div>
         </div>
-      </header>
+      </div>
 
-      <main className="container max-w-7xl mx-auto px-4 lg:px-6 py-4 sm:py-6 lg:py-8 space-y-6 sm:space-y-8">
-        {/* Stats Overview */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <Card>
-            <CardContent className="p-3 sm:p-4 text-center">
+      <main className="container max-w-7xl mx-auto px-4 lg:px-6 py-6 space-y-6">
+        {/* Stats Dashboard */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+          <Card className="hover:shadow-lg transition-all cursor-pointer" onClick={() => navigate('/wardrobe')}>
+            <CardContent className="p-4 text-center">
               <Shirt className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-primary" />
-              <p className="text-xl sm:text-2xl font-bold">{stats.wardrobeItems}</p>
-              <p className="text-xs sm:text-sm text-muted-foreground">Items</p>
+              <p className="text-2xl sm:text-3xl font-bold">{stats.wardrobeItems}</p>
+              <p className="text-xs text-muted-foreground">Wardrobe</p>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardContent className="p-3 sm:p-4 text-center">
-              <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-green-600" />
-              <p className="text-xl sm:text-2xl font-bold">{stats.outfitsCreated}</p>
-              <p className="text-xs sm:text-sm text-muted-foreground">Outfits</p>
+          <Card className="hover:shadow-lg transition-all">
+            <CardContent className="p-4 text-center">
+              <Heart className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-rose-500" />
+              <p className="text-2xl sm:text-3xl font-bold">{stats.favoriteItems}</p>
+              <p className="text-xs text-muted-foreground">Favorites</p>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardContent className="p-3 sm:p-4 text-center">
-              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-blue-600" />
-              <p className="text-xl sm:text-2xl font-bold">{stats.totalWears}</p>
-              <p className="text-xs sm:text-sm text-muted-foreground">Total Wears</p>
+          <Card className="hover:shadow-lg transition-all">
+            <CardContent className="p-4 text-center">
+              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-blue-500" />
+              <p className="text-2xl sm:text-3xl font-bold">{stats.totalWears}</p>
+              <p className="text-xs text-muted-foreground">Wears</p>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardContent className="p-3 sm:p-4 text-center">
-              <Star className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-yellow-600" />
-              <p className="text-xl sm:text-2xl font-bold">{stats.favoriteItems}</p>
-              <p className="text-xs sm:text-sm text-muted-foreground">Favorites</p>
+          <Card className="hover:shadow-lg transition-all">
+            <CardContent className="p-4 text-center">
+              <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-purple-500" />
+              <p className="text-2xl sm:text-3xl font-bold">{stats.outfitsCreated}</p>
+              <p className="text-xs text-muted-foreground">Outfits</p>
+            </CardContent>
+          </Card>
+          
+          <Card className="hover:shadow-lg transition-all col-span-2 sm:col-span-1">
+            <CardContent className="p-4 text-center">
+              <Flame className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-orange-500" />
+              <p className="text-2xl sm:text-3xl font-bold">{Math.floor(stats.styleScore / 10)}</p>
+              <p className="text-xs text-muted-foreground">Streak Days</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Quick Actions */}
+        {/* Trending Actions - Eye-catching Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {trendingActions.map((action) => (
+            <Card 
+              key={action.title}
+              className="group hover:shadow-xl transition-all cursor-pointer overflow-hidden border-2 hover:border-primary/50"
+              onClick={() => action.href.startsWith('#') ? setActiveTab('today') : navigate(action.href)}
+            >
+              <div className={`h-2 bg-gradient-to-r ${action.color}`} />
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between mb-3">
+                  <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color} bg-opacity-10`}>
+                    <action.icon className="w-5 h-5 text-primary" />
+                  </div>
+                  {action.badge && (
+                    <Badge variant="secondary" className="text-xs">
+                      {action.badge}
+                    </Badge>
+                  )}
+                </div>
+                <h3 className="font-semibold mb-1">{action.title}</h3>
+                <p className="text-sm text-muted-foreground">{action.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Quick Links */}
         <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Jump into your favorite features</CardDescription>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Quick Access</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 sm:gap-4">
-              {quickActions.map((action) => (
+            <div className="flex flex-wrap gap-2">
+              {quickLinks.map((link) => (
                 <Button
-                  key={action.title}
+                  key={link.label}
                   variant="outline"
-                  className="h-20 sm:h-24 flex-col space-y-1.5 sm:space-y-2 p-2"
-                  onClick={() => navigate(action.href)}
+                  size="sm"
+                  onClick={() => navigate(link.href)}
+                  className="flex items-center gap-2"
                 >
-                  <action.icon className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
-                  <div className="text-center min-w-0 w-full">
-                    <p className="font-medium text-xs sm:text-sm truncate">{action.title}</p>
-                    <p className="text-xs text-muted-foreground line-clamp-2">{action.description}</p>
-                  </div>
+                  <link.icon className="w-4 h-4" />
+                  {link.label}
                 </Button>
               ))}
             </div>
           </CardContent>
         </Card>
 
-        {/* Main Content Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
-            <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
-            <TabsTrigger value="outfits" className="text-xs sm:text-sm">Outfits</TabsTrigger>
-            <TabsTrigger value="analytics" className="text-xs sm:text-sm">Analytics</TabsTrigger>
-            <TabsTrigger value="laundry" className="text-xs sm:text-sm">Laundry</TabsTrigger>
+        {/* Main Content */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
+            <TabsTrigger value="today" className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              Today
+            </TabsTrigger>
+            <TabsTrigger value="discover" className="flex items-center gap-2">
+              <Eye className="w-4 h-4" />
+              Discover
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Insights
+            </TabsTrigger>
+            <TabsTrigger value="laundry" className="flex items-center gap-2">
+              <Cloud className="w-4 h-4" />
+              Laundry
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-6">
-            {/* Daily Outfit with VTO */}
-            <DailyOutfit />
-
-            {/* Recent Activity */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">{activity.action} {activity.item}</p>
-                      <p className="text-xs text-muted-foreground">{activity.time}</p>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+          <TabsContent value="today" className="space-y-6">
+            <RealDailyOutfit />
+            <PersonalizedRecommendations />
           </TabsContent>
 
-          <TabsContent value="outfits">
-            <DailyOutfitGenerator />
+          <TabsContent value="discover" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Trending in Fashion</CardTitle>
+                <CardDescription>Discover what's popular in your community</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button onClick={() => navigate('/community')} className="w-full">
+                  Explore Community
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="analytics">
@@ -243,44 +293,6 @@ const Home = () => {
             <SmartLaundryTracker />
           </TabsContent>
         </Tabs>
-
-        {/* Feature Discovery */}
-        <Card className="bg-gradient-to-r from-primary/10 to-secondary/10">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Zap className="w-5 h-5" />
-              <span>Discover More Features</span>
-            </CardTitle>
-            <CardDescription>Explore the full power of MyDresser AI</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Button 
-              variant="outline" 
-              className="w-full justify-between"
-              onClick={() => navigate('/wardrobe/enhanced')}
-            >
-              Enhanced Wardrobe Manager
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full justify-between"
-              onClick={() => navigate('/analytics')}
-            >
-              Advanced Analytics Dashboard
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-            <a href="/terminal">
-              <Button 
-                variant="outline" 
-                className="w-full justify-between"
-              >
-                Merchant Terminal (Pro Users)
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </a>
-          </CardContent>
-        </Card>
       </main>
     </div>
   );
