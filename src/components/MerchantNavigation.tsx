@@ -56,6 +56,11 @@ const merchantLinks = [
     icon: Store,
   },
   {
+    title: "Marketing",
+    href: "/terminal/marketing",
+    icon: TrendingUp,
+  },
+  {
     title: "Page",
     href: "/terminal/page",
     icon: MessageSquare,

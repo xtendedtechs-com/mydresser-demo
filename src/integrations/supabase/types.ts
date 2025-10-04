@@ -1282,6 +1282,63 @@ export type Database = {
           },
         ]
       }
+      merchant_events: {
+        Row: {
+          banner_image: string | null
+          created_at: string | null
+          current_attendees: number | null
+          description: string | null
+          end_date: string
+          event_type: string
+          id: string
+          is_active: boolean | null
+          is_online: boolean | null
+          location: string | null
+          max_attendees: number | null
+          merchant_id: string
+          name: string
+          registration_link: string | null
+          start_date: string
+          updated_at: string | null
+        }
+        Insert: {
+          banner_image?: string | null
+          created_at?: string | null
+          current_attendees?: number | null
+          description?: string | null
+          end_date: string
+          event_type: string
+          id?: string
+          is_active?: boolean | null
+          is_online?: boolean | null
+          location?: string | null
+          max_attendees?: number | null
+          merchant_id: string
+          name: string
+          registration_link?: string | null
+          start_date: string
+          updated_at?: string | null
+        }
+        Update: {
+          banner_image?: string | null
+          created_at?: string | null
+          current_attendees?: number | null
+          description?: string | null
+          end_date?: string
+          event_type?: string
+          id?: string
+          is_active?: boolean | null
+          is_online?: boolean | null
+          location?: string | null
+          max_attendees?: number | null
+          merchant_id?: string
+          name?: string
+          registration_link?: string | null
+          start_date?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       merchant_items: {
         Row: {
           brand: string | null

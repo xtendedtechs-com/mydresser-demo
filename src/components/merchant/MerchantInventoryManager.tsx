@@ -8,6 +8,7 @@ import { useMerchantItems } from '@/hooks/useMerchantItems';
 import AddMerchantProductDialog from '@/components/AddMerchantProductDialog';
 import { Package, Search, Edit, Trash2, AlertCircle, Plus } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
 
 export const MerchantInventoryManager = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -170,7 +171,15 @@ export const MerchantInventoryManager = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => {/* Add delete logic */}}
+                              onClick={async () => {
+                                if (confirm('Are you sure you want to delete this product?')) {
+                                  const { error } = await supabase
+                                    .from('merchant_items')
+                                    .delete()
+                                    .eq('id', item.id);
+                                  if (!error) refetch();
+                                }
+                              }}
                             >
                               <Trash2 className="h-3 w-3" />
                             </Button>

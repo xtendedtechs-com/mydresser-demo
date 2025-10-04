@@ -2,15 +2,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DresserPlusAI } from '@/components/merchant/DresserPlusAI';
 import { MyStylistAI } from '@/components/merchant/MyStylistAI';
 import AdvancedMerchantTools from '@/components/AdvancedMerchantTools';
-import { Sparkles, Target, Palette } from 'lucide-react';
+import { Sparkles, Palette, Zap } from 'lucide-react';
 
 const MerchantToolsPage = () => {
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Merchant Tools</h1>
+        <h1 className="text-3xl font-bold">AI Business Tools</h1>
         <p className="text-muted-foreground">
-          Advanced AI-powered tools for fashion innovation and marketing
+          Advanced AI-powered tools for fashion innovation and business optimization
         </p>
       </div>
 
@@ -22,11 +22,11 @@ const MerchantToolsPage = () => {
           </TabsTrigger>
           <TabsTrigger value="mystylist" className="gap-2">
             <Palette className="h-4 w-4" />
-            MyStylist
+            MyStylist AI
           </TabsTrigger>
-          <TabsTrigger value="marketing" className="gap-2">
-            <Target className="h-4 w-4" />
-            Marketing Tools
+          <TabsTrigger value="operations" className="gap-2">
+            <Zap className="h-4 w-4" />
+            Operations
           </TabsTrigger>
         </TabsList>
 
@@ -38,7 +38,7 @@ const MerchantToolsPage = () => {
           <MyStylistAI />
         </TabsContent>
 
-        <TabsContent value="marketing">
+        <TabsContent value="operations">
           <AdvancedMerchantTools />
         </TabsContent>
       </Tabs>

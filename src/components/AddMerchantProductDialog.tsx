@@ -175,11 +175,15 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
           .from('merchant_items')
           .update(productData)
           .eq('id', editProduct.id)
-          .eq('merchant_id', user.id);
+          .eq('merchant_id', user.id)
+          .select()
+          .single();
       } else {
         result = await supabase
           .from('merchant_items')
-          .insert([productData]);
+          .insert([productData])
+          .select()
+          .single();
       }
 
       if (result.error) throw result.error;
