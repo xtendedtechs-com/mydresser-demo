@@ -268,9 +268,21 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
 
     setGeneratingVTO(true);
     try {
+      // Convert storage URL to base64 if needed
+      let imageData = photo;
+      if (photo.startsWith('http')) {
+        const response = await fetch(photo);
+        const blob = await response.blob();
+        imageData = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(blob);
+        });
+      }
+
       const { data, error } = await supabase.functions.invoke('ai-virtual-tryon', {
         body: {
-          userImage: photo,
+          userImage: imageData,
           clothingItems: outfit.items.map((item: any) => ({
             id: item.id,
             name: item.name,
