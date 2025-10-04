@@ -47,3 +47,9 @@ verify_jwt = false
 
 [functions.ai-style-insights]
 verify_jwt = true
+
+[functions.ai-wardrobe-analysis]
+verify_jwt = true
+
+[functions.ai-image-style-analysis]
+verify_jwt = true

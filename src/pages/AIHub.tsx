@@ -1,11 +1,14 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sparkles, Shirt, MessageSquare, TrendingUp, Cloud } from "lucide-react";
+import { Sparkles, Shirt, MessageSquare, TrendingUp, Cloud, Scan, BarChart3 } from "lucide-react";
 import { AIOutfitGenerator } from "@/components/AIOutfitGenerator";
 import { AIStyleChat } from "@/components/AIStyleChat";
 import { SmartOutfitRecommendations } from "@/components/SmartOutfitRecommendations";
 import { DailyOutfitGenerator } from "@/components/DailyOutfitGenerator";
+import { AIWardrobeAnalyzer } from "@/components/AIWardrobeAnalyzer";
+import { AIImageStyleAnalyzer } from "@/components/AIImageStyleAnalyzer";
 import { useWardrobe } from "@/hooks/useWardrobe";
+import { Badge } from "@/components/ui/badge";
 
 const AIHub = () => {
   const { items: wardrobeItems, loading } = useWardrobe();
@@ -14,21 +17,38 @@ const AIHub = () => {
       <div className="container max-w-6xl mx-auto p-4 space-y-6">
         {/* Header */}
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold">AI Fashion Assistant</h1>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-8 w-8 text-primary" />
+                <h1 className="text-3xl font-bold">AI Fashion Hub</h1>
+                <Badge variant="secondary" className="ml-2">Powered by Gemini</Badge>
+              </div>
+              <p className="text-muted-foreground">
+                Advanced AI tools for wardrobe analysis, style consultation, and personalized recommendations
+              </p>
+            </div>
           </div>
-          <p className="text-muted-foreground">
-            Get personalized outfit suggestions, style advice, and smart recommendations powered by AI
-          </p>
         </div>
 
         {/* AI Features Tabs */}
         <Tabs defaultValue="daily" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="daily" className="flex items-center gap-2">
               <Cloud className="h-4 w-4" />
-              Daily Outfit
+              Daily
+            </TabsTrigger>
+            <TabsTrigger value="chat" className="flex items-center gap-2">
+              <MessageSquare className="h-4 w-4" />
+              Chat
+            </TabsTrigger>
+            <TabsTrigger value="analyzer" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Analyzer
+            </TabsTrigger>
+            <TabsTrigger value="scanner" className="flex items-center gap-2">
+              <Scan className="h-4 w-4" />
+              Scanner
             </TabsTrigger>
             <TabsTrigger value="generator" className="flex items-center gap-2">
               <Shirt className="h-4 w-4" />
@@ -36,11 +56,7 @@ const AIHub = () => {
             </TabsTrigger>
             <TabsTrigger value="recommendations" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
-              Recommendations
-            </TabsTrigger>
-            <TabsTrigger value="chat" className="flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
-              Style Chat
+              Smart Tips
             </TabsTrigger>
           </TabsList>
 
@@ -87,17 +103,15 @@ const AIHub = () => {
           </TabsContent>
 
           <TabsContent value="chat" className="space-y-4 mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>AI Style Consultant</CardTitle>
-                <CardDescription>
-                  Chat with your personal AI style assistant for fashion advice and tips
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <AIStyleChat />
-              </CardContent>
-            </Card>
+            <AIStyleChat />
+          </TabsContent>
+
+          <TabsContent value="analyzer" className="space-y-4 mt-6">
+            <AIWardrobeAnalyzer />
+          </TabsContent>
+
+          <TabsContent value="scanner" className="space-y-4 mt-6">
+            <AIImageStyleAnalyzer />
           </TabsContent>
         </Tabs>
 
