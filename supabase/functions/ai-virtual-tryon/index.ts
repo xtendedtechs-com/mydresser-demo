@@ -24,27 +24,69 @@ serve(async (req) => {
       throw new Error('Missing required parameters: userImage and clothingItems are required');
     }
 
-    // Normalize user image to a data URL to avoid external fetch failures
-    const toDataUrl = async (src: string): Promise<string> => {
-      if (typeof src !== 'string' || !src) throw new Error('Invalid user image');
-      if (src.startsWith('data:')) return src;
+    // Validate and process user image
+    const processImage = async (src: string): Promise<string> => {
+      if (typeof src !== 'string' || !src) {
+        throw new Error('Invalid user image: must be a non-empty string');
+      }
+      
+      // If already a data URL, validate format and size
+      if (src.startsWith('data:')) {
+        const match = src.match(/^data:image\/(jpeg|jpg|png|webp);base64,/);
+        if (!match) {
+          throw new Error('Unsupported image format. Please use JPEG, PNG, or WebP.');
+        }
+        
+        // Check data URL size (max ~4MB for Gemini)
+        const base64Data = src.split(',')[1];
+        const sizeInBytes = (base64Data.length * 3) / 4;
+        const sizeInMB = sizeInBytes / (1024 * 1024);
+        
+        if (sizeInMB > 4) {
+          throw new Error(`Image too large (${sizeInMB.toFixed(1)}MB). Please use an image under 4MB.`);
+        }
+        
+        console.log(`Image size: ${sizeInMB.toFixed(2)}MB`);
+        return src;
+      }
+      
+      // For HTTP(S) URLs, fetch and convert
       try {
+        console.log('Fetching image from URL:', src.substring(0, 100));
         const res = await fetch(src);
-        if (!res.ok) throw new Error(`Image fetch failed: ${res.status}`);
-        const contentType = res.headers.get('content-type') || 'image/jpeg';
+        if (!res.ok) {
+          throw new Error(`Image fetch failed with status ${res.status}`);
+        }
+        
+        const contentType = res.headers.get('content-type');
+        if (!contentType || !contentType.startsWith('image/')) {
+          throw new Error(`Invalid content type: ${contentType}. Expected image/*`);
+        }
+        
         const arrayBuffer = await res.arrayBuffer();
+        const sizeInMB = arrayBuffer.byteLength / (1024 * 1024);
+        
+        if (sizeInMB > 4) {
+          throw new Error(`Image too large (${sizeInMB.toFixed(1)}MB). Please use an image under 4MB.`);
+        }
+        
+        console.log(`Fetched image: ${sizeInMB.toFixed(2)}MB, type: ${contentType}`);
+        
+        // Convert to base64
         let binary = '';
         const bytes = new Uint8Array(arrayBuffer);
-        for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+        for (let i = 0; i < bytes.length; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
         const base64 = btoa(binary);
         return `data:${contentType};base64,${base64}`;
       } catch (e) {
-        console.error('Image normalization failed, passing through original URL', e);
-        return src;
+        console.error('Image processing failed:', e);
+        throw new Error(`Failed to process image: ${e instanceof Error ? e.message : 'Unknown error'}`);
       }
     };
 
-    const processedImage = await toDataUrl(userImage);
+    const processedImage = await processImage(userImage);
 
     console.log('Processing virtual try-on request with', clothingItems.length, 'items...');
 
@@ -58,17 +100,25 @@ serve(async (req) => {
 
     console.log('Outfit description:', outfitDescription);
 
-    // Construct the editing instruction - emphasize that we're editing an existing image
+    // Construct the editing instruction with clear, specific guidance
     const editInstruction = instruction || 
-      `Edit this photo to show the person wearing these clothes: ${outfitDescription}. 
-       Make the new clothing look natural and properly fitted to their body. 
-       Keep the person's pose, face, and background exactly the same. 
-       Only change the clothing to match the described outfit.
-       Ensure proper lighting and realistic fabric textures.`;
+      `Create a realistic photo showing the person wearing these specific clothing items: ${outfitDescription}.
+       
+       Requirements:
+       - Keep the person's face, body pose, and background EXACTLY as shown in the original photo
+       - Replace ONLY the clothing with the items described
+       - Ensure the new clothes fit naturally on the person's body
+       - Match the lighting and quality of the original photo
+       - Make fabric textures and colors look realistic
+       - Maintain proper proportions and perspective
+       
+       Generate a single edited photo where the person is wearing the described outfit.`;
 
-    console.log('Calling AI Gateway with image editing request...');
+    console.log('Calling AI Gateway for image generation...');
+    console.log('Image format:', processedImage.substring(0, 30) + '...');
 
-    // Call Lovable AI Gateway for image editing
+    // Call Lovable AI Gateway for image generation (not editing)
+    // Gemini image preview works better with generation than editing
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -82,19 +132,20 @@ serve(async (req) => {
             role: "user",
             content: [
               {
-                type: "text",
-                text: editInstruction
-              },
-              {
                 type: "image_url",
                 image_url: {
                   url: processedImage
                 }
+              },
+              {
+                type: "text",
+                text: editInstruction
               }
             ]
           }
         ],
-        modalities: ["image", "text"]
+        modalities: ["image", "text"],
+        max_tokens: 4096
       })
     });
 

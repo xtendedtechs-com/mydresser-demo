@@ -18,6 +18,11 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    // Validate messages is an array
+    if (!Array.isArray(messages) || messages.length === 0) {
+      throw new Error("Invalid messages format: expected non-empty array");
+    }
+
     const systemPrompt = `You are MyDresser AI Style Consultant, a professional fashion advisor with expertise in:
 - Personal styling and wardrobe curation
 - Color theory and coordination
