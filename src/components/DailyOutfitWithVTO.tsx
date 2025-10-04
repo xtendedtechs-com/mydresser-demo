@@ -32,13 +32,33 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
 
   const generateVTO = async () => {
     if (!userPhoto) return;
-    
+
+    // Ensure we always send a directly embeddable data URL to the Edge Function
+    const toDataUrl = async (src: string): Promise<string> => {
+      if (src.startsWith('data:')) return src;
+      try {
+        const res = await fetch(src, { cache: 'no-cache' });
+        const blob = await res.blob();
+        return await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      } catch (e) {
+        // As a last resort, just pass through (Edge will error and we surface toast)
+        return src;
+      }
+    };
+
     setIsGenerating(true);
     try {
+      const imageData = await toDataUrl(userPhoto);
+
       // Call AI virtual try-on function with user photo and outfit items
       const { data, error } = await supabase.functions.invoke('ai-virtual-tryon', {
         body: {
-          userImage: userPhoto,
+          userImage: imageData,
           clothingItems: outfit.items.map(item => ({
             id: item.id,
             name: item.name,
