@@ -52,7 +52,6 @@ import SustainabilityPage from "@/pages/SustainabilityPage";
 import GamificationPage from "@/pages/GamificationPage";
 import AdvancedAnalyticsPage from "@/pages/AdvancedAnalyticsPage";
 import PersonalizationHub from "@/pages/PersonalizationHub";
-import AdvancedAnalyticsPage from "@/pages/AdvancedAnalyticsPage";
 import StyleChallengesPage from "@/pages/StyleChallengesPage";
 import WardrobeOptimizerPage from "@/pages/WardrobeOptimizerPage";
 import VirtualFittingRoom from "@/pages/VirtualFittingRoom";
