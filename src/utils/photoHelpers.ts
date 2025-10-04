@@ -24,6 +24,23 @@ export const getCategoryPlaceholderImage = (category?: string): string => {
 };
 
 /**
+ * Extract a string URL from many possible shapes (object, nested, etc.)
+ */
+const extractUrl = (val: any): string | null => {
+  if (!val) return null;
+  if (typeof val === 'string') return val;
+  // Common object shapes
+  if (typeof val === 'object') {
+    // Supabase upload results or stored shapes
+    if (typeof val.publicUrl === 'string') return val.publicUrl;
+    if (typeof val.url === 'string') return val.url;
+    if (typeof val.src === 'string') return val.src;
+    if (typeof val.path === 'string') return val.path; // may be a storage path
+  }
+  return null;
+};
+
+/**
  * Extracts a primary photo URL from various photo data formats
  * @param photos - Photo data in various formats
  * @param category - Item category for smart placeholder selection
@@ -34,27 +51,37 @@ export const getPrimaryPhotoUrl = (photos: PhotoData, category?: string): string
 
   // Handle string URL
   if (typeof photos === 'string') {
-    // Filter out blob URLs as they're temporary
     if (photos.startsWith('blob:')) return getCategoryPlaceholderImage(category);
     return photos || getCategoryPlaceholderImage(category);
   }
 
-  // Handle array of URLs
+  // Handle array (strings or objects)
   if (Array.isArray(photos)) {
-    const validUrl = photos.find(url => url && !url.startsWith('blob:'));
-    return validUrl || getCategoryPlaceholderImage(category);
+    for (const entry of photos) {
+      const candidate = extractUrl(entry) || (typeof entry === 'string' ? entry : null);
+      if (candidate && !candidate.startsWith('blob:')) return candidate;
+    }
+    return getCategoryPlaceholderImage(category);
   }
 
-  // Handle object with main/urls properties
+  // Handle object with main/urls or arbitrary shapes
   if (typeof photos === 'object') {
     const p: any = photos;
-    // Check main first
-    if (p.main && !p.main.startsWith('blob:')) return p.main;
-    // Check urls array
+    // Check "main" first (string or object)
+    const mainUrl = extractUrl(p.main);
+    if (mainUrl && !mainUrl.startsWith('blob:')) return mainUrl;
+
+    // Check urls array (can be strings or objects)
     if (Array.isArray(p.urls) && p.urls.length > 0) {
-      const validUrl = p.urls.find((url: string) => url && !url.startsWith('blob:'));
-      if (validUrl) return validUrl;
+      for (const u of p.urls) {
+        const candidate = extractUrl(u) || (typeof u === 'string' ? u : null);
+        if (candidate && !candidate.startsWith('blob:')) return candidate;
+      }
     }
+
+    // Sometimes photos could be stored as { url: "..." }
+    const direct = extractUrl(p);
+    if (direct && !direct.startsWith('blob:')) return direct;
   }
 
   return getCategoryPlaceholderImage(category);
@@ -75,19 +102,31 @@ export const getAllPhotoUrls = (photos: PhotoData): string[] => {
     return (photos && !photos.startsWith('blob:')) ? [photos] : [];
   }
 
-  // Handle array of URLs
+  // Handle array (strings or objects)
   if (Array.isArray(photos)) {
-    return photos.filter(url => url && !url.startsWith('blob:'));
+    const urls: string[] = [];
+    for (const entry of photos) {
+      const candidate = extractUrl(entry) || (typeof entry === 'string' ? entry : null);
+      if (candidate && !candidate.startsWith('blob:')) urls.push(candidate);
+    }
+    return Array.from(new Set(urls));
   }
 
-  // Handle object with urls and/or main property
+  // Handle object with urls and/or main property (allow nested shapes)
   if (typeof photos === 'object') {
     const p: any = photos;
-    const main = (p.main && !p.main.startsWith('blob:')) ? [p.main] : [];
-    const urls = Array.isArray(p.urls) ? p.urls.filter((url: string) => url && !url.startsWith('blob:')) : [];
-    const combined = [...main, ...urls];
-    // Ensure uniqueness and preserve order
-    return Array.from(new Set(combined));
+    const urls: string[] = [];
+    const main = extractUrl(p.main);
+    if (main && !main.startsWith('blob:')) urls.push(main);
+    if (Array.isArray(p.urls)) {
+      for (const u of p.urls) {
+        const candidate = extractUrl(u) || (typeof u === 'string' ? u : null);
+        if (candidate && !candidate.startsWith('blob:')) urls.push(candidate);
+      }
+    }
+    const direct = extractUrl(p);
+    if (direct && !direct.startsWith('blob:')) urls.push(direct);
+    return Array.from(new Set(urls));
   }
 
   return [];

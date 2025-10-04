@@ -12,7 +12,7 @@ import {
   Star
 } from "lucide-react";
 import { WardrobeItem } from "@/hooks/useWardrobe";
-import { getPrimaryPhotoUrl } from "@/utils/photoHelpers";
+import { getPrimaryPhotoUrl, getCategoryPlaceholderImage } from "@/utils/photoHelpers";
 
 interface WardrobeItemCardProps {
   item: WardrobeItem;
@@ -51,8 +51,13 @@ const WardrobeItemCard = ({
       <div className="relative aspect-[3/4] bg-muted">
         <img
           src={getPrimaryPhotoUrl(item.photos, item.category)}
-          alt={item.name}
+          alt={`${item.name} - ${item.category}`}
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = getCategoryPlaceholderImage(item.category);
+          }}
         />
         
         {/* Overlay Badges */}

@@ -30,7 +30,7 @@ import { supabase } from "@/integrations/supabase/client";
 import SmartOutfitEngine from "@/services/smartOutfitEngine";
 import VirtualTryOn from "@/components/VirtualTryOn";
 import DailyOutfitWithVTO from "@/components/DailyOutfitWithVTO";
-import { getPrimaryPhotoUrl } from "@/utils/photoHelpers";
+import { getPrimaryPhotoUrl, getCategoryPlaceholderImage } from "@/utils/photoHelpers";
 
 const getTimeSlot = (timeOfDay: string): string => {
   const times: Record<string, string> = {
@@ -826,8 +826,13 @@ const DailyOutfit = () => {
                 <div className="aspect-square bg-muted rounded overflow-hidden mb-2">
                   <img
                     src={getPrimaryPhotoUrl(item.photos, item.category)}
-                    alt={item.name}
+                    alt={`${item.name} - ${item.category}`}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = getCategoryPlaceholderImage(item.category);
+                    }}
                   />
                 </div>
                 <div>
