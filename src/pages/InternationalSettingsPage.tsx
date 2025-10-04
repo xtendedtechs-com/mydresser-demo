@@ -1,7 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Globe, DollarSign, MapPin } from "lucide-react";
+import { Globe, DollarSign, MapPin, Languages } from "lucide-react";
 import MultiCurrencySettings from "@/components/MultiCurrencySettings";
 import ShippingZonesManager from "@/components/ShippingZonesManager";
+import { LanguageRegionalSettings } from "@/components/settings/LanguageRegionalSettings";
 
 const InternationalSettingsPage = () => {
   return (
@@ -17,8 +18,12 @@ const InternationalSettingsPage = () => {
           </p>
         </div>
 
-        <Tabs defaultValue="currency" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
+        <Tabs defaultValue="language" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3 lg:w-[600px]">
+            <TabsTrigger value="language" className="flex items-center gap-2">
+              <Languages className="w-4 h-4" />
+              Language
+            </TabsTrigger>
             <TabsTrigger value="currency" className="flex items-center gap-2">
               <DollarSign className="w-4 h-4" />
               Currency
@@ -28,6 +33,10 @@ const InternationalSettingsPage = () => {
               Shipping
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="language" className="space-y-6">
+            <LanguageRegionalSettings />
+          </TabsContent>
 
           <TabsContent value="currency" className="space-y-6">
             <MultiCurrencySettings />

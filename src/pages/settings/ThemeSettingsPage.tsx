@@ -1,9 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ThemeSettingsPanel } from "@/components/settings/ThemeSettingsPanel";
 import ThemeCustomizer from "@/components/ThemeCustomizer";
+import { AdvancedThemeCustomizer } from "@/components/settings/AdvancedThemeCustomizer";
+import { LanguageRegionalSettings } from "@/components/settings/LanguageRegionalSettings";
 
 const ThemeSettingsPage = () => {
   const navigate = useNavigate();
@@ -26,7 +27,9 @@ const ThemeSettingsPage = () => {
             </div>
           </div>
 
+          <LanguageRegionalSettings />
           <ThemeSettingsPanel />
+          <AdvancedThemeCustomizer />
           <ThemeCustomizer />
         </div>
       </div>

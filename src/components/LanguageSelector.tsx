@@ -28,6 +28,7 @@ const languages: Language[] = [
   { code: 'ko', name: 'Korean', nativeName: '한국어', flag: '🇰🇷' },
   { code: 'zh', name: 'Chinese', nativeName: '中文', flag: '🇨🇳' },
   { code: 'ar', name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦' },
+  { code: 'he', name: 'Hebrew', nativeName: 'עברית', flag: '🇮🇱' },
 ];
 
 export const LanguageSelector = () => {
@@ -41,19 +42,25 @@ export const LanguageSelector = () => {
     setSelectedLanguage(initial);
     i18n.changeLanguage(initial.code);
     document.documentElement.lang = initial.code;
+    
+    // Set initial RTL direction
+    const rtlLanguages = ['ar', 'he'];
+    document.documentElement.dir = rtlLanguages.includes(initial.code) ? 'rtl' : 'ltr';
   }, [i18n]);
 
   const handleLanguageChange = (language: Language) => {
     setSelectedLanguage(language);
-    // Store in localStorage
     localStorage.setItem('app-language', language.code);
-    // Apply to i18n and document
     i18n.changeLanguage(language.code);
     document.documentElement.lang = language.code;
     
+    // Update RTL direction
+    const rtlLanguages = ['ar', 'he'];
+    document.documentElement.dir = rtlLanguages.includes(language.code) ? 'rtl' : 'ltr';
+    
     toast({
-      title: 'Language Updated',
-      description: `Language changed to ${language.nativeName}`
+      title: i18n.t('common.languageChanged'),
+      description: `${language.flag} ${language.nativeName}`,
     });
   };
 
