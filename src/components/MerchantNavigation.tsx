@@ -22,18 +22,43 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 const merchantLinks = [
   {
     title: "Dashboard",
-    href: "/terminal/dashboard",
+    href: "/terminal",
     icon: LayoutDashboard,
   },
   {
-    title: "POS Terminal",
-    href: "/terminal",
+    title: "POS Register",
+    href: "/terminal/register",
     icon: ShoppingCart,
   },
   {
     title: "Inventory",
     href: "/terminal/inventory",
     icon: Package,
+  },
+  {
+    title: "Orders",
+    href: "/terminal/orders",
+    icon: FileText,
+  },
+  {
+    title: "Customers",
+    href: "/terminal/customers",
+    icon: Users,
+  },
+  {
+    title: "Financial",
+    href: "/terminal/financial",
+    icon: TrendingUp,
+  },
+  {
+    title: "Partners",
+    href: "/terminal/partnerships",
+    icon: Store,
+  },
+  {
+    title: "Page",
+    href: "/terminal/page",
+    icon: MessageSquare,
   },
   {
     title: "Tools",
@@ -46,29 +71,14 @@ const merchantLinks = [
     icon: BarChart3,
   },
   {
-    title: "Orders",
-    href: "/terminal/orders",
-    icon: FileText,
-  },
-  {
-    title: "Customer Relations",
-    href: "/terminal/customer-relations",
-    icon: Users,
-  },
-  {
-    title: "Financial Reports",
-    href: "/terminal/financial-reports",
-    icon: TrendingUp,
-  },
-  {
-    title: "Multi-Store",
-    href: "/terminal/multi-store",
-    icon: Store,
-  },
-  {
     title: "Settings",
     href: "/terminal/settings",
     icon: Settings,
+  },
+  {
+    title: "Support",
+    href: "/terminal/support",
+    icon: MessageSquare,
   },
 ];
 

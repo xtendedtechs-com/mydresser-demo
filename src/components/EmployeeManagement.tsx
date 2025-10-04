@@ -172,7 +172,7 @@ export const EmployeeManagement = () => {
                     <SelectValue placeholder="Select location" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No specific location</SelectItem>
+                    <SelectItem value="none">No specific location</SelectItem>
                     {locations.map((location) => (
                       <SelectItem key={location.id} value={location.id}>
                         {location.location_name}

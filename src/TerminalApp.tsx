@@ -7,6 +7,9 @@ import { useProfile } from "@/hooks/useProfile";
 import MerchantLanding from "@/pages/MerchantLanding";
 import MerchantAuth from "@/components/MerchantAuth";
 import MerchantTerminalPage from "@/pages/MerchantTerminalPage";
+import MerchantTerminalDashboard from "@/pages/MerchantTerminalDashboard";
+import MerchantTerminalRegister from "@/pages/MerchantTerminalRegister";
+import MerchantTerminalInventory from "@/pages/MerchantTerminalInventory";
 import MerchantPage from "@/pages/MerchantPage";
 import MerchantAnalyticsPage from "@/pages/MerchantAnalyticsPage";
 import EnhancedMerchantDashboard from "@/pages/EnhancedMerchantDashboard";
@@ -19,7 +22,6 @@ import NotFound from "@/pages/NotFound";
 import MultiStoreManagementPage from "@/pages/MultiStoreManagementPage";
 import BrandPartnershipsPage from "@/pages/BrandPartnershipsPage";
 import AdvancedMerchantReports from "@/pages/AdvancedMerchantReports";
-
 import MerchantToolsPage from "@/pages/MerchantToolsPage";
 
 const TerminalApp = () => {
@@ -55,19 +57,24 @@ const TerminalApp = () => {
             <MerchantNavigation />
             <main className="md:pl-64 min-h-screen bg-background">
               <Routes>
-                <Route path="/" element={<MerchantTerminalPage />} />
+                <Route path="/" element={<MerchantTerminalDashboard />} />
+                <Route path="/register" element={<MerchantTerminalRegister />} />
+                <Route path="/inventory" element={<MerchantTerminalInventory />} />
+                <Route path="/orders" element={<MerchantOrders />} />
+                <Route path="/customers" element={<CustomerRelations />} />
+                <Route path="/financial" element={<FinancialReports />} />
+                <Route path="/partnerships" element={<BrandPartnershipsPage />} />
+                <Route path="/page" element={<MerchantPage />} />
+                <Route path="/settings" element={<MerchantTerminalPage />} />
+                <Route path="/support" element={<SupportsResources />} />
                 <Route path="/tools" element={<MerchantToolsPage />} />
                 <Route path="/dashboard" element={<EnhancedMerchantDashboard />} />
-                <Route path="/inventory" element={<MerchantInventoryManagement />} />
-                <Route path="/orders" element={<MerchantOrders />} />
                 <Route path="/analytics" element={<MerchantAnalyticsPage />} />
                 <Route path="/reports" element={<AdvancedMerchantReports />} />
                 <Route path="/customer-relations" element={<CustomerRelations />} />
                 <Route path="/financial-reports" element={<FinancialReports />} />
                 <Route path="/multi-store" element={<MultiStoreManagementPage />} />
                 <Route path="/brand-partnerships" element={<BrandPartnershipsPage />} />
-                <Route path="/settings" element={<MerchantTerminalPage />} />
-                <Route path="/support" element={<SupportsResources />} />
                 <Route path="/page/:merchantId" element={<MerchantPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

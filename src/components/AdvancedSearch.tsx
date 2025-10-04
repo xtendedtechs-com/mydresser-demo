@@ -110,12 +110,12 @@ export const AdvancedSearch = ({ onSearch, onClear }: AdvancedSearchProps) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>Category</Label>
-            <Select value={filters.category} onValueChange={(value) => handleFilterChange('category', value)}>
+            <Select value={filters.category || 'all'} onValueChange={(value) => handleFilterChange('category', value === 'all' ? '' : value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Any category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any category</SelectItem>
+                <SelectItem value="all">Any category</SelectItem>
                 {categories.map(category => (
                   <SelectItem key={category} value={category}>
                     {category.charAt(0).toUpperCase() + category.slice(1)}
@@ -127,12 +127,12 @@ export const AdvancedSearch = ({ onSearch, onClear }: AdvancedSearchProps) => {
 
           <div className="space-y-2">
             <Label>Brand</Label>
-            <Select value={filters.brand} onValueChange={(value) => handleFilterChange('brand', value)}>
+            <Select value={filters.brand || 'all'} onValueChange={(value) => handleFilterChange('brand', value === 'all' ? '' : value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Any brand" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any brand</SelectItem>
+                <SelectItem value="all">Any brand</SelectItem>
                 {brands.map(brand => (
                   <SelectItem key={brand} value={brand}>
                     {brand}
@@ -147,12 +147,12 @@ export const AdvancedSearch = ({ onSearch, onClear }: AdvancedSearchProps) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>Color</Label>
-            <Select value={filters.color} onValueChange={(value) => handleFilterChange('color', value)}>
+            <Select value={filters.color || 'all'} onValueChange={(value) => handleFilterChange('color', value === 'all' ? '' : value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Any color" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any color</SelectItem>
+                <SelectItem value="all">Any color</SelectItem>
                 {colors.map(color => (
                   <SelectItem key={color} value={color}>
                     {color}
@@ -164,12 +164,12 @@ export const AdvancedSearch = ({ onSearch, onClear }: AdvancedSearchProps) => {
 
           <div className="space-y-2">
             <Label>Size</Label>
-            <Select value={filters.size} onValueChange={(value) => handleFilterChange('size', value)}>
+            <Select value={filters.size || 'all'} onValueChange={(value) => handleFilterChange('size', value === 'all' ? '' : value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Any size" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any size</SelectItem>
+                <SelectItem value="all">Any size</SelectItem>
                 {sizes.map(size => (
                   <SelectItem key={size} value={size}>
                     {size}
@@ -197,12 +197,12 @@ export const AdvancedSearch = ({ onSearch, onClear }: AdvancedSearchProps) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>Condition</Label>
-            <Select value={filters.condition} onValueChange={(value) => handleFilterChange('condition', value)}>
+            <Select value={filters.condition || 'all'} onValueChange={(value) => handleFilterChange('condition', value === 'all' ? '' : value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Any condition" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any condition</SelectItem>
+                <SelectItem value="all">Any condition</SelectItem>
                 {conditions.map(condition => (
                   <SelectItem key={condition} value={condition}>
                     {condition.charAt(0).toUpperCase() + condition.slice(1)}
@@ -214,12 +214,12 @@ export const AdvancedSearch = ({ onSearch, onClear }: AdvancedSearchProps) => {
 
           <div className="space-y-2">
             <Label>Occasion</Label>
-            <Select value={filters.occasion} onValueChange={(value) => handleFilterChange('occasion', value)}>
+            <Select value={filters.occasion || 'all'} onValueChange={(value) => handleFilterChange('occasion', value === 'all' ? '' : value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Any occasion" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any occasion</SelectItem>
+                <SelectItem value="all">Any occasion</SelectItem>
                 {occasions.map(occasion => (
                   <SelectItem key={occasion} value={occasion}>
                     {occasion.charAt(0).toUpperCase() + occasion.slice(1)}
@@ -233,12 +233,12 @@ export const AdvancedSearch = ({ onSearch, onClear }: AdvancedSearchProps) => {
         {/* Season */}
         <div className="space-y-2">
           <Label>Season</Label>
-          <Select value={filters.season} onValueChange={(value) => handleFilterChange('season', value)}>
+          <Select value={filters.season || 'all'} onValueChange={(value) => handleFilterChange('season', value === 'all' ? '' : value)}>
             <SelectTrigger>
               <SelectValue placeholder="Any season" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Any season</SelectItem>
+              <SelectItem value="all">Any season</SelectItem>
               {seasons.map(season => (
                 <SelectItem key={season} value={season}>
                   {season.charAt(0).toUpperCase() + season.slice(1)}
