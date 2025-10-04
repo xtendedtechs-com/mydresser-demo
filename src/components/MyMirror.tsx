@@ -93,29 +93,42 @@ export const MyMirror = ({ selectedItem, onCapture }: MyMirrorProps) => {
       const { data, error } = await supabase.functions.invoke('ai-virtual-tryon', {
         body: {
           userImage: capturedImage,
-          clothingItem: {
+          clothingItems: [{
+            id: selectedItem.id,
             name: selectedItem.name,
             category: selectedItem.category,
             color: selectedItem.color,
             brand: selectedItem.brand,
-          }
+          }]
         }
       });
 
       if (error) throw error;
 
-      if (data.editedImage) {
-        setProcessedImage(data.editedImage);
+      if (data?.editedImageUrl) {
+        setProcessedImage(data.editedImageUrl);
         toast({
           title: "Virtual try-on complete! ✨",
           description: "Your outfit has been virtually applied",
         });
+      } else {
+        throw new Error('No image returned from virtual try-on service');
       }
     } catch (error: any) {
       console.error('Virtual try-on error:', error);
+      
+      let errorMessage = 'Failed to apply virtual try-on. Please try again.';
+      if (error.message?.includes('AI service not configured')) {
+        errorMessage = 'Virtual try-on service is not configured.';
+      } else if (error.message?.includes('Rate limit')) {
+        errorMessage = 'Too many requests. Please wait and try again.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Try-on failed",
-        description: error.message || "Failed to apply virtual try-on",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

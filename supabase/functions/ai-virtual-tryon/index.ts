@@ -16,7 +16,12 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
+      console.error('LOVABLE_API_KEY is not configured');
+      throw new Error('AI service not configured. Please contact support.');
+    }
+
+    if (!userImage || !clothingItems || clothingItems.length === 0) {
+      throw new Error('Missing required parameters: userImage and clothingItems are required');
     }
 
     // Normalize user image to a data URL to avoid external fetch failures
@@ -41,19 +46,27 @@ serve(async (req) => {
 
     const processedImage = await toDataUrl(userImage);
 
-    console.log('Processing virtual try-on request with', clothingItems?.length || 0, 'items...');
+    console.log('Processing virtual try-on request with', clothingItems.length, 'items...');
 
     // Build detailed outfit description
-    const outfitDescription = clothingItems?.map((item: any) => {
-      return `${item.category}: ${item.name}${item.color ? ` in ${item.color}` : ''}${item.brand ? ` by ${item.brand}` : ''}`;
-    }).join(', ') || 'outfit';
+    const outfitDescription = clothingItems.map((item: any) => {
+      const parts = [item.category, item.name];
+      if (item.color) parts.push(`in ${item.color}`);
+      if (item.brand) parts.push(`by ${item.brand}`);
+      return parts.join(' ');
+    }).join(', ');
 
-    // Construct the editing instruction
+    console.log('Outfit description:', outfitDescription);
+
+    // Construct the editing instruction - emphasize that we're editing an existing image
     const editInstruction = instruction || 
-      `Transform this person's clothing to dress them in the following complete outfit: ${outfitDescription}. 
-       Make the clothing look natural, properly fitted, and realistic. 
-       Ensure all items coordinate well together and match the person's pose, body shape, and the lighting in the photo.
-       The result should look like a professional fashion photo where the person is actually wearing these clothes.`;
+      `Edit this photo to show the person wearing these clothes: ${outfitDescription}. 
+       Make the new clothing look natural and properly fitted to their body. 
+       Keep the person's pose, face, and background exactly the same. 
+       Only change the clothing to match the described outfit.
+       Ensure proper lighting and realistic fabric textures.`;
+
+    console.log('Calling AI Gateway with image editing request...');
 
     // Call Lovable AI Gateway for image editing
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -85,6 +98,8 @@ serve(async (req) => {
       })
     });
 
+    console.log('AI Gateway response status:', response.status);
+
     if (response.status === 429) {
       return new Response(
         JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
@@ -102,14 +117,22 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('AI Gateway error:', response.status, errorText);
-      throw new Error(`AI Gateway error: ${response.status}`);
+      throw new Error(`AI service returned error ${response.status}. Please try again.`);
     }
 
     const data = await response.json();
-    const editedImage = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    console.log('AI Gateway response structure:', JSON.stringify(data, null, 2).slice(0, 500));
+
+    // Try multiple paths to get the image
+    const editedImage = 
+      data.choices?.[0]?.message?.images?.[0]?.image_url?.url ||
+      data.choices?.[0]?.message?.content?.find((c: any) => c.type === 'image_url')?.image_url?.url ||
+      data.data?.[0]?.url ||
+      data.image_url;
 
     if (!editedImage) {
-      throw new Error('No image returned from AI');
+      console.error('No image in response. Full response:', JSON.stringify(data, null, 2));
+      throw new Error('AI did not generate an image. This feature may require additional setup. Please try again or contact support.');
     }
 
     console.log('Virtual try-on completed successfully');

@@ -81,7 +81,7 @@ export const VTOStudio = ({ itemId, itemType, itemName, itemImage }: VTOStudioPr
       if (error) throw error;
 
       if (!data?.editedImageUrl) {
-        throw new Error('No image returned from AI');
+        throw new Error('No image returned from AI. The service may be temporarily unavailable.');
       }
 
       // Generate mock fit scores (in production, AI would provide these)
@@ -124,9 +124,25 @@ export const VTOStudio = ({ itemId, itemType, itemName, itemImage }: VTOStudioPr
       });
     } catch (error: any) {
       console.error('Virtual try-on error:', error);
+      
+      // Better error messaging for users
+      let errorMessage = 'Could not process virtual try-on. Please try again.';
+      
+      if (error.message?.includes('AI service not configured')) {
+        errorMessage = 'Virtual try-on service is not configured. Please contact support.';
+      } else if (error.message?.includes('Rate limit')) {
+        errorMessage = 'Too many requests. Please wait a moment and try again.';
+      } else if (error.message?.includes('credits depleted')) {
+        errorMessage = 'AI credits depleted. Please add credits to continue.';
+      } else if (error.message?.includes('Missing required parameters')) {
+        errorMessage = 'Please ensure you have selected an item and uploaded a photo.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: 'Try-on failed',
-        description: error.message || 'Could not process virtual try-on. Please try again.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
