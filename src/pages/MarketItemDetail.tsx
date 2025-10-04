@@ -9,6 +9,7 @@ import { useMarketItems, MarketItem } from '@/hooks/useMarketItems';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { getAllPhotoUrls, getPrimaryPhotoUrl } from '@/utils/photoHelpers';
+import { PurchaseDialog } from '@/components/PurchaseDialog';
 
 const MarketItemDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,6 +22,7 @@ const MarketItemDetail = () => {
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedImage, setSelectedImage] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
+  const [showPurchaseDialog, setShowPurchaseDialog] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -141,10 +143,15 @@ const MarketItemDetail = () => {
       return;
     }
     
+    setShowPurchaseDialog(true);
+  };
+
+  const handlePurchaseSuccess = () => {
     toast({
-      title: "Redirecting to checkout...",
-      description: "Taking you to secure payment.",
+      title: "Purchase Complete!",
+      description: "Your order has been placed successfully.",
     });
+    navigate('/transactions');
   };
 
   // Use photoHelpers for consistent photo handling
@@ -529,6 +536,16 @@ const MarketItemDetail = () => {
           </section>
         )}
       </div>
+
+      {/* Purchase Dialog */}
+      {item && (
+        <PurchaseDialog
+          open={showPurchaseDialog}
+          onOpenChange={setShowPurchaseDialog}
+          item={item}
+          onSuccess={handlePurchaseSuccess}
+        />
+      )}
     </div>
   );
 };
