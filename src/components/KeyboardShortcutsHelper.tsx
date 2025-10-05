@@ -30,6 +30,8 @@ const shortcuts: Shortcut[] = [
   { keys: ["G", "M"], description: "Go to Market", category: "Navigation" },
   { keys: ["G", "S"], description: "Go to Social", category: "Navigation" },
   { keys: ["G", "A"], description: "Go to Account", category: "Navigation" },
+  { keys: ["G", "O"], description: "Go to Outfit History", category: "Navigation" },
+  { keys: ["G", "E"], description: "Go to Weather", category: "Navigation" },
   
   // Quick Actions
   { keys: ["⌘", "N"], description: "Add new item", category: "Quick Actions" },

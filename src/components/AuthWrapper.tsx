@@ -7,6 +7,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { CommandPalette } from "@/components/CommandPalette";
+import { QuickAccessMenu } from "@/components/QuickAccessMenu";
 import { QuickActionsMenu } from "@/components/QuickActionsMenu";
 import { KeyboardShortcutsHelper } from "@/components/KeyboardShortcutsHelper";
 import { useSecurityHeaders } from "@/hooks/useSecurityHeaders";
@@ -88,6 +89,8 @@ const UnifiedAIHub = lazy(() => import("@/components/UnifiedAIHub"));
 const AIStyleInsightsPage = lazy(() => import("@/pages/AIStyleInsightsPage"));
 const MerchantPage = lazy(() => import("@/pages/MerchantPage").then(m => ({ default: m.MerchantPage })));
 const AccountSettings = lazy(() => import("@/pages/settings/AccountSettings"));
+const OutfitHistoryPage = lazy(() => import("@/pages/OutfitHistoryPage"));
+const WeatherPage = lazy(() => import("@/pages/WeatherPage"));
 const AppSettings = lazy(() => import("@/pages/settings/AppSettings"));
 const AccessibilitySettingsPage = lazy(() => import("@/pages/settings/AccessibilitySettingsPage"));
 const ChallengeSettingsPage = lazy(() => import("@/pages/settings/ChallengeSettingsPage"));
@@ -115,6 +118,7 @@ export const AuthWrapper = () => {
         <>
           <PWAInstallPrompt />
           <CommandPalette />
+          <QuickAccessMenu />
           <QuickActionsMenu />
           <KeyboardShortcutsHelper />
           <Suspense fallback={<LoadingScreen />}>
@@ -149,6 +153,8 @@ export const AuthWrapper = () => {
           <Route path="/analytics/advanced" element={<AdvancedAnalyticsPage />} />
           <Route path="/personalization" element={<PersonalizationHub />} />
             <Route path="/merchant-analytics" element={<MerchantAnalyticsPage />} />
+            <Route path="/outfit-history" element={<OutfitHistoryPage />} />
+            <Route path="/weather" element={<WeatherPage />} />
             <Route path="/account" element={<Account />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
             <Route path="/data-export" element={<DataExportPage />} />

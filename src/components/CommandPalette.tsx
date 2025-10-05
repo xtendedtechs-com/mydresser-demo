@@ -90,6 +90,24 @@ export function CommandPalette() {
       keywords: ["account", "profile", "settings"],
       category: "Navigation"
     },
+    {
+      id: "nav-outfit-history",
+      label: "Outfit History",
+      description: "View your outfit history and analytics",
+      icon: Calendar,
+      action: () => navigate("/outfit-history"),
+      keywords: ["outfit", "history", "worn", "tracking", "calendar"],
+      category: "Navigation"
+    },
+    {
+      id: "nav-weather",
+      label: "Weather",
+      description: "Weather-based outfit suggestions",
+      icon: TrendingUp,
+      action: () => navigate("/weather"),
+      keywords: ["weather", "forecast", "temperature", "suggestions"],
+      category: "Navigation"
+    },
 
     // AI Features
     {
