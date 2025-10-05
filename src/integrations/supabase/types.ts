@@ -850,6 +850,98 @@ export type Database = {
           },
         ]
       }
+      market_fraud_detection: {
+        Row: {
+          action_taken: string | null
+          created_at: string
+          details: Json | null
+          fraud_type: string
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          risk_score: number
+          transaction_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action_taken?: string | null
+          created_at?: string
+          details?: Json | null
+          fraud_type: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_score: number
+          transaction_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action_taken?: string | null
+          created_at?: string
+          details?: Json | null
+          fraud_type?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_score?: number
+          transaction_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_fraud_detection_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "market_transaction_log"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      market_item_reports: {
+        Row: {
+          created_at: string
+          description: string
+          evidence_urls: string[] | null
+          id: string
+          item_id: string
+          merchant_id: string
+          report_category: string
+          reporter_id: string
+          resolution: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          evidence_urls?: string[] | null
+          id?: string
+          item_id: string
+          merchant_id: string
+          report_category: string
+          reporter_id: string
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          evidence_urls?: string[] | null
+          id?: string
+          item_id?: string
+          merchant_id?: string
+          report_category?: string
+          reporter_id?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       market_items: {
         Row: {
           brand: string | null
@@ -938,6 +1030,177 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      market_merchant_verification: {
+        Row: {
+          average_rating: number | null
+          business_name: string | null
+          business_registration: string | null
+          created_at: string
+          dispute_count: number | null
+          documents_verified: boolean | null
+          email_verified: boolean | null
+          id: string
+          identity_verified: boolean | null
+          is_suspended: boolean | null
+          phone_verified: boolean | null
+          report_count: number | null
+          successful_transactions: number | null
+          suspension_reason: string | null
+          tax_id: string | null
+          total_sales: number | null
+          trust_score: number | null
+          updated_at: string
+          user_id: string
+          verification_tier: string
+          verified_at: string | null
+        }
+        Insert: {
+          average_rating?: number | null
+          business_name?: string | null
+          business_registration?: string | null
+          created_at?: string
+          dispute_count?: number | null
+          documents_verified?: boolean | null
+          email_verified?: boolean | null
+          id?: string
+          identity_verified?: boolean | null
+          is_suspended?: boolean | null
+          phone_verified?: boolean | null
+          report_count?: number | null
+          successful_transactions?: number | null
+          suspension_reason?: string | null
+          tax_id?: string | null
+          total_sales?: number | null
+          trust_score?: number | null
+          updated_at?: string
+          user_id: string
+          verification_tier: string
+          verified_at?: string | null
+        }
+        Update: {
+          average_rating?: number | null
+          business_name?: string | null
+          business_registration?: string | null
+          created_at?: string
+          dispute_count?: number | null
+          documents_verified?: boolean | null
+          email_verified?: boolean | null
+          id?: string
+          identity_verified?: boolean | null
+          is_suspended?: boolean | null
+          phone_verified?: boolean | null
+          report_count?: number | null
+          successful_transactions?: number | null
+          suspension_reason?: string | null
+          tax_id?: string | null
+          total_sales?: number | null
+          trust_score?: number | null
+          updated_at?: string
+          user_id?: string
+          verification_tier?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
+      market_rate_limits: {
+        Row: {
+          created_at: string
+          daily_amount: number | null
+          daily_purchases: number | null
+          daily_reset_at: string
+          hourly_amount: number | null
+          hourly_purchases: number | null
+          hourly_reset_at: string
+          id: string
+          last_purchase_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          daily_amount?: number | null
+          daily_purchases?: number | null
+          daily_reset_at?: string
+          hourly_amount?: number | null
+          hourly_purchases?: number | null
+          hourly_reset_at?: string
+          id?: string
+          last_purchase_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          daily_amount?: number | null
+          daily_purchases?: number | null
+          daily_reset_at?: string
+          hourly_amount?: number | null
+          hourly_purchases?: number | null
+          hourly_reset_at?: string
+          id?: string
+          last_purchase_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      market_transaction_log: {
+        Row: {
+          amount: number
+          buyer_id: string
+          completed_at: string | null
+          created_at: string
+          currency: string | null
+          fraud_score: number | null
+          id: string
+          ip_address: unknown | null
+          is_suspicious: boolean | null
+          item_id: string | null
+          merchant_id: string
+          payment_gateway_id: string | null
+          payment_method: string | null
+          status: string
+          transaction_type: string
+          user_agent: string | null
+        }
+        Insert: {
+          amount: number
+          buyer_id: string
+          completed_at?: string | null
+          created_at?: string
+          currency?: string | null
+          fraud_score?: number | null
+          id?: string
+          ip_address?: unknown | null
+          is_suspicious?: boolean | null
+          item_id?: string | null
+          merchant_id: string
+          payment_gateway_id?: string | null
+          payment_method?: string | null
+          status: string
+          transaction_type: string
+          user_agent?: string | null
+        }
+        Update: {
+          amount?: number
+          buyer_id?: string
+          completed_at?: string | null
+          created_at?: string
+          currency?: string | null
+          fraud_score?: number | null
+          id?: string
+          ip_address?: unknown | null
+          is_suspicious?: boolean | null
+          item_id?: string | null
+          merchant_id?: string
+          payment_gateway_id?: string | null
+          payment_method?: string | null
+          status?: string
+          transaction_type?: string
+          user_agent?: string | null
+        }
+        Relationships: []
       }
       marketplace_disputes: {
         Row: {
@@ -2678,6 +2941,353 @@ export type Database = {
         }
         Relationships: []
       }
+      seconddresser_disputes: {
+        Row: {
+          created_at: string
+          description: string
+          dispute_reason: string
+          evidence_urls: string[] | null
+          filed_by: string
+          id: string
+          resolution: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          transaction_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          dispute_reason: string
+          evidence_urls?: string[] | null
+          filed_by: string
+          id?: string
+          resolution?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          transaction_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          dispute_reason?: string
+          evidence_urls?: string[] | null
+          filed_by?: string
+          id?: string
+          resolution?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seconddresser_disputes_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "seconddresser_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seconddresser_flagged_users: {
+        Row: {
+          action_taken: string | null
+          created_at: string
+          evidence: string | null
+          flagged_by: string
+          flagged_user_id: string
+          id: string
+          reason: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+        }
+        Insert: {
+          action_taken?: string | null
+          created_at?: string
+          evidence?: string | null
+          flagged_by: string
+          flagged_user_id: string
+          id?: string
+          reason: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Update: {
+          action_taken?: string | null
+          created_at?: string
+          evidence?: string | null
+          flagged_by?: string
+          flagged_user_id?: string
+          id?: string
+          reason?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      seconddresser_listings: {
+        Row: {
+          brand: string | null
+          category: string | null
+          condition: string
+          created_at: string
+          description: string
+          favorites: number | null
+          id: string
+          is_negotiable: boolean | null
+          location: string | null
+          original_price: number | null
+          photos: string[] | null
+          price: number
+          seller_id: string
+          shipping_included: boolean | null
+          size: string | null
+          sold_at: string | null
+          status: string
+          title: string
+          updated_at: string
+          views: number | null
+          wardrobe_item_id: string | null
+        }
+        Insert: {
+          brand?: string | null
+          category?: string | null
+          condition: string
+          created_at?: string
+          description: string
+          favorites?: number | null
+          id?: string
+          is_negotiable?: boolean | null
+          location?: string | null
+          original_price?: number | null
+          photos?: string[] | null
+          price: number
+          seller_id: string
+          shipping_included?: boolean | null
+          size?: string | null
+          sold_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          views?: number | null
+          wardrobe_item_id?: string | null
+        }
+        Update: {
+          brand?: string | null
+          category?: string | null
+          condition?: string
+          created_at?: string
+          description?: string
+          favorites?: number | null
+          id?: string
+          is_negotiable?: boolean | null
+          location?: string | null
+          original_price?: number | null
+          photos?: string[] | null
+          price?: number
+          seller_id?: string
+          shipping_included?: boolean | null
+          size?: string | null
+          sold_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          views?: number | null
+          wardrobe_item_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seconddresser_listings_wardrobe_item_id_fkey"
+            columns: ["wardrobe_item_id"]
+            isOneToOne: false
+            referencedRelation: "wardrobe_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seconddresser_reviews: {
+        Row: {
+          created_at: string
+          id: string
+          is_verified: boolean | null
+          rating: number
+          review_text: string | null
+          review_type: string
+          reviewee_id: string
+          reviewer_id: string
+          transaction_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_verified?: boolean | null
+          rating: number
+          review_text?: string | null
+          review_type: string
+          reviewee_id: string
+          reviewer_id: string
+          transaction_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_verified?: boolean | null
+          rating?: number
+          review_text?: string | null
+          review_type?: string
+          reviewee_id?: string
+          reviewer_id?: string
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seconddresser_reviews_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "seconddresser_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seconddresser_transactions: {
+        Row: {
+          amount: number
+          buyer_id: string
+          completed_at: string | null
+          created_at: string
+          delivered_at: string | null
+          escrow_release_date: string | null
+          escrow_status: string
+          id: string
+          listing_id: string
+          notes: string | null
+          payment_method: string | null
+          seller_id: string
+          shipped_at: string | null
+          tracking_number: string | null
+          transaction_status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          buyer_id: string
+          completed_at?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          escrow_release_date?: string | null
+          escrow_status?: string
+          id?: string
+          listing_id: string
+          notes?: string | null
+          payment_method?: string | null
+          seller_id: string
+          shipped_at?: string | null
+          tracking_number?: string | null
+          transaction_status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          buyer_id?: string
+          completed_at?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          escrow_release_date?: string | null
+          escrow_status?: string
+          id?: string
+          listing_id?: string
+          notes?: string | null
+          payment_method?: string | null
+          seller_id?: string
+          shipped_at?: string | null
+          tracking_number?: string | null
+          transaction_status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seconddresser_transactions_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "seconddresser_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seconddresser_user_credibility: {
+        Row: {
+          average_buyer_rating: number | null
+          average_seller_rating: number | null
+          created_at: string
+          credibility_score: number | null
+          disputes_filed: number | null
+          disputes_lost: number | null
+          flag_reason: string | null
+          id: string
+          is_flagged: boolean | null
+          is_verified: boolean | null
+          last_transaction_at: string | null
+          reported_listings_count: number | null
+          successful_purchases: number | null
+          successful_sales: number | null
+          total_purchases: number | null
+          total_reviews_received: number | null
+          total_sales: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          average_buyer_rating?: number | null
+          average_seller_rating?: number | null
+          created_at?: string
+          credibility_score?: number | null
+          disputes_filed?: number | null
+          disputes_lost?: number | null
+          flag_reason?: string | null
+          id?: string
+          is_flagged?: boolean | null
+          is_verified?: boolean | null
+          last_transaction_at?: string | null
+          reported_listings_count?: number | null
+          successful_purchases?: number | null
+          successful_sales?: number | null
+          total_purchases?: number | null
+          total_reviews_received?: number | null
+          total_sales?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          average_buyer_rating?: number | null
+          average_seller_rating?: number | null
+          created_at?: string
+          credibility_score?: number | null
+          disputes_filed?: number | null
+          disputes_lost?: number | null
+          flag_reason?: string | null
+          id?: string
+          is_flagged?: boolean | null
+          is_verified?: boolean | null
+          last_transaction_at?: string | null
+          reported_listings_count?: number | null
+          successful_purchases?: number | null
+          successful_sales?: number | null
+          total_purchases?: number | null
+          total_reviews_received?: number | null
+          total_sales?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       security_audit_log: {
         Row: {
           action: string
@@ -4271,6 +4881,14 @@ export type Database = {
         }
         Returns: string
       }
+      calculate_merchant_trust_score: {
+        Args: { p_merchant_id: string }
+        Returns: number
+      }
+      calculate_user_credibility: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
       calculate_vto_roi: {
         Args: {
           end_date?: string
@@ -4302,6 +4920,15 @@ export type Database = {
       check_contact_rate_limit: {
         Args: { operation?: string }
         Returns: boolean
+      }
+      check_market_purchase_limit: {
+        Args: { p_amount: number; p_user_id: string }
+        Returns: {
+          allowed: boolean
+          daily_remaining: number
+          hourly_remaining: number
+          reason: string
+        }[]
       }
       check_merchant_rate_limit: {
         Args: { operation: string }
@@ -4625,6 +5252,17 @@ export type Database = {
       log_admin_action: {
         Args: { action_type: string; details?: Json; resource_name: string }
         Returns: boolean
+      }
+      log_market_transaction: {
+        Args: {
+          p_amount: number
+          p_buyer_id: string
+          p_fraud_score?: number
+          p_item_id: string
+          p_merchant_id: string
+          p_status: string
+        }
+        Returns: string
       }
       log_merchant_sensitive_access: {
         Args: { accessed_fields: string[]; merchant_profile_id: string }

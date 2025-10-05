@@ -140,6 +140,9 @@ const Home = () => {
       </div>
 
       <main className="container max-w-7xl mx-auto px-4 lg:px-6 py-6 space-y-6">
+        {/* Daily Outfit - Top Priority */}
+        <RealDailyOutfit />
+
         {/* Stats Dashboard */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
           <Card className="hover:shadow-lg transition-all cursor-pointer" onClick={() => navigate('/wardrobe')}>
@@ -232,11 +235,6 @@ const Home = () => {
             </div>
           </CardContent>
         </Card>
-
-        {/* Daily Outfit Section - Top Priority */}
-        <div className="mb-6">
-          <RealDailyOutfit />
-        </div>
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
