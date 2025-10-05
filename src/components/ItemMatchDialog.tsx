@@ -144,6 +144,17 @@ const ItemMatchDialog = ({
               ))}
             </div>
           </div>
+
+          {/* Enhancement Benefits */}
+          <div className="bg-muted/50 p-4 rounded-lg">
+            <h3 className="font-semibold mb-2 text-sm">Accepting this match will:</h3>
+            <ul className="text-sm space-y-1 text-muted-foreground">
+              <li>✓ Update your item with verified merchant details</li>
+              <li>✓ Add accurate brand, material, and sizing information</li>
+              <li>✓ Link to merchant item for future reference</li>
+              <li>✓ Enhance outfit recommendations accuracy</li>
+            </ul>
+          </div>
         </div>
 
         <DialogFooter className="gap-2">

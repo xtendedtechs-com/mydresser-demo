@@ -301,6 +301,34 @@ export const useWardrobe = () => {
     return [];
   };
 
+  const enhanceItemWithMerchantData = async (itemId: string, merchantItem: any) => {
+    try {
+      const itemToUpdate = items.find(item => item.id === itemId);
+      if (!itemToUpdate) {
+        throw new Error('Item not found');
+      }
+
+      const enhancedData: Partial<WardrobeItem> = {
+        name: merchantItem.name || itemToUpdate.name,
+        brand: merchantItem.brand || itemToUpdate.brand,
+        color: merchantItem.color || itemToUpdate.color,
+        material: merchantItem.material || itemToUpdate.material,
+        size: merchantItem.size || itemToUpdate.size,
+        category: merchantItem.category || itemToUpdate.category,
+        tags: [...new Set([...(itemToUpdate.tags || []), ...(merchantItem.tags || [])])],
+      };
+
+      await updateItem(itemId, enhancedData);
+    } catch (error: any) {
+      toast({
+        title: "Error enhancing item",
+        description: error.message,
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   return {
     items,
     wardrobes,
@@ -315,6 +343,7 @@ export const useWardrobe = () => {
     getFavoriteItems,
     searchItems,
     getPhotoUrls,
+    enhanceItemWithMerchantData,
     refetch: () => {
       fetchWardrobes();
       fetchItems();

@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Sparkles, Check, X, Eye, Star } from 'lucide-react';
 import { useItemMatches } from '@/hooks/useItemMatches';
 import { useMerchantItems } from '@/hooks/useMerchantItems';
-import { WardrobeItem } from '@/hooks/useWardrobe';
+import { WardrobeItem, useWardrobe } from '@/hooks/useWardrobe';
 import ItemMatchDialog from './ItemMatchDialog';
 import { useToast } from '@/hooks/use-toast';
 
@@ -26,6 +26,7 @@ export const SmartItemMatcher: React.FC<SmartItemMatcherProps> = ({
   
   const { findMatches, createMatch } = useItemMatches();
   const { items: merchantItems } = useMerchantItems();
+  const { enhanceItemWithMerchantData } = useWardrobe();
   const { toast } = useToast();
 
   // Auto-scan for matches when items change
@@ -89,12 +90,14 @@ export const SmartItemMatcher: React.FC<SmartItemMatcherProps> = ({
         match.matchReasons
       );
       
+      await enhanceItemWithMerchantData(match.wardrobeItem.id, match.merchantItem);
+      
       // Remove from suggested matches
       setSuggestedMatches(prev => prev.filter(m => m.id !== match.id));
       
       toast({
         title: "Match accepted!",
-        description: "Your item has been enhanced with merchant data",
+        description: "Your item has been enhanced with accurate merchant details",
       });
     } catch (error) {
       toast({
