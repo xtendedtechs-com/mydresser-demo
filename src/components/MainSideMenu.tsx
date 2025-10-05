@@ -63,6 +63,7 @@ export const MainSideMenu = () => {
       title: t('menu.social', 'Social'),
       items: [
         { label: t('nav.social', 'Social Hub'), icon: Users, path: '/social' },
+        { label: t('nav.socialFeed', 'Social Feed'), icon: Users, path: '/social/feed' },
         { label: t('nav.messages', 'Messages'), icon: MessageSquare, path: '/messages' },
         { label: t('nav.community', 'Community'), icon: Users, path: '/community' },
       ],

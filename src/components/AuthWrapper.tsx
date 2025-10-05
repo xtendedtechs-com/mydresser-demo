@@ -45,6 +45,9 @@ const DailyOutfitGenerator = lazy(() => import("@/components/DailyOutfitGenerato
 const DresserPage = lazy(() => import("@/pages/DresserPage"));
 const CollectionsPage = lazy(() => import("@/pages/CollectionsPage"));
 const SocialPage = lazy(() => import("@/pages/SocialPage"));
+const SocialFeed = lazy(() => import("@/pages/social/SocialFeed"));
+const UserProfile = lazy(() => import("@/pages/social/UserProfile"));
+const VirtualTryOn = lazy(() => import("@/pages/tryon/VirtualTryOn"));
 const AIRecommendationsPage = lazy(() => import("@/pages/AIRecommendationsPage"));
 const AIAssistantPage = lazy(() => import("@/pages/AIAssistantPage"));
 const WardrobeInsightsPage = lazy(() => import("@/pages/WardrobeInsightsPage"));
@@ -140,6 +143,9 @@ export const AuthWrapper = () => {
             <Route path="/dresser" element={<DresserPage />} />
             <Route path="/collections" element={<CollectionsPage />} />
             <Route path="/social" element={<SocialPage />} />
+            <Route path="/social/feed" element={<SocialFeed />} />
+            <Route path="/profile/:userId" element={<UserProfile />} />
+            <Route path="/tryon" element={<VirtualTryOn />} />
             <Route path="/ai-assistant" element={<AIAssistantPage />} />
             <Route path="/wardrobe-insights" element={<WardrobeInsightsPage />} />
             <Route path="/wardrobe-insights/advanced" element={<AdvancedWardrobeInsights />} />
