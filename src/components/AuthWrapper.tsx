@@ -42,6 +42,7 @@ const NotFound = lazy(() => import("@/pages/NotFound"));
 const ServiceSettingsPage = lazy(() => import("@/pages/ServiceSettingsPage"));
 const MyStyle = lazy(() => import("@/pages/MyStyle"));
 const DailyOutfitGenerator = lazy(() => import("@/components/DailyOutfitGenerator").then(m => ({ default: m.DailyOutfitGenerator })));
+const DresserPage = lazy(() => import("@/pages/DresserPage"));
 const SocialPage = lazy(() => import("@/pages/SocialPage"));
 const AIRecommendationsPage = lazy(() => import("@/pages/AIRecommendationsPage"));
 const AIAssistantPage = lazy(() => import("@/pages/AIAssistantPage"));
@@ -135,6 +136,7 @@ export const AuthWrapper = () => {
             <Route path="/merchant/:merchantId" element={<MerchantPage />} />
             <Route path="/add" element={<Add />} />
             <Route path="/outfit-generator" element={<DailyOutfitGenerator />} />
+            <Route path="/dresser" element={<DresserPage />} />
             <Route path="/social" element={<SocialPage />} />
             <Route path="/ai-assistant" element={<AIAssistantPage />} />
             <Route path="/wardrobe-insights" element={<WardrobeInsightsPage />} />

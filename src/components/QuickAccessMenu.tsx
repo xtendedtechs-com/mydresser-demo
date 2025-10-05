@@ -133,6 +133,13 @@ export const QuickAccessMenu = () => {
       category: 'ai',
       keywords: ['generator', 'outfit', 'create', 'ai', 'suggest']
     },
+    { 
+      label: 'Dresser', 
+      icon: Sparkles, 
+      path: '/dresser', 
+      category: 'ai',
+      keywords: ['dresser', 'daily', 'outfit', 'suggestions', 'ai', 'smart', 'wardrobe']
+    },
     
     // Insights
     { 
