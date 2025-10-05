@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getAllPhotoUrls } from '@/utils/photoHelpers';
 import { useToast } from '@/hooks/use-toast';
 
 export interface WardrobeItem {
@@ -79,19 +80,13 @@ export const useWardrobe = () => {
 
       if (error) throw error;
       
-      // Resolve photo URLs for all items to fix display issues after reload
-      const itemsWithResolvedPhotos = await Promise.all((data || []).map(async (item) => {
-        if (item.photos && typeof item.photos === 'string' && !item.photos.startsWith('http') && !item.photos.startsWith('data:')) {
-          // It's a storage path like "bucket/path", resolve it to public URL
-          const [bucket, ...pathParts] = item.photos.split('/');
-          if (bucket && pathParts.length > 0) {
-            const path = pathParts.join('/');
-            const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path);
-            return { ...item, photos: urlData.publicUrl };
-          }
+      const itemsWithResolvedPhotos = (data || []).map((item) => {
+        const urls = getAllPhotoUrls(item.photos);
+        if (urls.length > 0) {
+          return { ...item, photos: { main: urls[0], urls } as any };
         }
         return item;
-      }));
+      });
       
       setItems(itemsWithResolvedPhotos);
     } catch (error: any) {

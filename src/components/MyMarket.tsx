@@ -17,7 +17,7 @@ import {
   Shield
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useMerchantItems } from "@/hooks/useMerchantItems";
+import { useMarketItems } from "@/hooks/useMarketItems";
 
 interface MerchantProduct {
   id: string;
@@ -45,7 +45,7 @@ interface MerchantProduct {
 const MyMarket = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { items: merchantItems, getFeaturedItems, loading } = useMerchantItems();
+  const { items, getFeaturedItems, loading, getPhotoUrls } = useMarketItems();
   
   const [likedItems, setLikedItems] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
@@ -190,22 +190,24 @@ const MyMarket = () => {
   ];
 
   const getFilteredProducts = () => {
-    let filtered = merchantItems.filter(item => item.stock_quantity > 0); // Only show in-stock items
+    let filtered = items.filter((item: any) => (item as any).status === 'available');
 
     if (searchQuery) {
-      filtered = filtered.filter(item =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (item.brand && item.brand.toLowerCase().includes(searchQuery.toLowerCase()))
-      );
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter((item: any) => {
+        const name = (item.title || item.name || '').toLowerCase();
+        const brand = (item.brand || '').toLowerCase();
+        return name.includes(q) || brand.includes(q);
+      });
     }
 
     if (selectedCategory !== "all") {
-      filtered = filtered.filter(item => 
-        item.category.toLowerCase() === selectedCategory.toLowerCase()
+      filtered = filtered.filter((item: any) => 
+        (item.category || '').toLowerCase() === selectedCategory.toLowerCase()
       );
     }
 
-    return filtered;
+    return filtered as any[];
   };
 
   const handleProductClick = (item: any) => {
@@ -299,7 +301,7 @@ const MyMarket = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4 text-center">
-            <div className="text-2xl font-bold text-primary">{merchantItems.length}</div>
+            <div className="text-2xl font-bold text-primary">{items.length}</div>
             <div className="text-sm text-muted-foreground">Available Products</div>
           </CardContent>
         </Card>
@@ -332,11 +334,11 @@ const MyMarket = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {featuredProducts.map((item) => {
-              const photoUrl = item.photos && Array.isArray(item.photos) && item.photos.length > 0 
-                ? item.photos[0] 
-                : '/placeholder.svg';
-              
+            {featuredProducts.map((item: any) => {
+              const photos = getPhotoUrls?.(item.photos) || [];
+              const photoUrl = photos[0] || '/placeholder.svg';
+              const displayName = item.title || item.name || 'Item';
+              const isPremium = (item as any).is_premium;
               return (
                 <Card 
                   key={item.id} 
@@ -346,10 +348,10 @@ const MyMarket = () => {
                   <div className="aspect-square bg-muted overflow-hidden rounded-t-lg relative">
                     <img
                       src={photoUrl}
-                      alt={item.name}
+                      alt={displayName}
                       className="w-full h-full object-cover"
+                      loading="lazy"
                     />
-                    
                     {/* Featured badge */}
                     <div className="absolute top-2 left-2">
                       <Badge className="bg-yellow-500 text-white">
@@ -357,9 +359,8 @@ const MyMarket = () => {
                         Featured
                       </Badge>
                     </div>
-                    
                     {/* Premium badge */}
-                    {item.is_premium && (
+                    {isPremium && (
                       <div className="absolute top-2 right-2">
                         <Badge variant="outline" className="bg-white/90 text-purple-700 border-purple-300">
                           <Shield className="w-3 h-3 mr-1" />
@@ -367,7 +368,6 @@ const MyMarket = () => {
                         </Badge>
                       </div>
                     )}
-
                     {/* Actions overlay */}
                     <div className="absolute bottom-2 right-2 flex gap-1">
                       <Button
@@ -389,20 +389,17 @@ const MyMarket = () => {
                       </Button>
                     </div>
                   </div>
-                  
                   <CardContent className="p-4">
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <h3 className="font-semibold truncate">{item.name}</h3>
+                        <h3 className="font-semibold truncate">{displayName}</h3>
                         <div className="flex items-center gap-1">
                           <Star className="w-3 h-3 text-yellow-400 fill-current" />
                           <span className="text-xs text-muted-foreground">4.8</span>
                         </div>
                       </div>
-                      
                       <p className="text-sm text-muted-foreground truncate">{item.brand}</p>
                       <p className="text-xs text-muted-foreground truncate">{item.category}</p>
-                      
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="text-lg font-bold text-primary">${item.price}</span>

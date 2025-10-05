@@ -42,7 +42,7 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
     stock_quantity: '1',
     is_featured: false,
     is_premium: false,
-    status: 'active'
+    status: 'draft'
   });
   
   const [sizes, setSizes] = useState<string[]>([]);
@@ -74,7 +74,7 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
         stock_quantity: editProduct.stock_quantity?.toString() || '1',
         is_featured: editProduct.is_featured || false,
         is_premium: editProduct.is_premium || false,
-        status: editProduct.status || 'active'
+        status: editProduct.status || 'draft'
       });
       setSizes(editProduct.size || []);
       setTags(editProduct.tags || []);
@@ -201,7 +201,7 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
         name: '', description: '', category: '', brand: '', price: '',
         original_price: '', condition: 'new', color: '', material: '',
         occasion: '', season: '', stock_quantity: '1', is_featured: false,
-        is_premium: false, status: 'active'
+        is_premium: false, status: 'draft'
       });
       setSizes([]);
       setTags([]);
@@ -415,9 +415,10 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="active">Active (Visible to customers)</SelectItem>
-                        <SelectItem value="inactive">Inactive (Not visible)</SelectItem>
-                        <SelectItem value="out_of_stock">Out of Stock</SelectItem>
+                        <SelectItem value="available">Available (Visible to customers)</SelectItem>
+                        <SelectItem value="draft">Draft (Not visible)</SelectItem>
+                        <SelectItem value="reserved">Reserved</SelectItem>
+                        <SelectItem value="sold">Sold</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
