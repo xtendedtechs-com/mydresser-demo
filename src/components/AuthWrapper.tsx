@@ -50,6 +50,7 @@ const UserProfile = lazy(() => import("@/pages/social/UserProfile"));
 const VirtualTryOn = lazy(() => import("@/pages/tryon/VirtualTryOn"));
 const AIRecommendationsPage = lazy(() => import("@/pages/AIRecommendationsPage"));
 const AIAssistantPage = lazy(() => import("@/pages/AIAssistantPage"));
+const PaymentSettingsPage = lazy(() => import("@/pages/settings/PaymentSettings"));
 const WardrobeInsightsPage = lazy(() => import("@/pages/WardrobeInsightsPage"));
 const SecondDresserPage = lazy(() => import("@/pages/SecondDresserPage"));
 const TransactionsPage = lazy(() => import("@/pages/TransactionsPage"));
@@ -226,9 +227,10 @@ export const AuthWrapper = () => {
             <Route path="/wardrobe-analytics" element={<WardrobeAnalyticsPage />} />
             <Route path="/analytics/user" element={<UserInsights />} />
             <Route path="/analytics/merchant" element={<MerchantDashboard />} />
-            <Route path="/subscription/pricing" element={<PricingPage />} />
-            <Route path="/subscription/manage" element={<ManageSubscription />} />
-            <Route path="/subscription/billing" element={<BillingHistory />} />
+          <Route path="/subscription/pricing" element={<PricingPage />} />
+          <Route path="/subscription/manage" element={<ManageSubscription />} />
+          <Route path="/subscription/billing" element={<BillingHistory />} />
+          <Route path="/settings/payment" element={<Suspense fallback={<div>Loading...</div>}><PaymentSettingsPage /></Suspense>} />
             <Route path="/merchant/pos-terminal" element={<POSTerminal />} />
             <Route path="/merchant/locations" element={<StoreLocations />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />

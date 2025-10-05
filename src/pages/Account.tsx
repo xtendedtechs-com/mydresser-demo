@@ -136,7 +136,7 @@ const Account = () => {
       id: 'payment',
       label: 'Payment Settings',
       description: 'Manage payment methods and billing',
-      onClick: () => navigate('/subscription/billing'),
+      onClick: () => navigate('/settings/payment'),
       highlighted: true
     },
     {
