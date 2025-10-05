@@ -18,184 +18,28 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMarketItems } from "@/hooks/useMarketItems";
-
-interface MerchantProduct {
-  id: string;
-  merchant_id: string;
-  merchant_name: string;
-  merchant_verified: boolean;
-  name: string;
-  brand: string;
-  description: string;
-  price: number;
-  original_price?: number;
-  category: string;
-  size: string[];
-  color: string;
-  photos: string[];
-  in_stock: boolean;
-  stock_quantity: number;
-  rating: number;
-  reviews_count: number;
-  shipping_free: boolean;
-  featured: boolean;
-  created_at: string;
-}
+import { getPrimaryPhotoUrl } from "@/utils/photoHelpers";
 
 const MyMarket = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { items, getFeaturedItems, loading, getPhotoUrls } = useMarketItems();
+  const { items, getFeaturedItems, loading } = useMarketItems();
   
   const [likedItems, setLikedItems] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-
-  // Mock merchant products data
-  const mockProducts: MerchantProduct[] = [
-    {
-      id: "mp1",
-      merchant_id: "m1",
-      merchant_name: "Elite Fashion Co.",
-      merchant_verified: true,
-      name: "Premium Wool Coat",
-      brand: "Hugo Boss",
-      description: "Luxurious wool blend coat perfect for winter elegance",
-      price: 299,
-      original_price: 399,
-      category: "outerwear",
-      size: ["S", "M", "L", "XL"],
-      color: "Black",
-      photos: ["/placeholder.svg"],
-      in_stock: true,
-      stock_quantity: 15,
-      rating: 4.8,
-      reviews_count: 124,
-      shipping_free: true,
-      featured: true,
-      created_at: "2024-01-15"
-    },
-    {
-      id: "mp2", 
-      merchant_id: "m2",
-      merchant_name: "Urban Style Hub",
-      merchant_verified: true,
-      name: "Designer Skinny Jeans",
-      brand: "Calvin Klein",
-      description: "Modern fit denim with premium stretch fabric",
-      price: 89,
-      original_price: 120,
-      category: "bottoms",
-      size: ["28", "29", "30", "31", "32", "34"],
-      color: "Dark Blue",
-      photos: ["/placeholder.svg"],
-      in_stock: true,
-      stock_quantity: 32,
-      rating: 4.6,
-      reviews_count: 89,
-      shipping_free: true,
-      featured: false,
-      created_at: "2024-01-14"
-    },
-    {
-      id: "mp3",
-      merchant_id: "m3", 
-      merchant_name: "Luxury Boutique",
-      merchant_verified: true,
-      name: "Silk Evening Dress",
-      brand: "Armani",
-      description: "Elegant silk dress for special occasions",
-      price: 450,
-      category: "dresses",
-      size: ["XS", "S", "M", "L"],
-      color: "Emerald Green",
-      photos: ["/placeholder.svg"],
-      in_stock: true,
-      stock_quantity: 8,
-      rating: 4.9,
-      reviews_count: 67,
-      shipping_free: true,
-      featured: true,
-      created_at: "2024-01-13"
-    },
-    {
-      id: "mp4",
-      merchant_id: "m4",
-      merchant_name: "Active Wear Pro",
-      merchant_verified: true,
-      name: "Performance Running Shoes",
-      brand: "Adidas",
-      description: "Professional running shoes with boost technology",
-      price: 140,
-      original_price: 180,
-      category: "shoes",
-      size: ["7", "8", "9", "10", "11", "12"],
-      color: "White/Black",
-      photos: ["/placeholder.svg"],
-      in_stock: true,
-      stock_quantity: 25,
-      rating: 4.7,
-      reviews_count: 203,
-      shipping_free: true,
-      featured: false,
-      created_at: "2024-01-12"
-    },
-    {
-      id: "mp5",
-      merchant_id: "m5",
-      merchant_name: "Classic Menswear",
-      merchant_verified: true,
-      name: "Business Shirt",
-      brand: "Brooks Brothers",
-      description: "Classic cotton business shirt with modern fit",
-      price: 75,
-      category: "tops",
-      size: ["S", "M", "L", "XL", "XXL"],
-      color: "White",
-      photos: ["/placeholder.svg"],
-      in_stock: true,
-      stock_quantity: 40,
-      rating: 4.5,
-      reviews_count: 156,
-      shipping_free: false,
-      featured: false,
-      created_at: "2024-01-11"
-    },
-    {
-      id: "mp6",
-      merchant_id: "m6",
-      merchant_name: "Trendy Accessories",
-      merchant_verified: false,
-      name: "Leather Handbag",
-      brand: "Michael Kors",
-      description: "Genuine leather handbag with multiple compartments",
-      price: 195,
-      original_price: 250,
-      category: "accessories",
-      size: ["One Size"],
-      color: "Brown",
-      photos: ["/placeholder.svg"],
-      in_stock: true,
-      stock_quantity: 12,
-      rating: 4.4,
-      reviews_count: 78,
-      shipping_free: true,
-      featured: false,
-      created_at: "2024-01-10"
-    }
-  ];
 
   const categories = [
     "all", "tops", "bottoms", "outerwear", "dresses", "shoes", "accessories"
   ];
 
   const getFilteredProducts = () => {
-    let filtered = items.filter((item: any) => (item as any).status === 'available');
+    let filtered = items.filter((item: any) => item.status === 'available');
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       filtered = filtered.filter((item: any) => {
-        const name = (item.title || item.name || '').toLowerCase();
+        const name = (item.title || '').toLowerCase();
         const brand = (item.brand || '').toLowerCase();
         return name.includes(q) || brand.includes(q);
       });
@@ -207,7 +51,7 @@ const MyMarket = () => {
       );
     }
 
-    return filtered as any[];
+    return filtered;
   };
 
   const handleProductClick = (item: any) => {
@@ -233,7 +77,7 @@ const MyMarket = () => {
     e.stopPropagation();
     toast({
       title: "Added to cart",
-      description: `${item.name} has been added to your cart.`,
+      description: `${item.title} has been added to your cart.`,
     });
   };
 
@@ -241,7 +85,7 @@ const MyMarket = () => {
   const featuredProducts = getFeaturedItems().filter(item => 
     filteredProducts.some(fp => fp.id === item.id)
   );
-  const regularProducts = filteredProducts.filter(item => !item.is_featured);
+  const regularProducts = filteredProducts.filter((item: any) => !item.is_featured);
 
   return (
     <div className="space-y-6">
@@ -335,10 +179,9 @@ const MyMarket = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {featuredProducts.map((item: any) => {
-              const photos = getPhotoUrls?.(item.photos) || [];
-              const photoUrl = photos[0] || '/placeholder.svg';
-              const displayName = item.title || item.name || 'Item';
-              const isPremium = (item as any).is_premium;
+              const photoUrl = getPrimaryPhotoUrl(item.photos, item.category);
+              const displayName = item.title || 'Item';
+              
               return (
                 <Card 
                   key={item.id} 
@@ -352,6 +195,7 @@ const MyMarket = () => {
                       className="w-full h-full object-cover"
                       loading="lazy"
                     />
+                    
                     {/* Featured badge */}
                     <div className="absolute top-2 left-2">
                       <Badge className="bg-yellow-500 text-white">
@@ -359,8 +203,9 @@ const MyMarket = () => {
                         Featured
                       </Badge>
                     </div>
+                    
                     {/* Premium badge */}
-                    {isPremium && (
+                    {item.is_premium && (
                       <div className="absolute top-2 right-2">
                         <Badge variant="outline" className="bg-white/90 text-purple-700 border-purple-300">
                           <Shield className="w-3 h-3 mr-1" />
@@ -368,6 +213,7 @@ const MyMarket = () => {
                         </Badge>
                       </div>
                     )}
+
                     {/* Actions overlay */}
                     <div className="absolute bottom-2 right-2 flex gap-1">
                       <Button
@@ -389,6 +235,7 @@ const MyMarket = () => {
                       </Button>
                     </div>
                   </div>
+                  
                   <CardContent className="p-4">
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
@@ -398,8 +245,10 @@ const MyMarket = () => {
                           <span className="text-xs text-muted-foreground">4.8</span>
                         </div>
                       </div>
+                      
                       <p className="text-sm text-muted-foreground truncate">{item.brand}</p>
                       <p className="text-xs text-muted-foreground truncate">{item.category}</p>
+                      
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="text-lg font-bold text-primary">${item.price}</span>
@@ -439,10 +288,9 @@ const MyMarket = () => {
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {regularProducts.map((item) => {
-              const photoUrl = item.photos && Array.isArray(item.photos) && item.photos.length > 0 
-                ? item.photos[0] 
-                : '/placeholder.svg';
+            {regularProducts.map((item: any) => {
+              const photoUrl = getPrimaryPhotoUrl(item.photos, item.category);
+              const displayName = item.title || 'Item';
               
               return (
                 <Card 
@@ -453,8 +301,9 @@ const MyMarket = () => {
                   <div className="aspect-square bg-muted overflow-hidden rounded-t-lg relative">
                     <img
                       src={photoUrl}
-                      alt={item.name}
+                      alt={displayName}
                       className="w-full h-full object-cover"
+                      loading="lazy"
                     />
                     
                     {/* Premium badge */}
@@ -501,7 +350,7 @@ const MyMarket = () => {
                   <CardContent className="p-4">
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <h3 className="font-semibold truncate">{item.name}</h3>
+                        <h3 className="font-semibold truncate">{displayName}</h3>
                         <div className="flex items-center gap-1">
                           <Star className="w-3 h-3 text-yellow-400 fill-current" />
                           <span className="text-xs text-muted-foreground">4.8</span>

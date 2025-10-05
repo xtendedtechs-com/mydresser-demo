@@ -53,6 +53,7 @@ const MarketItemDetail = () => {
           .from('merchant_items')
           .select('*')
           .eq('id', itemId)
+          .eq('status', 'available')
           .maybeSingle();
         
         if (merchantError) throw merchantError;
@@ -65,13 +66,17 @@ const MarketItemDetail = () => {
             likes_count: 0,
             views_count: 0,
             location: 'Merchant Store',
-            size: Array.isArray(merchantItem.size) ? merchantItem.size.join(',') : merchantItem.size || '',
+            size: Array.isArray(merchantItem.size) ? merchantItem.size : (merchantItem.size ? [merchantItem.size] : []),
             shipping_options: { shipping_available: true, shipping_cost: 0, local_pickup: false },
-            sustainability_score: null,
-            status: merchantItem.status || 'available',
+            sustainability_score: 75,
+            status: 'available',
             wardrobe_item_id: null
           } as any;
         }
+      }
+
+      if (!fetchedItem) {
+        throw new Error('Item not found');
       }
 
       if (!fetchedItem) {
@@ -193,9 +198,9 @@ const MarketItemDetail = () => {
     navigate('/transactions');
   };
 
-  // Use photoHelpers for consistent photo handling
+  // Use photoHelpers for consistent photo handling with proper casting
   const getPhotoUrls = (photos: any): string[] => {
-    return getAllPhotoUrls(photos);
+    return getAllPhotoUrls(photos as any);
   };
 
   if (loading) {

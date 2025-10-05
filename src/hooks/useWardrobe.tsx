@@ -81,7 +81,7 @@ export const useWardrobe = () => {
       if (error) throw error;
       
       const itemsWithResolvedPhotos = (data || []).map((item) => {
-        const urls = getAllPhotoUrls(item.photos);
+        const urls = getAllPhotoUrls(item.photos as any);
         if (urls.length > 0) {
           return { ...item, photos: { main: urls[0], urls } as any };
         }

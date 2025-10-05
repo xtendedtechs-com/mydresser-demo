@@ -1261,6 +1261,50 @@ export type Database = {
         }
         Relationships: []
       }
+      item_care_log: {
+        Row: {
+          care_date: string
+          care_type: string
+          cost: number | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          service_provider: string | null
+          user_id: string
+          wardrobe_item_id: string
+        }
+        Insert: {
+          care_date?: string
+          care_type: string
+          cost?: number | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          service_provider?: string | null
+          user_id: string
+          wardrobe_item_id: string
+        }
+        Update: {
+          care_date?: string
+          care_type?: string
+          cost?: number | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          service_provider?: string | null
+          user_id?: string
+          wardrobe_item_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "item_care_log_wardrobe_item_id_fkey"
+            columns: ["wardrobe_item_id"]
+            isOneToOne: false
+            referencedRelation: "wardrobe_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       item_matches: {
         Row: {
           created_at: string
@@ -1337,6 +1381,60 @@ export type Database = {
             columns: ["item_id"]
             isOneToOne: false
             referencedRelation: "market_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      item_wear_history: {
+        Row: {
+          created_at: string | null
+          id: string
+          location: string | null
+          notes: string | null
+          occasion: string | null
+          outfit_id: string | null
+          user_id: string
+          wardrobe_item_id: string
+          weather_data: Json | null
+          worn_date: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          occasion?: string | null
+          outfit_id?: string | null
+          user_id: string
+          wardrobe_item_id: string
+          weather_data?: Json | null
+          worn_date?: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          occasion?: string | null
+          outfit_id?: string | null
+          user_id?: string
+          wardrobe_item_id?: string
+          weather_data?: Json | null
+          worn_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "item_wear_history_outfit_id_fkey"
+            columns: ["outfit_id"]
+            isOneToOne: false
+            referencedRelation: "outfits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "item_wear_history_wardrobe_item_id_fkey"
+            columns: ["wardrobe_item_id"]
+            isOneToOne: false
+            referencedRelation: "wardrobe_items"
             referencedColumns: ["id"]
           },
         ]
@@ -6191,6 +6289,57 @@ export type Database = {
         }
         Relationships: []
       }
+      wardrobe_analytics: {
+        Row: {
+          avg_wear_frequency: number | null
+          brand_distribution: Json | null
+          category_distribution: Json | null
+          color_distribution: Json | null
+          cost_per_wear_avg: number | null
+          created_at: string | null
+          id: string
+          items_worn_today: number | null
+          metric_date: string
+          sustainability_score: number | null
+          total_items: number | null
+          total_value: number | null
+          unique_outfits_created: number | null
+          user_id: string
+        }
+        Insert: {
+          avg_wear_frequency?: number | null
+          brand_distribution?: Json | null
+          category_distribution?: Json | null
+          color_distribution?: Json | null
+          cost_per_wear_avg?: number | null
+          created_at?: string | null
+          id?: string
+          items_worn_today?: number | null
+          metric_date?: string
+          sustainability_score?: number | null
+          total_items?: number | null
+          total_value?: number | null
+          unique_outfits_created?: number | null
+          user_id: string
+        }
+        Update: {
+          avg_wear_frequency?: number | null
+          brand_distribution?: Json | null
+          category_distribution?: Json | null
+          color_distribution?: Json | null
+          cost_per_wear_avg?: number | null
+          created_at?: string | null
+          id?: string
+          items_worn_today?: number | null
+          metric_date?: string
+          sustainability_score?: number | null
+          total_items?: number | null
+          total_value?: number | null
+          unique_outfits_created?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       wardrobe_collection_items: {
         Row: {
           added_at: string
@@ -6449,6 +6598,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      aggregate_wardrobe_analytics: {
+        Args: { p_date?: string; p_user_id: string }
+        Returns: undefined
+      }
       analyze_user_style: {
         Args: { p_user_id: string }
         Returns: Json
@@ -6812,6 +6965,10 @@ export type Database = {
           social_instagram: string
           social_tiktok: string
         }[]
+      }
+      get_wardrobe_insights: {
+        Args: { p_days?: number; p_user_id: string }
+        Returns: Json
       }
       has_role: {
         Args: {

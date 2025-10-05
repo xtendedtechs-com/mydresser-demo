@@ -40,6 +40,7 @@ export const useMarketItems = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      console.log('Fetched market items:', data?.length, 'items');
       setItems(data || []);
     } catch (error) {
       console.error('Error fetching market items:', error);
@@ -99,7 +100,7 @@ export const useMarketItems = () => {
 
   const getPhotoUrls = (photos: any): string[] => {
     const { getAllPhotoUrls } = require('@/utils/photoHelpers');
-    return getAllPhotoUrls(photos);
+    return getAllPhotoUrls(photos as any);
   };
 
   useEffect(() => {
