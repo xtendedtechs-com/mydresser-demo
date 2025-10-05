@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Grid, List, Sparkles, Trash2 } from 'lucide-react';
+import { Plus, Grid, List, Sparkles, Trash2, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -9,6 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SmartListCreator } from '@/components/collections/SmartListCreator';
+import { SmartListViewer } from '@/components/collections/SmartListViewer';
 
 interface Collection {
   id: string;
@@ -35,6 +37,7 @@ export default function CollectionsPage() {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isCreateSmartListOpen, setIsCreateSmartListOpen] = useState(false);
   const [newCollection, setNewCollection] = useState({ name: '', description: '' });
   const { toast } = useToast();
 
@@ -124,6 +127,21 @@ export default function CollectionsPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // Check rate limit before creating
+      const { data: rateLimitData, error: rateLimitError } = await supabase
+        .rpc('check_collection_rate_limit', {
+          action_type: 'create',
+          max_attempts: 10,
+          window_minutes: 60
+        });
+
+      if (rateLimitError) throw rateLimitError;
+
+      const rateLimitResult = rateLimitData as { allowed: boolean } | null;
+      if (!rateLimitResult?.allowed) {
+        throw new Error('Rate limit exceeded. You can create up to 10 collections per hour.');
+      }
+
       const { error } = await supabase
         .from('wardrobe_collections')
         .insert({
@@ -143,11 +161,11 @@ export default function CollectionsPage() {
       setIsCreateDialogOpen(false);
       setNewCollection({ name: '', description: '' });
       loadCollections();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating collection:', error);
       toast({
         title: 'Error',
-        description: 'Failed to create collection',
+        description: error.message || 'Failed to create collection',
         variant: 'destructive'
       });
     }
@@ -183,7 +201,15 @@ export default function CollectionsPage() {
       {/* Header */}
       <div className="max-w-6xl mx-auto mb-6">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-bold">Collections & Lists</h1>
+          <div>
+            <h1 className="text-3xl font-bold">Collections & Lists</h1>
+            <div className="flex items-center gap-2 mt-2">
+              <Shield className="h-4 w-4 text-primary" />
+              <p className="text-sm text-muted-foreground">
+                Secured with rate limiting and audit logging
+              </p>
+            </div>
+          </div>
           <div className="flex gap-2">
             <Button
               variant={viewMode === 'grid' ? 'default' : 'outline'}
@@ -202,7 +228,7 @@ export default function CollectionsPage() {
           </div>
         </div>
         <p className="text-muted-foreground">
-          Organize your wardrobe into custom collections and smart lists
+          Organize your wardrobe into custom collections and AI-powered smart lists
         </p>
       </div>
 
@@ -318,49 +344,52 @@ export default function CollectionsPage() {
           <TabsContent value="smart-lists">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold">Smart Lists</h2>
-              <Button>
+              <Button onClick={() => setIsCreateSmartListOpen(!isCreateSmartListOpen)}>
                 <Plus className="h-4 w-4 mr-2" />
                 New Smart List
               </Button>
             </div>
 
-            {dynamicLists.length === 0 ? (
+            {isCreateSmartListOpen && (
+              <div className="mb-6">
+                <SmartListCreator
+                  onSuccess={() => {
+                    setIsCreateSmartListOpen(false);
+                    loadDynamicLists();
+                  }}
+                  onCancel={() => setIsCreateSmartListOpen(false)}
+                />
+              </div>
+            )}
+
+            {dynamicLists.length === 0 && !isCreateSmartListOpen ? (
               <Card className="p-12 text-center">
                 <Sparkles className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground mb-4">
+                <p className="text-muted-foreground mb-2">
                   Smart Lists automatically organize your wardrobe based on rules you define
                 </p>
-                <Button>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Create dynamic lists that update automatically when items match your criteria
+                </p>
+                <Button onClick={() => setIsCreateSmartListOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Create Your First Smart List
                 </Button>
               </Card>
             ) : (
-              <div className="space-y-4">
-                {dynamicLists.map((list) => (
-                  <Card key={list.id} className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold">{list.name}</h3>
-                          {list.auto_update && (
-                            <Badge variant="secondary" className="gap-1">
-                              <Sparkles className="h-3 w-3" />
-                              Auto-update
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {list.item_count} items
-                        </p>
-                      </div>
-                      <Button variant="ghost" size="icon">
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
-              </div>
+              !isCreateSmartListOpen && (
+                <div className="space-y-4">
+                  {dynamicLists.map((list) => (
+                    <SmartListViewer
+                      key={list.id}
+                      listId={list.id}
+                      listName={list.name}
+                      autoUpdate={list.auto_update}
+                      onDelete={() => loadDynamicLists()}
+                    />
+                  ))}
+                </div>
+              )
             )}
           </TabsContent>
         </Tabs>

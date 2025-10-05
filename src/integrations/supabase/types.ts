@@ -116,6 +116,47 @@ export type Database = {
         }
         Relationships: []
       }
+      collection_access_log: {
+        Row: {
+          action: string
+          collection_id: string | null
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          metadata: Json | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          collection_id?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          collection_id?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          metadata?: Json | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_access_log_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "wardrobe_collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collection_items: {
         Row: {
           collection_id: string | null
@@ -164,6 +205,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      collection_rate_limits: {
+        Row: {
+          action: string
+          attempt_count: number
+          created_at: string
+          id: string
+          user_id: string
+          window_start: string
+        }
+        Insert: {
+          action: string
+          attempt_count?: number
+          created_at?: string
+          id?: string
+          user_id: string
+          window_start?: string
+        }
+        Update: {
+          action?: string
+          attempt_count?: number
+          created_at?: string
+          id?: string
+          user_id?: string
+          window_start?: string
+        }
+        Relationships: []
       }
       collections: {
         Row: {
@@ -4078,6 +4146,18 @@ export type Database = {
         }
         Returns: Json
       }
+      can_access_collection: {
+        Args: { collection_id_param: string; user_id_param?: string }
+        Returns: boolean
+      }
+      check_collection_rate_limit: {
+        Args: {
+          action_type: string
+          max_attempts?: number
+          window_minutes?: number
+        }
+        Returns: Json
+      }
       check_contact_info_breach_patterns: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -4182,6 +4262,27 @@ export type Database = {
       ensure_minimum_sample_wardrobe_items: {
         Args: { min_count?: number }
         Returns: undefined
+      }
+      evaluate_smart_list: {
+        Args: { list_id_param: string }
+        Returns: {
+          item_category: string
+          item_color: string
+          item_id: string
+          item_name: string
+          match_score: number
+        }[]
+      }
+      get_collection_secure: {
+        Args: { collection_id_param: string }
+        Returns: {
+          cover_image: string
+          created_at: string
+          description: string
+          id: string
+          is_public: boolean
+          name: string
+        }[]
       }
       get_customer_data_secure: {
         Args: { order_id_param: string }
