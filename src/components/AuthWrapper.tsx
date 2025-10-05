@@ -94,6 +94,9 @@ const WeatherPage = lazy(() => import("@/pages/WeatherPage"));
 const AppSettings = lazy(() => import("@/pages/settings/AppSettings"));
 const AccessibilitySettingsPage = lazy(() => import("@/pages/settings/AccessibilitySettingsPage"));
 const ChallengeSettingsPage = lazy(() => import("@/pages/settings/ChallengeSettingsPage"));
+const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
+const SecuritySettings = lazy(() => import("@/pages/settings/SecuritySettings"));
 
 export const AuthWrapper = () => {
   const { isAuthenticated, loading } = useProfile();
@@ -111,6 +114,8 @@ export const AuthWrapper = () => {
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="*" element={<Landing />} />
           </Routes>
         </Suspense>
@@ -176,6 +181,7 @@ export const AuthWrapper = () => {
             <Route path="/settings/social" element={<SocialSettingsPage />} />
             <Route path="/settings/accessibility" element={<AccessibilitySettingsPage />} />
             <Route path="/settings/challenges" element={<ChallengeSettingsPage />} />
+            <Route path="/settings/security" element={<SecuritySettings />} />
             
             <Route path="/mystyle" element={<MyStyle />} />
             <Route path="/service-settings/:service" element={<ServiceSettingsPage />} />

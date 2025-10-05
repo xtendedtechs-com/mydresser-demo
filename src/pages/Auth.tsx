@@ -316,11 +316,19 @@ const Auth = () => {
                     <SupabaseCaptcha onVerify={(token) => setCaptchaToken(token)} />
                   </div> */}
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="flex flex-col gap-2">
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Sign In Securely
                   </Button>
+                  <div className="text-center w-full">
+                    <Link 
+                      to="/forgot-password" 
+                      className="text-sm text-primary hover:underline"
+                    >
+                      Forgot your password?
+                    </Link>
+                  </div>
                 </CardFooter>
               </form>
             </TabsContent>
