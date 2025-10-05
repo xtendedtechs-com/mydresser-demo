@@ -96,6 +96,11 @@ const MerchantPage = lazy(() => import("@/pages/MerchantPage").then(m => ({ defa
 const AccountSettings = lazy(() => import("@/pages/settings/AccountSettings"));
 const UserInsights = lazy(() => import("@/pages/analytics/UserInsights"));
 const MerchantDashboard = lazy(() => import("@/pages/analytics/MerchantDashboard"));
+const PricingPage = lazy(() => import("@/pages/subscription/PricingPage"));
+const ManageSubscription = lazy(() => import("@/pages/subscription/ManageSubscription"));
+const BillingHistory = lazy(() => import("@/pages/subscription/BillingHistory"));
+const POSTerminal = lazy(() => import("@/pages/merchant/POSTerminal"));
+const StoreLocations = lazy(() => import("@/pages/merchant/StoreLocations"));
 const OutfitHistoryPage = lazy(() => import("@/pages/OutfitHistoryPage"));
 const WeatherPage = lazy(() => import("@/pages/WeatherPage"));
 const AppSettings = lazy(() => import("@/pages/settings/AppSettings"));
@@ -221,6 +226,11 @@ export const AuthWrapper = () => {
             <Route path="/wardrobe-analytics" element={<WardrobeAnalyticsPage />} />
             <Route path="/analytics/user" element={<UserInsights />} />
             <Route path="/analytics/merchant" element={<MerchantDashboard />} />
+            <Route path="/subscription/pricing" element={<PricingPage />} />
+            <Route path="/subscription/manage" element={<ManageSubscription />} />
+            <Route path="/subscription/billing" element={<BillingHistory />} />
+            <Route path="/merchant/pos-terminal" element={<POSTerminal />} />
+            <Route path="/merchant/locations" element={<StoreLocations />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
             <Route path="/auth" element={<Navigate to="/" replace />} />
           </Routes>

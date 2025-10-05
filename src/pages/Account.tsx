@@ -133,6 +133,20 @@ const Account = () => {
       onClick: () => setProfileEditOpen(true)
     },
     {
+      id: 'payment',
+      label: 'Payment Settings',
+      description: 'Manage payment methods and billing',
+      onClick: () => navigate('/subscription/billing'),
+      highlighted: true
+    },
+    {
+      id: 'subscription',
+      label: 'Subscription & Billing',
+      description: 'Manage your premium subscription',
+      onClick: () => navigate('/subscription/manage'),
+      highlighted: true
+    },
+    {
       id: 'privacy',
       label: 'Privacy & Data Rights',
       description: 'GDPR/CCPA compliance & data management',
