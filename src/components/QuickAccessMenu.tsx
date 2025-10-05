@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 import {
-  Menu,
+  Zap,
   History,
   Cloud,
   Sparkles,
@@ -23,7 +24,6 @@ import {
   Users,
   Package,
   Heart,
-  PlusCircle,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -125,47 +125,58 @@ export const QuickAccessMenu = () => {
   }, {} as Record<string, typeof menuItems>);
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
         <Button
-          variant="ghost"
           size="icon"
-          className="fixed top-4 right-4 z-40 md:hidden"
+          className="fixed bottom-20 right-4 z-40 h-14 w-14 rounded-full shadow-lg animate-pulse hover:animate-none"
           aria-label="Quick access menu"
         >
-          <Menu className="h-5 w-5" />
+          <Zap className="h-6 w-6" />
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        align="end" 
-        className="w-56 bg-background border shadow-lg z-50"
-        sideOffset={8}
-      >
-        <DropdownMenuLabel className="font-semibold">
-          {t('menu.quickAccess', 'Quick Access')}
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
+      </SheetTrigger>
+      <SheetContent side="right" className="w-80 sm:w-96">
+        <SheetHeader>
+          <SheetTitle className="flex items-center gap-2">
+            <Zap className="h-5 w-5" />
+            {t('menu.quickAccess', 'Quick Access')}
+          </SheetTitle>
+        </SheetHeader>
 
-        {Object.entries(groupedItems).map(([category, items]) => (
-          <div key={category}>
-            <DropdownMenuLabel className="text-xs text-muted-foreground uppercase px-2 py-1">
-              {categories[category as keyof typeof categories]}
-            </DropdownMenuLabel>
-            {items.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link key={item.path} to={item.path} onClick={() => setOpen(false)}>
-                  <DropdownMenuItem className="cursor-pointer">
-                    <Icon className="h-4 w-4 mr-2" />
-                    <span>{item.label}</span>
-                  </DropdownMenuItem>
-                </Link>
-              );
-            })}
-            <DropdownMenuSeparator />
+        <ScrollArea className="h-[calc(100vh-8rem)] mt-6">
+          <div className="space-y-6 pr-4">
+            {Object.entries(groupedItems).map(([category, items]) => (
+              <div key={category} className="space-y-2">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
+                  {categories[category as keyof typeof categories]}
+                </h3>
+                <div className="space-y-1">
+                  {items.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <Link 
+                        key={item.path} 
+                        to={item.path} 
+                        onClick={() => setOpen(false)}
+                        className="block"
+                      >
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start h-auto py-3 px-4 hover:bg-accent transition-colors"
+                        >
+                          <Icon className="h-5 w-5 mr-3 text-muted-foreground" />
+                          <span className="text-sm font-medium">{item.label}</span>
+                        </Button>
+                      </Link>
+                    );
+                  })}
+                </div>
+                {category !== 'system' && <Separator className="my-2" />}
+              </div>
+            ))}
           </div>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+        </ScrollArea>
+      </SheetContent>
+    </Sheet>
   );
 };

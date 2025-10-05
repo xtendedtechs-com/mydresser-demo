@@ -1,8 +1,10 @@
-import { Home, ShoppingBag, Shirt, Plus, User, Bot, Brain } from "lucide-react";
+import { Home, ShoppingBag, Shirt, Plus, User, Brain } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useProfile } from "@/hooks/useProfile";
 import { EnhancedNotificationBell } from './EnhancedNotificationBell';
+import { MainSideMenu } from './MainSideMenu';
+import { QuickAccessMenu } from './QuickAccessMenu';
 import { useTranslation } from 'react-i18next';
 
 interface NavigationProps {
@@ -64,38 +66,47 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 safe-area-inset">
-      <div className="flex justify-between items-center max-w-md mx-auto px-2 py-2 overflow-x-auto">
-        {/* Notification Bell - Always visible on left */}
-        <div className="flex-shrink-0">
-          <EnhancedNotificationBell />
-        </div>
+    <>
+      {/* Main Side Menu */}
+      <MainSideMenu />
+      
+      {/* Quick Access Floating Button */}
+      <QuickAccessMenu />
 
-        {/* Navigation Items */}
-        <div className="flex justify-around flex-1 min-w-0">
-          {navItems.map(({ name, href, icon: Icon, id }) => {
-            const isActive = location.pathname === href || 
-                            (href !== "/" && location.pathname.startsWith(href));
-            
-            return (
-              <Link
-                key={id}
-                to={href}
-                className={cn(
-                  "flex flex-col items-center gap-0.5 py-1.5 px-1.5 rounded-lg transition-all duration-200 min-w-[60px]",
-                  isActive
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <Icon size={18} className="flex-shrink-0" />
-                <span className="text-xs font-medium truncate w-full text-center">{name}</span>
-              </Link>
-            );
-          })}
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 safe-area-inset">
+        <div className="flex justify-between items-center max-w-md mx-auto px-2 py-2 overflow-x-auto">
+          {/* Notification Bell - Always visible on left */}
+          <div className="flex-shrink-0">
+            <EnhancedNotificationBell />
+          </div>
+
+          {/* Navigation Items */}
+          <div className="flex justify-around flex-1 min-w-0">
+            {navItems.map(({ name, href, icon: Icon, id }) => {
+              const isActive = location.pathname === href || 
+                              (href !== "/" && location.pathname.startsWith(href));
+              
+              return (
+                <Link
+                  key={id}
+                  to={href}
+                  className={cn(
+                    "flex flex-col items-center gap-0.5 py-1.5 px-1.5 rounded-lg transition-all duration-200 min-w-[60px]",
+                    isActive
+                      ? "text-primary"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Icon size={18} className="flex-shrink-0" />
+                  <span className="text-xs font-medium truncate w-full text-center">{name}</span>
+                </Link>
+              );
+            })}
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </>
   );
 };
 
