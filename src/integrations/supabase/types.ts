@@ -269,6 +269,54 @@ export type Database = {
         }
         Relationships: []
       }
+      compliance_audit_log: {
+        Row: {
+          action_taken: string
+          compliance_type: string
+          consent_given: boolean | null
+          created_at: string
+          data_categories: string[] | null
+          data_subject_id: string | null
+          event_details: Json | null
+          event_type: string
+          id: string
+          legal_basis: string | null
+          processing_purpose: string | null
+          retention_period: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action_taken: string
+          compliance_type: string
+          consent_given?: boolean | null
+          created_at?: string
+          data_categories?: string[] | null
+          data_subject_id?: string | null
+          event_details?: Json | null
+          event_type: string
+          id?: string
+          legal_basis?: string | null
+          processing_purpose?: string | null
+          retention_period?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action_taken?: string
+          compliance_type?: string
+          consent_given?: boolean | null
+          created_at?: string
+          data_categories?: string[] | null
+          data_subject_id?: string | null
+          event_details?: Json | null
+          event_type?: string
+          id?: string
+          legal_basis?: string | null
+          processing_purpose?: string | null
+          retention_period?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       contact_info_access_log: {
         Row: {
           accessed_fields: string[] | null
@@ -391,6 +439,45 @@ export type Database = {
           },
         ]
       }
+      data_access_patterns: {
+        Row: {
+          access_count: number | null
+          access_type: string
+          anomaly_reasons: string[] | null
+          created_at: string
+          id: string
+          is_anomalous: boolean | null
+          resource_id: string | null
+          resource_type: string
+          time_window_start: string
+          user_id: string
+        }
+        Insert: {
+          access_count?: number | null
+          access_type: string
+          anomaly_reasons?: string[] | null
+          created_at?: string
+          id?: string
+          is_anomalous?: boolean | null
+          resource_id?: string | null
+          resource_type: string
+          time_window_start?: string
+          user_id: string
+        }
+        Update: {
+          access_count?: number | null
+          access_type?: string
+          anomaly_reasons?: string[] | null
+          created_at?: string
+          id?: string
+          is_anomalous?: boolean | null
+          resource_id?: string | null
+          resource_type?: string
+          time_window_start?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       emotes: {
         Row: {
           category: string | null
@@ -442,6 +529,36 @@ export type Database = {
           rate?: number
           to_currency?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      financial_audit_log: {
+        Row: {
+          amount: number | null
+          created_at: string
+          currency: string | null
+          event_details: Json | null
+          event_type: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          currency?: string | null
+          event_details?: Json | null
+          event_type: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          currency?: string | null
+          event_details?: Json | null
+          event_type?: string
+          id?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -607,6 +724,69 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ip_reputation: {
+        Row: {
+          asn: string | null
+          block_reason: string | null
+          country_code: string | null
+          created_at: string
+          failed_attempts: number | null
+          first_seen_at: string
+          id: string
+          ip_address: unknown
+          is_blocked: boolean | null
+          is_proxy: boolean | null
+          is_tor: boolean | null
+          is_vpn: boolean | null
+          last_seen_at: string | null
+          reputation_score: number | null
+          successful_logins: number | null
+          threat_categories: string[] | null
+          threat_level: string | null
+          updated_at: string
+        }
+        Insert: {
+          asn?: string | null
+          block_reason?: string | null
+          country_code?: string | null
+          created_at?: string
+          failed_attempts?: number | null
+          first_seen_at?: string
+          id?: string
+          ip_address: unknown
+          is_blocked?: boolean | null
+          is_proxy?: boolean | null
+          is_tor?: boolean | null
+          is_vpn?: boolean | null
+          last_seen_at?: string | null
+          reputation_score?: number | null
+          successful_logins?: number | null
+          threat_categories?: string[] | null
+          threat_level?: string | null
+          updated_at?: string
+        }
+        Update: {
+          asn?: string | null
+          block_reason?: string | null
+          country_code?: string | null
+          created_at?: string
+          failed_attempts?: number | null
+          first_seen_at?: string
+          id?: string
+          ip_address?: unknown
+          is_blocked?: boolean | null
+          is_proxy?: boolean | null
+          is_tor?: boolean | null
+          is_vpn?: boolean | null
+          last_seen_at?: string | null
+          reputation_score?: number | null
+          successful_logins?: number | null
+          threat_categories?: string[] | null
+          threat_level?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       item_matches: {
         Row: {
@@ -2523,6 +2703,47 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_fraud_detection: {
+        Row: {
+          created_at: string
+          decision: string
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          risk_factors: Json | null
+          risk_score: number
+          transaction_id: string
+        }
+        Insert: {
+          created_at?: string
+          decision: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_factors?: Json | null
+          risk_score: number
+          transaction_id: string
+        }
+        Update: {
+          created_at?: string
+          decision?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          risk_factors?: Json | null
+          risk_score?: number
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_fraud_detection_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "payment_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_records: {
         Row: {
           amount: number
@@ -2633,6 +2854,62 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      payment_transactions: {
+        Row: {
+          amount: number
+          completed_at: string | null
+          created_at: string
+          currency: string | null
+          fraud_score: number | null
+          id: string
+          metadata: Json | null
+          payment_method: string | null
+          related_transaction_id: string | null
+          status: string
+          stripe_payment_intent_id: string | null
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          completed_at?: string | null
+          created_at?: string
+          currency?: string | null
+          fraud_score?: number | null
+          id?: string
+          metadata?: Json | null
+          payment_method?: string | null
+          related_transaction_id?: string | null
+          status: string
+          stripe_payment_intent_id?: string | null
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          completed_at?: string | null
+          created_at?: string
+          currency?: string | null
+          fraud_score?: number | null
+          id?: string
+          metadata?: Json | null
+          payment_method?: string | null
+          related_transaction_id?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_related_transaction_id_fkey"
+            columns: ["related_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "payment_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       professional_applications: {
         Row: {
@@ -3288,6 +3565,54 @@ export type Database = {
         }
         Relationships: []
       }
+      security_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          affected_users: string[] | null
+          alert_data: Json | null
+          alert_type: string
+          created_at: string
+          id: string
+          is_acknowledged: boolean | null
+          message: string
+          resolved: boolean | null
+          resolved_at: string | null
+          severity: string
+          title: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          affected_users?: string[] | null
+          alert_data?: Json | null
+          alert_type: string
+          created_at?: string
+          id?: string
+          is_acknowledged?: boolean | null
+          message: string
+          resolved?: boolean | null
+          resolved_at?: string | null
+          severity: string
+          title: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          affected_users?: string[] | null
+          alert_data?: Json | null
+          alert_type?: string
+          created_at?: string
+          id?: string
+          is_acknowledged?: boolean | null
+          message?: string
+          resolved?: boolean | null
+          resolved_at?: string | null
+          severity?: string
+          title?: string
+        }
+        Relationships: []
+      }
       security_audit_log: {
         Row: {
           action: string
@@ -3319,6 +3644,60 @@ export type Database = {
           ip_address?: unknown | null
           resource?: string | null
           success?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      security_incidents: {
+        Row: {
+          affected_resources: string[] | null
+          assigned_to: string | null
+          created_at: string
+          detected_at: string
+          id: string
+          incident_details: Json
+          incident_type: string
+          ip_address: unknown | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          severity: string
+          status: string
+          threat_indicators: Json | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          affected_resources?: string[] | null
+          assigned_to?: string | null
+          created_at?: string
+          detected_at?: string
+          id?: string
+          incident_details?: Json
+          incident_type: string
+          ip_address?: unknown | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          severity: string
+          status?: string
+          threat_indicators?: Json | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          affected_resources?: string[] | null
+          assigned_to?: string | null
+          created_at?: string
+          detected_at?: string
+          id?: string
+          incident_details?: Json
+          incident_type?: string
+          ip_address?: unknown | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          threat_indicators?: Json | null
           user_agent?: string | null
           user_id?: string | null
         }
@@ -3378,6 +3757,54 @@ export type Database = {
           operation_type?: string
           user_id?: string
           window_start?: string | null
+        }
+        Relationships: []
+      }
+      session_security_log: {
+        Row: {
+          anomaly_score: number | null
+          created_at: string
+          device_fingerprint: string | null
+          id: string
+          ip_address: unknown | null
+          is_active: boolean | null
+          location_data: Json | null
+          security_flags: string[] | null
+          session_end: string | null
+          session_id: string
+          session_start: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          anomaly_score?: number | null
+          created_at?: string
+          device_fingerprint?: string | null
+          id?: string
+          ip_address?: unknown | null
+          is_active?: boolean | null
+          location_data?: Json | null
+          security_flags?: string[] | null
+          session_end?: string | null
+          session_id: string
+          session_start?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          anomaly_score?: number | null
+          created_at?: string
+          device_fingerprint?: string | null
+          id?: string
+          ip_address?: unknown | null
+          is_active?: boolean | null
+          location_data?: Json | null
+          security_flags?: string[] | null
+          session_end?: string | null
+          session_id?: string
+          session_start?: string
+          user_agent?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -4035,6 +4462,57 @@ export type Database = {
           assigned_by?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_security_score: {
+        Row: {
+          created_at: string
+          failed_login_attempts: number | null
+          id: string
+          last_suspicious_activity: string | null
+          mfa_enabled: boolean | null
+          password_last_changed: string | null
+          rate_limit_violations: number | null
+          risk_level: string | null
+          security_flags: string[] | null
+          security_score: number | null
+          successful_logins: number | null
+          suspicious_activities: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          failed_login_attempts?: number | null
+          id?: string
+          last_suspicious_activity?: string | null
+          mfa_enabled?: boolean | null
+          password_last_changed?: string | null
+          rate_limit_violations?: number | null
+          risk_level?: string | null
+          security_flags?: string[] | null
+          security_score?: number | null
+          successful_logins?: number | null
+          suspicious_activities?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          failed_login_attempts?: number | null
+          id?: string
+          last_suspicious_activity?: string | null
+          mfa_enabled?: boolean | null
+          password_last_changed?: string | null
+          rate_limit_violations?: number | null
+          risk_level?: string | null
+          security_flags?: string[] | null
+          security_score?: number | null
+          successful_logins?: number | null
+          suspicious_activities?: number | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -4889,6 +5367,10 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: number
       }
+      calculate_user_security_score: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
       calculate_vto_roi: {
         Args: {
           end_date?: string
@@ -4920,6 +5402,14 @@ export type Database = {
       check_contact_rate_limit: {
         Args: { operation?: string }
         Returns: boolean
+      }
+      check_ip_reputation: {
+        Args: { p_ip_address: unknown }
+        Returns: {
+          is_blocked: boolean
+          reputation_score: number
+          threat_level: string
+        }[]
       }
       check_market_purchase_limit: {
         Args: { p_amount: number; p_user_id: string }
@@ -5267,6 +5757,15 @@ export type Database = {
       log_merchant_sensitive_access: {
         Args: { accessed_fields: string[]; merchant_profile_id: string }
         Returns: boolean
+      }
+      log_security_incident: {
+        Args: {
+          p_details?: Json
+          p_incident_type: string
+          p_severity: string
+          p_user_id?: string
+        }
+        Returns: string
       }
       log_sensitive_data_access: {
         Args: {

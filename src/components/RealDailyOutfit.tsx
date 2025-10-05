@@ -131,7 +131,7 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
         console.warn('Weather data unavailable:', error);
       }
 
-      // Generate outfit using AI
+      // Generate outfit using AI with unique seed to ensure variety
       const outfitAI = new OutfitAI();
       const generatedOutfit = await outfitAI.generateOutfit({
         wardrobeItems,
@@ -140,6 +140,9 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
         occasion: 'daily'
       });
 
+      console.log('Generated outfit with name:', generatedOutfit.name);
+      console.log('Generated outfit reasoning:', generatedOutfit.reasoning);
+
       // Save outfit to database with AI-generated name and description
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -147,7 +150,7 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
           .from('outfits')
           .insert({
             user_id: user.id,
-            name: generatedOutfit.name || 'Daily AI Pick',
+            name: generatedOutfit.name || `Daily Pick ${Date.now()}`,
             occasion: 'casual',
             season: 'all-season',
             is_ai_generated: true,
@@ -172,11 +175,17 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
         }
       }
 
-      setOutfit({
+      // Force new outfit state with unique timestamp to trigger re-render
+      const newOutfit = {
         ...generatedOutfit,
-        name: generatedOutfit.name || 'Daily AI Pick',
+        id: generatedOutfit.id || `temp-${Date.now()}`,
+        name: generatedOutfit.name || `Daily Pick ${Date.now()}`,
+        reasoning: generatedOutfit.reasoning || 'AI-curated outfit for you',
         confidence: Math.round((generatedOutfit.confidence || 0.85) * 100)
-      });
+      };
+      
+      console.log('Setting new outfit state:', newOutfit.name, newOutfit.reasoning);
+      setOutfit(newOutfit);
     } catch (error) {
       console.error('Error generating outfit:', error);
       toast.error('Failed to generate outfit');
