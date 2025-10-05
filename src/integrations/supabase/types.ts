@@ -1741,6 +1741,48 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_preferences: {
+        Row: {
+          achievement_notifications: boolean
+          created_at: string
+          email_enabled: boolean
+          id: string
+          marketplace_updates: boolean
+          outfit_suggestions: boolean
+          push_enabled: boolean
+          social_notifications: boolean
+          updated_at: string
+          user_id: string
+          weather_alerts: boolean
+        }
+        Insert: {
+          achievement_notifications?: boolean
+          created_at?: string
+          email_enabled?: boolean
+          id?: string
+          marketplace_updates?: boolean
+          outfit_suggestions?: boolean
+          push_enabled?: boolean
+          social_notifications?: boolean
+          updated_at?: string
+          user_id: string
+          weather_alerts?: boolean
+        }
+        Update: {
+          achievement_notifications?: boolean
+          created_at?: string
+          email_enabled?: boolean
+          id?: string
+          marketplace_updates?: boolean
+          outfit_suggestions?: boolean
+          push_enabled?: boolean
+          social_notifications?: boolean
+          updated_at?: string
+          user_id?: string
+          weather_alerts?: boolean
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           action_url: string | null

@@ -25,7 +25,7 @@ const getNotificationIcon = (type: string) => {
 };
 
 const NotificationCenter = ({ open, onOpenChange }: NotificationCenterProps) => {
-  const { notifications, unreadCount, loading, markAsRead, markAllAsRead, deleteNotification, clearAll } = useNotifications();
+  const { notifications, unreadCount, loading, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
   const navigate = useNavigate();
 
   const handleNotificationClick = async (notification: any) => {
@@ -142,13 +142,13 @@ const NotificationCenter = ({ open, onOpenChange }: NotificationCenterProps) => 
           )}
         </ScrollArea>
 
-        {notifications.length > 0 && (
+        {notifications.length > 0 && notifications.some(n => !n.read) && (
           <>
             <Separator className="my-4" />
             
             <div className="flex gap-2">
-              <Button variant="outline" className="flex-1" size="sm" onClick={clearAll}>
-                Clear All
+              <Button variant="outline" className="flex-1" size="sm" onClick={markAllAsRead}>
+                Mark All Read
               </Button>
             </div>
           </>

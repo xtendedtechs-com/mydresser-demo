@@ -13,7 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 export const EnhancedNotificationBell = () => {
-  const { notifications, markAsRead, refetch } = useNotifications();
+  const { notifications, markAsRead, refresh } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
 
@@ -32,7 +32,7 @@ export const EnhancedNotificationBell = () => {
         },
         (payload) => {
           console.log('New notification:', payload);
-          refetch();
+          refresh();
           
           // Show toast for new notification
           const notification = payload.new as any;
@@ -47,7 +47,7 @@ export const EnhancedNotificationBell = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [refetch, toast]);
+  }, [refresh, toast]);
 
   const getNotificationIcon = (type: string) => {
     switch (type) {

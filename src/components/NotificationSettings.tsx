@@ -6,7 +6,17 @@ import { Bell, Trash2 } from "lucide-react";
 import { useNotifications } from "@/hooks/useNotifications";
 
 const NotificationSettings = () => {
-  const { notifications, unreadCount, clearAll, markAllAsRead } = useNotifications();
+  const { notifications, unreadCount, markAllAsRead, preferences, updatePreferences, loading } = useNotifications();
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="animate-pulse">
+          <div className="h-64 bg-muted rounded-lg" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -28,7 +38,11 @@ const NotificationSettings = () => {
                 Receive notifications for your daily outfit recommendations
               </p>
             </div>
-            <Switch id="outfit-notifications" defaultChecked />
+            <Switch 
+              id="outfit-notifications" 
+              checked={preferences.outfit_suggestions}
+              onCheckedChange={(checked) => updatePreferences({ outfit_suggestions: checked })}
+            />
           </div>
 
           <div className="flex items-center justify-between">
@@ -38,7 +52,11 @@ const NotificationSettings = () => {
                 Get notified when someone follows you or interacts with your posts
               </p>
             </div>
-            <Switch id="social-notifications" defaultChecked />
+            <Switch 
+              id="social-notifications" 
+              checked={preferences.social_notifications}
+              onCheckedChange={(checked) => updatePreferences({ social_notifications: checked })}
+            />
           </div>
 
           <div className="flex items-center justify-between">
@@ -48,27 +66,39 @@ const NotificationSettings = () => {
                 Notifications about new items and deals in the marketplace
               </p>
             </div>
-            <Switch id="market-notifications" defaultChecked />
+            <Switch 
+              id="market-notifications" 
+              checked={preferences.marketplace_updates}
+              onCheckedChange={(checked) => updatePreferences({ marketplace_updates: checked })}
+            />
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="laundry-notifications">Laundry Reminders</Label>
+              <Label htmlFor="weather-notifications">Weather Alerts</Label>
               <p className="text-sm text-muted-foreground">
-                Get reminded when it's time to do laundry
+                Get notified about important weather changes
               </p>
             </div>
-            <Switch id="laundry-notifications" defaultChecked />
+            <Switch 
+              id="weather-notifications" 
+              checked={preferences.weather_alerts}
+              onCheckedChange={(checked) => updatePreferences({ weather_alerts: checked })}
+            />
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="system-notifications">System Updates</Label>
+              <Label htmlFor="achievement-notifications">Achievements</Label>
               <p className="text-sm text-muted-foreground">
-                Important updates about MyDresser features and changes
+                Get notified when you unlock achievements and badges
               </p>
             </div>
-            <Switch id="system-notifications" defaultChecked />
+            <Switch 
+              id="achievement-notifications" 
+              checked={preferences.achievement_notifications}
+              onCheckedChange={(checked) => updatePreferences({ achievement_notifications: checked })}
+            />
           </div>
         </CardContent>
       </Card>
@@ -88,27 +118,15 @@ const NotificationSettings = () => {
                 {notifications.length} notifications ({unreadCount} unread)
               </p>
             </div>
-            <div className="flex gap-2">
-              {unreadCount > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={markAllAsRead}
-                >
-                  Mark All Read
-                </Button>
-              )}
-              {notifications.length > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={clearAll}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Clear All
-                </Button>
-              )}
-            </div>
+            {unreadCount > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={markAllAsRead}
+              >
+                Mark All Read
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
