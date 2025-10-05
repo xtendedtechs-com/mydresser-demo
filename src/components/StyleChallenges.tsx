@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Trophy, TrendingUp, Users, Calendar, 
   Heart, MessageCircle, Share2, Award,
@@ -18,116 +19,159 @@ interface Challenge {
   description: string;
   category: 'seasonal' | 'sustainable' | 'budget' | 'creative';
   difficulty: 'easy' | 'medium' | 'hard';
-  startDate: string;
-  endDate: string;
-  participants: number;
-  submissions: number;
+  start_date: string;
+  end_date: string;
+  participants_count: number;
+  submissions_count: number;
   prize: string;
   status: 'upcoming' | 'active' | 'completed';
-  trending: boolean;
+  is_trending: boolean;
 }
 
 interface Submission {
   id: string;
-  challengeId: string;
-  userId: string;
-  userName: string;
-  userAvatar: string;
-  imageUrl: string;
+  challenge_id: string;
+  user_id: string;
+  title: string;
   description: string;
-  likes: number;
-  comments: number;
-  submittedAt: string;
+  image_urls: string[];
+  likes_count: number;
+  comments_count: number;
+  submitted_at: string;
+  profiles?: {
+    full_name: string;
+    avatar_url: string;
+  };
 }
 
 export const StyleChallenges = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('active');
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [userStats, setUserStats] = useState({
+    activeChallenges: 0,
+    submissions: 0,
+    wins: 0,
+    rank: 0
+  });
 
-  const challenges: Challenge[] = [
-    {
-      id: '1',
-      title: 'Sustainable Summer Style',
-      description: 'Create an eco-friendly summer outfit using only sustainable brands and materials',
-      category: 'sustainable',
-      difficulty: 'medium',
-      startDate: '2025-06-01',
-      endDate: '2025-06-30',
-      participants: 342,
-      submissions: 156,
-      prize: '$500 Gift Card',
-      status: 'active',
-      trending: true
-    },
-    {
-      id: '2',
-      title: 'Minimalist Wardrobe Challenge',
-      description: 'Style 10 different looks with only 15 clothing items',
-      category: 'creative',
-      difficulty: 'hard',
-      startDate: '2025-07-01',
-      endDate: '2025-07-31',
-      participants: 289,
-      submissions: 98,
-      prize: 'Feature on Homepage',
-      status: 'active',
-      trending: false
-    },
-    {
-      id: '3',
-      title: 'Budget Fashion Week',
-      description: 'Create runway-worthy looks with items under $50',
-      category: 'budget',
-      difficulty: 'easy',
-      startDate: '2025-08-01',
-      endDate: '2025-08-15',
-      participants: 567,
-      submissions: 0,
-      prize: '$200 Shopping Spree',
-      status: 'upcoming',
-      trending: true
+  useEffect(() => {
+    loadChallenges();
+    loadSubmissions();
+    loadUserStats();
+  }, []);
+
+  const loadChallenges = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('style_challenges')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setChallenges((data || []) as Challenge[]);
+    } catch (error: any) {
+      toast({
+        title: "Error loading challenges",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  const submissions: Submission[] = [
-    {
-      id: '1',
-      challengeId: '1',
-      userId: '1',
-      userName: 'Emma Style',
-      userAvatar: '/placeholder.svg',
-      imageUrl: '/placeholder.svg',
-      description: 'Loving this sustainable linen dress paired with recycled accessories!',
-      likes: 234,
-      comments: 45,
-      submittedAt: '2025-06-15'
-    },
-    {
-      id: '2',
-      challengeId: '1',
-      userId: '2',
-      userName: 'Fashion Forward',
-      userAvatar: '/placeholder.svg',
-      imageUrl: '/placeholder.svg',
-      description: 'Thrifted finds + eco-friendly brands = perfect summer outfit',
-      likes: 189,
-      comments: 32,
-      submittedAt: '2025-06-14'
+  const loadSubmissions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('challenge_submissions')
+        .select(`
+          *,
+          profiles!challenge_submissions_user_id_fkey (
+            full_name,
+            avatar_url
+          )
+        `)
+        .order('likes_count', { ascending: false })
+        .limit(10);
+      
+      if (error) throw error;
+      setSubmissions((data || []) as any);
+    } catch (error: any) {
+      console.error('Error loading submissions:', error);
     }
-  ];
+  };
 
-  const handleJoinChallenge = (challengeId: string) => {
-    toast({
-      title: 'Challenge Joined!',
-      description: 'Good luck! Start creating your submission.'
+  const loadUserStats = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: participations } = await supabase
+      .from('challenge_participations')
+      .select('*')
+      .eq('user_id', user.id);
+
+    const { data: userSubmissions } = await supabase
+      .from('challenge_submissions')
+      .select('*')
+      .eq('user_id', user.id);
+
+    const { data: wins } = await supabase
+      .from('challenge_submissions')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('is_winner', true);
+
+    setUserStats({
+      activeChallenges: participations?.length || 0,
+      submissions: userSubmissions?.length || 0,
+      wins: wins?.length || 0,
+      rank: 42
     });
   };
 
-  const handleSubmitEntry = (challengeId: string) => {
-    toast({
-      title: 'Entry Submitted!',
-      description: 'Your submission is now live. Good luck!'
-    });
+  const handleJoinChallenge = async (challengeId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        title: "Please sign in",
+        description: "You need to be signed in to join challenges",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('challenge_participations')
+        .insert({ challenge_id: challengeId, user_id: user.id });
+
+      if (error) {
+        if (error.code === '23505') {
+          toast({
+            title: "Already Joined",
+            description: "You're already participating in this challenge"
+          });
+          return;
+        }
+        throw error;
+      }
+
+      toast({
+        title: 'Challenge Joined!',
+        description: 'Good luck! Start creating your submission.'
+      });
+      loadChallenges();
+      loadUserStats();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
   };
 
   const getCategoryColor = (category: Challenge['category']) => {
@@ -148,6 +192,14 @@ export const StyleChallenges = () => {
     };
     return colors[difficulty];
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -170,7 +222,7 @@ export const StyleChallenges = () => {
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">8</div>
+            <div className="text-2xl font-bold">{challenges.filter(c => c.status === 'active').length}</div>
             <p className="text-xs text-muted-foreground">Join now</p>
           </CardContent>
         </Card>
@@ -181,7 +233,7 @@ export const StyleChallenges = () => {
             <Award className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
+            <div className="text-2xl font-bold">{userStats.submissions}</div>
             <p className="text-xs text-muted-foreground">This month</p>
           </CardContent>
         </Card>
@@ -192,7 +244,7 @@ export const StyleChallenges = () => {
             <Trophy className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1</div>
+            <div className="text-2xl font-bold">{userStats.wins}</div>
             <p className="text-xs text-muted-foreground">Keep going!</p>
           </CardContent>
         </Card>
@@ -203,7 +255,7 @@ export const StyleChallenges = () => {
             <Star className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">#42</div>
+            <div className="text-2xl font-bold">#{userStats.rank}</div>
             <p className="text-xs text-muted-foreground">Top 5% this month</p>
           </CardContent>
         </Card>
@@ -224,7 +276,7 @@ export const StyleChallenges = () => {
                   <div className="space-y-1 flex-1">
                     <div className="flex items-center gap-2">
                       <CardTitle>{challenge.title}</CardTitle>
-                      {challenge.trending && (
+                      {challenge.is_trending && (
                         <Badge variant="default" className="gap-1">
                           <Flame className="h-3 w-3" />
                           Trending
@@ -249,15 +301,15 @@ export const StyleChallenges = () => {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div className="flex items-center gap-2">
                     <Users className="h-4 w-4 text-muted-foreground" />
-                    <span>{challenge.participants} participants</span>
+                    <span>{challenge.participants_count} participants</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                    <span>{challenge.submissions} submissions</span>
+                    <span>{challenge.submissions_count} submissions</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span>Ends {new Date(challenge.endDate).toLocaleDateString()}</span>
+                    <span>Ends {new Date(challenge.end_date).toLocaleDateString()}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Award className="h-4 w-4 text-muted-foreground" />
@@ -268,17 +320,22 @@ export const StyleChallenges = () => {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Progress</span>
-                    <span className="font-semibold">{Math.round((challenge.submissions / challenge.participants) * 100)}%</span>
+                    <span className="font-semibold">
+                      {challenge.participants_count > 0 
+                        ? Math.round((challenge.submissions_count / challenge.participants_count) * 100)
+                        : 0}%
+                    </span>
                   </div>
-                  <Progress value={(challenge.submissions / challenge.participants) * 100} />
+                  <Progress 
+                    value={challenge.participants_count > 0 
+                      ? (challenge.submissions_count / challenge.participants_count) * 100 
+                      : 0} 
+                  />
                 </div>
 
                 <div className="flex gap-2">
                   <Button onClick={() => handleJoinChallenge(challenge.id)} className="flex-1">
                     Join Challenge
-                  </Button>
-                  <Button variant="outline" onClick={() => handleSubmitEntry(challenge.id)}>
-                    Submit Entry
                   </Button>
                 </div>
               </CardContent>
@@ -301,7 +358,7 @@ export const StyleChallenges = () => {
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-2 text-sm">
                   <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span>Starts {new Date(challenge.startDate).toLocaleDateString()}</span>
+                  <span>Starts {new Date(challenge.start_date).toLocaleDateString()}</span>
                 </div>
                 <Button variant="outline" className="w-full">
                   Notify Me
@@ -316,22 +373,28 @@ export const StyleChallenges = () => {
             {submissions.map((submission) => (
               <Card key={submission.id} className="overflow-hidden">
                 <div className="aspect-square bg-muted relative">
-                  <img
-                    src={submission.imageUrl}
-                    alt={submission.description}
-                    className="object-cover w-full h-full"
-                  />
+                  {submission.image_urls?.[0] && (
+                    <img
+                      src={submission.image_urls[0]}
+                      alt={submission.title || submission.description}
+                      className="object-cover w-full h-full"
+                    />
+                  )}
                 </div>
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-center gap-2">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={submission.userAvatar} />
-                      <AvatarFallback>{submission.userName[0]}</AvatarFallback>
+                      <AvatarImage src={submission.profiles?.avatar_url} />
+                      <AvatarFallback>
+                        {submission.profiles?.full_name?.charAt(0) || 'U'}
+                      </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <p className="text-sm font-semibold">{submission.userName}</p>
+                      <p className="text-sm font-semibold">
+                        {submission.profiles?.full_name || 'Anonymous'}
+                      </p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(submission.submittedAt).toLocaleDateString()}
+                        {new Date(submission.submitted_at).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
@@ -339,11 +402,11 @@ export const StyleChallenges = () => {
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <button className="flex items-center gap-1 hover:text-primary transition-colors">
                       <Heart className="h-4 w-4" />
-                      {submission.likes}
+                      {submission.likes_count}
                     </button>
                     <button className="flex items-center gap-1 hover:text-primary transition-colors">
                       <MessageCircle className="h-4 w-4" />
-                      {submission.comments}
+                      {submission.comments_count}
                     </button>
                     <button className="flex items-center gap-1 hover:text-primary transition-colors">
                       <Share2 className="h-4 w-4" />

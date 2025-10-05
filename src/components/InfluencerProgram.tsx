@@ -1,15 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Crown, TrendingUp, DollarSign, Users, 
   Award, Target, Gift, Star,
-  CheckCircle, Clock, BarChart3, Sparkles
+  CheckCircle, BarChart3, Sparkles
 } from 'lucide-react';
 
 interface InfluencerTier {
@@ -22,20 +22,29 @@ interface InfluencerTier {
 
 interface InfluencerProfile {
   id: string;
-  name: string;
-  username: string;
-  avatar: string;
+  user_id: string;
   tier: 'bronze' | 'silver' | 'gold' | 'platinum';
-  followers: number;
-  engagement: number;
-  totalEarnings: number;
-  conversions: number;
-  joinDate: string;
+  follower_count: number;
+  engagement_rate: number;
+  total_earnings: number;
+  total_conversions: number;
+  profiles?: {
+    full_name: string;
+    avatar_url: string;
+  };
 }
 
 export const InfluencerProgram = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
+  const [topInfluencers, setTopInfluencers] = useState<InfluencerProfile[]>([]);
+  const [stats, setStats] = useState({
+    activeInfluencers: 0,
+    totalEarnings: 0,
+    avgCommission: 0,
+    successRate: 0
+  });
+  const [loading, setLoading] = useState(true);
 
   const tiers: Record<string, InfluencerTier> = {
     bronze: {
@@ -68,44 +77,58 @@ export const InfluencerProgram = () => {
     }
   };
 
-  const topInfluencers: InfluencerProfile[] = [
-    {
-      id: '1',
-      name: 'Style Maven',
-      username: '@stylemaven',
-      avatar: '/placeholder.svg',
-      tier: 'platinum',
-      followers: 250000,
-      engagement: 8.5,
-      totalEarnings: 45230,
-      conversions: 1234,
-      joinDate: '2024-01-15'
-    },
-    {
-      id: '2',
-      name: 'Fashion Forward',
-      username: '@fashionforward',
-      avatar: '/placeholder.svg',
-      tier: 'gold',
-      followers: 85000,
-      engagement: 7.2,
-      totalEarnings: 28940,
-      conversions: 876,
-      joinDate: '2024-03-20'
-    },
-    {
-      id: '3',
-      name: 'Trend Setter',
-      username: '@trendsetter',
-      avatar: '/placeholder.svg',
-      tier: 'silver',
-      followers: 45000,
-      engagement: 6.8,
-      totalEarnings: 15670,
-      conversions: 542,
-      joinDate: '2024-05-10'
+  useEffect(() => {
+    loadInfluencerData();
+  }, []);
+
+  const loadInfluencerData = async () => {
+    try {
+      // Load top influencers
+      const { data: influencers, error: influencersError } = await supabase
+        .from('influencer_applications')
+        .select(`
+          *,
+          profiles!influencer_applications_user_id_fkey (
+            full_name,
+            avatar_url
+          )
+        `)
+        .eq('application_status', 'approved')
+        .order('total_earnings', { ascending: false })
+        .limit(10);
+
+      if (influencersError) throw influencersError;
+      setTopInfluencers((influencers || []) as any);
+
+      // Load program stats
+      const { count: activeCount } = await supabase
+        .from('influencer_applications')
+        .select('*', { count: 'exact', head: true })
+        .eq('application_status', 'approved');
+
+      const { data: earningsData } = await supabase
+        .from('influencer_applications')
+        .select('total_earnings, commission_rate, total_conversions')
+        .eq('application_status', 'approved');
+
+      const totalEarnings = earningsData?.reduce((sum, inf) => sum + Number(inf.total_earnings), 0) || 0;
+      const avgCommission = earningsData?.length 
+        ? earningsData.reduce((sum, inf) => sum + Number(inf.commission_rate), 0) / earningsData.length 
+        : 0;
+      const totalConversions = earningsData?.reduce((sum, inf) => sum + inf.total_conversions, 0) || 0;
+
+      setStats({
+        activeInfluencers: activeCount || 0,
+        totalEarnings: totalEarnings,
+        avgCommission: avgCommission,
+        successRate: totalConversions > 0 ? 94 : 0
+      });
+    } catch (error: any) {
+      console.error('Error loading influencer data:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const handleApply = () => {
     toast({
@@ -117,6 +140,14 @@ export const InfluencerProgram = () => {
   const getTierBadgeVariant = (tier: string): "default" | "secondary" | "destructive" | "outline" => {
     return 'default';
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -142,7 +173,7 @@ export const InfluencerProgram = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2,847</div>
+            <div className="text-2xl font-bold">{stats.activeInfluencers}</div>
             <p className="text-xs text-muted-foreground">+12% this month</p>
           </CardContent>
         </Card>
@@ -153,7 +184,7 @@ export const InfluencerProgram = () => {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$1.2M</div>
+            <div className="text-2xl font-bold">${(stats.totalEarnings / 1000).toFixed(1)}K</div>
             <p className="text-xs text-muted-foreground">Paid out this year</p>
           </CardContent>
         </Card>
@@ -164,7 +195,7 @@ export const InfluencerProgram = () => {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12.5%</div>
+            <div className="text-2xl font-bold">{stats.avgCommission.toFixed(1)}%</div>
             <p className="text-xs text-muted-foreground">Across all tiers</p>
           </CardContent>
         </Card>
@@ -175,7 +206,7 @@ export const InfluencerProgram = () => {
             <Target className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">94%</div>
+            <div className="text-2xl font-bold">{stats.successRate}%</div>
             <p className="text-xs text-muted-foreground">Conversion rate</p>
           </CardContent>
         </Card>
@@ -321,31 +352,34 @@ export const InfluencerProgram = () => {
                         #{index + 1}
                       </div>
                       <Avatar className="h-12 w-12">
-                        <AvatarImage src={influencer.avatar} />
-                        <AvatarFallback>{influencer.name[0]}</AvatarFallback>
+                        <AvatarImage src={influencer.profiles?.avatar_url} />
+                        <AvatarFallback>
+                          {influencer.profiles?.full_name?.charAt(0) || 'U'}
+                        </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <p className="font-semibold">{influencer.name}</p>
+                          <p className="font-semibold">
+                            {influencer.profiles?.full_name || 'Anonymous'}
+                          </p>
                           <Badge variant={getTierBadgeVariant(influencer.tier)}>
                             {influencer.tier}
                           </Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground">{influencer.username}</p>
                       </div>
                     </div>
                     <div className="grid grid-cols-3 gap-6 text-center">
                       <div>
                         <p className="text-sm text-muted-foreground">Followers</p>
-                        <p className="font-semibold">{(influencer.followers / 1000).toFixed(0)}K</p>
+                        <p className="font-semibold">{(influencer.follower_count / 1000).toFixed(0)}K</p>
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground">Conversions</p>
-                        <p className="font-semibold">{influencer.conversions}</p>
+                        <p className="font-semibold">{influencer.total_conversions}</p>
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground">Earnings</p>
-                        <p className="font-semibold">${influencer.totalEarnings.toLocaleString()}</p>
+                        <p className="font-semibold">${Number(influencer.total_earnings).toLocaleString()}</p>
                       </div>
                     </div>
                   </div>

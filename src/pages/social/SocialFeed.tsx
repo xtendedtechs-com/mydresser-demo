@@ -117,8 +117,14 @@ export default function SocialFeed() {
   };
 
   const PostCard = ({ post }: { post: any }) => {
+    const [currentUser, setCurrentUser] = useState<any>(null);
+    
+    useEffect(() => {
+      supabase.auth.getUser().then(({ data }) => setCurrentUser(data.user));
+    }, []);
+    
     const hasLiked = post.post_reactions?.some((r: any) => 
-      r.reaction_type === 'like' && r.user_id === post.user_id
+      r.reaction_type === 'like' && currentUser && r.user_id === currentUser.id
     );
 
     return (

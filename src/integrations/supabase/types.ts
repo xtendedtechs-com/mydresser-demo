@@ -263,6 +263,85 @@ export type Database = {
         }
         Relationships: []
       }
+      challenge_participations: {
+        Row: {
+          challenge_id: string
+          id: string
+          joined_at: string | null
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          id?: string
+          joined_at?: string | null
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          id?: string
+          joined_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_participations_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "style_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenge_submissions: {
+        Row: {
+          challenge_id: string
+          comments_count: number | null
+          description: string
+          id: string
+          image_urls: string[]
+          is_winner: boolean | null
+          likes_count: number | null
+          outfit_items: string[] | null
+          submitted_at: string | null
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          comments_count?: number | null
+          description: string
+          id?: string
+          image_urls: string[]
+          is_winner?: boolean | null
+          likes_count?: number | null
+          outfit_items?: string[] | null
+          submitted_at?: string | null
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          comments_count?: number | null
+          description?: string
+          id?: string
+          image_urls?: string[]
+          is_winner?: boolean | null
+          likes_count?: number | null
+          outfit_items?: string[] | null
+          submitted_at?: string | null
+          title?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_submissions_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "style_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collection_access_log: {
         Row: {
           action: string
@@ -652,6 +731,41 @@ export type Database = {
         }
         Relationships: []
       }
+      event_registrations: {
+        Row: {
+          event_id: string
+          id: string
+          payment_status: string | null
+          registered_at: string | null
+          registration_status: string | null
+          user_id: string
+        }
+        Insert: {
+          event_id: string
+          id?: string
+          payment_status?: string | null
+          registered_at?: string | null
+          registration_status?: string | null
+          user_id: string
+        }
+        Update: {
+          event_id?: string
+          id?: string
+          payment_status?: string | null
+          registered_at?: string | null
+          registration_status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "fashion_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exchange_rates: {
         Row: {
           created_at: string
@@ -676,6 +790,66 @@ export type Database = {
           rate?: number
           to_currency?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      fashion_events: {
+        Row: {
+          attendees_count: number | null
+          category: string
+          created_at: string | null
+          description: string
+          event_date: string
+          event_time: string
+          event_type: string
+          host_id: string | null
+          host_name: string
+          id: string
+          image_url: string | null
+          is_featured: boolean | null
+          location: string
+          max_attendees: number | null
+          price: number | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          attendees_count?: number | null
+          category: string
+          created_at?: string | null
+          description: string
+          event_date: string
+          event_time: string
+          event_type: string
+          host_id?: string | null
+          host_name: string
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          location: string
+          max_attendees?: number | null
+          price?: number | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          attendees_count?: number | null
+          category?: string
+          created_at?: string | null
+          description?: string
+          event_date?: string
+          event_time?: string
+          event_type?: string
+          host_id?: string | null
+          host_name?: string
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          location?: string
+          max_attendees?: number | null
+          price?: number | null
+          title?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -735,6 +909,98 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      influencer_applications: {
+        Row: {
+          application_status: string | null
+          applied_at: string | null
+          approved_at: string | null
+          commission_rate: number | null
+          engagement_rate: number | null
+          follower_count: number | null
+          id: string
+          reviewed_by: string | null
+          social_profiles: Json
+          tier: string | null
+          total_conversions: number | null
+          total_earnings: number | null
+          user_id: string
+        }
+        Insert: {
+          application_status?: string | null
+          applied_at?: string | null
+          approved_at?: string | null
+          commission_rate?: number | null
+          engagement_rate?: number | null
+          follower_count?: number | null
+          id?: string
+          reviewed_by?: string | null
+          social_profiles: Json
+          tier?: string | null
+          total_conversions?: number | null
+          total_earnings?: number | null
+          user_id: string
+        }
+        Update: {
+          application_status?: string | null
+          applied_at?: string | null
+          approved_at?: string | null
+          commission_rate?: number | null
+          engagement_rate?: number | null
+          follower_count?: number | null
+          id?: string
+          reviewed_by?: string | null
+          social_profiles?: Json
+          tier?: string | null
+          total_conversions?: number | null
+          total_earnings?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      influencer_referrals: {
+        Row: {
+          commission_earned: number | null
+          conversion_status: string | null
+          converted_at: string | null
+          created_at: string | null
+          id: string
+          influencer_id: string
+          order_id: string | null
+          referral_code: string
+          referred_user_id: string | null
+        }
+        Insert: {
+          commission_earned?: number | null
+          conversion_status?: string | null
+          converted_at?: string | null
+          created_at?: string | null
+          id?: string
+          influencer_id: string
+          order_id?: string | null
+          referral_code: string
+          referred_user_id?: string | null
+        }
+        Update: {
+          commission_earned?: number | null
+          conversion_status?: string | null
+          converted_at?: string | null
+          created_at?: string | null
+          id?: string
+          influencer_id?: string
+          order_id?: string | null
+          referral_code?: string
+          referred_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "influencer_referrals_influencer_id_fkey"
+            columns: ["influencer_id"]
+            isOneToOne: false
+            referencedRelation: "influencer_applications"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       inventory_alerts: {
         Row: {
@@ -4595,6 +4861,60 @@ export type Database = {
         }
         Relationships: []
       }
+      style_challenges: {
+        Row: {
+          category: string
+          created_at: string | null
+          created_by: string | null
+          description: string
+          difficulty: string
+          end_date: string
+          id: string
+          is_trending: boolean | null
+          participants_count: number | null
+          prize: string
+          start_date: string
+          status: string
+          submissions_count: number | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          created_by?: string | null
+          description: string
+          difficulty: string
+          end_date: string
+          id?: string
+          is_trending?: boolean | null
+          participants_count?: number | null
+          prize: string
+          start_date: string
+          status?: string
+          submissions_count?: number | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string
+          difficulty?: string
+          end_date?: string
+          id?: string
+          is_trending?: boolean | null
+          participants_count?: number | null
+          prize?: string
+          start_date?: string
+          status?: string
+          submissions_count?: number | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       style_evolution_log: {
         Row: {
           brand_diversity: number | null
@@ -4879,6 +5199,36 @@ export type Database = {
           type?: string
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_name: string
+          achievement_type: string
+          description: string | null
+          earned_at: string | null
+          id: string
+          points_earned: number | null
+          user_id: string
+        }
+        Insert: {
+          achievement_name: string
+          achievement_type: string
+          description?: string | null
+          earned_at?: string | null
+          id?: string
+          points_earned?: number | null
+          user_id: string
+        }
+        Update: {
+          achievement_name?: string
+          achievement_type?: string
+          description?: string | null
+          earned_at?: string | null
+          id?: string
+          points_earned?: number | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -6603,6 +6953,10 @@ export type Database = {
           p_tokens_used?: number
           p_user_id: string
         }
+        Returns: undefined
+      }
+      update_challenge_status: {
+        Args: Record<PropertyKey, never>
         Returns: undefined
       }
       update_contact_info_secure: {

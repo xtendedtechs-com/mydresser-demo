@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Calendar, MapPin, Users, Clock, 
-  Video, Star, Ticket, ExternalLink,
+  Video, Star, Ticket,
   ChevronRight, Bell, Heart
 } from 'lucide-react';
 
@@ -14,123 +15,119 @@ interface Event {
   id: string;
   title: string;
   description: string;
-  type: 'virtual' | 'physical' | 'hybrid';
-  date: string;
-  time: string;
-  location: string;
-  host: string;
-  hostAvatar: string;
-  attendees: number;
-  maxAttendees?: number;
-  price: number;
-  featured: boolean;
+  event_type: 'virtual' | 'physical' | 'hybrid';
   category: 'workshop' | 'fashion-show' | 'meetup' | 'webinar';
-  imageUrl: string;
+  event_date: string;
+  event_time: string;
+  location: string;
+  host_id: string;
+  host_name: string;
+  attendees_count: number;
+  max_attendees: number | null;
+  price: number;
+  is_featured: boolean;
+  image_url: string | null;
 }
 
 export const FashionEvents = () => {
   const { toast } = useToast();
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'virtual' | 'physical'>('all');
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const events: Event[] = [
-    {
-      id: '1',
-      title: 'Sustainable Fashion Workshop',
-      description: 'Learn how to build an eco-friendly wardrobe with expert stylist Sarah Chen',
-      type: 'virtual',
-      date: '2025-07-15',
-      time: '18:00 - 20:00',
-      location: 'Zoom',
-      host: 'Sarah Chen',
-      hostAvatar: '/placeholder.svg',
-      attendees: 145,
-      maxAttendees: 200,
-      price: 0,
-      featured: true,
-      category: 'workshop',
-      imageUrl: '/placeholder.svg'
-    },
-    {
-      id: '2',
-      title: 'Summer Fashion Week 2025',
-      description: 'Exclusive runway show featuring emerging designers and latest trends',
-      type: 'physical',
-      date: '2025-08-20',
-      time: '19:00 - 22:00',
-      location: 'NYC Fashion District',
-      host: 'Fashion Forward',
-      hostAvatar: '/placeholder.svg',
-      attendees: 580,
-      maxAttendees: 1000,
-      price: 75,
-      featured: true,
-      category: 'fashion-show',
-      imageUrl: '/placeholder.svg'
-    },
-    {
-      id: '3',
-      title: 'Style Influencer Meetup',
-      description: 'Network with fashion influencers and content creators in your area',
-      type: 'physical',
-      date: '2025-07-28',
-      time: '14:00 - 17:00',
-      location: 'Los Angeles, CA',
-      host: 'StyleConnect',
-      hostAvatar: '/placeholder.svg',
-      attendees: 67,
-      maxAttendees: 100,
-      price: 25,
-      featured: false,
-      category: 'meetup',
-      imageUrl: '/placeholder.svg'
-    },
-    {
-      id: '4',
-      title: 'Personal Styling Masterclass',
-      description: 'Discover your personal style and learn professional styling techniques',
-      type: 'virtual',
-      date: '2025-07-22',
-      time: '16:00 - 18:30',
-      location: 'Google Meet',
-      host: 'Emma Martinez',
-      hostAvatar: '/placeholder.svg',
-      attendees: 89,
-      maxAttendees: 150,
-      price: 49,
-      featured: false,
-      category: 'webinar',
-      imageUrl: '/placeholder.svg'
+  useEffect(() => {
+    loadEvents();
+  }, []);
+
+  const loadEvents = async () => {
+    try {
+      let query = supabase
+        .from('fashion_events')
+        .select('*')
+        .gte('event_date', new Date().toISOString().split('T')[0])
+        .order('event_date', { ascending: true });
+
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      setEvents((data || []) as Event[]);
+    } catch (error: any) {
+      toast({
+        title: "Error loading events",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const filteredEvents = events.filter(event => {
     if (filter === 'all') return true;
-    if (filter === 'virtual') return event.type === 'virtual';
-    if (filter === 'physical') return event.type === 'physical';
+    if (filter === 'virtual') return event.event_type === 'virtual';
+    if (filter === 'physical') return event.event_type === 'physical';
     return true;
   });
 
-  const handleRegister = (eventId: string) => {
-    toast({
-      title: 'Registration Successful!',
-      description: 'Check your email for event details and confirmation.'
-    });
+  const handleRegister = async (eventId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        title: "Please sign in",
+        description: "You need to be signed in to register for events",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('event_registrations')
+        .insert({ 
+          event_id: eventId, 
+          user_id: user.id,
+          registration_status: 'registered',
+          payment_status: 'pending'
+        });
+
+      if (error) {
+        if (error.code === '23505') {
+          toast({
+            title: "Already Registered",
+            description: "You're already registered for this event"
+          });
+          return;
+        }
+        throw error;
+      }
+
+      toast({
+        title: 'Registration Successful!',
+        description: 'Check your email for event details and confirmation.'
+      });
+      loadEvents();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
   };
 
-  const getTypeIcon = (type: Event['type']) => {
+  const getTypeIcon = (type: Event['event_type']) => {
     if (type === 'virtual') return <Video className="h-4 w-4" />;
     if (type === 'physical') return <MapPin className="h-4 w-4" />;
     return <Calendar className="h-4 w-4" />;
   };
 
-  const getTypeColor = (type: Event['type']) => {
-    const colors = {
-      virtual: 'bg-blue-500',
-      physical: 'bg-green-500',
-      hybrid: 'bg-purple-500'
-    };
-    return colors[type];
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -180,14 +177,16 @@ export const FashionEvents = () => {
         <div className="space-y-4">
           <h3 className="text-xl font-semibold">Featured Events</h3>
           <div className="grid gap-4 md:grid-cols-2">
-            {events.filter(e => e.featured).map((event) => (
+            {events.filter(e => e.is_featured).map((event) => (
               <Card key={event.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="aspect-video bg-muted relative">
-                  <img
-                    src={event.imageUrl}
-                    alt={event.title}
-                    className="object-cover w-full h-full"
-                  />
+                  {event.image_url && (
+                    <img
+                      src={event.image_url}
+                      alt={event.title}
+                      className="object-cover w-full h-full"
+                    />
+                  )}
                   <Badge className="absolute top-4 right-4" variant="secondary">
                     <Star className="mr-1 h-3 w-3" />
                     Featured
@@ -206,11 +205,10 @@ export const FashionEvents = () => {
                 <CardContent className="space-y-4">
                   <div className="flex items-center gap-2">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={event.hostAvatar} />
-                      <AvatarFallback>{event.host[0]}</AvatarFallback>
+                      <AvatarFallback>{event.host_name[0]}</AvatarFallback>
                     </Avatar>
                     <div className="text-sm">
-                      <p className="font-medium">{event.host}</p>
+                      <p className="font-medium">{event.host_name}</p>
                       <p className="text-muted-foreground">Host</p>
                     </div>
                   </div>
@@ -218,19 +216,19 @@ export const FashionEvents = () => {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span>{new Date(event.date).toLocaleDateString()}</span>
+                      <span>{new Date(event.event_date).toLocaleDateString()}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span>{event.time}</span>
+                      <span>{event.event_time}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      {getTypeIcon(event.type)}
+                      {getTypeIcon(event.event_type)}
                       <span>{event.location}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4 text-muted-foreground" />
-                      <span>{event.attendees} attending</span>
+                      <span>{event.attendees_count} attending</span>
                     </div>
                   </div>
 
@@ -239,9 +237,9 @@ export const FashionEvents = () => {
                       <p className="text-2xl font-bold">
                         {event.price === 0 ? 'Free' : `$${event.price}`}
                       </p>
-                      {event.maxAttendees && (
+                      {event.max_attendees && (
                         <p className="text-xs text-muted-foreground">
-                          {event.maxAttendees - event.attendees} spots left
+                          {event.max_attendees - event.attendees_count} spots left
                         </p>
                       )}
                     </div>
@@ -268,10 +266,10 @@ export const FashionEvents = () => {
                   {/* Date Box */}
                   <div className="flex flex-col items-center justify-center bg-primary text-primary-foreground rounded-lg p-4 min-w-[80px]">
                     <span className="text-2xl font-bold">
-                      {new Date(event.date).getDate()}
+                      {new Date(event.event_date).getDate()}
                     </span>
                     <span className="text-sm">
-                      {new Date(event.date).toLocaleString('default', { month: 'short' })}
+                      {new Date(event.event_date).toLocaleString('default', { month: 'short' })}
                     </span>
                   </div>
 
@@ -282,8 +280,8 @@ export const FashionEvents = () => {
                         <div className="flex items-center gap-2 mb-1">
                           <h4 className="text-lg font-semibold">{event.title}</h4>
                           <Badge variant="outline" className="gap-1">
-                            {getTypeIcon(event.type)}
-                            {event.type}
+                            {getTypeIcon(event.event_type)}
+                            {event.event_type}
                           </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground line-clamp-2">
@@ -295,7 +293,7 @@ export const FashionEvents = () => {
                     <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <Clock className="h-4 w-4" />
-                        {event.time}
+                        {event.event_time}
                       </div>
                       <div className="flex items-center gap-1">
                         <MapPin className="h-4 w-4" />
@@ -303,7 +301,7 @@ export const FashionEvents = () => {
                       </div>
                       <div className="flex items-center gap-1">
                         <Users className="h-4 w-4" />
-                        {event.attendees} attending
+                        {event.attendees_count} attending
                       </div>
                     </div>
 
