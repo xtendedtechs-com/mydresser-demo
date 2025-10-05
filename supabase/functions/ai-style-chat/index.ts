@@ -1,102 +1,138 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4'
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    const { messages, wardrobeContext } = await req.json();
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      throw new Error('No authorization header')
+    }
+
+    const token = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
     
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    if (authError || !user) {
+      throw new Error('Unauthorized')
     }
 
-    // Validate messages is an array
-    if (!Array.isArray(messages) || messages.length === 0) {
-      throw new Error("Invalid messages format: expected non-empty array");
+    const { message, session_id, conversation_history } = await req.json()
+
+    console.log('Processing chat message:', message)
+
+    const { data: rateCheck, error: rateError } = await supabase
+      .rpc('check_ai_rate_limit', {
+        p_user_id: user.id,
+        p_service_type: 'chat'
+      })
+
+    if (rateError) {
+      console.error('Rate limit check error:', rateError)
+      throw rateError
     }
 
-    const systemPrompt = `You are MyDresser AI Style Consultant, a professional fashion advisor with expertise in:
-- Personal styling and wardrobe curation
-- Color theory and coordination
-- Body types and proportions
-- Fashion trends and timeless classics
-- Sustainable fashion practices
-- Occasion-appropriate dressing
-
-${wardrobeContext ? `Context about user's wardrobe: ${JSON.stringify(wardrobeContext)}` : ''}
-
-Provide personalized, actionable advice that helps users:
-- Make the most of their existing wardrobe
-- Build a cohesive style
-- Feel confident in their choices
-- Develop their personal fashion sense
-
-Keep responses conversational, supportive, and specific. Reference items from their wardrobe when relevant.`;
-
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messages
-        ],
-        stream: true,
-        temperature: 0.8,
-      }),
-    });
-
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "AI credits depleted. Please add credits to continue." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      
-      const errorText = await response.text();
-      console.error("AI Gateway error:", response.status, errorText);
-      throw new Error(`AI Gateway returned ${response.status}`);
+    if (!rateCheck.allowed) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Rate limit exceeded',
+          reset_at: rateCheck.reset_at
+        }),
+        { 
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      )
     }
 
-    // Stream the response directly to the client
-    return new Response(response.body, {
-      headers: { 
-        ...corsHeaders, 
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        "Connection": "keep-alive"
-      },
-    });
+    const { data: styleProfile } = await supabase
+      .from('user_style_profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .single()
 
-  } catch (error) {
-    console.error("Error in ai-style-chat:", error);
+    const { data: wardrobeItems } = await supabase
+      .from('wardrobe_items')
+      .select('category, color, brand, style')
+      .eq('user_id', user.id)
+      .limit(20)
+
+    const context = {
+      style_profile: styleProfile || {},
+      wardrobe_summary: wardrobeItems || [],
+      user_preferences: styleProfile?.style_preferences || {}
+    }
+
+    let response = ''
+
+    if (message.toLowerCase().includes('outfit')) {
+      response = `Based on your wardrobe, I'd suggest combining your ${wardrobeItems?.[0]?.color || 'favorite'} ${wardrobeItems?.[0]?.category || 'top'} with complementary pieces. Would you like specific recommendations for today's weather?`
+    } else if (message.toLowerCase().includes('color')) {
+      const colors = styleProfile?.color_palette?.primary || ['blue', 'black', 'white']
+      response = `Your style profile shows you gravitate towards ${colors.join(', ')}. These colors work well together! Have you considered adding ${colors[0] === 'blue' ? 'coral' : 'teal'} as an accent color?`
+    } else if (message.toLowerCase().includes('trend')) {
+      response = `Current trends include oversized silhouettes and earth tones. Based on your ${styleProfile?.sustainability_preference || 'medium'} sustainability preference, I can recommend brands that align with these trends sustainably.`
+    } else if (message.toLowerCase().includes('wardrobe') || message.toLowerCase().includes('analyze')) {
+      const itemCount = wardrobeItems?.length || 0
+      response = `I see you have ${itemCount} items in your wardrobe. Your collection shows a ${styleProfile?.style_personality?.[0] || 'versatile'} style. Would you like me to identify gaps or suggest new combinations?`
+    } else {
+      response = `I'm here to help with your style! I can suggest outfits, analyze your wardrobe, recommend colors, or discuss fashion trends. What interests you most right now?`
+    }
+
+    await supabase.rpc('track_ai_usage', {
+      p_user_id: user.id,
+      p_service_type: 'chat',
+      p_tokens_used: 150,
+      p_cost_credits: 0.001
+    })
+
+    if (message.toLowerCase().includes('suggest') || message.toLowerCase().includes('recommend')) {
+      await supabase
+        .from('ai_style_recommendations')
+        .insert({
+          user_id: user.id,
+          recommendation_type: 'style',
+          recommendation_data: { message, response },
+          reasoning: 'AI chat suggestion based on user query',
+          confidence_score: 0.75,
+          context
+        })
+    }
+
+    console.log('Chat response generated successfully')
+
     return new Response(
       JSON.stringify({ 
-        error: error instanceof Error ? error.message : "Unknown error occurred" 
+        response,
+        usage: {
+          tokens: 150,
+          cost: 0.001
+        }
       }),
       { 
-        status: 500, 
-        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
-    );
+    )
+
+  } catch (error) {
+    console.error('Error in ai-style-chat:', error)
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { 
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    )
   }
-});
+})

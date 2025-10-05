@@ -38,6 +38,42 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_rate_limits_config: {
+        Row: {
+          created_at: string | null
+          daily_analyses: number | null
+          daily_chat_messages: number | null
+          daily_image_generations: number | null
+          daily_recommendations: number | null
+          id: string
+          max_session_duration_minutes: number | null
+          max_tokens_per_day: number | null
+          user_tier: string
+        }
+        Insert: {
+          created_at?: string | null
+          daily_analyses?: number | null
+          daily_chat_messages?: number | null
+          daily_image_generations?: number | null
+          daily_recommendations?: number | null
+          id?: string
+          max_session_duration_minutes?: number | null
+          max_tokens_per_day?: number | null
+          user_tier: string
+        }
+        Update: {
+          created_at?: string | null
+          daily_analyses?: number | null
+          daily_chat_messages?: number | null
+          daily_image_generations?: number | null
+          daily_recommendations?: number | null
+          id?: string
+          max_session_duration_minutes?: number | null
+          max_tokens_per_day?: number | null
+          user_tier?: string
+        }
+        Relationships: []
+      }
       ai_service_settings: {
         Row: {
           brand_preferences: string[] | null
@@ -92,6 +128,117 @@ export type Database = {
           style_preferences?: Json | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      ai_style_recommendations: {
+        Row: {
+          confidence_score: number | null
+          context: Json | null
+          created_at: string | null
+          id: string
+          reasoning: string | null
+          recommendation_data: Json
+          recommendation_type: string
+          user_feedback: string | null
+          user_id: string
+          was_accepted: boolean | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          context?: Json | null
+          created_at?: string | null
+          id?: string
+          reasoning?: string | null
+          recommendation_data: Json
+          recommendation_type: string
+          user_feedback?: string | null
+          user_id: string
+          was_accepted?: boolean | null
+        }
+        Update: {
+          confidence_score?: number | null
+          context?: Json | null
+          created_at?: string | null
+          id?: string
+          reasoning?: string | null
+          recommendation_data?: Json
+          recommendation_type?: string
+          user_feedback?: string | null
+          user_id?: string
+          was_accepted?: boolean | null
+        }
+        Relationships: []
+      }
+      ai_style_sessions: {
+        Row: {
+          context_data: Json | null
+          conversation_history: Json | null
+          created_at: string | null
+          ended_at: string | null
+          id: string
+          is_active: boolean | null
+          session_type: string
+          started_at: string | null
+          total_messages: number | null
+          user_id: string
+        }
+        Insert: {
+          context_data?: Json | null
+          conversation_history?: Json | null
+          created_at?: string | null
+          ended_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          session_type: string
+          started_at?: string | null
+          total_messages?: number | null
+          user_id: string
+        }
+        Update: {
+          context_data?: Json | null
+          conversation_history?: Json | null
+          created_at?: string | null
+          ended_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          session_type?: string
+          started_at?: string | null
+          total_messages?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_usage_tracking: {
+        Row: {
+          cost_credits: number | null
+          created_at: string | null
+          id: string
+          request_count: number | null
+          service_type: string
+          tokens_used: number | null
+          user_id: string
+          window_start: string | null
+        }
+        Insert: {
+          cost_credits?: number | null
+          created_at?: string | null
+          id?: string
+          request_count?: number | null
+          service_type: string
+          tokens_used?: number | null
+          user_id: string
+          window_start?: string | null
+        }
+        Update: {
+          cost_credits?: number | null
+          created_at?: string | null
+          id?: string
+          request_count?: number | null
+          service_type?: string
+          tokens_used?: number | null
+          user_id?: string
+          window_start?: string | null
         }
         Relationships: []
       }
@@ -2420,6 +2567,48 @@ export type Database = {
         }
         Relationships: []
       }
+      occasion_templates: {
+        Row: {
+          created_at: string | null
+          example_outfits: Json | null
+          formality_level: number | null
+          id: string
+          occasion_category: string
+          occasion_name: string
+          season_suitability: string[] | null
+          template_rules: Json
+          time_of_day: string[] | null
+          updated_at: string | null
+          weather_conditions: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          example_outfits?: Json | null
+          formality_level?: number | null
+          id?: string
+          occasion_category: string
+          occasion_name: string
+          season_suitability?: string[] | null
+          template_rules: Json
+          time_of_day?: string[] | null
+          updated_at?: string | null
+          weather_conditions?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          example_outfits?: Json | null
+          formality_level?: number | null
+          id?: string
+          occasion_category?: string
+          occasion_name?: string
+          season_suitability?: string[] | null
+          template_rules?: Json
+          time_of_day?: string[] | null
+          updated_at?: string | null
+          weather_conditions?: Json | null
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           color: string | null
@@ -4376,6 +4565,72 @@ export type Database = {
           },
         ]
       }
+      style_analysis_history: {
+        Row: {
+          analysis_results: Json
+          analysis_type: string
+          created_at: string | null
+          id: string
+          insights: string[] | null
+          recommendations: string[] | null
+          user_id: string
+        }
+        Insert: {
+          analysis_results: Json
+          analysis_type: string
+          created_at?: string | null
+          id?: string
+          insights?: string[] | null
+          recommendations?: string[] | null
+          user_id: string
+        }
+        Update: {
+          analysis_results?: Json
+          analysis_type?: string
+          created_at?: string | null
+          id?: string
+          insights?: string[] | null
+          recommendations?: string[] | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      style_evolution_log: {
+        Row: {
+          brand_diversity: number | null
+          color_usage: Json | null
+          created_at: string | null
+          date: string
+          experimentation_score: number | null
+          id: string
+          outfit_choices: Json | null
+          style_metrics: Json
+          user_id: string
+        }
+        Insert: {
+          brand_diversity?: number | null
+          color_usage?: Json | null
+          created_at?: string | null
+          date: string
+          experimentation_score?: number | null
+          id?: string
+          outfit_choices?: Json | null
+          style_metrics: Json
+          user_id: string
+        }
+        Update: {
+          brand_diversity?: number | null
+          color_usage?: Json | null
+          created_at?: string | null
+          date?: string
+          experimentation_score?: number | null
+          id?: string
+          outfit_choices?: Json | null
+          style_metrics?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       style_preferences: {
         Row: {
           body_type: string | null
@@ -4418,6 +4673,48 @@ export type Database = {
           sustainability_priority?: number | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      style_trends: {
+        Row: {
+          demographics: Json | null
+          description: string | null
+          first_detected_at: string | null
+          id: string
+          popularity_score: number | null
+          related_items: Json | null
+          season: string[] | null
+          trend_category: string
+          trend_name: string
+          trend_status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          demographics?: Json | null
+          description?: string | null
+          first_detected_at?: string | null
+          id?: string
+          popularity_score?: number | null
+          related_items?: Json | null
+          season?: string[] | null
+          trend_category: string
+          trend_name: string
+          trend_status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          demographics?: Json | null
+          description?: string | null
+          first_detected_at?: string | null
+          id?: string
+          popularity_score?: number | null
+          related_items?: Json | null
+          season?: string[] | null
+          trend_category?: string
+          trend_name?: string
+          trend_status?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -4967,6 +5264,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_style_profiles: {
+        Row: {
+          avoided_brands: string[] | null
+          body_type: string | null
+          brand_preferences: string[] | null
+          budget_range: Json | null
+          color_palette: Json | null
+          created_at: string | null
+          id: string
+          last_analysis_at: string | null
+          occasion_frequency: Json | null
+          preferred_fits: string[] | null
+          style_evolution_data: Json | null
+          style_personality: string[] | null
+          style_preferences: Json | null
+          sustainability_preference: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          avoided_brands?: string[] | null
+          body_type?: string | null
+          brand_preferences?: string[] | null
+          budget_range?: Json | null
+          color_palette?: Json | null
+          created_at?: string | null
+          id?: string
+          last_analysis_at?: string | null
+          occasion_frequency?: Json | null
+          preferred_fits?: string[] | null
+          style_evolution_data?: Json | null
+          style_personality?: string[] | null
+          style_preferences?: Json | null
+          sustainability_preference?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          avoided_brands?: string[] | null
+          body_type?: string | null
+          brand_preferences?: string[] | null
+          budget_range?: Json | null
+          color_palette?: Json | null
+          created_at?: string | null
+          id?: string
+          last_analysis_at?: string | null
+          occasion_frequency?: Json | null
+          preferred_fits?: string[] | null
+          style_evolution_data?: Json | null
+          style_personality?: string[] | null
+          style_preferences?: Json | null
+          sustainability_preference?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       user_styles: {
         Row: {
@@ -5718,6 +6072,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      analyze_user_style: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
       analyze_vto_quality: {
         Args: {
           p_feedback_comment?: string
@@ -5758,6 +6116,10 @@ export type Database = {
       can_access_collection: {
         Args: { collection_id_param: string; user_id_param?: string }
         Returns: boolean
+      }
+      check_ai_rate_limit: {
+        Args: { p_service_type: string; p_user_id: string }
+        Returns: Json
       }
       check_collection_rate_limit: {
         Args: {
@@ -6234,6 +6596,15 @@ export type Database = {
           test_name: string
         }[]
       }
+      track_ai_usage: {
+        Args: {
+          p_cost_credits?: number
+          p_service_type: string
+          p_tokens_used?: number
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       update_contact_info_secure: {
         Args: {
           new_email?: string
@@ -6261,6 +6632,10 @@ export type Database = {
       update_mfa_status: {
         Args: { enable_totp?: boolean; verify_phone?: boolean }
         Returns: boolean
+      }
+      upsert_style_profile: {
+        Args: { p_profile_data: Json; p_user_id: string }
+        Returns: string
       }
       use_backup_code: {
         Args: { input_code: string }
