@@ -21,7 +21,7 @@ export interface MerchantItem {
   occasion?: string;
   photos: string[];
   tags?: string[];
-  status: 'available' | 'sold' | 'reserved';
+  status: 'available' | 'sold' | 'reserved' | 'draft';
   stock_quantity?: number;
   is_featured?: boolean;
   is_premium?: boolean;
@@ -91,7 +91,7 @@ export const useMerchantItems = () => {
           occasion: item.occasion,
           photos: photos,
           tags: item.tags || [],
-          status: 'available',
+          status: (item.status || 'draft') as 'available' | 'draft' | 'reserved' | 'sold',
           stock_quantity: item.stock_quantity,
           is_featured: item.is_featured,
           is_premium: item.is_premium,
@@ -310,12 +310,57 @@ export const useMerchantItems = () => {
     return getAllPhotoUrls(item.photos);
   };
 
+  const publishItem = async (itemId: string) => {
+    try {
+      const { data, error } = await supabase.rpc('publish_merchant_item', {
+        item_id: itemId
+      });
+
+      if (error) {
+        console.error('Error publishing item:', error);
+        toast({
+          title: "Error",
+          description: "Failed to publish item to market",
+          variant: "destructive"
+        });
+        return false;
+      }
+
+      const result = data as any;
+      if (!result?.success) {
+        toast({
+          title: "Error",
+          description: result?.error || "Failed to publish item",
+          variant: "destructive"
+        });
+        return false;
+      }
+
+      await fetchMerchantItems();
+      toast({
+        title: "Success",
+        description: "Item published to market successfully"
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('Error in publishItem:', error);
+      toast({
+        title: "Error",
+        description: "Failed to publish item",
+        variant: "destructive"
+      });
+      return false;
+    }
+  };
+
   return {
     items,
     loading,
     addItem,
     updateItem,
     deleteItem,
+    publishItem,
     refetch: fetchMerchantItems,
     getFeaturedItems,
     getPremiumItems,

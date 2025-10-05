@@ -3426,6 +3426,33 @@ export type Database = {
           },
         ]
       }
+      pii_access_log: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          record_id: string | null
+          table_name: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          record_id?: string | null
+          table_name: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          record_id?: string | null
+          table_name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pos_activity_log: {
         Row: {
           activity_details: Json | null
@@ -6704,6 +6731,10 @@ export type Database = {
           tax_id: string
         }[]
       }
+      get_order_customer_masked: {
+        Args: { order_id_param: string }
+        Returns: Json
+      }
       get_profile_contact_safe: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -6904,6 +6935,10 @@ export type Database = {
           p_terminal_id: string
           p_transaction_type: string
         }
+        Returns: Json
+      }
+      publish_merchant_item: {
+        Args: { item_id: string }
         Returns: Json
       }
       revoke_invitation_admin: {

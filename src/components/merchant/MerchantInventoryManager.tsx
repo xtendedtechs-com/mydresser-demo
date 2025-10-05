@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useMerchantItems } from '@/hooks/useMerchantItems';
 import AddMerchantProductDialog from '@/components/AddMerchantProductDialog';
-import { Package, Search, Edit, Trash2, AlertCircle, Plus } from 'lucide-react';
+import { Package, Search, Edit, Trash2, AlertCircle, Plus, Send } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -16,7 +16,7 @@ export const MerchantInventoryManager = () => {
   const [inventoryView, setInventoryView] = useState<'local' | 'global'>('global');
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
-  const { items, refetch } = useMerchantItems();
+  const { items, refetch, publishItem } = useMerchantItems();
 
   const filteredItems = items?.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -139,9 +139,14 @@ export const MerchantInventoryManager = () => {
                               <h4 className="font-semibold line-clamp-1">{item.name}</h4>
                               <p className="text-sm text-muted-foreground">{item.category}</p>
                             </div>
-                            <Badge variant={stockStatus.variant}>
-                              {stockStatus.label}
-                            </Badge>
+                            <div className="flex flex-col gap-1 items-end">
+                              <Badge variant={stockStatus.variant}>
+                                {stockStatus.label}
+                              </Badge>
+                              <Badge variant={(item as any).status === 'available' ? 'default' : 'secondary'}>
+                                {(item as any).status === 'available' ? 'Published' : 'Draft'}
+                              </Badge>
+                            </div>
                           </div>
 
                           <div className="flex items-center justify-between">
@@ -156,6 +161,19 @@ export const MerchantInventoryManager = () => {
                           )}
 
                           <div className="flex gap-2">
+                            {(item as any).status === 'draft' && (
+                              <Button
+                                variant="default"
+                                size="sm"
+                                className="flex-1"
+                                onClick={async () => {
+                                  await publishItem(item.id);
+                                }}
+                              >
+                                <Send className="mr-1 h-3 w-3" />
+                                Publish
+                              </Button>
+                            )}
                             <Button
                               variant="outline"
                               size="sm"
