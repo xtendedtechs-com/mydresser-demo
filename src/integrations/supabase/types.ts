@@ -1947,6 +1947,48 @@ export type Database = {
         }
         Relationships: []
       }
+      outfit_history: {
+        Row: {
+          created_at: string
+          id: string
+          location: string | null
+          notes: string | null
+          occasion: string | null
+          outfit_items: string[]
+          rating: number | null
+          updated_at: string
+          user_id: string
+          weather: string | null
+          worn_date: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          occasion?: string | null
+          outfit_items: string[]
+          rating?: number | null
+          updated_at?: string
+          user_id: string
+          weather?: string | null
+          worn_date?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          occasion?: string | null
+          outfit_items?: string[]
+          rating?: number | null
+          updated_at?: string
+          user_id?: string
+          weather?: string | null
+          worn_date?: string
+        }
+        Relationships: []
+      }
       outfit_items: {
         Row: {
           created_at: string
