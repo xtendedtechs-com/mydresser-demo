@@ -33,6 +33,7 @@ import {
   Brain,
   User,
   Search,
+  FolderOpen,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -112,10 +113,10 @@ export const QuickAccessMenu = () => {
     },
     { 
       label: t('nav.collections', 'Collections'), 
-      icon: Heart, 
+      icon: FolderOpen, 
       path: '/collections', 
       category: 'features',
-      keywords: ['collections', 'favorites', 'saved', 'organize']
+      keywords: ['collections', 'organize', 'lists', 'smart', 'curate', 'group']
     },
     
     // AI Tools

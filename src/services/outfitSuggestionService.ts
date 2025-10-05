@@ -67,7 +67,6 @@ class OutfitSuggestionService {
           outfit:outfit_id (
             id,
             name,
-            description,
             photos,
             style_tags,
             occasion,

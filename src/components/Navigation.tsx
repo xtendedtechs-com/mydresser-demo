@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 import { useProfile } from "@/hooks/useProfile";
 import { EnhancedNotificationBell } from './EnhancedNotificationBell';
 import { MainSideMenu } from './MainSideMenu';
-import { QuickAccessMenu } from './QuickAccessMenu';
 import { useTranslation } from 'react-i18next';
 
 interface NavigationProps {
@@ -69,9 +68,6 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
     <>
       {/* Main Side Menu */}
       <MainSideMenu />
-      
-      {/* Quick Access Floating Button */}
-      <QuickAccessMenu />
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 safe-area-inset">

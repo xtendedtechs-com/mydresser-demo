@@ -110,10 +110,19 @@ Create a complete outfit by selecting items from the wardrobe. Return ONLY valid
       throw new Error("No content in AI response");
     }
 
-    // Parse AI response
+    // Parse AI response - strip markdown code blocks if present
     let outfitData;
     try {
-      outfitData = JSON.parse(content);
+      let cleanContent = content.trim();
+      
+      // Remove markdown code block markers
+      if (cleanContent.startsWith('```json')) {
+        cleanContent = cleanContent.replace(/^```json\s*\n/, '').replace(/\n```\s*$/, '');
+      } else if (cleanContent.startsWith('```')) {
+        cleanContent = cleanContent.replace(/^```\s*\n/, '').replace(/\n```\s*$/, '');
+      }
+      
+      outfitData = JSON.parse(cleanContent);
     } catch (parseError) {
       console.error("Failed to parse AI response:", content);
       throw new Error("Invalid AI response format");
