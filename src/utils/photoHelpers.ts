@@ -42,11 +42,20 @@ const extractUrl = (val: any): string | null => {
 };
 
 // Resolve any Supabase Storage path (bucket/path) to a public URL
-// Leaves http(s), data URIs, and blob URLs untouched
+// Leaves http(s), data URIs, blob URLs, and local asset paths untouched
 const resolvePublicUrl = (input: string): string => {
   if (!input) return '';
   const trimmed = input.trim();
-  if (trimmed.startsWith('http') || trimmed.startsWith('data:image/') || trimmed.startsWith('blob:')) {
+  
+  // Keep http(s), data URIs, blob URLs, and local paths as-is
+  if (trimmed.startsWith('http') || 
+      trimmed.startsWith('data:image/') || 
+      trimmed.startsWith('blob:') ||
+      trimmed.startsWith('/src/') ||
+      trimmed.startsWith('/assets/') ||
+      trimmed.startsWith('/public/') ||
+      trimmed === '/placeholder.svg' ||
+      trimmed.includes('/placeholder')) {
     return trimmed;
   }
 
@@ -76,6 +85,8 @@ const resolvePublicUrl = (input: string): string => {
   // Try to detect known bucket prefix: `${bucket}/${path}`
   const knownBuckets = [
     'wardrobe-items',
+    'wardrobe-photos',
+    'wardrobe',
     'merchant-products',
     'outfits',
     'user-avatars',
@@ -83,7 +94,6 @@ const resolvePublicUrl = (input: string): string => {
     'merchant-uploads',
     'profile-photos',
     'user-photos',
-    'wardrobe-photos',
     'profile-avatars',
     'avatars',
     'products',
@@ -101,8 +111,8 @@ const resolvePublicUrl = (input: string): string => {
   }
 
   // If it's just a path without bucket, try common buckets
-  if (!decoded.startsWith('http') && !decoded.includes('://')) {
-    for (const bucket of ['wardrobe-items', 'wardrobe-photos', 'items']) {
+  if (!decoded.startsWith('http') && !decoded.includes('://') && !decoded.startsWith('/')) {
+    for (const bucket of ['wardrobe', 'wardrobe-items', 'wardrobe-photos', 'items']) {
       const { data } = supabase.storage.from(bucket).getPublicUrl(decoded);
       if (data.publicUrl) return data.publicUrl;
     }
@@ -123,7 +133,11 @@ export const getPrimaryPhotoUrl = (photos: PhotoData, category?: string): string
   // Handle string URL
   if (typeof photos === 'string') {
     const normalized = resolvePublicUrl(photos);
-    return normalized || getCategoryPlaceholderImage(category);
+    // If it's a placeholder path, return category placeholder instead
+    if (!normalized || normalized === '/placeholder.svg' || normalized.includes('/placeholder')) {
+      return getCategoryPlaceholderImage(category);
+    }
+    return normalized;
   }
 
   // Handle array (strings or objects)
@@ -132,7 +146,10 @@ export const getPrimaryPhotoUrl = (photos: PhotoData, category?: string): string
       const raw = extractUrl(entry) || (typeof entry === 'string' ? entry : null);
       if (raw) {
         const normalized = resolvePublicUrl(raw);
-        if (normalized) return normalized;
+        // Skip placeholder paths
+        if (normalized && normalized !== '/placeholder.svg' && !normalized.includes('/placeholder')) {
+          return normalized;
+        }
       }
     }
     return getCategoryPlaceholderImage(category);
@@ -145,7 +162,10 @@ export const getPrimaryPhotoUrl = (photos: PhotoData, category?: string): string
     const mainUrl = extractUrl(p.main);
     if (mainUrl) {
       const normalized = resolvePublicUrl(mainUrl);
-      if (normalized) return normalized;
+      // Skip placeholder paths
+      if (normalized && normalized !== '/placeholder.svg' && !normalized.includes('/placeholder')) {
+        return normalized;
+      }
     }
 
     // Check urls array (can be strings or objects)
@@ -154,7 +174,10 @@ export const getPrimaryPhotoUrl = (photos: PhotoData, category?: string): string
         const raw = extractUrl(u) || (typeof u === 'string' ? u : null);
         if (raw) {
           const normalized = resolvePublicUrl(raw);
-          if (normalized) return normalized;
+          // Skip placeholder paths
+          if (normalized && normalized !== '/placeholder.svg' && !normalized.includes('/placeholder')) {
+            return normalized;
+          }
         }
       }
     }
@@ -163,7 +186,10 @@ export const getPrimaryPhotoUrl = (photos: PhotoData, category?: string): string
     const direct = extractUrl(p);
     if (direct) {
       const normalized = resolvePublicUrl(direct);
-      if (normalized) return normalized;
+      // Skip placeholder paths
+      if (normalized && normalized !== '/placeholder.svg' && !normalized.includes('/placeholder')) {
+        return normalized;
+      }
     }
   }
 
