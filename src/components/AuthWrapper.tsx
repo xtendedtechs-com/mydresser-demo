@@ -94,6 +94,8 @@ const UnifiedAIHub = lazy(() => import("@/components/UnifiedAIHub"));
 const AIStyleInsightsPage = lazy(() => import("@/pages/AIStyleInsightsPage"));
 const MerchantPage = lazy(() => import("@/pages/MerchantPage").then(m => ({ default: m.MerchantPage })));
 const AccountSettings = lazy(() => import("@/pages/settings/AccountSettings"));
+const UserInsights = lazy(() => import("@/pages/analytics/UserInsights"));
+const MerchantDashboard = lazy(() => import("@/pages/analytics/MerchantDashboard"));
 const OutfitHistoryPage = lazy(() => import("@/pages/OutfitHistoryPage"));
 const WeatherPage = lazy(() => import("@/pages/WeatherPage"));
 const AppSettings = lazy(() => import("@/pages/settings/AppSettings"));
@@ -217,6 +219,8 @@ export const AuthWrapper = () => {
             <Route path="/collaborate" element={<CollaborationPage />} />
             <Route path="/verification" element={<VerificationPage />} />
             <Route path="/wardrobe-analytics" element={<WardrobeAnalyticsPage />} />
+            <Route path="/analytics/user" element={<UserInsights />} />
+            <Route path="/analytics/merchant" element={<MerchantDashboard />} />
             <Route path="/profile-setup" element={<ProfileSetup />} />
             <Route path="/auth" element={<Navigate to="/" replace />} />
           </Routes>

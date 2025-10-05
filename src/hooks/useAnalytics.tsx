@@ -160,6 +160,75 @@ export const useAnalytics = () => {
     }
   }, [user?.id, profile?.role, items, orders]);
 
+  const calculateWardrobeAnalytics = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const { data, error } = await supabase.rpc('calculate_wardrobe_analytics' as any, {
+        p_user_id: user.id
+      });
+
+      if (error) throw error;
+      return data as any;
+    } catch (error: any) {
+      console.error('Error calculating wardrobe analytics:', error);
+      throw error;
+    }
+  };
+
+  const getMerchantSalesSummary = async (startDate: string, endDate: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const { data, error } = await supabase.rpc('get_merchant_sales_summary' as any, {
+        p_merchant_id: user.id,
+        p_start_date: startDate,
+        p_end_date: endDate
+      });
+
+      if (error) throw error;
+      return data as any;
+    } catch (error: any) {
+      console.error('Error getting merchant sales summary:', error);
+      throw error;
+    }
+  };
+
+  const trackBehaviorEvent = async (
+    eventType: string,
+    eventData: Record<string, any> = {},
+    pagePath?: string
+  ) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const sessionId = sessionStorage.getItem('analytics_session_id') || crypto.randomUUID();
+      sessionStorage.setItem('analytics_session_id', sessionId);
+
+      const getDeviceType = (): 'mobile' | 'tablet' | 'desktop' | 'unknown' => {
+        const width = window.innerWidth;
+        if (width < 768) return 'mobile';
+        if (width < 1024) return 'tablet';
+        if (width >= 1024) return 'desktop';
+        return 'unknown';
+      };
+
+      await (supabase as any).from('user_behavior_analytics').insert({
+        user_id: user.id,
+        session_id: sessionId,
+        event_type: eventType,
+        event_data: eventData,
+        page_path: pagePath || window.location.pathname,
+        device_type: getDeviceType()
+      });
+    } catch (error) {
+      console.error('Error tracking behavior:', error);
+    }
+  };
+
   return {
     analytics,
     loading,
@@ -167,6 +236,9 @@ export const useAnalytics = () => {
     logItemView,
     logPurchase,
     getTopCustomers,
-    refetch: calculateAnalytics
+    refetch: calculateAnalytics,
+    calculateWardrobeAnalytics,
+    getMerchantSalesSummary,
+    trackBehaviorEvent
   };
 };
