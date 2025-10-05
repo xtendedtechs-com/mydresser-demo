@@ -643,6 +643,66 @@ export type Database = {
           },
         ]
       }
+      inventory_sync_log: {
+        Row: {
+          completed_at: string | null
+          data_integrity_hash: string | null
+          id: string
+          items_synced: number | null
+          merchant_id: string
+          started_at: string | null
+          store_location_id: string | null
+          sync_duration_ms: number | null
+          sync_errors: Json | null
+          sync_status: string | null
+          sync_type: string
+          terminal_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          data_integrity_hash?: string | null
+          id?: string
+          items_synced?: number | null
+          merchant_id: string
+          started_at?: string | null
+          store_location_id?: string | null
+          sync_duration_ms?: number | null
+          sync_errors?: Json | null
+          sync_status?: string | null
+          sync_type: string
+          terminal_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          data_integrity_hash?: string | null
+          id?: string
+          items_synced?: number | null
+          merchant_id?: string
+          started_at?: string | null
+          store_location_id?: string | null
+          sync_duration_ms?: number | null
+          sync_errors?: Json | null
+          sync_status?: string | null
+          sync_type?: string
+          terminal_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_sync_log_store_location_id_fkey"
+            columns: ["store_location_id"]
+            isOneToOne: false
+            referencedRelation: "store_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_sync_log_terminal_id_fkey"
+            columns: ["terminal_id"]
+            isOneToOne: false
+            referencedRelation: "pos_terminals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       inventory_transfers: {
         Row: {
           approved_at: string | null
@@ -2911,6 +2971,196 @@ export type Database = {
           },
         ]
       }
+      pos_activity_log: {
+        Row: {
+          activity_details: Json | null
+          activity_type: string
+          created_at: string | null
+          id: string
+          ip_address: unknown | null
+          is_suspicious: boolean | null
+          merchant_id: string
+          staff_id: string | null
+          terminal_id: string | null
+        }
+        Insert: {
+          activity_details?: Json | null
+          activity_type: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          is_suspicious?: boolean | null
+          merchant_id: string
+          staff_id?: string | null
+          terminal_id?: string | null
+        }
+        Update: {
+          activity_details?: Json | null
+          activity_type?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          is_suspicious?: boolean | null
+          merchant_id?: string
+          staff_id?: string | null
+          terminal_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pos_activity_log_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "store_staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pos_activity_log_terminal_id_fkey"
+            columns: ["terminal_id"]
+            isOneToOne: false
+            referencedRelation: "pos_terminals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pos_terminals: {
+        Row: {
+          auth_token_hash: string
+          created_at: string | null
+          device_id: string
+          hardware_info: Json | null
+          id: string
+          is_active: boolean | null
+          last_sync_at: string | null
+          merchant_id: string
+          security_level: string | null
+          software_version: string | null
+          store_location_id: string | null
+          terminal_code: string
+          terminal_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          auth_token_hash: string
+          created_at?: string | null
+          device_id: string
+          hardware_info?: Json | null
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          merchant_id: string
+          security_level?: string | null
+          software_version?: string | null
+          store_location_id?: string | null
+          terminal_code: string
+          terminal_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          auth_token_hash?: string
+          created_at?: string | null
+          device_id?: string
+          hardware_info?: Json | null
+          id?: string
+          is_active?: boolean | null
+          last_sync_at?: string | null
+          merchant_id?: string
+          security_level?: string | null
+          software_version?: string | null
+          store_location_id?: string | null
+          terminal_code?: string
+          terminal_name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pos_terminals_store_location_id_fkey"
+            columns: ["store_location_id"]
+            isOneToOne: false
+            referencedRelation: "store_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pos_transactions: {
+        Row: {
+          amount: number
+          completed_at: string | null
+          created_at: string | null
+          currency: string | null
+          customer_id: string | null
+          encrypted_customer_data: string | null
+          encryption_salt: string | null
+          fraud_score: number | null
+          id: string
+          ip_address: unknown | null
+          is_suspicious: boolean | null
+          items: Json
+          merchant_id: string
+          payment_method: string
+          payment_reference: string | null
+          receipt_number: string
+          staff_id: string | null
+          terminal_id: string | null
+          transaction_status: string | null
+          transaction_type: string
+          user_agent: string | null
+        }
+        Insert: {
+          amount: number
+          completed_at?: string | null
+          created_at?: string | null
+          currency?: string | null
+          customer_id?: string | null
+          encrypted_customer_data?: string | null
+          encryption_salt?: string | null
+          fraud_score?: number | null
+          id?: string
+          ip_address?: unknown | null
+          is_suspicious?: boolean | null
+          items?: Json
+          merchant_id: string
+          payment_method: string
+          payment_reference?: string | null
+          receipt_number: string
+          staff_id?: string | null
+          terminal_id?: string | null
+          transaction_status?: string | null
+          transaction_type: string
+          user_agent?: string | null
+        }
+        Update: {
+          amount?: number
+          completed_at?: string | null
+          created_at?: string | null
+          currency?: string | null
+          customer_id?: string | null
+          encrypted_customer_data?: string | null
+          encryption_salt?: string | null
+          fraud_score?: number | null
+          id?: string
+          ip_address?: unknown | null
+          is_suspicious?: boolean | null
+          items?: Json
+          merchant_id?: string
+          payment_method?: string
+          payment_reference?: string | null
+          receipt_number?: string
+          staff_id?: string | null
+          terminal_id?: string | null
+          transaction_status?: string | null
+          transaction_type?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pos_transactions_terminal_id_fkey"
+            columns: ["terminal_id"]
+            isOneToOne: false
+            referencedRelation: "pos_terminals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       professional_applications: {
         Row: {
           application_status: string | null
@@ -3957,6 +4207,62 @@ export type Database = {
         }
         Relationships: []
       }
+      store_analytics: {
+        Row: {
+          average_transaction_value: number | null
+          conversion_rate: number | null
+          created_at: string | null
+          date: string
+          foot_traffic: number | null
+          id: string
+          merchant_id: string
+          peak_hours: Json | null
+          staff_performance: Json | null
+          store_location_id: string | null
+          top_selling_items: Json | null
+          total_revenue: number | null
+          total_transactions: number | null
+        }
+        Insert: {
+          average_transaction_value?: number | null
+          conversion_rate?: number | null
+          created_at?: string | null
+          date: string
+          foot_traffic?: number | null
+          id?: string
+          merchant_id: string
+          peak_hours?: Json | null
+          staff_performance?: Json | null
+          store_location_id?: string | null
+          top_selling_items?: Json | null
+          total_revenue?: number | null
+          total_transactions?: number | null
+        }
+        Update: {
+          average_transaction_value?: number | null
+          conversion_rate?: number | null
+          created_at?: string | null
+          date?: string
+          foot_traffic?: number | null
+          id?: string
+          merchant_id?: string
+          peak_hours?: Json | null
+          staff_performance?: Json | null
+          store_location_id?: string | null
+          top_selling_items?: Json | null
+          total_revenue?: number | null
+          total_transactions?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_analytics_store_location_id_fkey"
+            columns: ["store_location_id"]
+            isOneToOne: false
+            referencedRelation: "store_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       store_locations: {
         Row: {
           address: Json | null
@@ -4007,6 +4313,68 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      store_staff: {
+        Row: {
+          created_at: string | null
+          hired_date: string | null
+          id: string
+          is_active: boolean | null
+          last_login_at: string | null
+          merchant_id: string
+          permissions: Json | null
+          pin_hash: string | null
+          role: string
+          staff_email: string | null
+          staff_name: string
+          staff_phone: string | null
+          store_location_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          hired_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_login_at?: string | null
+          merchant_id: string
+          permissions?: Json | null
+          pin_hash?: string | null
+          role: string
+          staff_email?: string | null
+          staff_name: string
+          staff_phone?: string | null
+          store_location_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          hired_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_login_at?: string | null
+          merchant_id?: string
+          permissions?: Json | null
+          pin_hash?: string | null
+          role?: string
+          staff_email?: string | null
+          staff_name?: string
+          staff_phone?: string | null
+          store_location_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_staff_store_location_id_fkey"
+            columns: ["store_location_id"]
+            isOneToOne: false
+            referencedRelation: "store_locations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       style_preferences: {
         Row: {
@@ -5359,6 +5727,14 @@ export type Database = {
         }
         Returns: string
       }
+      authenticate_pos_terminal: {
+        Args: {
+          p_auth_token: string
+          p_device_id: string
+          p_terminal_code: string
+        }
+        Returns: Json
+      }
       calculate_merchant_trust_score: {
         Args: { p_merchant_id: string }
         Returns: number
@@ -5807,6 +6183,17 @@ export type Database = {
         Args: { phone: string }
         Returns: string
       }
+      process_pos_transaction: {
+        Args: {
+          p_amount: number
+          p_items: Json
+          p_payment_method: string
+          p_staff_id?: string
+          p_terminal_id: string
+          p_transaction_type: string
+        }
+        Returns: Json
+      }
       revoke_invitation_admin: {
         Args: { invitation_token: string }
         Returns: boolean
@@ -5828,6 +6215,14 @@ export type Database = {
           phone_data?: string
           secret_data?: string
           setup_type: string
+        }
+        Returns: Json
+      }
+      sync_store_inventory: {
+        Args: {
+          p_merchant_id: string
+          p_sync_type?: string
+          p_terminal_id: string
         }
         Returns: Json
       }
@@ -5889,6 +6284,10 @@ export type Database = {
       }
       verify_invitation_token: {
         Args: { input_token: string; stored_hash: string }
+        Returns: boolean
+      }
+      verify_staff_pin: {
+        Args: { p_pin: string; p_staff_id: string }
         Returns: boolean
       }
       verify_totp_secret: {
