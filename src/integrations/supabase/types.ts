@@ -3688,6 +3688,56 @@ export type Database = {
           },
         ]
       }
+      vto_generation_log: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          image_size_bytes: number | null
+          processing_time_ms: number | null
+          result_url: string | null
+          status: string
+          user_id: string
+          user_photo_url: string | null
+          wardrobe_item_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          image_size_bytes?: number | null
+          processing_time_ms?: number | null
+          result_url?: string | null
+          status: string
+          user_id: string
+          user_photo_url?: string | null
+          wardrobe_item_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          image_size_bytes?: number | null
+          processing_time_ms?: number | null
+          result_url?: string | null
+          status?: string
+          user_id?: string
+          user_photo_url?: string | null
+          wardrobe_item_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vto_generation_log_wardrobe_item_id_fkey"
+            columns: ["wardrobe_item_id"]
+            isOneToOne: false
+            referencedRelation: "wardrobe_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vto_item_status: {
         Row: {
           created_at: string
@@ -3795,6 +3845,80 @@ export type Database = {
           is_active?: boolean | null
           photo_url?: string
           uploaded_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vto_quality_metrics: {
+        Row: {
+          created_at: string
+          feedback_comment: string | null
+          id: string
+          quality_rating: number | null
+          reported_issues: string[] | null
+          user_id: string
+          vto_log_id: string
+        }
+        Insert: {
+          created_at?: string
+          feedback_comment?: string | null
+          id?: string
+          quality_rating?: number | null
+          reported_issues?: string[] | null
+          user_id: string
+          vto_log_id: string
+        }
+        Update: {
+          created_at?: string
+          feedback_comment?: string | null
+          id?: string
+          quality_rating?: number | null
+          reported_issues?: string[] | null
+          user_id?: string
+          vto_log_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vto_quality_metrics_vto_log_id_fkey"
+            columns: ["vto_log_id"]
+            isOneToOne: false
+            referencedRelation: "vto_generation_log"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vto_rate_limits: {
+        Row: {
+          created_at: string
+          daily_count: number
+          daily_reset_at: string
+          hourly_count: number
+          hourly_reset_at: string
+          id: string
+          last_generation_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          daily_count?: number
+          daily_reset_at?: string
+          hourly_count?: number
+          hourly_reset_at?: string
+          id?: string
+          last_generation_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          daily_count?: number
+          daily_reset_at?: string
+          hourly_count?: number
+          hourly_reset_at?: string
+          id?: string
+          last_generation_at?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -4138,6 +4262,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      analyze_vto_quality: {
+        Args: {
+          p_feedback_comment?: string
+          p_log_id: string
+          p_quality_rating: number
+          p_reported_issues?: string[]
+        }
+        Returns: string
+      }
       calculate_vto_roi: {
         Args: {
           end_date?: string
@@ -4181,6 +4314,15 @@ export type Database = {
           window_minutes?: number
         }
         Returns: boolean
+      }
+      check_vto_rate_limit: {
+        Args: { p_user_id: string }
+        Returns: {
+          allowed: boolean
+          daily_remaining: number
+          hourly_remaining: number
+          reset_time: string
+        }[]
       }
       create_invitation_admin: {
         Args: { invitation_email: string; invited_by_admin?: string }
@@ -4502,6 +4644,18 @@ export type Database = {
       }
       log_user_activity: {
         Args: { activity_data_param?: Json; activity_type_param: string }
+        Returns: string
+      }
+      log_vto_generation: {
+        Args: {
+          p_error_message?: string
+          p_processing_time_ms?: number
+          p_result_url?: string
+          p_status: string
+          p_user_id: string
+          p_user_photo_url: string
+          p_wardrobe_item_id: string
+        }
         Returns: string
       }
       mask_contact_data: {

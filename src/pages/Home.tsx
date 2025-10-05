@@ -233,16 +233,21 @@ const Home = () => {
           </CardContent>
         </Card>
 
+        {/* Daily Outfit Section - Top Priority */}
+        <div className="mb-6">
+          <RealDailyOutfit />
+        </div>
+
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
-            <TabsTrigger value="today" className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4" />
-              Today
-            </TabsTrigger>
             <TabsTrigger value="discover" className="flex items-center gap-2">
               <Eye className="w-4 h-4" />
               Discover
+            </TabsTrigger>
+            <TabsTrigger value="recommendations" className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4" />
+              For You
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
@@ -254,8 +259,7 @@ const Home = () => {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="today" className="space-y-6">
-            <RealDailyOutfit />
+          <TabsContent value="recommendations" className="space-y-6">
             <PersonalizedRecommendations />
           </TabsContent>
 

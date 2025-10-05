@@ -188,6 +188,7 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
   const regenerateOutfit = async () => {
     setRegenerating(true);
     setVtoImage(null); // Clear old VTO
+    setOutfit(null); // Clear old outfit completely to force new name and description
     await generateDailyOutfit();
     setRegenerating(false);
     toast.success('New outfit generated!');
