@@ -87,7 +87,7 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
         name: '', description: '', category: '', brand: '', price: '',
         original_price: '', condition: 'new', color: '', material: '',
         occasion: '', season: '', stock_quantity: '1', is_featured: false,
-        is_premium: false, status: 'active'
+        is_premium: false, status: 'draft'
       });
       setSizes([]);
       setTags([]);
@@ -162,9 +162,9 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
         price: parseFloat(formData.price),
         original_price: formData.original_price ? parseFloat(formData.original_price) : null,
         stock_quantity: parseInt(formData.stock_quantity.toString()),
-        size: sizes,
-        tags,
-        style_tags: styleTags,
+        size: sizes, // Supabase will handle jsonb conversion
+        tags, // Supabase will handle jsonb conversion
+        style_tags: styleTags, // Supabase will handle jsonb conversion
         photos: photos.length > 0 ? (photos.length === 1 ? { main: photos[0] } : { main: photos[0], urls: photos }) : null,
         videos: videos.length > 0 ? (videos.length === 1 ? { main: videos[0] } : { main: videos[0], urls: videos }) : null,
       };

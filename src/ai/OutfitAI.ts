@@ -80,24 +80,34 @@ export class OutfitAI {
     const condition = weather?.condition?.toLowerCase() || '';
     const location = weather?.location || 'your location';
     
-    // Weather-based outfit name
+    // Weather-based outfit name with more variety
     let weatherPrefix = '';
+    const styleNames = ['Dapper', 'Gentleman', 'Classy', 'Sharp', 'Polished', 'Refined', 'Sleek', 'Chic'];
+    
     if (temp !== undefined) {
-      if (temp < 5) weatherPrefix = 'Cozy Winter';
-      else if (temp < 15) weatherPrefix = 'Cool Day';
-      else if (temp < 25) weatherPrefix = 'Perfect Spring';
-      else weatherPrefix = 'Summer Breeze';
+      if (temp < 5) {
+        weatherPrefix = ['Cozy Winter', 'Warm Layers', 'Winter Comfort'][Math.floor(Math.random() * 3)];
+      } else if (temp < 15) {
+        weatherPrefix = ['Cool Breeze', 'Crisp Day', 'Fresh Morning'][Math.floor(Math.random() * 3)];
+      } else if (temp < 25) {
+        weatherPrefix = ['Perfect Spring', 'Pleasant Day', 'Ideal Weather'][Math.floor(Math.random() * 3)];
+      } else {
+        weatherPrefix = ['Summer Breeze', 'Hot Day', 'Sunny Vibes'][Math.floor(Math.random() * 3)];
+      }
     }
     
-    if (condition.includes('rain')) weatherPrefix = 'Rainy Day';
-    else if (condition.includes('sun')) weatherPrefix = 'Sunny';
+    if (condition.includes('rain')) {
+      weatherPrefix = ['Rainy Day', 'Weather Ready', 'Storm Proof'][Math.floor(Math.random() * 3)];
+    } else if (condition.includes('sun')) {
+      weatherPrefix = ['Sunny Day', 'Bright Morning', 'Golden Hour'][Math.floor(Math.random() * 3)];
+    }
     
     const occasionStyles: Record<string, string> = {
-      work: 'Professional',
-      formal: 'Elegant',
-      casual: 'Casual',
+      work: styleNames[Math.floor(Math.random() * styleNames.length)],
+      formal: styleNames[Math.floor(Math.random() * styleNames.length)],
+      casual: 'Everyday',
       athletic: 'Active',
-      date: 'Chic',
+      date: 'Date Night',
       party: 'Party',
       daily: 'Everyday'
     };

@@ -374,23 +374,29 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
     <Card className="w-full">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <div>
+          <div className="flex-1">
             <CardTitle className="flex items-center space-x-2">
               <Sparkles className="w-5 h-5 text-primary" />
-              <span>{outfit.name}</span>
+              <span>{outfit.name || 'Daily Outfit'}</span>
             </CardTitle>
-            <CardDescription className="flex items-center space-x-4 mt-2">
+            <CardDescription className="flex items-center flex-wrap gap-4 mt-2">
               <div className="flex items-center space-x-1">
                 <Calendar className="w-4 h-4" />
-                <span>{date.toLocaleDateString()}</span>
+                <span>{date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
               </div>
               {weather && (
-                <div className="flex items-center space-x-1">
-                  <Thermometer className="w-4 h-4" />
-                  <span>{Math.round(weather.temperature)}°C</span>
-                </div>
+                <>
+                  <div className="flex items-center space-x-1">
+                    <Cloud className="w-4 h-4" />
+                    <span>{weather.condition}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Thermometer className="w-4 h-4" />
+                    <span>{Math.round(weather.temperature)}°C</span>
+                  </div>
+                </>
               )}
-              <Badge variant="secondary">{outfit.confidence}% match</Badge>
+              <Badge variant="secondary">{outfit.confidence || 85}% match</Badge>
             </CardDescription>
           </div>
           <Button
@@ -398,6 +404,7 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
             size="icon"
             onClick={regenerateOutfit}
             disabled={regenerating}
+            title="Generate new outfit"
           >
             <RefreshCw className={`w-4 h-4 ${regenerating ? 'animate-spin' : ''}`} />
           </Button>
@@ -406,17 +413,6 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
 
       <CardContent className="space-y-6">
         <DailyOutfitWithVTO outfit={outfit} userPhoto={userPhoto || undefined} />
-        {weather && (
-          <div className="flex items-center justify-center space-x-4 p-3 bg-muted rounded-lg">
-            <Cloud className="w-5 h-5 text-muted-foreground" />
-            <div className="text-sm">
-              <span className="font-medium">{weather.condition}</span>
-              <span className="text-muted-foreground ml-2">
-                {Math.round(weather.temperature)}°C
-              </span>
-            </div>
-          </div>
-        )}
 
         {/* Outfit Items */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">

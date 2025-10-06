@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { getAllPhotoUrls } from '@/utils/photoHelpers';
+import { getAllPhotoUrls, getPrimaryPhotoUrl } from '@/utils/photoHelpers';
 import { useToast } from '@/hooks/use-toast';
 
 export interface WardrobeItem {
@@ -82,10 +82,17 @@ export const useWardrobe = () => {
       
       const itemsWithResolvedPhotos = (data || []).map((item) => {
         const urls = getAllPhotoUrls(item.photos as any);
-        if (urls.length > 0) {
-          return { ...item, photos: { main: urls[0], urls } as any };
-        }
-        return item;
+        const primaryPhoto = getPrimaryPhotoUrl(item.photos as any, item.category);
+        
+        // Ensure we always have at least one photo (primary or placeholder)
+        const finalUrls = urls.length > 0 ? urls : [primaryPhoto];
+        
+        return { 
+          ...item, 
+          photos: finalUrls.length === 1 
+            ? { main: finalUrls[0] } 
+            : { main: finalUrls[0], urls: finalUrls }
+        } as any;
       });
       
       setItems(itemsWithResolvedPhotos);
