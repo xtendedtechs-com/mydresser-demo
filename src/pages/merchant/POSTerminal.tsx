@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { usePOSTerminal } from '@/hooks/usePOSTerminal';
 import { useStoreLocations } from '@/hooks/useStoreLocations';
-import { Monitor, DollarSign, Receipt, RefreshCw, Plus, Settings } from 'lucide-react';
+import { Monitor, DollarSign, Receipt, RefreshCw, Plus, Settings, LogOut } from 'lucide-react';
 import { format } from 'date-fns';
 
 const POSTerminal = () => {
@@ -31,6 +31,12 @@ const POSTerminal = () => {
     return <div className="p-8">Loading POS system...</div>;
   }
 
+  const handleLogout = async () => {
+    const { supabase } = await import('@/integrations/supabase/client');
+    await supabase.auth.signOut();
+    window.location.href = '/';
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className="container max-w-7xl mx-auto p-8">
@@ -39,6 +45,11 @@ const POSTerminal = () => {
             <h1 className="text-3xl font-bold mb-2">POS Terminal</h1>
             <p className="text-muted-foreground">Manage your point-of-sale terminals and transactions</p>
           </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleLogout}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </Button>
           <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
             <DialogTrigger asChild>
               <Button>
@@ -88,6 +99,7 @@ const POSTerminal = () => {
               </div>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         <Tabs defaultValue="terminals" className="space-y-6">

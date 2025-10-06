@@ -41,6 +41,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VirtualTryOn from "@/components/VirtualTryOn";
 import { useWardrobe } from "@/hooks/useWardrobe";
 import { useTranslation } from 'react-i18next';
+import { AppVersion } from "@/components/AppVersion";
 
 interface SettingItem {
   id: string;
@@ -228,6 +229,13 @@ const Account = () => {
   };
 
   const serviceSettings: SettingItem[] = [
+    {
+      id: 'app-version',
+      label: 'App Version & Changelog',
+      description: 'View current version and update history',
+      onClick: () => {}, // Will be replaced with Dialog
+      highlighted: false
+    },
     {
       id: 'weather',
       label: 'Weather settings',
@@ -580,21 +588,33 @@ const Account = () => {
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                   {serviceSettings.map((setting) => (
-                    <div 
+                    setting.id === 'app-version' ? (
+                      <div key={setting.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="space-y-1 flex-1 min-w-0">
+                          <div className="font-medium flex items-center gap-2 text-sm md:text-base">
+                            {setting.label}
+                          </div>
+                          <p className="text-xs md:text-sm text-muted-foreground line-clamp-1">{setting.description}</p>
+                        </div>
+                        <AppVersion />
+                      </div>
+                    ) : (
+                    <div
                       key={setting.id} 
                       className="flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-muted/50 active:scale-98 transition-all" 
                       onClick={setting.onClick}
                     >
-                      <div className="space-y-1 flex-1 min-w-0">
-                        <div className="font-medium flex items-center gap-2 text-sm md:text-base">
-                          {setting.label}
-                          {setting.highlighted && <Badge variant="secondary" className="text-xs">Featured</Badge>}
-                        </div>
-                        <div className="text-xs md:text-sm text-muted-foreground line-clamp-1">{setting.description}</div>
-                      </div>
-                      <ChevronRight className="w-4 h-4 flex-shrink-0 ml-2" />
-                    </div>
-                  ))}
+                       <div className="space-y-1 flex-1 min-w-0">
+                         <div className="font-medium flex items-center gap-2 text-sm md:text-base">
+                           {setting.label}
+                           {setting.highlighted && <Badge variant="secondary" className="text-xs">Featured</Badge>}
+                         </div>
+                         <div className="text-xs md:text-sm text-muted-foreground line-clamp-1">{setting.description}</div>
+                       </div>
+                       <ChevronRight className="w-4 h-4 flex-shrink-0 ml-2" />
+                     </div>
+                    )
+                   ))}
                 </div>
               </CardContent>
             </Card>

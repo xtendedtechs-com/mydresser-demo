@@ -2,7 +2,6 @@ import { useProfile } from "@/hooks/useProfile";
 import { Navigate, Outlet } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { MobileNavigation } from "@/components/MobileNavigation";
-import { AppVersion } from "@/components/AppVersion";
 import { Loader2 } from "lucide-react";
 
 interface LayoutProps {
@@ -46,9 +45,6 @@ export default function Layout({ requireAuth = false, requireRole }: LayoutProps
         <Outlet />
       </main>
       {user && <MobileNavigation />}
-      <div className="fixed bottom-4 right-4 z-50">
-        <AppVersion />
-      </div>
     </div>
   );
 }
