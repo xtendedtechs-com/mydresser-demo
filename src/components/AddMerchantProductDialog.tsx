@@ -48,6 +48,7 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
   const [sizes, setSizes] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [styleTags, setStyleTags] = useState<string[]>([]);
+  const [careInstructions, setCareInstructions] = useState('');
   const [photos, setPhotos] = useState<string[]>([]);
   const [videos, setVideos] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
@@ -79,6 +80,7 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
       setSizes(editProduct.size || []);
       setTags(editProduct.tags || []);
       setStyleTags(editProduct.style_tags || []);
+      setCareInstructions(editProduct.care_instructions || '');
       setPhotos(getAllPhotoUrls(editProduct.photos));
       setVideos(Array.isArray(editProduct.videos) ? editProduct.videos : []);
     } else {
@@ -92,6 +94,7 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
       setSizes([]);
       setTags([]);
       setStyleTags([]);
+      setCareInstructions('');
       setPhotos([]);
       setVideos([]);
     }
@@ -165,6 +168,7 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
         size: sizes, // Supabase will handle jsonb conversion
         tags, // Supabase will handle jsonb conversion
         style_tags: styleTags, // Supabase will handle jsonb conversion
+        care_instructions: careInstructions || null,
         photos: photos.length > 0 ? (photos.length === 1 ? { main: photos[0] } : { main: photos[0], urls: photos }) : null,
         videos: videos.length > 0 ? (videos.length === 1 ? { main: videos[0] } : { main: videos[0], urls: videos }) : null,
       };
@@ -206,6 +210,7 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
       setSizes([]);
       setTags([]);
       setStyleTags([]);
+      setCareInstructions('');
       setPhotos([]);
       setVideos([]);
     } catch (error) {
@@ -508,6 +513,20 @@ const AddMerchantProductDialog = ({ open, onOpenChange, onProductAdded, editProd
                     <Tag className="w-4 h-4" />
                   </Button>
                 </div>
+              </div>
+
+              {/* Care Instructions */}
+              <div className="space-y-2">
+                <Label htmlFor="care-instructions">Care Instructions</Label>
+                <Textarea
+                  id="care-instructions"
+                  placeholder="e.g., Machine wash cold, tumble dry low, do not bleach, iron on low heat..."
+                  value={careInstructions}
+                  onChange={(e) => setCareInstructions(e.target.value)}
+                  rows={3}
+                  className="resize-none"
+                />
+                <p className="text-xs text-muted-foreground">Provide care and maintenance instructions for customers</p>
               </div>
 
               {/* Photos */}

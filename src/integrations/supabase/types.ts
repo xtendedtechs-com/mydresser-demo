@@ -2451,6 +2451,7 @@ export type Database = {
       merchant_items: {
         Row: {
           brand: string | null
+          care_instructions: string | null
           category: string
           color: string | null
           condition: string | null
@@ -2477,6 +2478,7 @@ export type Database = {
         }
         Insert: {
           brand?: string | null
+          care_instructions?: string | null
           category: string
           color?: string | null
           condition?: string | null
@@ -2503,6 +2505,7 @@ export type Database = {
         }
         Update: {
           brand?: string | null
+          care_instructions?: string | null
           category?: string
           color?: string | null
           condition?: string | null
