@@ -126,11 +126,23 @@ export function MerchantNavigation() {
         <div className="flex-1 overflow-auto py-4 px-3">
           <NavLinks />
         </div>
-        <div className="border-t p-4">
+        <div className="border-t p-4 space-y-2">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <div className="h-2 w-2 rounded-full bg-green-500" />
             <span>Terminal Active</span>
           </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full"
+            onClick={async () => {
+              const { supabase } = await import('@/integrations/supabase/client');
+              await supabase.auth.signOut();
+              window.location.href = '/';
+            }}
+          >
+            Logout
+          </Button>
         </div>
       </aside>
 

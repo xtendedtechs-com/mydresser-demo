@@ -81,18 +81,10 @@ export const useWardrobe = () => {
       if (error) throw error;
       
       const itemsWithResolvedPhotos = (data || []).map((item) => {
-        const urls = getAllPhotoUrls(item.photos as any);
-        const primaryPhoto = getPrimaryPhotoUrl(item.photos as any, item.category);
-        
-        // Ensure we always have at least one photo (primary or placeholder)
-        const finalUrls = urls.length > 0 ? urls : [primaryPhoto];
-        
         return { 
           ...item, 
-          photos: finalUrls.length === 1 
-            ? { main: finalUrls[0] } 
-            : { main: finalUrls[0], urls: finalUrls }
-        } as any;
+          photos: item.photos // Keep original photo structure
+        } as WardrobeItem;
       });
       
       setItems(itemsWithResolvedPhotos);
