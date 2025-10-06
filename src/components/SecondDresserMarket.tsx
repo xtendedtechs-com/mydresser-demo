@@ -56,9 +56,9 @@ const SecondDresserMarket = () => {
       try {
         const { data, error } = await supabase
           .from('market_items')
-          .select('*')
-          .eq('source_type', 'user')
-          .eq('status', 'active')
+          .select<'*', any>('*')
+          .eq('status', 'available')
+          .not('wardrobe_item_id', 'is', null) // Only user items from wardrobe
           .order('created_at', { ascending: false })
           .limit(50);
 

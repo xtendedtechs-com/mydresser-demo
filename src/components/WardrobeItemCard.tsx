@@ -14,7 +14,7 @@ import {
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { WardrobeItem } from "@/hooks/useWardrobe";
-import { getPrimaryPhotoUrl } from "@/utils/photoHelpers";
+import { getPrimaryPhotoUrl, getCategoryPlaceholderImage } from "@/utils/photoHelpers";
 
 interface WardrobeItemCardProps {
   item: WardrobeItem;
@@ -42,6 +42,8 @@ const WardrobeItemCard = ({
       default: return 'bg-gray-500';
     }
   };
+
+  const primaryPhotoUrl = getPrimaryPhotoUrl(item.photos, item.category);
 
   const daysSinceWorn = item.last_worn 
     ? Math.floor((new Date().getTime() - new Date(item.last_worn).getTime()) / (1000 * 3600 * 24))

@@ -80,12 +80,11 @@ export const useWardrobe = () => {
 
       if (error) throw error;
       
-      const itemsWithResolvedPhotos = (data || []).map((item) => {
-        return { 
-          ...item, 
-          photos: item.photos // Keep original photo structure
-        } as WardrobeItem;
-      });
+      // Map items and ensure photos are in a usable format
+      const itemsWithResolvedPhotos = (data || []).map((item) => ({
+        ...item,
+        photos: item.photos // Keep original JSONB structure
+      } as WardrobeItem));
       
       setItems(itemsWithResolvedPhotos);
     } catch (error: any) {
