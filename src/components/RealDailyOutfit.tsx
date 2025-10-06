@@ -28,6 +28,8 @@ import { toast } from "sonner";
 import EditOutfitDialog from "./EditOutfitDialog";
 import MarketOutfitSuggestions from "./MarketOutfitSuggestions";
 import DailyOutfitWithVTO from "@/components/DailyOutfitWithVTO";
+import { getPrimaryPhotoUrl } from "@/utils/photoHelpers";
+import { Link } from "react-router-dom";
 
 interface DailyOutfitProps {
   date?: Date;
@@ -106,6 +108,53 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
   // VTO generation is now handled by the legacy, stable component (DailyOutfitWithVTO)
   // to ensure reliability after dashboard redesign.
 
+  // Helper: Generate a descriptive, varied name for the outfit
+  const generateOutfitName = (genOutfit: any, w: any) => {
+    const items = genOutfit?.items || [];
+    const cats = items.map((it: any) => (it.category || '').toLowerCase());
+    const hasFormal = cats.some((c: string) => ['suit', 'blazer', 'dress_shirt', 'oxfords'].includes(c));
+    const hasSporty = cats.some((c: string) => ['sneakers', 'hoodie', 'activewear'].includes(c));
+    const hasOuter = cats.some((c: string) => ['coat', 'jacket', 'outerwear'].includes(c));
+
+    const formalPool = ['The Dapper', 'The Gentleman', 'Classy Guy', 'Modern Executive', 'Midnight Tux'];
+    const smartPool = ['Urban Classic', 'Polished Minimal', 'Smart Casual', 'City Sharp', 'Tailored Ease'];
+    const casualPool = ['Easy Breezy', 'Streetwise', 'Everyday Flow', 'Weekend Mode', 'Clean Lines'];
+    const cozyPool = ['Warm Layers', 'Cozy Chic', 'Frost Ready', 'Breezy Layers', 'Cloud Soft'];
+
+    let pool = casualPool;
+    if (hasFormal) pool = formalPool;
+    else if (hasOuter) pool = cozyPool;
+    else if (hasSporty) pool = smartPool;
+
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    // Prefer AI-provided but replace generic names
+    const aiName: string | undefined = genOutfit?.name;
+    const generic = !aiName || /daily pick|outfit|look/gi.test(aiName);
+    return generic ? pick : aiName!;
+  };
+
+  // Helper: Generate a weather-aware explanation
+  const generateOutfitDescription = (genOutfit: any, w: any) => {
+    const items = genOutfit?.items || [];
+    const count = items.length;
+    const temp = Math.round(w?.temperature ?? 0);
+    const cond = (w?.condition || 'mixed').toLowerCase();
+    const feels = Math.round(w?.feelsLike ?? temp);
+    const loc = w?.location === 'Estimated Location' ? 'your area' : w?.location || 'your area';
+
+    const mentions: string[] = [];
+    if (cond.includes('rain')) mentions.push('water-friendly layers');
+    if (cond.includes('snow')) mentions.push('insulating pieces');
+    if (cond.includes('clear')) mentions.push('clean lines');
+    if (cond.includes('cloud')) mentions.push('balanced tones');
+    if (temp <= 8) mentions.push('warm textures');
+    if (temp >= 26) mentions.push('breathable fabrics');
+
+    const core = mentions.slice(0, 2).join(' and ') || 'complimentary detailing';
+
+    return `Built for ${cond} at ${temp}°C (feels ${feels}°C) in ${loc}, this ${count}-piece combo balances comfort and style with ${core}. Each item is chosen to work together in silhouette and color.`;
+  };
+
   const generateDailyOutfit = async () => {
     if (!wardrobeItems.length) return;
     
@@ -176,11 +225,13 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
       }
 
       // Force new outfit state with unique timestamp to trigger re-render
+      const computedName = generateOutfitName(generatedOutfit, weatherData);
+      const computedReasoning = generateOutfitDescription(generatedOutfit, weatherData);
       const newOutfit = {
         ...generatedOutfit,
         id: generatedOutfit.id || `temp-${Date.now()}`,
-        name: generatedOutfit.name || `Daily Pick ${Date.now()}`,
-        reasoning: generatedOutfit.reasoning || 'AI-curated outfit for you',
+        name: computedName,
+        reasoning: computedReasoning,
         confidence: Math.round((generatedOutfit.confidence || 0.85) * 100)
       };
       
@@ -417,11 +468,11 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
         {/* Outfit Items */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {outfit.items?.map((item: any, index: number) => (
-            <div key={item.id || index} className="text-center">
+            <Link key={item.id || index} to={`/wardrobe/item/${item.id}`} className="block text-center">
               <div className="relative mb-2">
                 <Avatar className="w-20 h-20 mx-auto">
-                  <AvatarImage src={item.photos?.main || '/placeholder.svg'} />
-                  <AvatarFallback>{item.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                  <AvatarImage src={getPrimaryPhotoUrl(item.photos, item.category)} />
+                  <AvatarFallback>{item.name?.slice(0, 2)?.toUpperCase() || 'IT'}</AvatarFallback>
                 </Avatar>
                 <Badge 
                   variant="secondary" 
@@ -432,7 +483,7 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
               </div>
               <p className="text-sm font-medium">{item.name}</p>
               <p className="text-xs text-muted-foreground">{item.brand}</p>
-            </div>
+            </Link>
           ))}
         </div>
 
