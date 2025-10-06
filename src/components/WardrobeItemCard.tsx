@@ -101,7 +101,8 @@ const WardrobeItemCard = ({
           decoding="async"
           className="w-full h-full object-cover"
           onError={() => {
-            // Retry with signed URL or fall back to category placeholder
+            // Fall back to placeholder immediately; attempt signing in background
+            setImgSrc(getCategoryPlaceholderImage(item.category));
             trySignUrl(initialUrl);
           }}
         />
