@@ -34,7 +34,7 @@ const Auth = () => {
 
   // Get invitation token from URL parameters
   useEffect(() => {
-    const inviteToken = searchParams.get('invite');
+    const inviteToken = searchParams.get("invite");
     if (inviteToken) {
       setInvitationToken(inviteToken);
       setShowInviteField(true);
@@ -44,14 +44,14 @@ const Auth = () => {
   // Check if signup is allowed
   const checkSignupAllowed = async () => {
     try {
-      const response = await supabase.functions.invoke('auth-security', {
-        body: { action: 'check_signup_allowed' }
+      const response = await supabase.functions.invoke("auth-security", {
+        body: { action: "check_signup_allowed" },
       });
 
       if (response.data) {
         if (!response.data.allowed) {
           setSignupBlocked(true);
-          setBlockReason(response.data.reason || 'Signup is currently disabled');
+          setBlockReason(response.data.reason || "Signup is currently disabled");
           setShowInviteField(true);
         }
         return response.data.allowed;
@@ -59,7 +59,7 @@ const Auth = () => {
       return false;
     } catch (error) {
       setSignupBlocked(true);
-      setBlockReason('Unable to verify signup permissions. Please try again later.');
+      setBlockReason("Unable to verify signup permissions. Please try again later.");
       return false;
     }
   };
@@ -68,21 +68,21 @@ const Auth = () => {
   const checkRateLimit = async (action: string) => {
     try {
       const identifier = `${window.location.hostname}_${Date.now()}`;
-      const response = await supabase.functions.invoke('auth-security', {
-        body: { 
-          action: 'rate_limit_check',
+      const response = await supabase.functions.invoke("auth-security", {
+        body: {
+          action: "rate_limit_check",
           data: {
             identifier,
             action,
-            limit: action === 'login' ? 5 : 3,
-            windowMinutes: 15
-          }
-        }
+            limit: action === "login" ? 5 : 3,
+            windowMinutes: 15,
+          },
+        },
       });
 
       return response.data?.allowed !== false;
     } catch (error) {
-      console.warn('Rate limit check failed:', error);
+      console.warn("Rate limit check failed:", error);
       return true; // Allow on error to not block legitimate users
     }
   };
@@ -90,29 +90,29 @@ const Auth = () => {
   // Security audit logging
   const auditLog = async (action: string, success: boolean, details?: any) => {
     try {
-      await supabase.functions.invoke('auth-security', {
+      await supabase.functions.invoke("auth-security", {
         body: {
-          action: 'audit_log',
+          action: "audit_log",
           data: {
             action,
             success,
             details,
-            resource: 'auth'
-          }
-        }
+            resource: "auth",
+          },
+        },
       });
     } catch (error) {
-      console.warn('Audit logging failed:', error);
+      console.warn("Audit logging failed:", error);
     }
   };
 
   const validateInvitation = async (token: string) => {
     try {
-      const response = await supabase.functions.invoke('auth-security', {
-        body: { 
-          action: 'validate_invitation',
-          data: { token }
-        }
+      const response = await supabase.functions.invoke("auth-security", {
+        body: {
+          action: "validate_invitation",
+          data: { token },
+        },
       });
 
       return response.data?.valid === true;
@@ -127,9 +127,9 @@ const Auth = () => {
 
     try {
       // Security validations
-      const canProceed = await checkRateLimit('signup');
+      const canProceed = await checkRateLimit("signup");
       if (!canProceed) {
-        throw new Error('Too many signup attempts. Please try again later.');
+        throw new Error("Too many signup attempts. Please try again later.");
       }
 
       // Check signup permissions
@@ -138,20 +138,20 @@ const Auth = () => {
         if (invitationToken) {
           const validInvite = await validateInvitation(invitationToken);
           if (!validInvite) {
-            throw new Error('Invalid invitation token');
+            throw new Error("Invalid invitation token");
           }
         } else {
-          throw new Error('Signup is currently restricted. Please contact support for an invitation.');
+          throw new Error("Signup is currently restricted. Please contact support for an invitation.");
         }
       }
 
       // Input validation
       if (password.length < 8) {
-        throw new Error('Password must be at least 8 characters long');
+        throw new Error("Password must be at least 8 characters long");
       }
 
-      if (!email.includes('@')) {
-        throw new Error('Please enter a valid email address');
+      if (!email.includes("@")) {
+        throw new Error("Please enter a valid email address");
       }
 
       // Prepare auth options
@@ -163,9 +163,9 @@ const Auth = () => {
           data: {
             full_name: fullName,
             phone: phone,
-            invitation_token: invitationToken || undefined
-          }
-        }
+            invitation_token: invitationToken || undefined,
+          },
+        },
       };
 
       // CAPTCHA disabled for testing: no captchaToken passed
@@ -173,7 +173,7 @@ const Auth = () => {
 
       if (error) throw error;
 
-      await auditLog('user_signup', true, { email, invitation_used: !!invitationToken });
+      await auditLog("user_signup", true, { email, invitation_used: !!invitationToken });
 
       // Reset CAPTCHA state on success
       setShowCaptcha(false);
@@ -184,8 +184,8 @@ const Auth = () => {
         description: "Please check your email to verify your account.",
       });
     } catch (error: any) {
-      await auditLog('user_signup', false, { email, error: error.message });
-      
+      await auditLog("user_signup", false, { email, error: error.message });
+
       toast({
         title: "Error creating account",
         description: error.message,
@@ -202,9 +202,9 @@ const Auth = () => {
 
     try {
       // Rate limit check
-      const canProceed = await checkRateLimit('login');
+      const canProceed = await checkRateLimit("login");
       if (!canProceed) {
-        throw new Error('Too many login attempts. Please try again later.');
+        throw new Error("Too many login attempts. Please try again later.");
       }
 
       const { error } = await supabase.auth.signInWithPassword({
@@ -214,7 +214,7 @@ const Auth = () => {
 
       if (error) throw error;
 
-      await auditLog('user_signin', true, { email });
+      await auditLog("user_signin", true, { email });
 
       // Reset CAPTCHA state on success
       setShowCaptcha(false);
@@ -226,10 +226,10 @@ const Auth = () => {
       });
 
       // Get user data and navigate appropriately - regular users go to main app
-      navigate('/');
+      navigate("/");
     } catch (error: any) {
-      await auditLog('user_signin', false, { email, error: error.message });
-      
+      await auditLog("user_signin", false, { email, error: error.message });
+
       toast({
         title: "Error signing in",
         description: error.message,
@@ -251,21 +251,16 @@ const Auth = () => {
             <Shield className="h-8 w-8 text-primary" />
             <h1 className="text-3xl font-bold fashion-text-gradient">MyDresser</h1>
           </div>
-          <p className="text-muted-foreground">Secure access to your fashion platform</p>
+          <p className="text-muted-foreground">Taking care of what you wear.</p>
         </div>
-
-        {/* Security Notice */}
-        <Alert>
-          <Shield className="h-4 w-4" />
-          <AlertDescription>
-            This platform uses enterprise-grade security including rate limiting, 
-            audit logging, and invitation-only access during launch.
-          </AlertDescription>
-        </Alert>
 
         {/* Auth Form */}
         <Card>
-          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "signin" | "signup")} className="w-full">
+          <Tabs
+            value={activeTab}
+            onValueChange={(value) => setActiveTab(value as "signin" | "signup")}
+            className="w-full"
+          >
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
@@ -275,9 +270,7 @@ const Auth = () => {
               <form onSubmit={handleSignIn}>
                 <CardHeader>
                   <CardTitle>Sign In</CardTitle>
-                  <CardDescription>
-                    Access your secure fashion dashboard
-                  </CardDescription>
+                  <CardDescription>Log in to MyDresser.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
@@ -310,7 +303,7 @@ const Auth = () => {
                       />
                     </div>
                   </div>
-                  
+
                   {/* CAPTCHA temporarily disabled for testing */}
                   {/* <div className="mt-4">
                     <SupabaseCaptcha onVerify={(token) => setCaptchaToken(token)} />
@@ -319,13 +312,10 @@ const Auth = () => {
                 <CardFooter className="flex flex-col gap-2">
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Sign In Securely
+                    Sign In
                   </Button>
                   <div className="text-center w-full">
-                    <Link 
-                      to="/forgot-password" 
-                      className="text-sm text-primary hover:underline"
-                    >
+                    <Link to="/forgot-password" className="text-sm text-primary hover:underline">
                       Forgot your password?
                     </Link>
                   </div>
@@ -338,16 +328,14 @@ const Auth = () => {
                 <CardHeader>
                   <CardTitle>Create Account</CardTitle>
                   <CardDescription>
-                    {signupBlocked ? 'Invitation required for early access' : 'Join the secure fashion platform'}
+                    {signupBlocked ? "Invitation required for early access" : "Join the fashion platform"}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {signupBlocked && (
                     <Alert variant="destructive">
                       <AlertTriangle className="h-4 w-4" />
-                      <AlertDescription>
-                        {blockReason}
-                      </AlertDescription>
+                      <AlertDescription>{blockReason}</AlertDescription>
                     </Alert>
                   )}
 
@@ -425,7 +413,7 @@ const Auth = () => {
                       />
                     </div>
                   </div>
-                  
+
                   {/* CAPTCHA temporarily disabled for testing */}
                   {/* <div className="mt-4">
                     <SupabaseCaptcha onVerify={(token) => setCaptchaToken(token)} />
@@ -434,7 +422,7 @@ const Auth = () => {
                 <CardFooter>
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Create Secure Account
+                    Create Account
                   </Button>
                 </CardFooter>
               </form>
@@ -445,13 +433,11 @@ const Auth = () => {
         <div className="space-y-2">
           <div className="text-center text-sm text-muted-foreground">
             <Shield className="inline w-4 h-4 mr-1" />
-            Protected by enterprise security measures
+            Wearing without worrying.
           </div>
           <div className="text-center">
             <a href="/terminal">
-              <Button variant="link">
-                Are you a merchant? Access MyMarket here
-              </Button>
+              <Button variant="link">Are you a merchant? Access MyMarket here</Button>
             </a>
           </div>
         </div>
