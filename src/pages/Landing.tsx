@@ -42,29 +42,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Features */}
-      <section className="py-16 bg-muted/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-12">Why Fashion Leaders Choose Us</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card>
-              <CardHeader>
-                <Users className="h-12 w-12 text-primary mb-4" />
-                <CardTitle>Fashion Community</CardTitle>
-                <CardDescription>Join many others who choose MyDresser as their fashion eco-system</CardDescription>
-              </CardHeader>
-            </Card>
-            <Card>
-              <CardHeader>
-                <Zap className="h-12 w-12 text-primary mb-4" />
-                <CardTitle>AI-Powered Insights</CardTitle>
-                <CardDescription>Smart wardrobe management and personalized style recommendations</CardDescription>
-              </CardHeader>
-            </Card>
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className="border-t py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
