@@ -60,18 +60,12 @@ const Landing = () => {
           <h2 className="text-3xl font-bold text-center mb-12">Why Fashion Leaders Choose Us</h2>
           <div className="grid md:grid-cols-3 gap-8">
             <Card>
-              <CardHeader>
-                <Shield className="h-12 w-12 text-primary mb-4" />
-                <CardTitle>Enterprise Security</CardTitle>
-                <CardDescription>Bank-level encryption, audit logging, and compliance with GDPR/CCPA</CardDescription>
-              </CardHeader>
-            </Card>
             <Card>
               <CardHeader>
                 <Users className="h-12 w-12 text-primary mb-4" />
-                <CardTitle>Exclusive Community</CardTitle>
+                <CardTitle>Fashion Community</CardTitle>
                 <CardDescription>
-                  Invitation-only access ensures quality interactions and premium content
+                  Join many others who choose MyDresser as their fashion eco-system
                 </CardDescription>
               </CardHeader>
             </Card>
