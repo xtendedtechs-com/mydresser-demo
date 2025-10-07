@@ -43,7 +43,7 @@ const Landing = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-12" style={{ bottom: 0 }}>
+      <footer className="border-t py-12" style={{ bottom: 0, marginTop:auto; }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center mb-4 md:mb-0">
