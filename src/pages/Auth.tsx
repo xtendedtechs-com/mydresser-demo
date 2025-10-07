@@ -431,10 +431,7 @@ const Auth = () => {
         </Card>
 
         <div className="space-y-2">
-          <div className="text-center text-sm text-muted-foreground">
-            <Shield className="inline w-4 h-4 mr-1" />
-            Wearing without worrying.
-          </div>
+          <div className="text-center text-sm text-muted-foreground">Wearing without worrying.</div>
           <div className="text-center">
             <a href="/terminal">
               <Button variant="link">Are you a merchant? Access MyMarket here</Button>
