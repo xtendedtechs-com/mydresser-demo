@@ -50,6 +50,11 @@ const Landing = () => {
       <br />
       <br />
       <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
       {/* Footer */}
       <footer className="border-t py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
