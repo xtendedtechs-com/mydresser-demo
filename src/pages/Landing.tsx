@@ -39,18 +39,9 @@ const Landing = () => {
       {/* Hero Section */}
       <section className="pt-20 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Your Personal Fashion
-            <span className="text-primary block">Intelligence Platform</span>
-          </h1>
-          <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Join our exclusive community of fashion enthusiasts. By invitation only during our launch phase.
-          </p>
-          <Link to="/auth">
-            <Button size="lg" className="text-lg px-8 py-6">
-              Request Your Invitation
-            </Button>
-          </Link>
+          <h1 className="text-4xl md:text-6xl font-bold mb-6">MyDresser</h1>
+          <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">Taking care of what you wear.</p>
+          <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">Coming soon.</p>
         </div>
       </section>
 
