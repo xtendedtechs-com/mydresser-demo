@@ -60,13 +60,10 @@ const Landing = () => {
           <h2 className="text-3xl font-bold text-center mb-12">Why Fashion Leaders Choose Us</h2>
           <div className="grid md:grid-cols-3 gap-8">
             <Card>
-            <Card>
               <CardHeader>
                 <Users className="h-12 w-12 text-primary mb-4" />
                 <CardTitle>Fashion Community</CardTitle>
-                <CardDescription>
-                  Join many others who choose MyDresser as their fashion eco-system
-                </CardDescription>
+                <CardDescription>Join many others who choose MyDresser as their fashion eco-system</CardDescription>
               </CardHeader>
             </Card>
             <Card>
