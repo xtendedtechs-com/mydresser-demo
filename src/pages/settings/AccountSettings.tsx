@@ -9,6 +9,10 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { AccountDeletionDialog } from "@/components/AccountDeletionDialog";
+import { AppVersion } from "@/components/AppVersion";
+import { AppStatusMonitor } from "@/components/AppStatusMonitor";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { FileText, Activity } from "lucide-react";
 
 const AccountSettings = () => {
   const navigate = useNavigate();
@@ -156,6 +160,45 @@ const AccountSettings = () => {
               >
                 Manage Authentication
               </Button>
+            </CardContent>
+          </Card>
+
+          {/* App Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                App Information
+              </CardTitle>
+              <CardDescription>
+                Version, changelog, and documentation
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-muted-foreground" />
+                  <span className="font-medium">Current Version</span>
+                </div>
+                <AppVersion />
+              </div>
+              
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full">
+                    View System Status
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-3xl max-h-[90vh]">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                      <Activity className="w-5 h-5" />
+                      Live System Status
+                    </DialogTitle>
+                  </DialogHeader>
+                  <AppStatusMonitor />
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
 
