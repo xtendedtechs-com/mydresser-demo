@@ -37,7 +37,7 @@ const MerchantLanding = () => {
             <span className="text-primary block">Merchant Terminal</span>
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            The world's first FOS - Fashion Operating System
+            The world's first Fashion Operating System - FOS
             <br />
             <br />
             Manage your fashion business with powerful tools designed for modern merchants.
