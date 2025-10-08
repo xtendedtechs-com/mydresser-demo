@@ -16,7 +16,9 @@ const MerchantLanding = () => {
             </div>
             <div className="flex items-center space-x-4">
               <a href="/">
-                <Button variant="ghost" size="sm">Customer App</Button>
+                <Button variant="ghost" size="sm">
+                  Customer App
+                </Button>
               </a>
               <Link to="/terminal/auth">
                 <Button>Merchant Sign In</Button>
@@ -31,10 +33,14 @@ const MerchantLanding = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
             Your Complete
-            <span className="text-primary block">Merchant Command Center</span>
+            <span className="text-primary block">Merchant Terminal</span>
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-            Manage your fashion business with powerful tools designed for modern merchants. 
+            The world's first FOS - Fashion Operating System
+            <br />
+            <br />
+            Manage your fashion business with powerful tools designed for modern merchants.
+            <br />
             Inventory, sales, analytics, and customer relations—all in one place.
           </p>
           <Link to="/terminal/auth">
@@ -81,27 +87,14 @@ const MerchantLanding = () => {
               <CardHeader>
                 <TrendingUp className="h-12 w-12 text-primary mb-4" />
                 <CardTitle>Sales Optimization</CardTitle>
-                <CardDescription>
-                  AI-powered recommendations to maximize revenue and minimize waste
-                </CardDescription>
-              </CardHeader>
-            </Card>
-            <Card>
-              <CardHeader>
-                <Shield className="h-12 w-12 text-primary mb-4" />
-                <CardTitle>Enterprise Security</CardTitle>
-                <CardDescription>
-                  Bank-level encryption and compliance with industry standards
-                </CardDescription>
+                <CardDescription>AI-powered recommendations to maximize revenue and minimize waste</CardDescription>
               </CardHeader>
             </Card>
             <Card>
               <CardHeader>
                 <Store className="h-12 w-12 text-primary mb-4" />
                 <CardTitle>Custom Storefront</CardTitle>
-                <CardDescription>
-                  Beautiful, customizable pages to showcase your brand and products
-                </CardDescription>
+                <CardDescription>Beautiful, customizable pages to showcase your brand and products</CardDescription>
               </CardHeader>
             </Card>
           </div>
@@ -113,7 +106,7 @@ const MerchantLanding = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-6">Ready to Transform Your Business?</h2>
           <p className="text-lg text-muted-foreground mb-8">
-            Join thousands of merchants who trust MyDresser Terminal to power their fashion business.
+            Join the new fashion business experience, an all-in-one solution.
           </p>
           <Link to="/terminal/auth">
             <Button size="lg" className="text-lg px-8 py-6">
@@ -132,9 +125,15 @@ const MerchantLanding = () => {
               <span className="ml-2 font-semibold">MyDresser Terminal</span>
             </div>
             <div className="flex space-x-6 text-sm text-muted-foreground">
-              <a href="#" className="hover:text-foreground">Privacy Policy</a>
-              <a href="#" className="hover:text-foreground">Terms of Service</a>
-              <a href="#" className="hover:text-foreground">Support</a>
+              <a href="#" className="hover:text-foreground">
+                Privacy Policy
+              </a>
+              <a href="#" className="hover:text-foreground">
+                Terms of Service
+              </a>
+              <a href="#" className="hover:text-foreground">
+                Support
+              </a>
             </div>
           </div>
           <div className="mt-8 text-center text-sm text-muted-foreground">
