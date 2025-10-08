@@ -32,7 +32,7 @@ const MerchantLanding = () => {
       <section className="pt-20 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Register and start setup
+            Register and start setting up your
             <br />
             <span className="text-primary block">Merchant Terminal</span>
           </h1>
