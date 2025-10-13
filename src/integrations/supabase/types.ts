@@ -242,6 +242,36 @@ export type Database = {
         }
         Relationships: []
       }
+      app_versions: {
+        Row: {
+          changelog: Json
+          created_at: string
+          id: string
+          is_current: boolean
+          release_date: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          changelog?: Json
+          created_at?: string
+          id?: string
+          is_current?: boolean
+          release_date?: string
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          changelog?: Json
+          created_at?: string
+          id?: string
+          is_current?: boolean
+          release_date?: string
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
       blocked_users: {
         Row: {
           blocked_at: string
