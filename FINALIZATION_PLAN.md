@@ -154,6 +154,11 @@
 
 - **`MASTER_PLAN.md`** - Comprehensive development overview (replaces all PHASE_*.md)
 - **`FINALIZATION_PLAN.md`** - This document (current sprint focus)
+- **`PRD.md`** - Detailed product requirements and specifications
+- **`GAP_ANALYSIS.md`** - Concept vs. demo feature comparison
+- **`CHANGELOG.md`** - Version history and release notes
 - **`README.md`** - Project setup and technical guide
 
-**For complete details on architecture, features, and roadmap, see `MASTER_PLAN.md`**
+**For complete details on architecture, features, and roadmap, see `MASTER_PLAN.md`**  
+**For concept-demo gaps and priorities, see `GAP_ANALYSIS.md`**  
+**For detailed feature requirements, see `PRD.md`**
