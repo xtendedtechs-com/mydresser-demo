@@ -108,25 +108,28 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
   // VTO generation is now handled by the legacy, stable component (DailyOutfitWithVTO)
   // to ensure reliability after dashboard redesign.
 
-  // Helper: Generate a descriptive, varied name for the outfit
-  const generateOutfitName = (genOutfit: any, w: any) => {
+  // Helper: Generate a descriptive, varied name for the outfit with unique seed
+  const generateOutfitName = (genOutfit: any, w: any, seed = Date.now()) => {
     const items = genOutfit?.items || [];
     const cats = items.map((it: any) => (it.category || '').toLowerCase());
     const hasFormal = cats.some((c: string) => ['suit', 'blazer', 'dress_shirt', 'oxfords'].includes(c));
     const hasSporty = cats.some((c: string) => ['sneakers', 'hoodie', 'activewear'].includes(c));
     const hasOuter = cats.some((c: string) => ['coat', 'jacket', 'outerwear'].includes(c));
 
-    const formalPool = ['The Dapper', 'The Gentleman', 'Classy Guy', 'Modern Executive', 'Midnight Tux'];
-    const smartPool = ['Urban Classic', 'Polished Minimal', 'Smart Casual', 'City Sharp', 'Tailored Ease'];
-    const casualPool = ['Easy Breezy', 'Streetwise', 'Everyday Flow', 'Weekend Mode', 'Clean Lines'];
-    const cozyPool = ['Warm Layers', 'Cozy Chic', 'Frost Ready', 'Breezy Layers', 'Cloud Soft'];
+    const formalPool = ['The Dapper', 'The Gentleman', 'Classy Guy', 'Modern Executive', 'Midnight Tux', 'Sharp Edge', 'Refined Look'];
+    const smartPool = ['Urban Classic', 'Polished Minimal', 'Smart Casual', 'City Sharp', 'Tailored Ease', 'Modern Edge', 'Street Elegant'];
+    const casualPool = ['Easy Breezy', 'Streetwise', 'Everyday Flow', 'Weekend Mode', 'Clean Lines', 'Relaxed Vibe', 'Casual Chic'];
+    const cozyPool = ['Warm Layers', 'Cozy Chic', 'Frost Ready', 'Breezy Layers', 'Cloud Soft', 'Winter Embrace', 'Snug Style'];
 
     let pool = casualPool;
     if (hasFormal) pool = formalPool;
     else if (hasOuter) pool = cozyPool;
     else if (hasSporty) pool = smartPool;
 
-    const pick = pool[Math.floor(Math.random() * pool.length)];
+    // Use seed for deterministic but unique selection
+    const index = Math.floor((seed % 997) % pool.length);
+    const pick = pool[index];
+    
     // Prefer AI-provided but replace generic names
     const aiName: string | undefined = genOutfit?.name;
     const generic = !aiName || /daily pick|outfit|look/gi.test(aiName);
@@ -225,17 +228,19 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
       }
 
       // Force new outfit state with unique timestamp to trigger re-render
-      const computedName = generateOutfitName(generatedOutfit, weatherData);
+      const uniqueSeed = Date.now() + Math.floor(Math.random() * 1000);
+      const computedName = generateOutfitName(generatedOutfit, weatherData, uniqueSeed);
       const computedReasoning = generateOutfitDescription(generatedOutfit, weatherData);
       const newOutfit = {
         ...generatedOutfit,
-        id: generatedOutfit.id || `temp-${Date.now()}`,
+        id: generatedOutfit.id || `temp-${uniqueSeed}`,
         name: computedName,
         reasoning: computedReasoning,
-        confidence: Math.round((generatedOutfit.confidence || 0.85) * 100)
+        confidence: Math.round((generatedOutfit.confidence || 0.85) * 100),
+        _seed: uniqueSeed // Track seed for debugging
       };
       
-      console.log('Setting new outfit state:', newOutfit.name, newOutfit.reasoning);
+      console.log('Setting new outfit state:', newOutfit.name, newOutfit.reasoning, 'seed:', uniqueSeed);
       setOutfit(newOutfit);
     } catch (error) {
       console.error('Error generating outfit:', error);

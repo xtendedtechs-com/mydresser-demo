@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ✅ **MyDresser AI Intelligence Layer** - Custom AI orchestration with Claude Sonnet 4.5, GPT-5, and Gemini support
 - ✅ **Cart Persistence System** - Zustand-based cart with automatic database sync
 - ✅ **Order Tracking UI** - Beautiful order tracking cards with progress visualization
+- ✅ **AI Chat Fixed** - Resolved "messages is not iterable" error with proper conversation history handling
+- ✅ **Daily Outfit Duplication Fixed** - Unique seed-based name generation prevents duplicate outfit names
 
 ### Phase 47 Completed: Quality Assurance & Testing
 

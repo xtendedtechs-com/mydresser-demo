@@ -28,9 +28,13 @@ serve(async (req) => {
       throw new Error('Unauthorized')
     }
 
-    const { message, session_id, conversation_history } = await req.json()
+    const { message, session_id, conversationHistory } = await req.json()
 
     console.log('Processing chat message:', message)
+    
+    // Handle conversation history as array (for context-aware responses)
+    const history = Array.isArray(conversationHistory) ? conversationHistory : []
+    const recentMessages = history.slice(-5).map((m: any) => `${m.role}: ${m.content}`).join('\n')
 
     const { data: rateCheck, error: rateError } = await supabase
       .rpc('check_ai_rate_limit', {
@@ -75,6 +79,9 @@ serve(async (req) => {
     }
 
     let response = ''
+    
+    // Enhanced context with conversation history
+    const contextPrompt = recentMessages ? `Recent conversation:\n${recentMessages}\n\n` : ''
 
     if (message.toLowerCase().includes('outfit')) {
       response = `Based on your wardrobe, I'd suggest combining your ${wardrobeItems?.[0]?.color || 'favorite'} ${wardrobeItems?.[0]?.category || 'top'} with complementary pieces. Would you like specific recommendations for today's weather?`
