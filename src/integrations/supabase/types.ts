@@ -293,6 +293,48 @@ export type Database = {
         }
         Relationships: []
       }
+      cart_items: {
+        Row: {
+          created_at: string
+          id: string
+          item_id: string
+          item_image: string | null
+          item_name: string
+          item_type: string
+          merchant_id: string | null
+          price: number
+          quantity: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_id: string
+          item_image?: string | null
+          item_name: string
+          item_type: string
+          merchant_id?: string | null
+          price: number
+          quantity?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_id?: string
+          item_image?: string | null
+          item_name?: string
+          item_type?: string
+          merchant_id?: string | null
+          price?: number
+          quantity?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       challenge_participations: {
         Row: {
           challenge_id: string
@@ -378,7 +420,7 @@ export type Database = {
           collection_id: string | null
           created_at: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           metadata: Json | null
           user_agent: string | null
           user_id: string
@@ -388,7 +430,7 @@ export type Database = {
           collection_id?: string | null
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           metadata?: Json | null
           user_agent?: string | null
           user_id: string
@@ -398,7 +440,7 @@ export type Database = {
           collection_id?: string | null
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           metadata?: Json | null
           user_agent?: string | null
           user_id?: string
@@ -579,7 +621,7 @@ export type Database = {
           action: string
           created_at: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           user_agent: string | null
           user_id: string
         }
@@ -588,7 +630,7 @@ export type Database = {
           action: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_agent?: string | null
           user_id: string
         }
@@ -597,7 +639,7 @@ export type Database = {
           action?: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_agent?: string | null
           user_id?: string
         }
@@ -1935,7 +1977,7 @@ export type Database = {
           currency: string | null
           fraud_score: number | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           is_suspicious: boolean | null
           item_id: string | null
           merchant_id: string
@@ -1953,7 +1995,7 @@ export type Database = {
           currency?: string | null
           fraud_score?: number | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           is_suspicious?: boolean | null
           item_id?: string | null
           merchant_id: string
@@ -1971,7 +2013,7 @@ export type Database = {
           currency?: string | null
           fraud_score?: number | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           is_suspicious?: boolean | null
           item_id?: string | null
           merchant_id?: string
@@ -2288,7 +2330,7 @@ export type Database = {
           accessed_at: string | null
           customer_id: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           merchant_id: string
         }
         Insert: {
@@ -2296,7 +2338,7 @@ export type Database = {
           accessed_at?: string | null
           customer_id: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           merchant_id: string
         }
         Update: {
@@ -2304,7 +2346,7 @@ export type Database = {
           accessed_at?: string | null
           customer_id?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           merchant_id?: string
         }
         Relationships: []
@@ -2685,7 +2727,7 @@ export type Database = {
           action: string
           created_at: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           merchant_profile_id: string
           user_agent: string | null
           user_id: string
@@ -2695,7 +2737,7 @@ export type Database = {
           action: string
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           merchant_profile_id: string
           user_agent?: string | null
           user_id: string
@@ -2705,7 +2747,7 @@ export type Database = {
           action?: string
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           merchant_profile_id?: string
           user_agent?: string | null
           user_id?: string
@@ -3590,7 +3632,7 @@ export type Database = {
           activity_type: string
           created_at: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           is_suspicious: boolean | null
           merchant_id: string
           staff_id: string | null
@@ -3601,7 +3643,7 @@ export type Database = {
           activity_type: string
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           is_suspicious?: boolean | null
           merchant_id: string
           staff_id?: string | null
@@ -3612,7 +3654,7 @@ export type Database = {
           activity_type?: string
           created_at?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           is_suspicious?: boolean | null
           merchant_id?: string
           staff_id?: string | null
@@ -3705,7 +3747,7 @@ export type Database = {
           encryption_salt: string | null
           fraud_score: number | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           is_suspicious: boolean | null
           items: Json
           merchant_id: string
@@ -3728,7 +3770,7 @@ export type Database = {
           encryption_salt?: string | null
           fraud_score?: number | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           is_suspicious?: boolean | null
           items?: Json
           merchant_id: string
@@ -3751,7 +3793,7 @@ export type Database = {
           encryption_salt?: string | null
           fraud_score?: number | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           is_suspicious?: boolean | null
           items?: Json
           merchant_id?: string
@@ -4482,7 +4524,7 @@ export type Database = {
           created_at: string
           details: Json | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           resource: string | null
           success: boolean
           user_agent: string | null
@@ -4493,7 +4535,7 @@ export type Database = {
           created_at?: string
           details?: Json | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           resource?: string | null
           success?: boolean
           user_agent?: string | null
@@ -4504,7 +4546,7 @@ export type Database = {
           created_at?: string
           details?: Json | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           resource?: string | null
           success?: boolean
           user_agent?: string | null
@@ -4521,7 +4563,7 @@ export type Database = {
           id: string
           incident_details: Json
           incident_type: string
-          ip_address: unknown | null
+          ip_address: unknown
           resolution_notes: string | null
           resolved_at: string | null
           severity: string
@@ -4538,7 +4580,7 @@ export type Database = {
           id?: string
           incident_details?: Json
           incident_type: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           resolution_notes?: string | null
           resolved_at?: string | null
           severity: string
@@ -4555,7 +4597,7 @@ export type Database = {
           id?: string
           incident_details?: Json
           incident_type?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           resolution_notes?: string | null
           resolved_at?: string | null
           severity?: string
@@ -4571,7 +4613,7 @@ export type Database = {
           accessed_at: string | null
           accessed_fields: string[] | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           row_id: string
           table_name: string
           user_id: string
@@ -4580,7 +4622,7 @@ export type Database = {
           accessed_at?: string | null
           accessed_fields?: string[] | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           row_id: string
           table_name: string
           user_id: string
@@ -4589,7 +4631,7 @@ export type Database = {
           accessed_at?: string | null
           accessed_fields?: string[] | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           row_id?: string
           table_name?: string
           user_id?: string
@@ -4629,7 +4671,7 @@ export type Database = {
           created_at: string
           device_fingerprint: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           is_active: boolean | null
           location_data: Json | null
           security_flags: string[] | null
@@ -4644,7 +4686,7 @@ export type Database = {
           created_at?: string
           device_fingerprint?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           is_active?: boolean | null
           location_data?: Json | null
           security_flags?: string[] | null
@@ -4659,7 +4701,7 @@ export type Database = {
           created_at?: string
           device_fingerprint?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           is_active?: boolean | null
           location_data?: Json | null
           security_flags?: string[] | null
@@ -6635,10 +6677,7 @@ export type Database = {
         Args: { p_date?: string; p_user_id: string }
         Returns: undefined
       }
-      analyze_user_style: {
-        Args: { p_user_id: string }
-        Returns: Json
-      }
+      analyze_user_style: { Args: { p_user_id: string }; Returns: Json }
       analyze_vto_quality: {
         Args: {
           p_feedback_comment?: string
@@ -6693,7 +6732,7 @@ export type Database = {
         Returns: Json
       }
       check_contact_info_breach_patterns: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           last_suspicious_access: string
           suspicious_access_count: number
@@ -6757,10 +6796,7 @@ export type Database = {
         }
         Returns: string
       }
-      create_sample_wardrobe_items: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      create_sample_wardrobe_items: { Args: never; Returns: undefined }
       decrypt_business_data: {
         Args: { business_salt?: string; encrypted_text: string }
         Returns: string
@@ -6777,10 +6813,7 @@ export type Database = {
         Args: { encrypted_text: string; user_salt?: string }
         Returns: string
       }
-      delete_user_account: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      delete_user_account: { Args: never; Returns: boolean }
       detect_bot_patterns: {
         Args: {
           ip_address?: unknown
@@ -6854,10 +6887,7 @@ export type Database = {
           shipping_address: Json
         }[]
       }
-      get_merchant_contact_public: {
-        Args: { page_id: string }
-        Returns: Json
-      }
+      get_merchant_contact_public: { Args: { page_id: string }; Returns: Json }
       get_merchant_contact_safe: {
         Args: { page_id: string; requesting_user_id: string }
         Returns: Json
@@ -6874,20 +6904,33 @@ export type Database = {
           verification_status: string
         }[]
       }
-      get_merchant_profile_safe: {
-        Args: Record<PropertyKey, never> | { profile_user_id: string }
-        Returns: {
-          business_name: string
-          business_type: string
-          created_at: string
-          id: string
-          updated_at: string
-          user_id: string
-          verification_status: string
-        }[]
-      }
+      get_merchant_profile_safe:
+        | {
+            Args: { profile_user_id: string }
+            Returns: {
+              business_name: string
+              business_type: string
+              created_at: string
+              id: string
+              updated_at: string
+              user_id: string
+              verification_status: string
+            }[]
+          }
+        | {
+            Args: never
+            Returns: {
+              business_name: string
+              business_type: string
+              created_at: string
+              id: string
+              updated_at: string
+              user_id: string
+              verification_status: string
+            }[]
+          }
       get_merchant_profiles_safe: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           address_status: string
           business_name: string
@@ -6910,7 +6953,7 @@ export type Database = {
         }[]
       }
       get_merchant_sensitive_fields: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           business_address: Json
           contact_info: Json
@@ -6922,7 +6965,7 @@ export type Database = {
         Returns: Json
       }
       get_profile_contact_safe: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           email: string
           social_facebook: string
@@ -6931,7 +6974,7 @@ export type Database = {
         }[]
       }
       get_provider_subscriptions: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           auto_renew: boolean
           created_at: string
@@ -6959,7 +7002,7 @@ export type Database = {
         }[]
       }
       get_public_profiles: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           avatar_url: string
           bio: string
@@ -6982,7 +7025,7 @@ export type Database = {
         }[]
       }
       get_user_contact_info: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           email: string
           social_facebook: string
@@ -7010,14 +7053,8 @@ export type Database = {
         }
         Returns: boolean
       }
-      hash_backup_code: {
-        Args: { code: string }
-        Returns: string
-      }
-      hash_invitation_token: {
-        Args: { token: string }
-        Returns: string
-      }
+      hash_backup_code: { Args: { code: string }; Returns: string }
+      hash_invitation_token: { Args: { token: string }; Returns: string }
       insert_encrypted_merchant_profile: {
         Args: {
           business_address_param?: Json
@@ -7028,16 +7065,10 @@ export type Database = {
         }
         Returns: string
       }
-      is_admin: {
-        Args: { _user_id?: string }
-        Returns: boolean
-      }
-      is_merchant: {
-        Args: { _user_id?: string }
-        Returns: boolean
-      }
+      is_admin: { Args: { _user_id?: string }; Returns: boolean }
+      is_merchant: { Args: { _user_id?: string }; Returns: boolean }
       list_invitations_admin: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           created_at: string
           email: string
@@ -7108,14 +7139,8 @@ export type Database = {
         Args: { data_text: string; data_type: string }
         Returns: string
       }
-      mask_email: {
-        Args: { email: string }
-        Returns: string
-      }
-      mask_phone: {
-        Args: { phone: string }
-        Returns: string
-      }
+      mask_email: { Args: { email: string }; Returns: string }
+      mask_phone: { Args: { phone: string }; Returns: string }
       process_pos_transaction: {
         Args: {
           p_amount: number
@@ -7127,16 +7152,13 @@ export type Database = {
         }
         Returns: Json
       }
-      publish_merchant_item: {
-        Args: { item_id: string }
-        Returns: Json
-      }
+      publish_merchant_item: { Args: { item_id: string }; Returns: Json }
       revoke_invitation_admin: {
         Args: { invitation_token: string }
         Returns: boolean
       }
       secure_merchant_data_access: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           address_summary: string
           business_name: string
@@ -7180,10 +7202,7 @@ export type Database = {
         }
         Returns: undefined
       }
-      update_challenge_status: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      update_challenge_status: { Args: never; Returns: undefined }
       update_contact_info_secure: {
         Args: {
           new_email?: string
@@ -7216,22 +7235,10 @@ export type Database = {
         Args: { p_profile_data: Json; p_user_id: string }
         Returns: string
       }
-      use_backup_code: {
-        Args: { input_code: string }
-        Returns: boolean
-      }
-      validate_merchant_security: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      validate_user_session: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      validate_user_session_robust: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      use_backup_code: { Args: { input_code: string }; Returns: boolean }
+      validate_merchant_security: { Args: never; Returns: string }
+      validate_user_session: { Args: never; Returns: boolean }
+      validate_user_session_robust: { Args: never; Returns: boolean }
       verify_backup_code_hash: {
         Args: { code: string; hash: string }
         Returns: boolean
@@ -7244,10 +7251,7 @@ export type Database = {
         Args: { p_pin: string; p_staff_id: string }
         Returns: boolean
       }
-      verify_totp_secret: {
-        Args: { input_code: string }
-        Returns: boolean
-      }
+      verify_totp_secret: { Args: { input_code: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "merchant" | "professional" | "user"

@@ -53,3 +53,6 @@ verify_jwt = true
 
 [functions.ai-image-style-analysis]
 verify_jwt = true
+
+[functions.mydresser-ai]
+verify_jwt = true
