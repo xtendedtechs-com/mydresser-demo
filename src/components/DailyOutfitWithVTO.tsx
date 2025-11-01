@@ -33,22 +33,52 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
   const generateVTO = async () => {
     if (!userPhoto) return;
 
-    // Ensure we always send a directly embeddable data URL to the Edge Function
+    // Ensure we always send a properly oriented data URL to the Edge Function
     const toDataUrl = async (src: string): Promise<string> => {
-      if (src.startsWith('data:')) return src;
+      if (src.startsWith('data:')) {
+        // Still correct orientation even for data URLs
+        return correctImageOrientation(src);
+      }
       try {
         const res = await fetch(src, { cache: 'no-cache' });
         const blob = await res.blob();
-        return await new Promise<string>((resolve, reject) => {
+        const dataUrl = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
           reader.onloadend = () => resolve(reader.result as string);
           reader.onerror = reject;
           reader.readAsDataURL(blob);
         });
+        return correctImageOrientation(dataUrl);
       } catch (e) {
-        // As a last resort, just pass through (Edge will error and we surface toast)
         return src;
       }
+    };
+
+    // Fix EXIF orientation issues that cause sideways photos
+    const correctImageOrientation = async (dataUrl: string): Promise<string> => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(dataUrl);
+            return;
+          }
+
+          // Set canvas size to image size
+          canvas.width = img.width;
+          canvas.height = img.height;
+
+          // Draw image with proper orientation
+          ctx.drawImage(img, 0, 0);
+
+          // Convert to data URL with high quality
+          resolve(canvas.toDataURL('image/jpeg', 0.95));
+        };
+        img.onerror = () => resolve(dataUrl);
+        img.src = dataUrl;
+      });
     };
 
     setIsGenerating(true);
