@@ -3,7 +3,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
-import { Loader2, Camera, Sparkles, Settings2, History, ArrowLeftRight } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2, Camera, Sparkles, Settings2, History, ArrowLeftRight, Share2, Maximize2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { WardrobeItem } from "@/hooks/useWardrobe";
 import { getPrimaryPhotoUrl } from "@/utils/photoHelpers";
@@ -11,6 +12,9 @@ import { localVTO, VTOConfig } from "@/services/localVTO";
 import { SizeRecommendation } from "@/services/sizeRecommendation";
 import { BodyShape } from "@/services/bodyShapeAnalysis";
 import { useVTOHistory } from "@/hooks/useVTOHistory";
+import WebcamVTO from "./vto/WebcamVTO";
+import VTOShareDialog from "./vto/VTOShareDialog";
+import VTO3DControls from "./vto/VTO3DControls";
 
 interface DailyOutfitWithVTOProps {
   outfit: {
@@ -31,6 +35,8 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
   const [processingTime, setProcessingTime] = useState<number>(0);
   const [showAdjustments, setShowAdjustments] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [show3DView, setShow3DView] = useState(false);
   const [adjustments, setAdjustments] = useState<VTOConfig['manualAdjustments']>({});
   const { toast } = useToast();
   const vtoHistory = useVTOHistory();
@@ -99,28 +105,37 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
   }
 
   return (
-    <Card className="overflow-hidden">
-      <div className="relative aspect-[3/4] bg-muted">
-        {isGenerating ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/80">
-            <div className="text-center space-y-2">
-              <Loader2 className="w-8 h-8 animate-spin mx-auto" />
-              <p className="text-sm text-muted-foreground">Generating virtual try-on...</p>
-            </div>
-          </div>
-        ) : vtoImage ? (
-          <img
-            src={vtoImage}
-            alt="Virtual Try-On"
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <img
-            src={userPhoto}
-            alt="Your Photo"
-            className="w-full h-full object-cover"
-          />
-        )}
+    <>
+      <Tabs defaultValue="photo" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="photo">Photo Upload</TabsTrigger>
+          <TabsTrigger value="webcam">Live Webcam</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="photo">
+          <Card className="overflow-hidden">
+            <div className="relative aspect-[3/4] bg-muted">
+              {isGenerating ? (
+                <div className="absolute inset-0 flex items-center justify-center bg-background/80">
+                  <div className="text-center space-y-2">
+                    <Loader2 className="w-8 h-8 animate-spin mx-auto" />
+                    <p className="text-sm text-muted-foreground">Generating virtual try-on...</p>
+                    <p className="text-xs text-muted-foreground">This may take a few seconds...</p>
+                  </div>
+                </div>
+              ) : vtoImage ? (
+                <img
+                  src={vtoImage}
+                  alt="Virtual Try-On"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <img
+                  src={userPhoto}
+                  alt="Your Photo"
+                  className="w-full h-full object-cover"
+                />
+              )}
         
         <div className="absolute top-2 left-2 flex gap-2 flex-wrap max-w-[calc(100%-1rem)]">
           <Badge variant="secondary" className="bg-primary text-primary-foreground">
@@ -144,6 +159,26 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
         <div className="flex items-center justify-between">
           <Badge variant="outline">{outfit.confidence}% Match</Badge>
           <div className="flex gap-2">
+            {vtoImage && (
+              <>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => setShowShareDialog(true)}
+                  title="Share"
+                >
+                  <Share2 className="w-4 h-4" />
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => setShow3DView(!show3DView)}
+                  title="3D View"
+                >
+                  <Maximize2 className="w-4 h-4" />
+                </Button>
+              </>
+            )}
             <Button 
               size="sm" 
               variant="outline"
@@ -247,6 +282,13 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
           </div>
         )}
 
+        {show3DView && vtoImage && (
+          <div className="space-y-2 pt-3 border-t">
+            <p className="text-sm font-medium">3D View Controls:</p>
+            <VTO3DControls imageUrl={vtoImage} onImageUpdate={setVtoImage} />
+          </div>
+        )}
+
         {showAdjustments && outfit.items.length > 0 && (
           <div className="space-y-3 pt-3 border-t">
             <p className="text-sm font-medium">Manual Adjustments:</p>
@@ -272,8 +314,24 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
             ))}
           </div>
         )}
-      </div>
-    </Card>
+            </div>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="webcam">
+          <WebcamVTO outfit={outfit} />
+        </TabsContent>
+      </Tabs>
+
+      {vtoImage && (
+        <VTOShareDialog
+          open={showShareDialog}
+          onOpenChange={setShowShareDialog}
+          imageUrl={vtoImage}
+          outfitName={outfit.name}
+        />
+      )}
+    </>
   );
 };
 
