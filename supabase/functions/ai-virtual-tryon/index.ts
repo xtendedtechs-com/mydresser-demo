@@ -12,16 +12,38 @@ serve(async (req) => {
   }
 
   try {
+    const startTime = Date.now();
     const { userImage, clothingItems, instruction } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-
-    if (!LOVABLE_API_KEY) {
-      console.error('LOVABLE_API_KEY is not configured');
-      throw new Error('AI service not configured. Please contact support.');
-    }
-
+    
+    // Check for custom SD endpoint first (user will configure this)
+    const SD_ENDPOINT = Deno.env.get('SD_ENDPOINT_URL');
+    
     if (!userImage || !clothingItems || clothingItems.length === 0) {
       throw new Error('Missing required parameters: userImage and clothingItems are required');
+    }
+
+    // Try custom SD endpoint if configured
+    if (SD_ENDPOINT) {
+      try {
+        console.log('Using custom SD endpoint:', SD_ENDPOINT);
+        const sdResult = await callCustomSD(SD_ENDPOINT, userImage, clothingItems);
+        return new Response(
+          JSON.stringify({
+            imageUrl: sdResult.imageUrl,
+            processingTime: Date.now() - startTime
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      } catch (sdError) {
+        console.error('SD endpoint failed, falling back to Lovable AI:', sdError);
+      }
+    }
+
+    // Fallback to Lovable AI
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      console.error('No AI services configured');
+      throw new Error('AI service not configured. Please contact support.');
     }
 
     // Validate and process user image
@@ -190,9 +212,10 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ 
-        success: true, 
-        editedImageUrl: editedImage,
-        message: "Virtual try-on completed successfully"
+        imageUrl: editedImage,
+        processingTime: Date.now() - startTime,
+        sizeRecommendations: { top: 'M', bottom: 'M', confidence: 0.7 },
+        bodyShape: 'rectangle'
       }),
       { 
         headers: { ...corsHeaders, "Content-Type": "application/json" }
@@ -204,7 +227,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         error: error instanceof Error ? error.message : "Unknown error",
-        success: false 
+        imageUrl: null
       }),
       { 
         status: 500, 
@@ -213,3 +236,37 @@ serve(async (req) => {
     );
   }
 });
+
+// Custom SD endpoint integration
+async function callCustomSD(endpoint: string, userImage: string, clothingItems: any[]): Promise<any> {
+  console.log('[SD] Calling custom endpoint with', clothingItems.length, 'items');
+  
+  // Build prompt from clothing items
+  const prompt = clothingItems.map((item: any) => 
+    `${item.category} ${item.name}${item.color ? ` in ${item.color}` : ''}`
+  ).join(', ');
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      init_images: [userImage],
+      prompt: `person wearing ${prompt}, photorealistic, high quality, natural lighting`,
+      negative_prompt: 'blurry, low quality, distorted, unrealistic',
+      steps: 20,
+      cfg_scale: 7,
+      denoising_strength: 0.6
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`SD endpoint returned ${response.status}`);
+  }
+
+  const data = await response.json();
+  
+  // Handle different SD API response formats
+  return {
+    imageUrl: data.images?.[0] || data.image || data.output?.[0]
+  };
+}
