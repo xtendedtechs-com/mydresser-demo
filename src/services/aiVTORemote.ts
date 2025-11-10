@@ -1,3 +1,5 @@
+import { supabase } from '@/integrations/supabase/client';
+
 export interface RemoteClothingItem {
   id: string;
   name: string;
@@ -70,21 +72,15 @@ export async function tryRemoteVTO(req: RemoteVTORequest): Promise<RemoteVTOResp
     instruction: req.instruction ?? 'Apply the listed garments realistically with correct scale and alignment.'
   };
 
-  const endpoint = '/functions/v1/ai-virtual-tryon';
-  const res = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
+  const { data: funcData, error } = await supabase.functions.invoke('ai-virtual-tryon', {
+    body
   });
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(`Remote VTO failed (${res.status}): ${text}`);
+  if (error) {
+    throw new Error(`Remote VTO failed (${(error as any).message || 'invoke error'})`);
   }
 
-  const data = await res.json();
+  const data = funcData as any;
   const imageUrl: string | undefined = data?.editedImageUrl || data?.imageUrl;
   if (!imageUrl) throw new Error('Remote VTO: missing image URL in response');
 

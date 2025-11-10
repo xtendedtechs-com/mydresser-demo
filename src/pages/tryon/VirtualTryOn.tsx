@@ -75,11 +75,12 @@ export default function VirtualTryOn() {
 
       if (error) throw error;
 
-      if (!data.success) {
-        throw new Error(data.error || 'Generation failed');
+      const url = data?.imageUrl || data?.editedImageUrl;
+      if (!url) {
+        throw new Error(data?.error || 'Generation failed');
       }
 
-      setGeneratedImage(data.editedImageUrl);
+      setGeneratedImage(url);
       
       // Get updated rate limit
       const { data: userData } = await supabase.auth.getUser();
