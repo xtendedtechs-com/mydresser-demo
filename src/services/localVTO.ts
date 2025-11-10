@@ -38,6 +38,8 @@ export class LocalVTOEngine {
   async generateVTO(config: VTOConfig): Promise<VTOResult> {
     const startTime = performance.now();
     try {
+      console.log('Starting VTO generation...');
+      
       // Load and downscale user image for faster processing
       const userImg = await this.getCachedImage(config.userImage);
       const maxDimension = 800; // Reduce from original size for speed
@@ -53,18 +55,32 @@ export class LocalVTOEngine {
       if (!tempCtx) throw new Error('Could not create temp canvas');
       tempCtx.drawImage(userImg, 0, 0, scaledWidth, scaledHeight);
       
-      // Detect pose with caching
+      // Detect pose with caching and timeout
+      console.log('Detecting pose...');
       let poseResults = this.poseCache.get(config.userImage);
       if (!poseResults) {
-        const scaledImg = new Image();
-        scaledImg.src = tempCanvas.toDataURL('image/jpeg', 0.8);
-        await new Promise(resolve => scaledImg.onload = resolve);
-        
-        poseResults = await poseDetectionService.detectPose(scaledImg);
-        if (!poseResults || !poseResults.landmarks) {
-          throw new Error('Could not detect pose in image');
+        try {
+          const scaledImg = new Image();
+          scaledImg.src = tempCanvas.toDataURL('image/jpeg', 0.8);
+          await new Promise(resolve => scaledImg.onload = resolve);
+          
+          // Add timeout to pose detection
+          const posePromise = poseDetectionService.detectPose(scaledImg);
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Pose detection timeout')), 5000)
+          );
+          
+          poseResults = await Promise.race([posePromise, timeoutPromise]) as PoseResults;
+          
+          if (!poseResults || !poseResults.landmarks) {
+            throw new Error('Could not detect pose in image');
+          }
+          this.poseCache.set(config.userImage, poseResults);
+          console.log('Pose detected successfully');
+        } catch (poseError) {
+          console.error('Pose detection failed:', poseError);
+          throw new Error('Could not detect body pose. Please ensure full body is visible in good lighting.');
         }
-        this.poseCache.set(config.userImage, poseResults);
       }
 
       // Analyze body shape

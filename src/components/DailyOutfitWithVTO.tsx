@@ -52,16 +52,42 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
 
     setIsGenerating(true);
     try {
-      const result = await localVTO.generateVTO({
-        userImage: userPhoto,
-        clothingItems: outfit.items.map(item => ({
-          id: item.id,
-          name: item.name,
-          category: item.category,
-          photo: getPrimaryPhotoUrl(item.photos, item.category)
-        })),
-        manualAdjustments: adjustments
-      });
+      console.log('Starting VTO generation...');
+      
+      // Try MediaPipe-based VTO first, fall back to AI VTO if it fails
+      let result;
+      try {
+        result = await localVTO.generateVTO({
+          userImage: userPhoto,
+          clothingItems: outfit.items.map(item => ({
+            id: item.id,
+            name: item.name,
+            category: item.category,
+            photo: getPrimaryPhotoUrl(item.photos, item.category)
+          })),
+          manualAdjustments: adjustments
+        });
+        console.log('VTO generated successfully');
+      } catch (mediapipeError) {
+        console.warn('MediaPipe VTO failed, using AI fallback:', mediapipeError);
+        
+        // Import AI VTO dynamically
+        const { aiVTO } = await import('@/services/aiVTO');
+        result = await aiVTO.generateVTO({
+          userImage: userPhoto,
+          clothingItems: outfit.items.map(item => ({
+            id: item.id,
+            name: item.name,
+            category: item.category,
+            photo: getPrimaryPhotoUrl(item.photos, item.category)
+          }))
+        });
+        
+        toast({
+          title: "Using Simplified VTO",
+          description: "Advanced pose detection unavailable, using AI-based overlay instead"
+        });
+      }
 
       setVtoImage(result.imageUrl);
       setSizeRecommendations(result.sizeRecommendations);
@@ -83,7 +109,7 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
       console.error('VTO generation error:', error);
       toast({
         title: "VTO Generation Failed",
-        description: error.message || "Could not detect pose in image. Make sure the full body is visible.",
+        description: error.message || "Could not process image. Please try with a different photo showing full body.",
         variant: "destructive"
       });
     } finally {
