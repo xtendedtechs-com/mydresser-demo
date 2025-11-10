@@ -271,7 +271,11 @@ export class LocalVTOEngine {
   private loadImage(src: string): Promise<HTMLImageElement> {
     return new Promise((resolve, reject) => {
       const img = new Image();
-      img.crossOrigin = 'anonymous';
+      
+      // Only set crossOrigin for non-blob URLs
+      if (!src.startsWith('blob:')) {
+        img.crossOrigin = 'anonymous';
+      }
       
       // Add timeout for faster failure
       const timeout = setTimeout(() => {
@@ -282,8 +286,9 @@ export class LocalVTOEngine {
         clearTimeout(timeout);
         resolve(img);
       };
-      img.onerror = () => {
+      img.onerror = (e) => {
         clearTimeout(timeout);
+        console.error('Image load error:', e, 'src:', src);
         reject(new Error(`Failed to load image: ${src}`));
       };
       img.src = src;

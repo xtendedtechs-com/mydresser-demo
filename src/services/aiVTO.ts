@@ -158,7 +158,11 @@ export class AIVTOEngine {
   private loadImage(src: string): Promise<HTMLImageElement> {
     return new Promise((resolve, reject) => {
       const img = new Image();
-      img.crossOrigin = 'anonymous';
+      
+      // Only set crossOrigin for non-blob URLs
+      if (!src.startsWith('blob:')) {
+        img.crossOrigin = 'anonymous';
+      }
       
       const timeout = setTimeout(() => {
         reject(new Error(`Image load timeout: ${src}`));
@@ -168,8 +172,9 @@ export class AIVTOEngine {
         clearTimeout(timeout);
         resolve(img);
       };
-      img.onerror = () => {
+      img.onerror = (e) => {
         clearTimeout(timeout);
+        console.error('Image load error:', e, 'src:', src);
         reject(new Error(`Failed to load image: ${src}`));
       };
       img.src = src;
