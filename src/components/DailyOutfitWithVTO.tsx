@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Camera, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { WardrobeItem } from "@/hooks/useWardrobe";
 import { getPrimaryPhotoUrl } from "@/utils/photoHelpers";
+import { localVTO } from "@/services/localVTO";
 
 interface DailyOutfitWithVTOProps {
   outfit: {
@@ -33,87 +33,29 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
   const generateVTO = async () => {
     if (!userPhoto) return;
 
-    // Ensure we always send a properly oriented data URL to the Edge Function
-    const toDataUrl = async (src: string): Promise<string> => {
-      if (src.startsWith('data:')) {
-        // Still correct orientation even for data URLs
-        return correctImageOrientation(src);
-      }
-      try {
-        const res = await fetch(src, { cache: 'no-cache' });
-        const blob = await res.blob();
-        const dataUrl = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
-        return correctImageOrientation(dataUrl);
-      } catch (e) {
-        return src;
-      }
-    };
-
-    // Fix EXIF orientation issues that cause sideways photos
-    const correctImageOrientation = async (dataUrl: string): Promise<string> => {
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          if (!ctx) {
-            resolve(dataUrl);
-            return;
-          }
-
-          // Set canvas size to image size
-          canvas.width = img.width;
-          canvas.height = img.height;
-
-          // Draw image with proper orientation
-          ctx.drawImage(img, 0, 0);
-
-          // Convert to data URL with high quality
-          resolve(canvas.toDataURL('image/jpeg', 0.95));
-        };
-        img.onerror = () => resolve(dataUrl);
-        img.src = dataUrl;
-      });
-    };
-
     setIsGenerating(true);
     try {
-      const imageData = await toDataUrl(userPhoto);
-
-      // Call AI virtual try-on function with user photo and outfit items
-      const { data, error } = await supabase.functions.invoke('ai-virtual-tryon', {
-        body: {
-          userImage: imageData,
-          clothingItems: outfit.items.map(item => ({
-            id: item.id,
-            name: item.name,
-            category: item.category,
-            color: item.color,
-            brand: item.brand,
-            photo: getPrimaryPhotoUrl(item.photos, item.category)
-          }))
-        }
+      // Use local VTO engine (no external API, no credits needed)
+      const resultImage = await localVTO.generateVTO({
+        userImage: userPhoto,
+        clothingItems: outfit.items.map(item => ({
+          id: item.id,
+          name: item.name,
+          category: item.category,
+          photo: getPrimaryPhotoUrl(item.photos, item.category)
+        }))
       });
 
-      if (error) throw error;
-
-      if (data?.editedImageUrl) {
-        setVtoImage(data.editedImageUrl);
-        toast({
-          title: "Virtual Try-On Ready",
-          description: "Your outfit preview has been generated!"
-        });
-      }
+      setVtoImage(resultImage);
+      toast({
+        title: "Virtual Try-On Ready",
+        description: "Your outfit preview has been generated offline!"
+      });
     } catch (error: any) {
       console.error('VTO generation error:', error);
       toast({
         title: "VTO Generation Failed",
-        description: error.message || "Could not generate virtual try-on",
+        description: error.message || "Could not detect pose in image. Make sure the full body is visible.",
         variant: "destructive"
       });
     } finally {
