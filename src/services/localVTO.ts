@@ -97,10 +97,16 @@ export class LocalVTOEngine {
       const canvas = tempCanvas;
       const ctx = tempCtx;
 
-      // Load all clothing images in parallel
-      const clothingImages = await Promise.all(
+      // Load all clothing images in parallel (tolerate per-image failures)
+      const imageResults = await Promise.allSettled(
         config.clothingItems.map(item => this.getCachedImage(item.photo))
       );
+
+      // If none could be loaded, bail so caller can try another fallback
+      const anyLoaded = imageResults.some(r => r.status === 'fulfilled');
+      if (!anyLoaded) {
+        throw new Error('No clothing images could be loaded for Local VTO');
+      }
 
       // Calculate size recommendations
       const sizeRecommendations: SizeRecommendation[] = [];
@@ -110,22 +116,26 @@ export class LocalVTOEngine {
         scaledHeight
       );
 
-      // Overlay clothing items with all enhancements
+      // Overlay clothing items with all enhancements; skip failed image loads
       for (let i = 0; i < config.clothingItems.length; i++) {
         const item = config.clothingItems[i];
-        const itemImg = clothingImages[i];
-        
-        const manualAdj = config.manualAdjustments?.[item.id];
-        await this.overlayClothing(
-          ctx,
-          itemImg,
-          item.category,
-          poseResults.landmarks,
-          scaledWidth,
-          scaledHeight,
-          colorAdjustment,
-          manualAdj
-        );
+        const res = imageResults[i];
+        if (res?.status !== 'fulfilled') {
+          console.warn('Skipping clothing image due to load failure:', item);
+        } else {
+          const itemImg = res.value;
+          const manualAdj = config.manualAdjustments?.[item.id];
+          await this.overlayClothing(
+            ctx,
+            itemImg,
+            item.category,
+            poseResults.landmarks,
+            scaledWidth,
+            scaledHeight,
+            colorAdjustment,
+            manualAdj
+          );
+        }
 
         const sizeRec = sizeRecommendation.recommendSize(measurements, item.category);
         sizeRecommendations.push(sizeRec);

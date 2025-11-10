@@ -54,8 +54,8 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
     try {
       console.log('Starting VTO generation...');
       
-      // Try MediaPipe-based VTO first, fall back to AI VTO if it fails
-      let result;
+      // Try MediaPipe-based VTO first, then Canvas AI, then Remote AI fallback
+      let result: { imageUrl: string; sizeRecommendations: SizeRecommendation[]; bodyShape: BodyShape; processingTime: number };
       try {
         result = await localVTO.generateVTO({
           userImage: userPhoto,
@@ -69,24 +69,37 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
         });
         console.log('VTO generated successfully');
       } catch (mediapipeError) {
-        console.warn('MediaPipe VTO failed, using AI fallback:', mediapipeError);
-        
-        // Import AI VTO dynamically
-        const { aiVTO } = await import('@/services/aiVTO');
-        result = await aiVTO.generateVTO({
-          userImage: userPhoto,
-          clothingItems: outfit.items.map(item => ({
-            id: item.id,
-            name: item.name,
-            category: item.category,
-            photo: getPrimaryPhotoUrl(item.photos, item.category)
-          }))
-        });
-        
-        toast({
-          title: "Using Simplified VTO",
-          description: "Advanced pose detection unavailable, using AI-based overlay instead"
-        });
+        console.warn('MediaPipe VTO failed, trying Canvas AI:', mediapipeError);
+        try {
+          const { aiVTO } = await import('@/services/aiVTO');
+          result = await aiVTO.generateVTO({
+            userImage: userPhoto,
+            clothingItems: outfit.items.map(item => ({
+              id: item.id,
+              name: item.name,
+              category: item.category,
+              photo: getPrimaryPhotoUrl(item.photos, item.category)
+            }))
+          });
+          toast({
+            title: "Using Simplified VTO",
+            description: "Advanced pose detection unavailable, using AI-based overlay instead"
+          });
+        } catch (aiError) {
+          console.warn('Canvas AI VTO failed, trying Remote AI:', aiError);
+          const { tryRemoteVTO } = await import('@/services/aiVTORemote');
+          const remote = await tryRemoteVTO({
+            userImage: userPhoto,
+            clothingItems: outfit.items.map(item => ({ id: item.id, name: item.name, category: item.category }))
+          });
+          result = {
+            imageUrl: remote.imageUrl,
+            sizeRecommendations: [],
+            bodyShape: { type: 'rectangle', shoulderWidth: 0, waistWidth: 0, hipWidth: 0, torsoLength: 0, legLength: 0, bustToWaistRatio: 1, waistToHipRatio: 1 },
+            processingTime: remote.processingTime ?? 0
+          };
+          toast({ title: 'Using Cloud VTO', description: 'Generated via remote AI fallback' });
+        }
       }
 
       setVtoImage(result.imageUrl);

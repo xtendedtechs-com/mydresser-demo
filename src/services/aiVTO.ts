@@ -39,15 +39,26 @@ export class AIVTOEngine {
       // Draw user image
       ctx.drawImage(userImg, 0, 0, canvas.width, canvas.height);
       
-      // Load clothing images
-      const clothingImages = await Promise.all(
+      // Load clothing images (tolerate per-image failures)
+      const imageResults = await Promise.allSettled(
         config.clothingItems.map(item => this.loadImage(item.photo))
       );
+
+      // If none of the clothing images could be loaded, bail so caller can try another fallback
+      const anyLoaded = imageResults.some(r => r.status === 'fulfilled');
+      if (!anyLoaded) {
+        throw new Error('No clothing images could be loaded for AI VTO');
+      }
       
-      // Simple overlay positioning based on image dimensions
+      // Simple overlay positioning based on image dimensions; skip failed images
       for (let i = 0; i < config.clothingItems.length; i++) {
         const item = config.clothingItems[i];
-        const itemImg = clothingImages[i];
+        const res = imageResults[i];
+        if (res.status !== 'fulfilled') {
+          console.warn('Skipping clothing image due to load failure:', item);
+          continue;
+        }
+        const itemImg = res.value;
         
         await this.simpleOverlay(
           ctx,
