@@ -1,6 +1,9 @@
 import { poseDetectionService, PoseLandmark, LANDMARKS, PoseResults } from './poseDetection';
 import { sizeRecommendation, SizeRecommendation } from './sizeRecommendation';
 import { colorMatching, ColorAdjustment } from './colorMatching';
+import { fabricTexture } from './fabricTexture';
+import { bodyShapeAnalyzer, BodyShape } from './bodyShapeAnalysis';
+import { clothingPhysics } from './clothingPhysics';
 
 interface ClothingItem {
   id: string;
@@ -25,6 +28,7 @@ export interface VTOResult {
   imageUrl: string;
   sizeRecommendations: SizeRecommendation[];
   processingTime: number;
+  bodyShape: BodyShape;
 }
 
 export class LocalVTOEngine {
@@ -34,34 +38,48 @@ export class LocalVTOEngine {
   async generateVTO(config: VTOConfig): Promise<VTOResult> {
     const startTime = performance.now();
     try {
-      // Load user image with caching
+      // Load and downscale user image for faster processing
       const userImg = await this.getCachedImage(config.userImage);
+      const maxDimension = 800; // Reduce from original size for speed
+      const scale = Math.min(maxDimension / userImg.width, maxDimension / userImg.height, 1);
+      const scaledWidth = Math.floor(userImg.width * scale);
+      const scaledHeight = Math.floor(userImg.height * scale);
+      
+      // Create scaled canvas for processing
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = scaledWidth;
+      tempCanvas.height = scaledHeight;
+      const tempCtx = tempCanvas.getContext('2d');
+      if (!tempCtx) throw new Error('Could not create temp canvas');
+      tempCtx.drawImage(userImg, 0, 0, scaledWidth, scaledHeight);
       
       // Detect pose with caching
       let poseResults = this.poseCache.get(config.userImage);
       if (!poseResults) {
-        poseResults = await poseDetectionService.detectPose(userImg);
+        const scaledImg = new Image();
+        scaledImg.src = tempCanvas.toDataURL('image/jpeg', 0.8);
+        await new Promise(resolve => scaledImg.onload = resolve);
+        
+        poseResults = await poseDetectionService.detectPose(scaledImg);
         if (!poseResults || !poseResults.landmarks) {
           throw new Error('Could not detect pose in image');
         }
         this.poseCache.set(config.userImage, poseResults);
       }
 
+      // Analyze body shape
+      const bodyShape = bodyShapeAnalyzer.analyzeBodyShape(
+        poseResults.landmarks,
+        scaledWidth,
+        scaledHeight
+      );
+
       // Analyze lighting
       const colorAdjustment = colorMatching.analyzeImageLighting(userImg);
 
-      // Create canvas for composition
-      const canvas = document.createElement('canvas');
-      canvas.width = userImg.width;
-      canvas.height = userImg.height;
-      const ctx = canvas.getContext('2d');
-      
-      if (!ctx) {
-        throw new Error('Could not create canvas context');
-      }
-
-      // Draw original image
-      ctx.drawImage(userImg, 0, 0);
+      // Use scaled canvas for final output
+      const canvas = tempCanvas;
+      const ctx = tempCtx;
 
       // Load all clothing images in parallel
       const clothingImages = await Promise.all(
@@ -72,11 +90,11 @@ export class LocalVTOEngine {
       const sizeRecommendations: SizeRecommendation[] = [];
       const measurements = sizeRecommendation.calculateMeasurements(
         poseResults.landmarks,
-        canvas.width,
-        canvas.height
+        scaledWidth,
+        scaledHeight
       );
 
-      // Overlay clothing items
+      // Overlay clothing items with all enhancements
       for (let i = 0; i < config.clothingItems.length; i++) {
         const item = config.clothingItems[i];
         const itemImg = clothingImages[i];
@@ -87,8 +105,8 @@ export class LocalVTOEngine {
           itemImg,
           item.category,
           poseResults.landmarks,
-          canvas.width,
-          canvas.height,
+          scaledWidth,
+          scaledHeight,
           colorAdjustment,
           manualAdj
         );
@@ -100,9 +118,10 @@ export class LocalVTOEngine {
       const processingTime = performance.now() - startTime;
 
       return {
-        imageUrl: canvas.toDataURL('image/jpeg', 0.95),
+        imageUrl: canvas.toDataURL('image/jpeg', 0.85),
         sizeRecommendations,
-        processingTime
+        processingTime,
+        bodyShape
       };
     } catch (error) {
       console.error('VTO generation error:', error);
@@ -205,6 +224,13 @@ export class LocalVTOEngine {
     
     ctx.restore();
     
+    // Apply fabric texture
+    const fabricType = fabricTexture.detectFabricType(category);
+    fabricTexture.applyFabricTexture(ctx, Math.floor(x), Math.floor(y), Math.floor(width), Math.floor(height), fabricType);
+    
+    // Apply clothing physics (wrinkles and shadows)
+    clothingPhysics.applyPhysics(ctx, x, y, width, height, landmarks, category);
+    
     // Apply subtle shadow for depth
     ctx.save();
     ctx.globalAlpha = 0.2;
@@ -230,8 +256,20 @@ export class LocalVTOEngine {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.crossOrigin = 'anonymous';
-      img.onload = () => resolve(img);
-      img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+      
+      // Add timeout for faster failure
+      const timeout = setTimeout(() => {
+        reject(new Error(`Image load timeout: ${src}`));
+      }, 5000);
+      
+      img.onload = () => {
+        clearTimeout(timeout);
+        resolve(img);
+      };
+      img.onerror = () => {
+        clearTimeout(timeout);
+        reject(new Error(`Failed to load image: ${src}`));
+      };
       img.src = src;
     });
   }

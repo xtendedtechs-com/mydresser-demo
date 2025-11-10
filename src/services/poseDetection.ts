@@ -35,17 +35,17 @@ class PoseDetectionService {
 
     this.pose = new Pose({
       locateFile: (file) => {
-        return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+        return `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/${file}`;
       }
     });
 
     this.pose.setOptions({
-      modelComplexity: 1,
-      smoothLandmarks: true,
+      modelComplexity: 0, // Use lightweight model for speed
+      smoothLandmarks: false, // Disable for faster processing
       enableSegmentation: false,
       smoothSegmentation: false,
-      minDetectionConfidence: 0.5,
-      minTrackingConfidence: 0.5
+      minDetectionConfidence: 0.3, // Lower threshold for faster detection
+      minTrackingConfidence: 0.3
     });
 
     this.isInitialized = true;
