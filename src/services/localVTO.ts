@@ -1,4 +1,6 @@
-import { poseDetectionService, PoseLandmark, LANDMARKS } from './poseDetection';
+import { poseDetectionService, PoseLandmark, LANDMARKS, PoseResults } from './poseDetection';
+import { sizeRecommendation, SizeRecommendation } from './sizeRecommendation';
+import { colorMatching, ColorAdjustment } from './colorMatching';
 
 interface ClothingItem {
   id: string;
@@ -7,23 +9,46 @@ interface ClothingItem {
   photo: string;
 }
 
-interface VTOConfig {
+export interface VTOConfig {
   userImage: string;
   clothingItems: ClothingItem[];
+  manualAdjustments?: {
+    [itemId: string]: {
+      x: number;
+      y: number;
+      scale: number;
+    };
+  };
+}
+
+export interface VTOResult {
+  imageUrl: string;
+  sizeRecommendations: SizeRecommendation[];
+  processingTime: number;
 }
 
 export class LocalVTOEngine {
-  async generateVTO(config: VTOConfig): Promise<string> {
+  private poseCache = new Map<string, PoseResults>();
+  private imageCache = new Map<string, HTMLImageElement>();
+
+  async generateVTO(config: VTOConfig): Promise<VTOResult> {
+    const startTime = performance.now();
     try {
-      // Load user image
-      const userImg = await this.loadImage(config.userImage);
+      // Load user image with caching
+      const userImg = await this.getCachedImage(config.userImage);
       
-      // Detect pose
-      const poseResults = await poseDetectionService.detectPose(userImg);
-      
-      if (!poseResults || !poseResults.landmarks) {
-        throw new Error('Could not detect pose in image');
+      // Detect pose with caching
+      let poseResults = this.poseCache.get(config.userImage);
+      if (!poseResults) {
+        poseResults = await poseDetectionService.detectPose(userImg);
+        if (!poseResults || !poseResults.landmarks) {
+          throw new Error('Could not detect pose in image');
+        }
+        this.poseCache.set(config.userImage, poseResults);
       }
+
+      // Analyze lighting
+      const colorAdjustment = colorMatching.analyzeImageLighting(userImg);
 
       // Create canvas for composition
       const canvas = document.createElement('canvas');
@@ -38,14 +63,47 @@ export class LocalVTOEngine {
       // Draw original image
       ctx.drawImage(userImg, 0, 0);
 
-      // Overlay clothing items based on category
-      for (const item of config.clothingItems) {
-        const itemImg = await this.loadImage(item.photo);
-        await this.overlayClothing(ctx, itemImg, item.category, poseResults.landmarks, canvas.width, canvas.height);
+      // Load all clothing images in parallel
+      const clothingImages = await Promise.all(
+        config.clothingItems.map(item => this.getCachedImage(item.photo))
+      );
+
+      // Calculate size recommendations
+      const sizeRecommendations: SizeRecommendation[] = [];
+      const measurements = sizeRecommendation.calculateMeasurements(
+        poseResults.landmarks,
+        canvas.width,
+        canvas.height
+      );
+
+      // Overlay clothing items
+      for (let i = 0; i < config.clothingItems.length; i++) {
+        const item = config.clothingItems[i];
+        const itemImg = clothingImages[i];
+        
+        const manualAdj = config.manualAdjustments?.[item.id];
+        await this.overlayClothing(
+          ctx,
+          itemImg,
+          item.category,
+          poseResults.landmarks,
+          canvas.width,
+          canvas.height,
+          colorAdjustment,
+          manualAdj
+        );
+
+        const sizeRec = sizeRecommendation.recommendSize(measurements, item.category);
+        sizeRecommendations.push(sizeRec);
       }
 
-      // Return as data URL
-      return canvas.toDataURL('image/jpeg', 0.95);
+      const processingTime = performance.now() - startTime;
+
+      return {
+        imageUrl: canvas.toDataURL('image/jpeg', 0.95),
+        sizeRecommendations,
+        processingTime
+      };
     } catch (error) {
       console.error('VTO generation error:', error);
       throw error;
@@ -58,7 +116,9 @@ export class LocalVTOEngine {
     category: string,
     landmarks: PoseLandmark[],
     canvasWidth: number,
-    canvasHeight: number
+    canvasHeight: number,
+    colorAdjustment: ColorAdjustment,
+    manualAdjustment?: { x: number; y: number; scale: number }
   ): Promise<void> {
     const leftShoulder = landmarks[LANDMARKS.LEFT_SHOULDER];
     const rightShoulder = landmarks[LANDMARKS.RIGHT_SHOULDER];
@@ -79,7 +139,7 @@ export class LocalVTOEngine {
     );
 
     // Position and scale based on category
-    let x = 0, y = 0, width = 0, height = 0, opacity = 0.85;
+    let x = 0, y = 0, width = 0, height = 0, opacity = 0.9;
 
     switch (category.toLowerCase()) {
       case 'tops':
@@ -121,10 +181,21 @@ export class LocalVTOEngine {
         height = torsoHeight;
     }
 
-    // Apply semi-transparent overlay with blend mode
+    // Apply manual adjustments if provided
+    if (manualAdjustment) {
+      x += manualAdjustment.x;
+      y += manualAdjustment.y;
+      width *= manualAdjustment.scale;
+      height *= manualAdjustment.scale;
+    }
+
+    // Apply enhanced blending with lighting
     ctx.save();
     ctx.globalAlpha = opacity;
     ctx.globalCompositeOperation = 'multiply';
+    
+    // Apply color adjustments for realistic lighting
+    colorMatching.applyColorAdjustment(ctx, colorAdjustment);
     
     try {
       ctx.drawImage(clothingImg, x, y, width, height);
@@ -133,6 +204,26 @@ export class LocalVTOEngine {
     }
     
     ctx.restore();
+    
+    // Apply subtle shadow for depth
+    ctx.save();
+    ctx.globalAlpha = 0.2;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2;
+    ctx.fillStyle = 'transparent';
+    ctx.fillRect(x, y, width, height);
+    ctx.restore();
+  }
+
+  private async getCachedImage(src: string): Promise<HTMLImageElement> {
+    if (this.imageCache.has(src)) {
+      return this.imageCache.get(src)!;
+    }
+    const img = await this.loadImage(src);
+    this.imageCache.set(src, img);
+    return img;
   }
 
   private loadImage(src: string): Promise<HTMLImageElement> {
@@ -143,6 +234,11 @@ export class LocalVTOEngine {
       img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
       img.src = src;
     });
+  }
+
+  clearCache(): void {
+    this.poseCache.clear();
+    this.imageCache.clear();
   }
 }
 

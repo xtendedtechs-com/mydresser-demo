@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Camera, Sparkles } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Loader2, Camera, Sparkles, Settings2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { WardrobeItem } from "@/hooks/useWardrobe";
 import { getPrimaryPhotoUrl } from "@/utils/photoHelpers";
-import { localVTO } from "@/services/localVTO";
+import { localVTO, VTOConfig } from "@/services/localVTO";
+import { SizeRecommendation } from "@/services/sizeRecommendation";
 
 interface DailyOutfitWithVTOProps {
   outfit: {
@@ -22,6 +24,10 @@ interface DailyOutfitWithVTOProps {
 const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
   const [vtoImage, setVtoImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [sizeRecommendations, setSizeRecommendations] = useState<SizeRecommendation[]>([]);
+  const [processingTime, setProcessingTime] = useState<number>(0);
+  const [showAdjustments, setShowAdjustments] = useState(false);
+  const [adjustments, setAdjustments] = useState<VTOConfig['manualAdjustments']>({});
   const { toast } = useToast();
 
   useEffect(() => {
@@ -35,21 +41,24 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
 
     setIsGenerating(true);
     try {
-      // Use local VTO engine (no external API, no credits needed)
-      const resultImage = await localVTO.generateVTO({
+      const result = await localVTO.generateVTO({
         userImage: userPhoto,
         clothingItems: outfit.items.map(item => ({
           id: item.id,
           name: item.name,
           category: item.category,
           photo: getPrimaryPhotoUrl(item.photos, item.category)
-        }))
+        })),
+        manualAdjustments: adjustments
       });
 
-      setVtoImage(resultImage);
+      setVtoImage(result.imageUrl);
+      setSizeRecommendations(result.sizeRecommendations);
+      setProcessingTime(result.processingTime);
+      
       toast({
         title: "Virtual Try-On Ready",
-        description: "Your outfit preview has been generated offline!"
+        description: `Generated in ${(result.processingTime / 1000).toFixed(1)}s with size recommendations!`
       });
     } catch (error: any) {
       console.error('VTO generation error:', error);
@@ -100,29 +109,84 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
           />
         )}
         
-        <div className="absolute top-2 left-2">
+        <div className="absolute top-2 left-2 flex gap-2">
           <Badge variant="secondary" className="bg-primary text-primary-foreground">
             <Sparkles className="w-3 h-3 mr-1" />
             AI Try-On
           </Badge>
+          {processingTime > 0 && (
+            <Badge variant="outline" className="bg-background/80">
+              {(processingTime / 1000).toFixed(1)}s
+            </Badge>
+          )}
         </div>
       </div>
 
-        <div className="flex items-center justify-between p-4">
+      <div className="p-4 space-y-3">
+        <div className="flex items-center justify-between">
           <Badge variant="outline">{outfit.confidence}% Match</Badge>
-          <Button 
-            size="sm" 
-            variant="outline"
-            onClick={generateVTO}
-            disabled={isGenerating}
-          >
-            {isGenerating ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <>Regenerate</>
-            )}
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={() => setShowAdjustments(!showAdjustments)}
+            >
+              <Settings2 className="w-4 h-4" />
+            </Button>
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={generateVTO}
+              disabled={isGenerating}
+            >
+              {isGenerating ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>Regenerate</>
+              )}
+            </Button>
+          </div>
         </div>
+
+        {sizeRecommendations.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Size Recommendations:</p>
+            <div className="flex flex-wrap gap-2">
+              {sizeRecommendations.map((rec, idx) => (
+                <Badge key={idx} variant="secondary">
+                  {rec.category}: {rec.size} ({Math.round(rec.confidence * 100)}%)
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {showAdjustments && outfit.items.length > 0 && (
+          <div className="space-y-3 pt-3 border-t">
+            <p className="text-sm font-medium">Manual Adjustments:</p>
+            {outfit.items.map((item) => (
+              <div key={item.id} className="space-y-2">
+                <p className="text-xs text-muted-foreground">{item.name}</p>
+                <div className="space-y-1">
+                  <label className="text-xs">Scale</label>
+                  <Slider
+                    value={[adjustments[item.id]?.scale ?? 1]}
+                    min={0.5}
+                    max={1.5}
+                    step={0.1}
+                    onValueChange={(value) => {
+                      setAdjustments(prev => ({
+                        ...prev,
+                        [item.id]: { x: prev[item.id]?.x ?? 0, y: prev[item.id]?.y ?? 0, scale: value[0] }
+                      }));
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </Card>
   );
 };
