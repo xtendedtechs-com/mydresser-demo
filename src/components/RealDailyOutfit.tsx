@@ -435,7 +435,7 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
               <Sparkles className="w-5 h-5 text-primary" />
               <span>{outfit.name || 'Daily Outfit'}</span>
             </CardTitle>
-            <CardDescription className="flex items-center flex-wrap gap-4 mt-2">
+            <div className="flex items-center flex-wrap gap-4 mt-2 text-sm text-muted-foreground">
               <div className="flex items-center space-x-1">
                 <Calendar className="w-4 h-4" />
                 <span>{date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
@@ -453,7 +453,7 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
                 </>
               )}
               <Badge variant="secondary">{outfit.confidence || 85}% match</Badge>
-            </CardDescription>
+            </div>
           </div>
           <Button
             variant="ghost"
