@@ -49,21 +49,34 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
 
   // Helper to convert blob URLs to data URLs for canvas compatibility
   const convertBlobToDataUrl = async (url: string): Promise<string> => {
-    if (!url.startsWith('blob:')) return url;
+    // If already a data URL, return as-is
+    if (url.startsWith('data:')) return url;
     
-    try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    } catch (error) {
-      console.error('Failed to convert blob URL:', error);
+    // For blob URLs, skip conversion due to cross-origin issues in sandbox
+    // Just use the URL directly - canvas will handle it
+    if (url.startsWith('blob:')) {
+      console.warn('Using blob URL directly (conversion skipped):', url.substring(0, 50));
       return url;
     }
+    
+    // For HTTP(S) URLs, try to convert
+    if (url.startsWith('http')) {
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      } catch (error) {
+        console.error('Failed to convert URL:', error);
+        return url; // Return original URL as fallback
+      }
+    }
+    
+    return url;
   };
 
   const generateVTO = async () => {
