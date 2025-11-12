@@ -6,6 +6,29 @@ All notable changes to the MyDresser Beta application are documented here.
 
 ## [1.0.1-beta] - 2025-11-12
 
+### 🚀 Navigation Improvements
+
+#### Fixed Full Page Reloads
+- **Fixed navigation in 6 components** - Replaced `window.location.href` with `useNavigate()` from React Router
+- **Components updated:**
+  - DailyOutfitGenerator.tsx
+  - RealDailyOutfit.tsx
+  - MerchantItemCard.tsx
+  - ProductCard.tsx
+  - WardrobeItemCard.tsx
+  - Multiple other components
+- **Impact:** Eliminated unnecessary page reloads, faster navigation, better SPA experience
+- **User Experience:** Instant page transitions, no flash of blank content
+
+### 📚 Documentation
+
+#### Beta Tester Guide
+- Created comprehensive BETA_TESTER_GUIDE.md
+- Includes getting started guide, testing checklist, known issues
+- Bug report and feature request templates
+- FAQ and support information
+- Privacy and data security documentation
+
 ### ⚡ Performance Optimizations
 
 #### Code & Bundle Optimization

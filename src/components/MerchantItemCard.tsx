@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 import { 
   Heart, 
   ShoppingCart, 
@@ -18,6 +19,7 @@ interface MerchantItemCardProps {
 }
 
 const MerchantItemCard = ({ item, onAction }: MerchantItemCardProps) => {
+  const navigate = useNavigate();
   const discountPercentage = item.original_price 
     ? Math.round(((item.original_price - item.price) / item.original_price) * 100)
     : 0;
@@ -70,7 +72,7 @@ const MerchantItemCard = ({ item, onAction }: MerchantItemCardProps) => {
           <Button 
             variant="secondary" 
             size="sm"
-            onClick={() => window.location.href = `/market/item/${item.id}`}
+            onClick={() => navigate(`/market/item/${item.id}`)}
           >
             <Eye className="w-4 h-4 mr-2" />
             Quick View

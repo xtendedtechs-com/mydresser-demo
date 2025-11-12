@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 import { 
   Heart, 
   Eye, 
@@ -33,6 +34,7 @@ const WardrobeItemCard = ({
   onDelete, 
   onView 
 }: WardrobeItemCardProps) => {
+  const navigate = useNavigate();
   const getConditionColor = (condition: string) => {
     switch (condition) {
       case 'excellent': return 'bg-green-500';
@@ -142,7 +144,7 @@ const WardrobeItemCard = ({
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              window.location.href = `/wardrobe/item/${item.id}`;
+              navigate(`/wardrobe/item/${item.id}`);
             }}
           >
             <Eye className="w-4 h-4 mr-2" />

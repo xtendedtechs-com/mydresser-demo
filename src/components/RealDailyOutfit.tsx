@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +37,7 @@ interface DailyOutfitProps {
 }
 
 export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
+  const navigate = useNavigate();
   const { items: wardrobeItems, loading: wardrobeLoading } = useWardrobe();
   const { preferences, loading: preferencesLoading } = useUserPreferences();
   const { createSuggestion, acceptSuggestion, rejectSuggestion } = useDailyOutfitSuggestions();
@@ -405,7 +407,7 @@ export const RealDailyOutfit = ({ date = new Date() }: DailyOutfitProps) => {
           <p className="text-muted-foreground mb-4">
             Add some items to your wardrobe to get AI-powered outfit suggestions!
           </p>
-          <Button onClick={() => window.location.href = '/add'}>
+          <Button onClick={() => navigate('/add')}>
             Add Items to Wardrobe
           </Button>
         </CardContent>
