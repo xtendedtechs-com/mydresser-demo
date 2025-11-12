@@ -47,6 +47,25 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
     }
   }, [outfit.id, userPhoto]);
 
+  // Helper to convert blob URLs to data URLs for canvas compatibility
+  const convertBlobToDataUrl = async (url: string): Promise<string> => {
+    if (!url.startsWith('blob:')) return url;
+    
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.error('Failed to convert blob URL:', error);
+      return url;
+    }
+  };
+
   const generateVTO = async () => {
     if (!userPhoto) return;
 
@@ -54,52 +73,47 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
     try {
       console.log('Starting VTO generation...');
       
-      // Try MediaPipe-based VTO first, then Canvas AI, then Remote AI fallback
+      // Convert user photo if it's a blob URL
+      const userImageUrl = await convertBlobToDataUrl(userPhoto);
+      
+      // Prepare clothing items with converted URLs
+      const clothingItemsPromises = outfit.items.map(async (item) => {
+        const photoUrl = getPrimaryPhotoUrl(item.photos, item.category);
+        const convertedUrl = await convertBlobToDataUrl(photoUrl);
+        return {
+          id: item.id,
+          name: item.name,
+          category: item.category,
+          photo: convertedUrl
+        };
+      });
+      
+      const clothingItems = await Promise.all(clothingItemsPromises);
+      console.log('Clothing items prepared for VTO:', clothingItems.length);
+      
+      // Try Canvas AI VTO first (skip MediaPipe due to sandbox limitations)
       let result: { imageUrl: string; sizeRecommendations: SizeRecommendation[]; bodyShape: BodyShape; processingTime: number };
       try {
-        result = await localVTO.generateVTO({
-          userImage: userPhoto,
-          clothingItems: outfit.items.map(item => ({
-            id: item.id,
-            name: item.name,
-            category: item.category,
-            photo: getPrimaryPhotoUrl(item.photos, item.category)
-          })),
-          manualAdjustments: adjustments
+        const { aiVTO } = await import('@/services/aiVTO');
+        result = await aiVTO.generateVTO({
+          userImage: userImageUrl,
+          clothingItems
         });
-        console.log('VTO generated successfully');
-      } catch (mediapipeError) {
-        console.warn('MediaPipe VTO failed, trying Canvas AI:', mediapipeError);
-        try {
-          const { aiVTO } = await import('@/services/aiVTO');
-          result = await aiVTO.generateVTO({
-            userImage: userPhoto,
-            clothingItems: outfit.items.map(item => ({
-              id: item.id,
-              name: item.name,
-              category: item.category,
-              photo: getPrimaryPhotoUrl(item.photos, item.category)
-            }))
-          });
-          toast({
-            title: "Using Simplified VTO",
-            description: "Advanced pose detection unavailable, using AI-based overlay instead"
-          });
-        } catch (aiError) {
-          console.warn('Canvas AI VTO failed, trying Remote AI:', aiError);
-          const { tryRemoteVTO } = await import('@/services/aiVTORemote');
-          const remote = await tryRemoteVTO({
-            userImage: userPhoto,
-            clothingItems: outfit.items.map(item => ({ id: item.id, name: item.name, category: item.category }))
-          });
-          result = {
-            imageUrl: remote.imageUrl,
-            sizeRecommendations: [],
-            bodyShape: { type: 'rectangle', shoulderWidth: 0, waistWidth: 0, hipWidth: 0, torsoLength: 0, legLength: 0, bustToWaistRatio: 1, waistToHipRatio: 1 },
-            processingTime: remote.processingTime ?? 0
-          };
-          toast({ title: 'Using Cloud VTO', description: 'Generated via remote AI fallback' });
-        }
+        console.log('VTO generated successfully with Canvas AI');
+      } catch (aiError) {
+        console.warn('Canvas AI VTO failed, trying Remote AI:', aiError);
+        const { tryRemoteVTO } = await import('@/services/aiVTORemote');
+        const remote = await tryRemoteVTO({
+          userImage: userImageUrl,
+          clothingItems: clothingItems.map(item => ({ id: item.id, name: item.name, category: item.category }))
+        });
+        result = {
+          imageUrl: remote.imageUrl,
+          sizeRecommendations: [],
+          bodyShape: { type: 'rectangle', shoulderWidth: 0, waistWidth: 0, hipWidth: 0, torsoLength: 0, legLength: 0, bustToWaistRatio: 1, waistToHipRatio: 1 },
+          processingTime: remote.processingTime ?? 0
+        };
+        toast({ title: 'Using Cloud VTO', description: 'Generated via remote AI fallback' });
       }
 
       setVtoImage(result.imageUrl);

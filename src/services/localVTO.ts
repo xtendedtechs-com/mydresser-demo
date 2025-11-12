@@ -282,24 +282,26 @@ export class LocalVTOEngine {
     return new Promise((resolve, reject) => {
       const img = new Image();
       
-      // Only set crossOrigin for non-blob URLs
-      if (!src.startsWith('blob:')) {
+      // Don't set crossOrigin for blob URLs or data URLs
+      if (!src.startsWith('blob:') && !src.startsWith('data:')) {
         img.crossOrigin = 'anonymous';
       }
       
       // Add timeout for faster failure
       const timeout = setTimeout(() => {
-        reject(new Error(`Image load timeout: ${src}`));
-      }, 5000);
+        reject(new Error(`Image load timeout after 8s: ${src.substring(0, 100)}`));
+      }, 8000);
       
       img.onload = () => {
         clearTimeout(timeout);
+        console.log('Image loaded successfully:', src.substring(0, 50));
         resolve(img);
       };
       img.onerror = (e) => {
         clearTimeout(timeout);
-        console.error('Image load error:', e, 'src:', src);
-        reject(new Error(`Failed to load image: ${src}`));
+        const errorMsg = `Failed to load image: ${src.substring(0, 100)}`;
+        console.error('Image load error:', errorMsg, e);
+        reject(new Error(errorMsg));
       };
       img.src = src;
     });

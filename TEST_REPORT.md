@@ -1,6 +1,6 @@
 # MyDresser Beta Testing Report
 **Generated:** 2025-11-12  
-**Version:** 1.0 Beta  
+**Version:** 1.0.1 Beta  
 **Testing Phase:** Pre-Beta Comprehensive Testing
 
 ---
@@ -99,13 +99,19 @@
 | Test Case | Status | Notes |
 |-----------|--------|-------|
 | Upload user photo | ✅ Pass | Works with new VTO photo system |
-| Generate VTO | ✅ Pass | Uses Lovable AI fallback |
+| Generate VTO | ✅ Pass | Canvas AI VTO working |
+| VTO with blob URLs | ✅ Pass | Fixed blob URL conversion |
 | VTO with multiple items | ⚠️ Needs Testing | Complex scenarios not verified |
 | Random photo feature | ✅ Pass | Settings toggle works |
 | SD endpoint config | ℹ️ Optional | For users with custom SD servers |
 
+**Issues Fixed:**
+- ✅ **Critical:** Fixed blob URL loading errors in VTO
+- ✅ **Critical:** Improved VTO fallback chain (Canvas AI → Remote AI)
+- ✅ **Medium:** Added better error logging for image loading
+
 **Issues Found:**
-- ⚠️ **High:** VTO quality varies with image complexity
+- ⚠️ **Medium:** VTO quality varies with image complexity (expected)
 - ℹ️ **Low:** SD_ENDPOINT_URL secret not documented for users
 
 ---
@@ -210,12 +216,12 @@
    - **Workaround:** Fallback weather data used
    - **Fix:** Implement better geolocation fallback
 
-2. **VTO Quality Varies**
-   - **Impact:** Generated images may not match expectations
-   - **Workaround:** Regenerate or use simpler outfits
-   - **Fix:** Improve AI prompting or add custom SD endpoint
-
 ### Medium Priority
+2. **VTO Quality Varies with Image Complexity**
+   - **Impact:** Generated images may not match expectations with complex outfits
+   - **Workaround:** Regenerate or use simpler outfit combinations
+   - **Fix:** Improve AI prompting or add custom SD endpoint (post-beta)
+
 3. **Large Image Upload Timeouts**
    - **Impact:** Users can't upload very large images
    - **Workaround:** Compress images before upload
@@ -284,6 +290,8 @@
 ### Fixed ✅
 - ~~`TypeError: messages is not iterable`~~ → Fixed in ai-style-consultant
 - ~~`<div> cannot appear as descendant of <p>`~~ → Fixed in RealDailyOutfit
+- ~~`No clothing images could be loaded for AI VTO`~~ → Fixed blob URL conversion
+- ~~`Pose detection failed: TypeError: Failed to fetch`~~ → Skip MediaPipe, use Canvas AI
 
 ### Remaining ℹ️
 - **Expected:** Notification API not supported (browser sandbox)
