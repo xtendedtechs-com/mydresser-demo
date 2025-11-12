@@ -138,7 +138,8 @@ export function MerchantNavigation() {
             onClick={async () => {
               const { supabase } = await import('@/integrations/supabase/client');
               await supabase.auth.signOut();
-              window.location.href = '/';
+              const { useNavigate } = await import('react-router-dom');
+              useNavigate()('/');
             }}
           >
             Logout

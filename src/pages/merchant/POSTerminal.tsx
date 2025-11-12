@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +13,7 @@ import { Monitor, DollarSign, Receipt, RefreshCw, Plus, Settings, LogOut } from 
 import { format } from 'date-fns';
 
 const POSTerminal = () => {
+  const navigate = useNavigate();
   const { terminals, transactions, isLoading, createTerminal, syncInventory, isSyncing } = usePOSTerminal();
   const { locations } = useStoreLocations();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -30,11 +32,11 @@ const POSTerminal = () => {
   if (isLoading) {
     return <div className="p-8">Loading POS system...</div>;
   }
-
+  
   const handleLogout = async () => {
     const { supabase } = await import('@/integrations/supabase/client');
     await supabase.auth.signOut();
-    window.location.href = '/';
+    navigate('/');
   };
 
   return (

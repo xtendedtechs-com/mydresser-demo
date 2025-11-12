@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Shield, AlertTriangle, CheckCircle, Lock, Eye, Activity, Clock } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +18,7 @@ interface SecurityEvent {
 }
 
 const SecurityDashboard = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [securityScore, setSecurityScore] = useState(75);
   const [mfaEnabled, setMfaEnabled] = useState(false);
@@ -125,7 +127,7 @@ const SecurityDashboard = () => {
                   <p className="text-xs text-muted-foreground mt-1">
                     Add an extra layer of security to your account
                   </p>
-                  <Button size="sm" variant="outline" className="mt-2" onClick={() => window.location.href = '/settings/authentication'}>
+                  <Button size="sm" variant="outline" className="mt-2" onClick={() => navigate('/settings/authentication')}>
                     Enable MFA
                   </Button>
                 </div>

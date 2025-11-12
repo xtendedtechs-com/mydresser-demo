@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +18,7 @@ interface SelectedItem {
 }
 
 export const UnifiedTryOnStudio = () => {
+  const navigate = useNavigate();
   const { items: wardrobeItems, loading: wardrobeLoading, getPhotoUrls } = useWardrobe();
   const { items: marketItems, loading: marketLoading } = useMarketItems();
   const [selected, setSelected] = useState<SelectedItem | null>(null);
@@ -104,7 +106,7 @@ export const UnifiedTryOnStudio = () => {
               {!wardrobeLoading && wardrobeItems.length === 0 && (
                 <div className="text-center py-8">
                   <p className="text-sm text-muted-foreground">No wardrobe items yet</p>
-                  <Button size="sm" className="mt-3" onClick={() => (window.location.href = "/add")}>Add Items</Button>
+                  <Button size="sm" className="mt-3" onClick={() => navigate('/add')}>Add Items</Button>
                 </div>
               )}
               {!wardrobeLoading && wardrobeItems.map((item) => renderItemCard(item, "wardrobe"))}

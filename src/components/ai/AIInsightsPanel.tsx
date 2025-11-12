@@ -7,9 +7,11 @@ import { LoadingScreen } from '@/components/LoadingScreen';
 import { EmptyState } from '@/components/EmptyState';
 import { OptimizedImage } from '@/components/OptimizedImage';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { type RecommendationContext } from '@/services/aiModels/outfitRecommendationEngine';
 
 export const AIInsightsPanel = () => {
+  const navigate = useNavigate();
   const {
     dailyRecommendations,
     isLoadingDaily,
@@ -43,7 +45,7 @@ export const AIInsightsPanel = () => {
         title="No Recommendations Yet"
         description="Add items to your wardrobe to get AI-powered outfit suggestions"
         actionLabel="Go to Wardrobe"
-        onAction={() => window.location.href = '/wardrobe'}
+        onAction={() => navigate('/wardrobe')}
       />
     );
   }

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,7 @@ import { Bell, AlertTriangle, CheckCircle, Info, Plus, ExternalLink } from 'luci
 import { Progress } from '@/components/ui/progress';
 
 export const MerchantCustomPanel = () => {
+  const navigate = useNavigate();
   const { profile } = useMerchantProfile();
   const { items } = useMerchantItems();
   const { orders } = useOrders();
@@ -137,7 +139,7 @@ export const MerchantCustomPanel = () => {
               key={index}
               variant="ghost"
               className="w-full justify-start"
-              onClick={() => window.location.href = link.href}
+              onClick={() => navigate(link.href)}
             >
               {link.label}
             </Button>

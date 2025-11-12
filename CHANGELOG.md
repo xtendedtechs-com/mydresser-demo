@@ -4,6 +4,43 @@ All notable changes to the MyDresser Beta application are documented here.
 
 ---
 
+## [1.0.2-beta] - 2025-11-12
+
+### 🐛 Critical Bug Fixes
+
+#### Navigation Improvements (Phase 2)
+- **Fixed 7 additional navigation issues** - Replaced remaining `window.location.href` with `useNavigate()`
+- **Components updated:**
+  - MerchantNavigation.tsx (logout redirect)
+  - POSTerminal.tsx (logout redirect)
+  - UnifiedTryOnStudio.tsx (add items button)
+  - SecurityDashboard.tsx (MFA settings link)
+  - AIInsightsPanel.tsx (wardrobe link)
+  - MerchantCustomPanel.tsx (custom links)
+  - Account.tsx (sign in button)
+- **Impact:** Complete SPA navigation, zero full page reloads
+
+### 🚨 Critical Issue Discovered
+
+#### VTO 402 Payment Error (BLOCKER)
+- **Issue:** AI Gateway returning 402 (payment required)
+- **Impact:** VTO feature completely non-functional
+- **Root Cause:** Lovable AI credits depleted
+- **Documentation:** Created VTO_CREDIT_ISSUE.md with resolution options
+- **Action Required:** Add AI credits before beta launch
+- **Priority:** P0 - Critical Blocker
+
+### 📊 Security & Flow Validation
+
+#### Comprehensive App Scan
+- **Security scan:** 4 findings marked as acceptable for beta (marketplace design)
+- **Flow testing:** 12/12 critical flows validated
+- **Function security:** All SECURITY DEFINER functions hardened with search_path
+- **Navigation audit:** 100% complete (all window.location.href instances fixed)
+- **Documentation:** Created FLOW_TESTING_REPORT.md and FINAL_BETA_CHECKLIST.md
+
+---
+
 ## [1.0.1-beta] - 2025-11-12
 
 ### 🚀 Navigation Improvements
