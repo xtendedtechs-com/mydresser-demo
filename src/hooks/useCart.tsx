@@ -45,13 +45,19 @@ export const useCart = create<CartState>()(
             )
           });
         } else {
+          // Generate a unique ID for the cart item
+          const cartItem = { 
+            ...item, 
+            id: `cart_${item.itemId}_${Date.now()}`,
+            quantity: 1 
+          };
           set({
-            items: [...get().items, { ...item, quantity: 1 }]
+            items: [...get().items, cartItem]
           });
         }
 
-        // Sync to database
-        get().syncToDatabase();
+        // Sync to database asynchronously (non-blocking)
+        setTimeout(() => get().syncToDatabase(), 100);
       },
 
       removeItem: (id) => {
@@ -121,19 +127,27 @@ export const useCart = create<CartState>()(
 
       syncToDatabase: async () => {
         try {
-          const { data: { user } } = await supabase.auth.getUser();
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
           
-          if (!user) return;
+          if (userError || !user) {
+            console.log('Cannot sync cart: user not authenticated');
+            return;
+          }
 
           const items = get().items;
 
-          // Delete all existing cart items
-          await supabase
+          // Use a transaction-like approach: delete then insert
+          const { error: deleteError } = await supabase
             .from('cart_items')
             .delete()
             .eq('user_id', user.id);
 
-          // Insert current cart items
+          if (deleteError) {
+            console.error('Error deleting cart items:', deleteError);
+            throw deleteError;
+          }
+
+          // Insert current cart items if any exist
           if (items.length > 0) {
             const dbItems = items.map(item => ({
               user_id: user.id,
@@ -141,19 +155,23 @@ export const useCart = create<CartState>()(
               item_type: item.itemType,
               item_name: item.name,
               price: item.price,
-              item_image: item.image,
+              item_image: item.image || null,
               quantity: item.quantity,
-              merchant_id: item.merchantId
+              merchant_id: item.merchantId || null
             }));
 
-            const { error } = await supabase
+            const { error: insertError } = await supabase
               .from('cart_items')
               .insert(dbItems);
 
-            if (error) throw error;
+            if (insertError) {
+              console.error('Error inserting cart items:', insertError);
+              throw insertError;
+            }
           }
         } catch (error) {
-          console.error('Error syncing cart:', error);
+          console.error('Error syncing cart to database:', error);
+          // Don't throw - allow cart to continue working locally
         }
       },
 

@@ -11,7 +11,14 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, wardrobeContext } = await req.json();
+    const body = await req.json();
+    const { messages, wardrobeContext } = body;
+    
+    // Validate messages array
+    if (!messages || !Array.isArray(messages)) {
+      throw new Error("Invalid messages format: expected array");
+    }
+    
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
