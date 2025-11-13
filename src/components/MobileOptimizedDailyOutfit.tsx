@@ -73,12 +73,15 @@ export const MobileOptimizedDailyOutfit = () => {
       });
 
       if (suggestion && suggestion.items.length > 0) {
-        const outfitItems: OutfitItem[] = suggestion.items.map(item => ({
+        // Resolve all photo URLs async
+        const { getPrimaryPhotoUrlAsync } = await import('@/utils/photoHelpers');
+        const outfitItemsPromises = suggestion.items.map(async (item) => ({
           id: item.id,
           name: item.name,
           category: item.category,
-          image: getPrimaryPhotoUrl(item.photos, item.category)
+          image: await getPrimaryPhotoUrlAsync(item.photos, item.category)
         }));
+        const outfitItems = await Promise.all(outfitItemsPromises);
         setTodayOutfit(outfitItems);
         
         // Save suggestion with correct schema

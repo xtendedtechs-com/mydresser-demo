@@ -166,30 +166,31 @@ export class AIVTOEngine {
     ctx.restore();
   }
   
-  private loadImage(src: string): Promise<HTMLImageElement> {
+  private async loadImage(src: string): Promise<HTMLImageElement> {
     return new Promise((resolve, reject) => {
       const img = new Image();
       
-      // Don't set crossOrigin for blob URLs or data URLs
-      if (!src.startsWith('blob:') && !src.startsWith('data:')) {
+      // Only set crossOrigin for actual HTTP URLs, not blob or data URLs
+      if (src.startsWith('http://') || src.startsWith('https://')) {
         img.crossOrigin = 'anonymous';
       }
       
       const timeout = setTimeout(() => {
-        reject(new Error(`Image load timeout after 8s: ${src.substring(0, 100)}`));
-      }, 8000);
+        reject(new Error(`Image load timeout: ${src.substring(0, 100)}`));
+      }, 30000);
       
       img.onload = () => {
         clearTimeout(timeout);
         console.log('Image loaded successfully:', src.substring(0, 50));
         resolve(img);
       };
+      
       img.onerror = (e) => {
         clearTimeout(timeout);
-        const errorMsg = `Failed to load image: ${src.substring(0, 100)}`;
-        console.error('Image load error:', errorMsg, e);
-        reject(new Error(errorMsg));
+        console.error('Image load error:', 'Failed to load image:', src.substring(0, 100));
+        reject(new Error(`Failed to load image: ${src.substring(0, 100)}`));
       };
+      
       img.src = src;
     });
   }
