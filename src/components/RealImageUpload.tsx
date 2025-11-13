@@ -6,10 +6,10 @@ import { Upload, X, Image, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface RealImageUploadProps {
-  onFilesSelected: (urls: string[]) => void;
+  onFilesSelected: (files: File[]) => void;
   type: 'photo' | 'video';
   maxFiles?: number;
-  existingFiles?: string[];
+  existingFiles?: File[];
   disabled?: boolean;
 }
 
@@ -21,7 +21,8 @@ const RealImageUpload = ({
   disabled = false
 }: RealImageUploadProps) => {
   const [uploading, setUploading] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState<string[]>(existingFiles);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>(existingFiles);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -38,44 +39,43 @@ const RealImageUpload = ({
       return;
     }
 
-    setUploading(true);
-
     try {
-      const newUrls: string[] = [];
+      const newFiles = Array.from(files);
+      const newPreviews = newFiles.map(file => URL.createObjectURL(file));
       
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        
-        // For demo purposes, create a placeholder URL
-        // In a real app, you would upload to a storage service
-        const placeholderUrl = URL.createObjectURL(file);
-        newUrls.push(placeholderUrl);
-      }
-
-      const updatedFiles = [...selectedFiles, ...newUrls];
+      const updatedFiles = [...selectedFiles, ...newFiles];
+      const updatedPreviews = [...previewUrls, ...newPreviews];
+      
       setSelectedFiles(updatedFiles);
+      setPreviewUrls(updatedPreviews);
       onFilesSelected(updatedFiles);
 
       toast({
-        title: 'Upload successful',
-        description: `${newUrls.length} ${type}(s) uploaded successfully`
+        title: 'Files selected',
+        description: `${newFiles.length} ${type}(s) ready to upload`
       });
     } catch (error: any) {
       toast({
-        title: 'Upload failed',
+        title: 'Selection failed',
         description: error.message,
         variant: 'destructive'
       });
-    } finally {
-      setUploading(false);
     }
   };
 
   const removeFile = (indexToRemove: number) => {
     if (disabled) return;
 
+    // Revoke the preview URL to free memory
+    if (previewUrls[indexToRemove]) {
+      URL.revokeObjectURL(previewUrls[indexToRemove]);
+    }
+
     const updatedFiles = selectedFiles.filter((_, index) => index !== indexToRemove);
+    const updatedPreviews = previewUrls.filter((_, index) => index !== indexToRemove);
+    
     setSelectedFiles(updatedFiles);
+    setPreviewUrls(updatedPreviews);
     onFilesSelected(updatedFiles);
 
     toast({
@@ -120,7 +120,7 @@ const RealImageUpload = ({
       />
 
       {/* Preview */}
-      {selectedFiles.length === 0 ? (
+      {previewUrls.length === 0 ? (
         <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
           <Image className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
           <p className="text-muted-foreground">No {type}s uploaded yet</p>
@@ -130,7 +130,7 @@ const RealImageUpload = ({
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {selectedFiles.map((url, index) => (
+          {previewUrls.map((url, index) => (
             <div key={index} className="relative group">
               <div className="aspect-square bg-muted rounded-lg overflow-hidden">
                 <img

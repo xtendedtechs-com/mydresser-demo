@@ -38,9 +38,11 @@ export default function VirtualTryOn() {
     }
   };
 
-  const handlePhotoUpload = (urls: string[]) => {
-    if (urls.length > 0) {
-      setUserPhoto(urls[0]);
+  const handlePhotoUpload = (files: File[]) => {
+    if (files.length > 0) {
+      // Convert File to blob URL for immediate preview
+      const blobUrl = URL.createObjectURL(files[0]);
+      setUserPhoto(blobUrl);
     }
   };
 

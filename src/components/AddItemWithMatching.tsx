@@ -74,7 +74,7 @@ const AddItemWithMatching = ({ open, onOpenChange, initialData }: AddItemWithMat
   });
 
   const [currentTag, setCurrentTag] = useState('');
-  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
 
   // Helpers to map scan data
   const titleCase = (s?: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
@@ -102,9 +102,8 @@ const AddItemWithMatching = ({ open, onOpenChange, initialData }: AddItemWithMat
       notes: initialData.description ?? prev.notes,
       tags: Array.from(new Set([...(prev.tags || []), ...(((initialData.style_tags as string[]) || []))]))
     }));
-    if (initialData.photo) {
-      setPhotoUrls(prev => [initialData.photo as string, ...prev]);
-    }
+    // Note: initialData.photo (string URL from scan) won't be handled by File-based upload
+    // Users will need to re-upload if they want to use scanned item photo
   }, [initialData]);
 
   const handleInputChange = (field: string, value: string) => {
@@ -151,7 +150,7 @@ const AddItemWithMatching = ({ open, onOpenChange, initialData }: AddItemWithMat
         ...formData,
         user_id: '', // Will be set by the hook
         purchase_price: formData.purchase_price ? parseFloat(formData.purchase_price) : undefined,
-        photos: photoUrls.length > 0 ? { urls: photoUrls } : undefined,
+        photos: undefined, // Photos will be uploaded by the hook
         season: formData.season.toLowerCase() || 'all-season',
         occasion: formData.occasion.toLowerCase() || 'casual',
         condition: formData.condition.toLowerCase(),
@@ -159,7 +158,7 @@ const AddItemWithMatching = ({ open, onOpenChange, initialData }: AddItemWithMat
         is_favorite: false
       };
 
-      const newItem = await addItem(itemData);
+      const newItem = await addItem(itemData, photoFiles);
 
       // Check for matches with merchant items
       const matches = await findMatches(newItem, merchantItems);
@@ -346,10 +345,10 @@ const AddItemWithMatching = ({ open, onOpenChange, initialData }: AddItemWithMat
             <div>
               <Label>Photos</Label>
               <RealImageUpload
-                onFilesSelected={setPhotoUrls}
+                onFilesSelected={setPhotoFiles}
                 type="photo"
                 maxFiles={5}
-                existingFiles={photoUrls}
+                existingFiles={photoFiles}
               />
             </div>
 

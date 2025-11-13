@@ -56,15 +56,22 @@ const WardrobeItemCard = ({
 
   const deriveStoragePath = (url: string): { bucket: string; path: string } | null => {
     if (!url) return null;
+    
+    // Skip blob URLs, data URLs, and local paths - they can't be signed
+    if (url.startsWith('blob:') || url.startsWith('data:') || url.startsWith('/src/') || 
+        url.startsWith('/assets/') || url.startsWith('/placeholder')) {
+      return null;
+    }
+    
     // Match absolute or relative Supabase storage URLs
     const relAbsMatch = url.match(/\/storage\/v1\/object\/(?:public|sign)\/([^/]+)\/(.+)/);
     if (relAbsMatch) {
-      return { bucket: relAbsMatch[1], path: decodeURIComponent(relAbsMatch[2]) };
+      return { bucket: relAbsMatch[1], path: decodeURIComponent(relAbsMatch[2].split('?')[0]) };
     }
     try {
       const u = new URL(url);
       const match = u.pathname.match(/\/storage\/v1\/object\/(?:public|sign)\/([^/]+)\/(.+)/);
-      if (match) return { bucket: match[1], path: decodeURIComponent(match[2]) };
+      if (match) return { bucket: match[1], path: decodeURIComponent(match[2].split('?')[0]) };
     } catch {}
     if (url && !url.startsWith('http') && url.includes('/')) {
       const cleaned = url.replace(/^\/+/, '');
