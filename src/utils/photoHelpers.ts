@@ -41,9 +41,11 @@ const extractUrl = (val: any): string | null => {
   return null;
 };
 
-// Resolve any Supabase Storage path (bucket/path) to a public URL
-// Leaves http(s), data URIs, blob URLs, and local asset paths untouched
-const resolvePublicUrl = (input: string): string => {
+/**
+ * Resolves any Supabase Storage path to a public URL
+ * For private buckets, it will attempt to create a signed URL
+ */
+const resolvePublicUrl = async (input: string): Promise<string> => {
   if (!input) return '';
   const trimmed = input.trim();
   
@@ -64,11 +66,26 @@ const resolvePublicUrl = (input: string): string => {
     try { return decodeURIComponent(trimmed); } catch { return trimmed; }
   })();
 
-  // Already a public storage URL (absolute or relative) -> rebuild absolute via API to ensure domain prefix
-  const publicMatch = decoded.match(/^\/?storage\/v1\/object\/(?:public|sign)\/([^/]+)\/(.+)/);
+  // Parse storage path from URL
+  const publicMatch = decoded.match(/^\/?storage\/v1\/object\/(?:public|sign)\/([^/]+)\/(.+?)(?:\?.*)?$/);
   if (publicMatch) {
     const bucket = publicMatch[1];
     const path = publicMatch[2];
+    
+    // Try to create a signed URL for private buckets
+    try {
+      const { data: signedData } = await supabase.storage
+        .from(bucket)
+        .createSignedUrl(path, 3600); // 1 hour expiry
+      
+      if (signedData?.signedUrl) {
+        return signedData.signedUrl;
+      }
+    } catch (e) {
+      console.warn('Could not create signed URL, falling back to public URL:', e);
+    }
+    
+    // Fallback to public URL
     const { data } = supabase.storage.from(bucket).getPublicUrl(path);
     return data.publicUrl || decoded;
   }
@@ -78,6 +95,20 @@ const resolvePublicUrl = (input: string): string => {
   if (protoMatch) {
     const bucket = protoMatch[1];
     const path = protoMatch[2];
+    
+    // Try signed URL first
+    try {
+      const { data: signedData } = await supabase.storage
+        .from(bucket)
+        .createSignedUrl(path, 3600);
+      
+      if (signedData?.signedUrl) {
+        return signedData.signedUrl;
+      }
+    } catch (e) {
+      console.warn('Could not create signed URL:', e);
+    }
+    
     const { data } = supabase.storage.from(bucket).getPublicUrl(path);
     return data.publicUrl || decoded;
   }
@@ -97,7 +128,8 @@ const resolvePublicUrl = (input: string): string => {
     'profile-avatars',
     'avatars',
     'products',
-    'items'
+    'items',
+    'vto-photos'
   ];
 
   const firstSlash = decoded.indexOf('/');
@@ -105,6 +137,19 @@ const resolvePublicUrl = (input: string): string => {
     const bucket = decoded.slice(0, firstSlash);
     const path = decoded.slice(firstSlash + 1);
     if (knownBuckets.includes(bucket) && path) {
+      // Try signed URL first
+      try {
+        const { data: signedData } = await supabase.storage
+          .from(bucket)
+          .createSignedUrl(path, 3600);
+        
+        if (signedData?.signedUrl) {
+          return signedData.signedUrl;
+        }
+      } catch (e) {
+        console.warn('Could not create signed URL:', e);
+      }
+      
       const { data } = supabase.storage.from(bucket).getPublicUrl(path);
       return data.publicUrl || decoded;
     }
@@ -112,7 +157,20 @@ const resolvePublicUrl = (input: string): string => {
 
   // If it's just a path without bucket, try common buckets
   if (!decoded.startsWith('http') && !decoded.includes('://') && !decoded.startsWith('/')) {
-    for (const bucket of ['wardrobe', 'wardrobe-items', 'wardrobe-photos', 'items']) {
+    for (const bucket of ['wardrobe-items', 'wardrobe-photos', 'wardrobe', 'items', 'vto-photos']) {
+      // Try signed URL first
+      try {
+        const { data: signedData } = await supabase.storage
+          .from(bucket)
+          .createSignedUrl(decoded, 3600);
+        
+        if (signedData?.signedUrl) {
+          return signedData.signedUrl;
+        }
+      } catch (e) {
+        // Continue to next bucket
+      }
+      
       const { data } = supabase.storage.from(bucket).getPublicUrl(decoded);
       if (data.publicUrl) return data.publicUrl;
     }
@@ -127,13 +185,71 @@ const resolvePublicUrl = (input: string): string => {
  * @param category - Item category for smart placeholder selection
  * @returns The primary photo URL or category-appropriate placeholder
  */
+/**
+ * Synchronous wrapper that returns placeholder immediately if async resolution needed
+ * For async resolution, use getPrimaryPhotoUrlAsync
+ */
 export const getPrimaryPhotoUrl = (photos: PhotoData, category?: string): string => {
+  if (!photos) return getCategoryPlaceholderImage(category);
+
+  // Handle string URL - return as-is for now, caller can resolve async if needed
+  if (typeof photos === 'string') {
+    if (!photos || photos === '/placeholder.svg' || photos.includes('/placeholder')) {
+      return getCategoryPlaceholderImage(category);
+    }
+    // For storage URLs, return as-is; caller will handle async resolution
+    return photos;
+  }
+
+  // Handle array (strings or objects)
+  if (Array.isArray(photos)) {
+    for (const entry of photos) {
+      const raw = extractUrl(entry) || (typeof entry === 'string' ? entry : null);
+      if (raw && raw !== '/placeholder.svg' && !raw.includes('/placeholder')) {
+        return raw;
+      }
+    }
+    return getCategoryPlaceholderImage(category);
+  }
+
+  // Handle object with main/urls or arbitrary shapes
+  if (typeof photos === 'object') {
+    const p: any = photos;
+    // Check "main" first (string or object)
+    const mainUrl = extractUrl(p.main);
+    if (mainUrl && mainUrl !== '/placeholder.svg' && !mainUrl.includes('/placeholder')) {
+      return mainUrl;
+    }
+
+    // Check urls array (can be strings or objects)
+    if (Array.isArray(p.urls) && p.urls.length > 0) {
+      for (const u of p.urls) {
+        const raw = extractUrl(u) || (typeof u === 'string' ? u : null);
+        if (raw && raw !== '/placeholder.svg' && !raw.includes('/placeholder')) {
+          return raw;
+        }
+      }
+    }
+
+    // Sometimes photos could be stored as { url: "..." }
+    const direct = extractUrl(p);
+    if (direct && direct !== '/placeholder.svg' && !direct.includes('/placeholder')) {
+      return direct;
+    }
+  }
+
+  return getCategoryPlaceholderImage(category);
+};
+
+/**
+ * Async version that properly resolves storage URLs to signed URLs
+ */
+export const getPrimaryPhotoUrlAsync = async (photos: PhotoData, category?: string): Promise<string> => {
   if (!photos) return getCategoryPlaceholderImage(category);
 
   // Handle string URL
   if (typeof photos === 'string') {
-    const normalized = resolvePublicUrl(photos);
-    // If it's a placeholder path, return category placeholder instead
+    const normalized = await resolvePublicUrl(photos);
     if (!normalized || normalized === '/placeholder.svg' || normalized.includes('/placeholder')) {
       return getCategoryPlaceholderImage(category);
     }
@@ -145,8 +261,7 @@ export const getPrimaryPhotoUrl = (photos: PhotoData, category?: string): string
     for (const entry of photos) {
       const raw = extractUrl(entry) || (typeof entry === 'string' ? entry : null);
       if (raw) {
-        const normalized = resolvePublicUrl(raw);
-        // Skip placeholder paths
+        const normalized = await resolvePublicUrl(raw);
         if (normalized && normalized !== '/placeholder.svg' && !normalized.includes('/placeholder')) {
           return normalized;
         }
@@ -158,23 +273,19 @@ export const getPrimaryPhotoUrl = (photos: PhotoData, category?: string): string
   // Handle object with main/urls or arbitrary shapes
   if (typeof photos === 'object') {
     const p: any = photos;
-    // Check "main" first (string or object)
     const mainUrl = extractUrl(p.main);
     if (mainUrl) {
-      const normalized = resolvePublicUrl(mainUrl);
-      // Skip placeholder paths
+      const normalized = await resolvePublicUrl(mainUrl);
       if (normalized && normalized !== '/placeholder.svg' && !normalized.includes('/placeholder')) {
         return normalized;
       }
     }
 
-    // Check urls array (can be strings or objects)
     if (Array.isArray(p.urls) && p.urls.length > 0) {
       for (const u of p.urls) {
         const raw = extractUrl(u) || (typeof u === 'string' ? u : null);
         if (raw) {
-          const normalized = resolvePublicUrl(raw);
-          // Skip placeholder paths
+          const normalized = await resolvePublicUrl(raw);
           if (normalized && normalized !== '/placeholder.svg' && !normalized.includes('/placeholder')) {
             return normalized;
           }
@@ -182,11 +293,9 @@ export const getPrimaryPhotoUrl = (photos: PhotoData, category?: string): string
       }
     }
 
-    // Sometimes photos could be stored as { url: "..." }
     const direct = extractUrl(p);
     if (direct) {
-      const normalized = resolvePublicUrl(direct);
-      // Skip placeholder paths
+      const normalized = await resolvePublicUrl(direct);
       if (normalized && normalized !== '/placeholder.svg' && !normalized.includes('/placeholder')) {
         return normalized;
       }
@@ -202,13 +311,15 @@ export const getPrimaryPhotoUrl = (photos: PhotoData, category?: string): string
  * @param photos - Photo data in various formats
  * @returns Array of photo URLs
  */
+/**
+ * Synchronous version - returns raw URLs
+ */
 export const getAllPhotoUrls = (photos: PhotoData): string[] => {
   if (!photos) return [];
 
   // Handle string URL
   if (typeof photos === 'string') {
-    const normalized = resolvePublicUrl(photos);
-    return normalized ? [normalized] : [];
+    return photos ? [photos] : [];
   }
 
   // Handle array (strings or objects)
@@ -216,7 +327,7 @@ export const getAllPhotoUrls = (photos: PhotoData): string[] => {
     const urls: string[] = [];
     for (const entry of photos) {
       const raw = extractUrl(entry) || (typeof entry === 'string' ? entry : null);
-      if (raw) urls.push(resolvePublicUrl(raw));
+      if (raw) urls.push(raw);
     }
     return Array.from(new Set(urls.filter(Boolean)));
   }
@@ -226,15 +337,69 @@ export const getAllPhotoUrls = (photos: PhotoData): string[] => {
     const p: any = photos;
     const urls: string[] = [];
     const main = extractUrl(p.main);
-    if (main) urls.push(resolvePublicUrl(main));
+    if (main) urls.push(main);
     if (Array.isArray(p.urls)) {
       for (const u of p.urls) {
         const raw = extractUrl(u) || (typeof u === 'string' ? u : null);
-        if (raw) urls.push(resolvePublicUrl(raw));
+        if (raw) urls.push(raw);
       }
     }
     const direct = extractUrl(p);
-    if (direct) urls.push(resolvePublicUrl(direct));
+    if (direct) urls.push(direct);
+    return Array.from(new Set(urls.filter(Boolean)));
+  }
+
+  return [];
+};
+
+/**
+ * Async version that properly resolves all photo URLs
+ */
+export const getAllPhotoUrlsAsync = async (photos: PhotoData): Promise<string[]> => {
+  if (!photos) return [];
+
+  // Handle string URL
+  if (typeof photos === 'string') {
+    const normalized = await resolvePublicUrl(photos);
+    return normalized ? [normalized] : [];
+  }
+
+  // Handle array (strings or objects)
+  if (Array.isArray(photos)) {
+    const urls: string[] = [];
+    for (const entry of photos) {
+      const raw = extractUrl(entry) || (typeof entry === 'string' ? entry : null);
+      if (raw) {
+        const resolved = await resolvePublicUrl(raw);
+        urls.push(resolved);
+      }
+    }
+    return Array.from(new Set(urls.filter(Boolean)));
+  }
+
+  // Handle object with urls and/or main property
+  if (typeof photos === 'object') {
+    const p: any = photos;
+    const urls: string[] = [];
+    const main = extractUrl(p.main);
+    if (main) {
+      const resolved = await resolvePublicUrl(main);
+      urls.push(resolved);
+    }
+    if (Array.isArray(p.urls)) {
+      for (const u of p.urls) {
+        const raw = extractUrl(u) || (typeof u === 'string' ? u : null);
+        if (raw) {
+          const resolved = await resolvePublicUrl(raw);
+          urls.push(resolved);
+        }
+      }
+    }
+    const direct = extractUrl(p);
+    if (direct) {
+      const resolved = await resolvePublicUrl(direct);
+      urls.push(resolved);
+    }
     return Array.from(new Set(urls.filter(Boolean)));
   }
 
