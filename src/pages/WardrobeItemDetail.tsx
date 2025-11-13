@@ -21,13 +21,28 @@ const WardrobeItemDetail = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isStarred, setIsStarred] = useState(false);
   const [showVTO, setShowVTO] = useState(false);
+  const [resolvedPhotos, setResolvedPhotos] = useState<string[]>([]);
 
   useEffect(() => {
-    if (id && items.length > 0) {
-      const foundItem = items.find(i => i.id === id);
-      setItem(foundItem || null);
-      setIsStarred(foundItem?.tags?.includes('starred') || false);
-    }
+    const loadItem = async () => {
+      if (id && items.length > 0) {
+        const foundItem = items.find(i => i.id === id);
+        setItem(foundItem || null);
+        setIsStarred(foundItem?.tags?.includes('starred') || false);
+        
+        // Resolve photos async
+        if (foundItem) {
+          const { getAllPhotoUrlsAsync } = await import('@/utils/photoHelpers');
+          const photos = getPhotoUrls(foundItem);
+          const resolved = await Promise.all(
+            photos.map(photo => getAllPhotoUrlsAsync(photo))
+          );
+          setResolvedPhotos(resolved.flat());
+        }
+      }
+    };
+    
+    loadItem();
   }, [id, items]);
 
   if (!item) {
@@ -43,7 +58,7 @@ const WardrobeItemDetail = () => {
     );
   }
 
-  const photos = getPhotoUrls(item);
+  const photos = resolvedPhotos.length > 0 ? resolvedPhotos : getPhotoUrls(item);
   const daysSinceWorn = item.last_worn 
     ? Math.floor((new Date().getTime() - new Date(item.last_worn).getTime()) / (1000 * 3600 * 24))
     : null;

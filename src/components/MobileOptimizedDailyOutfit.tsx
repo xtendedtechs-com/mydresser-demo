@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,9 +13,15 @@ import {
   ChevronRight,
   Sun,
   CloudRain,
-  Wind
+  Wind,
+  Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useWardrobe } from '@/hooks/useWardrobe';
+import { useDailyOutfitSuggestions } from '@/hooks/useDailyOutfitSuggestions';
+import { getPrimaryPhotoUrl } from '@/utils/photoHelpers';
+import { OutfitAI } from '@/ai/OutfitAI';
+import { weatherService } from '@/services/weatherService';
 
 interface OutfitItem {
   id: string;
@@ -27,26 +33,80 @@ interface OutfitItem {
 export const MobileOptimizedDailyOutfit = () => {
   const [activeView, setActiveView] = useState<'outfit' | 'alternatives'>('outfit');
   const [liked, setLiked] = useState(false);
-
-  // Mock data for demonstration
-  const todayOutfit: OutfitItem[] = [
-    { id: '1', name: 'White Button Shirt', category: 'Top', image: '/placeholder.svg' },
-    { id: '2', name: 'Dark Denim Jeans', category: 'Bottom', image: '/placeholder.svg' },
-    { id: '3', name: 'Black Leather Jacket', category: 'Outerwear', image: '/placeholder.svg' },
-    { id: '4', name: 'White Sneakers', category: 'Shoes', image: '/placeholder.svg' }
-  ];
-
-  const weather = {
+  const [loading, setLoading] = useState(true);
+  const [todayOutfit, setTodayOutfit] = useState<OutfitItem[]>([]);
+  const [weather, setWeather] = useState({
     temp: 72,
     condition: 'Partly Cloudy',
     icon: Cloud
+  });
+  
+  const { items: wardrobeItems } = useWardrobe();
+  const { createSuggestion } = useDailyOutfitSuggestions();
+
+  useEffect(() => {
+    generateDailyOutfit();
+  }, [wardrobeItems]);
+
+  const generateDailyOutfit = async () => {
+    if (wardrobeItems.length === 0) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Get weather
+      const weatherData = await weatherService.getCurrentWeather();
+      setWeather({
+        temp: Math.round(weatherData.temperature),
+        condition: weatherData.description,
+        icon: weatherData.condition === 'clear' ? Sun : weatherData.condition === 'rain' ? CloudRain : Cloud
+      });
+
+      // Generate outfit
+      const outfitAI = new OutfitAI();
+      const suggestion = await outfitAI.generateOutfit({
+        wardrobeItems,
+        weather: weatherData,
+        occasion: 'casual'
+      });
+
+      if (suggestion && suggestion.items.length > 0) {
+        const outfitItems: OutfitItem[] = suggestion.items.map(item => ({
+          id: item.id,
+          name: item.name,
+          category: item.category,
+          image: getPrimaryPhotoUrl(item.photos, item.category)
+        }));
+        setTodayOutfit(outfitItems);
+        
+        // Save suggestion with correct schema
+        const today = new Date().toISOString().split('T')[0];
+        await createSuggestion({
+          outfit_id: suggestion.id,
+          suggestion_date: today,
+          time_slot: 'morning',
+          weather_data: weatherData,
+          occasion: 'casual',
+          confidence_score: suggestion.confidence || 0.8,
+          is_accepted: false,
+          is_rejected: false
+        });
+      }
+    } catch (error) {
+      console.error('Failed to generate outfit:', error);
+      toast.error('Could not generate outfit');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const occasions = ['Work', 'Casual Outing'];
 
   const handleRefresh = () => {
     toast.info('Generating new outfit...');
-    // Refresh logic here
+    generateDailyOutfit();
   };
 
   const handleLike = () => {
@@ -58,6 +118,32 @@ export const MobileOptimizedDailyOutfit = () => {
     toast.success('Outfit shared!');
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+          <p className="text-muted-foreground">Generating your outfit...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (todayOutfit.length === 0) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardHeader>
+            <CardTitle>No Outfit Available</CardTitle>
+            <CardDescription>
+              Add items to your wardrobe to get daily outfit suggestions
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
@@ -68,8 +154,8 @@ export const MobileOptimizedDailyOutfit = () => {
               <h1 className="text-2xl font-bold">Today's Outfit</h1>
               <p className="text-sm text-muted-foreground">AI-curated for you</p>
             </div>
-            <Button size="sm" variant="ghost" onClick={handleRefresh}>
-              <RefreshCw className="h-4 w-4" />
+            <Button size="sm" variant="ghost" onClick={handleRefresh} disabled={loading}>
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             </Button>
           </div>
         </div>
