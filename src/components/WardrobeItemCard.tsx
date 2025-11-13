@@ -86,7 +86,8 @@ const WardrobeItemCard = ({
   };
 
   useEffect(() => {
-    if (initialUrl.includes('/storage/v1/object/')) {
+    const parsed = deriveStoragePath(initialUrl);
+    if (parsed) {
       trySignUrl(initialUrl);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
