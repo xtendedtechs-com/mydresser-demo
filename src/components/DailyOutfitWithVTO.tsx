@@ -47,36 +47,10 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
     }
   }, [outfit.id, userPhoto]);
 
-  // Helper to convert blob URLs to data URLs for canvas compatibility
+  // Helper to convert URLs for canvas compatibility
   const convertBlobToDataUrl = async (url: string): Promise<string> => {
-    // If already a data URL, return as-is
-    if (url.startsWith('data:')) return url;
-    
-    // For blob URLs, skip conversion due to cross-origin issues in sandbox
-    // Just use the URL directly - canvas will handle it
-    if (url.startsWith('blob:')) {
-      console.warn('Using blob URL directly (conversion skipped):', url.substring(0, 50));
-      return url;
-    }
-    
-    // For HTTP(S) URLs, try to convert
-    if (url.startsWith('http')) {
-      try {
-        const response = await fetch(url);
-        const blob = await response.blob();
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
-      } catch (error) {
-        console.error('Failed to convert URL:', error);
-        return url; // Return original URL as fallback
-      }
-    }
-    
-    return url;
+    const { convertToDataUrl } = await import('@/utils/blobHelpers');
+    return convertToDataUrl(url);
   };
 
   const generateVTO = async () => {
@@ -89,9 +63,12 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
       // Convert user photo if it's a blob URL
       const userImageUrl = await convertBlobToDataUrl(userPhoto);
       
-      // Prepare clothing items with converted URLs
+      // Prepare clothing items with resolved storage URLs and blob conversion
+      const { getPrimaryPhotoUrlAsync } = await import('@/utils/photoHelpers');
       const clothingItemsPromises = outfit.items.map(async (item) => {
-        const photoUrl = getPrimaryPhotoUrl(item.photos, item.category);
+        // First resolve storage URLs (signed URLs if needed)
+        const photoUrl = await getPrimaryPhotoUrlAsync(item.photos, item.category);
+        // Then convert blobs to data URLs for canvas operations
         const convertedUrl = await convertBlobToDataUrl(photoUrl);
         return {
           id: item.id,
