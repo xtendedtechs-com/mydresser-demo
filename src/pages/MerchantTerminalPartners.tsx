@@ -8,9 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { AutoReorderSystem } from '@/components/merchant/AutoReorderSystem';
 import { 
   Handshake, Plus, TrendingUp, Package, 
-  Search, Filter, Send, FileText, CheckCircle, Clock
+  Search, Filter, Send, FileText, CheckCircle, Clock, RefreshCw
 } from 'lucide-react';
 
 const MerchantTerminalPartners = () => {
@@ -78,10 +79,14 @@ const MerchantTerminalPartners = () => {
       </div>
 
       <Tabs defaultValue="active" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 max-w-md">
+        <TabsList className="grid w-full grid-cols-4 max-w-2xl">
           <TabsTrigger value="active">Active</TabsTrigger>
           <TabsTrigger value="pending">Pending</TabsTrigger>
           <TabsTrigger value="bulk">Bulk Orders</TabsTrigger>
+          <TabsTrigger value="auto-reorder" className="gap-2">
+            <RefreshCw className="h-3 w-3" />
+            Auto-Reorder
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="active" className="space-y-6">
@@ -213,6 +218,10 @@ const MerchantTerminalPartners = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="auto-reorder">
+          <AutoReorderSystem />
         </TabsContent>
       </Tabs>
     </div>

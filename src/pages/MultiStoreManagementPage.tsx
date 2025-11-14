@@ -1,7 +1,9 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MultiStoreManager } from '@/components/MultiStoreManager';
 import { CentralizedInventory } from '@/components/CentralizedInventory';
-import { Store, Package } from 'lucide-react';
+import { StaffScheduling } from '@/components/merchant/StaffScheduling';
+import { OrganizationMembers } from '@/components/merchant/OrganizationMembers';
+import { Store, Package, Calendar, Users } from 'lucide-react';
 
 export default function MultiStoreManagementPage() {
   return (
@@ -9,19 +11,27 @@ export default function MultiStoreManagementPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Multi-Store Management</h1>
         <p className="text-muted-foreground">
-          Manage multiple locations, franchises, and centralized inventory
+          Manage locations, inventory, staff, and team members
         </p>
       </div>
 
       <Tabs defaultValue="stores" className="space-y-6">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-2xl grid-cols-4">
           <TabsTrigger value="stores" className="flex items-center gap-2">
             <Store className="h-4 w-4" />
-            Store Locations
+            Locations
           </TabsTrigger>
           <TabsTrigger value="inventory" className="flex items-center gap-2">
             <Package className="h-4 w-4" />
-            Centralized Inventory
+            Inventory
+          </TabsTrigger>
+          <TabsTrigger value="scheduling" className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            Scheduling
+          </TabsTrigger>
+          <TabsTrigger value="team" className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Team
           </TabsTrigger>
         </TabsList>
 
@@ -31,6 +41,14 @@ export default function MultiStoreManagementPage() {
 
         <TabsContent value="inventory">
           <CentralizedInventory />
+        </TabsContent>
+
+        <TabsContent value="scheduling">
+          <StaffScheduling />
+        </TabsContent>
+
+        <TabsContent value="team">
+          <OrganizationMembers />
         </TabsContent>
       </Tabs>
     </div>

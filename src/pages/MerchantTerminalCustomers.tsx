@@ -1,34 +1,40 @@
-import { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useOrders } from '@/hooks/useOrders';
-import { 
-  Users, Mail, MessageSquare, Search, 
-  TrendingUp, UserPlus, Star, Award, Send, Filter
-} from 'lucide-react';
-import { format } from 'date-fns';
-import { useToast } from '@/hooks/use-toast';
+import { CustomerCRM } from '@/components/merchant/CustomerCRM';
+import { LoyaltyProgram } from '@/components/merchant/LoyaltyProgram';
+import { Users, Award } from 'lucide-react';
 
 const MerchantTerminalCustomers = () => {
-  const { orders } = useOrders();
-  const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [messageDialogOpen, setMessageDialogOpen] = useState(false);
 
-  const customerData = useMemo(() => {
-    const customers: { [key: string]: { 
-      email: string; 
-      name: string;
-      orders: number; 
-      spent: number; 
-      lastOrder: Date;
-    }} = {};
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Customer Management</h1>
+        <p className="text-muted-foreground">Manage customer relationships and loyalty programs</p>
+      </div>
+
+      <Tabs defaultValue="crm" className="space-y-6">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="crm" className="gap-2">
+            <Users className="h-4 w-4" />
+            CRM
+          </TabsTrigger>
+          <TabsTrigger value="loyalty" className="gap-2">
+            <Award className="h-4 w-4" />
+            Loyalty Program
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="crm">
+          <CustomerCRM />
+        </TabsContent>
+
+        <TabsContent value="loyalty">
+          <LoyaltyProgram />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
 
     orders?.forEach(order => {
       const email = order.customer_email || 'unknown@example.com';
