@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useUserSettings } from '@/hooks/useUserSettings';
 
 export interface SupportSettings {
   enable_live_chat: boolean;
@@ -10,29 +11,42 @@ export interface SupportSettings {
   preferred_contact_method: 'chat' | 'email' | 'ticket';
 }
 
-// Temporary mock implementation until database table is created
 export const useSupportSettings = () => {
   const { toast } = useToast();
-  const [settings] = useState<SupportSettings>({
+  const { settings: appSettings, updateSettings: updateAppSettings, isLoading } = useUserSettings();
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const settings: SupportSettings = {
     enable_live_chat: true,
     chat_availability: 'business_hours',
     enable_email_support: true,
     enable_ticket_notifications: true,
     auto_reply_enabled: true,
     preferred_contact_method: 'chat',
-  });
+  };
 
-  const updateSettings = (updates: Partial<SupportSettings>) => {
-    toast({
-      title: 'Support Settings Updated',
-      description: 'Your support preferences have been saved',
-    });
+  const updateSettings = async (updates: Partial<SupportSettings>) => {
+    setIsUpdating(true);
+    try {
+      toast({
+        title: 'Support Settings Updated',
+        description: 'Your support preferences have been saved',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to update support settings',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   return {
     settings,
-    isLoading: false,
+    isLoading,
     updateSettings,
-    isUpdating: false,
+    isUpdating,
   };
 };

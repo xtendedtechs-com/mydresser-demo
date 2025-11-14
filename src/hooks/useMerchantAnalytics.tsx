@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface MerchantAnalyticsDay {
   date: string;
@@ -23,9 +24,61 @@ export const useMerchantAnalytics = () => {
   const [isCalculating, setIsCalculating] = useState(false);
 
   const fetchAnalytics = useCallback(async () => {
-    // Stub: provide empty but well-typed data so UI renders without errors
     setIsLoading(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Fetch orders for analytics
+      const { data: orders } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('merchant_id', user.id)
+        .order('created_at', { ascending: true });
+
+      if (!orders || orders.length === 0) {
+        setAnalytics([]);
+        return;
+      }
+
+      // Group by date and calculate daily metrics
+      const dailyData = new Map<string, MerchantAnalyticsDay>();
+      
+      orders.forEach(order => {
+        const date = new Date(order.created_at).toISOString().split('T')[0];
+        const existing = dailyData.get(date) || {
+          date,
+          sales: 0,
+          orders: 0,
+          views: 0,
+          total_sales: 0,
+          total_orders: 0,
+          total_items_sold: 0,
+          average_order_value: 0,
+          new_customers: 0,
+          returning_customers: 0,
+          top_selling_items: [],
+          revenue_by_category: {}
+        };
+
+        existing.sales += order.total_amount || 0;
+        existing.total_sales = existing.sales;
+        existing.orders += 1;
+        existing.total_orders = existing.orders;
+        existing.total_items_sold += (order.items as any[])?.length || 0;
+
+        dailyData.set(date, existing);
+      });
+
+      // Calculate average order values
+      dailyData.forEach((day, date) => {
+        day.average_order_value = day.orders > 0 ? day.sales / day.orders : 0;
+        dailyData.set(date, day);
+      });
+
+      setAnalytics(Array.from(dailyData.values()));
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
       setAnalytics([]);
     } finally {
       setIsLoading(false);
