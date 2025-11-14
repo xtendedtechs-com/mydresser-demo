@@ -19,6 +19,9 @@ import MerchantTerminalPage from '@/pages/MerchantTerminalPage';
 import MerchantTerminalMarketing from '@/pages/MerchantTerminalMarketing';
 import MerchantPage from "@/pages/MerchantPage";
 import MerchantOrders from "@/pages/MerchantOrders";
+import MerchantReports from "@/pages/merchant/MerchantReports";
+import BulkOperations from "@/pages/merchant/BulkOperations";
+import Notifications from "@/pages/merchant/Notifications";
 import NotFound from "@/pages/NotFound";
 import MultiStoreManagementPage from "@/pages/MultiStoreManagementPage";
 import MerchantToolsPage from "@/pages/MerchantToolsPage";
@@ -61,6 +64,9 @@ const TerminalApp = () => {
                 <Route path="/inventory" element={<MerchantTerminalInventory />} />
                 <Route path="/orders" element={<MerchantOrders />} />
                 <Route path="/customers" element={<MerchantTerminalCustomers />} />
+                <Route path="/reports" element={<MerchantReports />} />
+                <Route path="/bulk-operations" element={<BulkOperations />} />
+                <Route path="/notifications" element={<Notifications />} />
                 <Route path="/financial" element={<MerchantTerminalFinancial />} />
                 <Route path="/partnerships" element={<MerchantTerminalPartners />} />
                 <Route path="/analytics" element={<MerchantTerminalAnalytics />} />
