@@ -14,7 +14,8 @@ import {
   MessageSquare,
   Menu,
   X,
-  Wrench
+  Wrench,
+  Bell
 } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -46,6 +47,21 @@ const merchantLinks = [
     icon: Users,
   },
   {
+    title: "Reports",
+    href: "/terminal/reports",
+    icon: BarChart3,
+  },
+  {
+    title: "Bulk Ops",
+    href: "/terminal/bulk-operations",
+    icon: Package,
+  },
+  {
+    title: "Notifications",
+    href: "/terminal/notifications",
+    icon: Bell,
+  },
+  {
     title: "Financial",
     href: "/terminal/financial",
     icon: TrendingUp,
@@ -59,11 +75,6 @@ const merchantLinks = [
     title: "Marketing",
     href: "/terminal/marketing",
     icon: TrendingUp,
-  },
-  {
-    title: "Page",
-    href: "/terminal/page",
-    icon: MessageSquare,
   },
   {
     title: "Tools",
