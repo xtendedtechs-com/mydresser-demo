@@ -22,6 +22,9 @@ import MerchantOrders from "@/pages/MerchantOrders";
 import MerchantReports from "@/pages/merchant/MerchantReports";
 import BulkOperations from "@/pages/merchant/BulkOperations";
 import Notifications from "@/pages/merchant/Notifications";
+import AutoReorder from "@/pages/merchant/AutoReorder";
+import MobilePOS from "@/pages/merchant/MobilePOS";
+import Marketing from "@/pages/merchant/Marketing";
 import NotFound from "@/pages/NotFound";
 import MultiStoreManagementPage from "@/pages/MultiStoreManagementPage";
 import MerchantToolsPage from "@/pages/MerchantToolsPage";
@@ -67,11 +70,13 @@ const TerminalApp = () => {
                 <Route path="/reports" element={<MerchantReports />} />
                 <Route path="/bulk-operations" element={<BulkOperations />} />
                 <Route path="/notifications" element={<Notifications />} />
+                <Route path="/auto-reorder" element={<AutoReorder />} />
+                <Route path="/mobile-pos" element={<MobilePOS />} />
+                <Route path="/marketing" element={<Marketing />} />
                 <Route path="/financial" element={<MerchantTerminalFinancial />} />
                 <Route path="/partnerships" element={<MerchantTerminalPartners />} />
                 <Route path="/analytics" element={<MerchantTerminalAnalytics />} />
                 <Route path="/page" element={<MerchantTerminalPage />} />
-                <Route path="/marketing" element={<MerchantTerminalMarketing />} />
                 <Route path="/settings" element={<MerchantTerminalSettings />} />
                 <Route path="/support" element={<MerchantTerminalSupport />} />
                 <Route path="/tools" element={<MerchantToolsPage />} />

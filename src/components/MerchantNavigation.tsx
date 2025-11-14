@@ -57,6 +57,16 @@ const merchantLinks = [
     icon: Package,
   },
   {
+    title: "Auto-Reorder",
+    href: "/terminal/auto-reorder",
+    icon: Package,
+  },
+  {
+    title: "Mobile POS",
+    href: "/terminal/mobile-pos",
+    icon: ShoppingCart,
+  },
+  {
     title: "Notifications",
     href: "/terminal/notifications",
     icon: Bell,

@@ -1,8 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Activity } from 'lucide-react';
 import { useMerchantAnalytics } from '@/hooks/useMerchantAnalytics';
-import { MerchantDashboardOverview } from '@/components/merchant/MerchantDashboardOverview';
-import { MerchantCustomPanel } from '@/components/merchant/MerchantCustomPanel';
+import { EnhancedDashboardWidgets } from '@/components/merchant/EnhancedDashboardWidgets';
 
 const MerchantTerminalDashboard = () => {
   const { calculateDailyAnalytics, isCalculating } = useMerchantAnalytics();
@@ -24,14 +23,7 @@ const MerchantTerminalDashboard = () => {
         </Button>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <MerchantDashboardOverview />
-        </div>
-        <div>
-          <MerchantCustomPanel />
-        </div>
-      </div>
+      <EnhancedDashboardWidgets />
     </div>
   );
 };
