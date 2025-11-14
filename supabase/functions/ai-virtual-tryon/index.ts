@@ -197,11 +197,27 @@ serve(async (req) => {
     console.log('AI Gateway response structure:', JSON.stringify(data, null, 2).slice(0, 500));
 
     // Try multiple paths to get the image
-    const editedImage = 
-      data.choices?.[0]?.message?.images?.[0]?.image_url?.url ||
-      data.choices?.[0]?.message?.content?.find((c: any) => c.type === 'image_url')?.image_url?.url ||
-      data.data?.[0]?.url ||
-      data.image_url;
+    let editedImage = null;
+    
+    // Try direct image paths first
+    if (data.choices?.[0]?.message?.images?.[0]?.image_url?.url) {
+      editedImage = data.choices[0].message.images[0].image_url.url;
+    } else if (data.data?.[0]?.url) {
+      editedImage = data.data[0].url;
+    } else if (data.image_url) {
+      editedImage = data.image_url;
+    } else if (data.choices?.[0]?.message?.content) {
+      // Handle content array or string
+      const content = data.choices[0].message.content;
+      if (Array.isArray(content)) {
+        const imageContent = content.find((c: any) => c.type === 'image_url');
+        if (imageContent?.image_url?.url) {
+          editedImage = imageContent.image_url.url;
+        }
+      } else if (typeof content === 'string' && content.startsWith('http')) {
+        editedImage = content;
+      }
+    }
 
     if (!editedImage) {
       console.error('No image in response. Full response:', JSON.stringify(data, null, 2));
