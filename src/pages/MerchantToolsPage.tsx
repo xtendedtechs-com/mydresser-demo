@@ -2,7 +2,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DresserPlusAI } from '@/components/merchant/DresserPlusAI';
 import { MyStylistAI } from '@/components/merchant/MyStylistAI';
 import AdvancedMerchantTools from '@/components/AdvancedMerchantTools';
-import { Sparkles, Palette, Zap } from 'lucide-react';
+import { BulkOperationsCenter } from '@/components/merchant/BulkOperationsCenter';
+import { Sparkles, Palette, Zap, Package } from 'lucide-react';
 
 const MerchantToolsPage = () => {
   return (
@@ -15,7 +16,7 @@ const MerchantToolsPage = () => {
       </div>
 
       <Tabs defaultValue="dresser-plus" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="dresser-plus" className="gap-2">
             <Sparkles className="h-4 w-4" />
             Dresser+ AI
@@ -27,6 +28,10 @@ const MerchantToolsPage = () => {
           <TabsTrigger value="operations" className="gap-2">
             <Zap className="h-4 w-4" />
             Operations
+          </TabsTrigger>
+          <TabsTrigger value="bulk" className="gap-2">
+            <Package className="h-4 w-4" />
+            Bulk Operations
           </TabsTrigger>
         </TabsList>
 
@@ -40,6 +45,10 @@ const MerchantToolsPage = () => {
 
         <TabsContent value="operations">
           <AdvancedMerchantTools />
+        </TabsContent>
+
+        <TabsContent value="bulk">
+          <BulkOperationsCenter />
         </TabsContent>
       </Tabs>
     </div>

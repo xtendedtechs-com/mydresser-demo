@@ -1,29 +1,40 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useMerchantAnalytics } from '@/hooks/useMerchantAnalytics';
-import { useOrders } from '@/hooks/useOrders';
-import { useMerchantItems } from '@/hooks/useMerchantItems';
-import { useState, useMemo } from 'react';
-import { 
-  DollarSign, TrendingUp, ShoppingCart, Package, 
-  Download, Users, Star, Eye, Heart, Activity
-} from 'lucide-react';
-import { format, subDays } from 'date-fns';
+import { MerchantAnalytics } from '@/components/MerchantAnalytics';
+import { PredictiveAnalytics } from '@/components/merchant/PredictiveAnalytics';
+import { BarChart3, Brain } from 'lucide-react';
 
 const MerchantTerminalAnalytics = () => {
-  const { analytics, calculateDailyAnalytics, isCalculating } = useMerchantAnalytics();
-  const { orders } = useOrders();
-  const { items } = useMerchantItems();
-  const [dateRange, setDateRange] = useState('30');
 
-  const dateRangeNum = parseInt(dateRange);
-  const startDate = subDays(new Date(), dateRangeNum);
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Analytics & Insights</h1>
+        <p className="text-muted-foreground">Performance metrics and AI-powered predictions</p>
+      </div>
 
-  const recentAnalytics = useMemo(() => {
-    return analytics?.filter(a => new Date(a.date) >= startDate) || [];
-  }, [analytics, startDate]);
+      <Tabs defaultValue="analytics" className="space-y-6">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="analytics" className="gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Analytics
+          </TabsTrigger>
+          <TabsTrigger value="predictive" className="gap-2">
+            <Brain className="h-4 w-4" />
+            Predictive AI
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="analytics">
+          <MerchantAnalytics />
+        </TabsContent>
+
+        <TabsContent value="predictive">
+          <PredictiveAnalytics />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
 
   const totalRevenue = recentAnalytics.reduce((sum, a) => sum + (a.total_sales || 0), 0);
   const totalOrders = recentAnalytics.reduce((sum, a) => sum + (a.total_orders || 0), 0);

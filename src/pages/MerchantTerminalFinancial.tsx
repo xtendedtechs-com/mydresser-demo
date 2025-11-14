@@ -1,28 +1,40 @@
-import { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { useMerchantAnalytics } from '@/hooks/useMerchantAnalytics';
-import { useOrders } from '@/hooks/useOrders';
-import { 
-  DollarSign, TrendingUp, TrendingDown, Download, 
-  Receipt, CreditCard, Wallet, FileText, PieChart
-} from 'lucide-react';
-import { format, subDays } from 'date-fns';
+import { MerchantFinancialDashboard } from '@/components/merchant/MerchantFinancialDashboard';
+import { SupplierManagement } from '@/components/merchant/SupplierManagement';
+import { DollarSign, Truck } from 'lucide-react';
 
 const MerchantTerminalFinancial = () => {
-  const { analytics } = useMerchantAnalytics();
-  const { orders } = useOrders();
-  const [dateRange, setDateRange] = useState('30');
 
-  const dateRangeNum = parseInt(dateRange);
-  const startDate = subDays(new Date(), dateRangeNum);
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Financial Management</h1>
+        <p className="text-muted-foreground">Track finances and manage supplier relationships</p>
+      </div>
 
-  const filteredAnalytics = useMemo(() => {
-    return analytics?.filter(a => new Date(a.date) >= startDate) || [];
-  }, [analytics, startDate]);
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="overview" className="gap-2">
+            <DollarSign className="h-4 w-4" />
+            Financial Overview
+          </TabsTrigger>
+          <TabsTrigger value="suppliers" className="gap-2">
+            <Truck className="h-4 w-4" />
+            Suppliers
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview">
+          <MerchantFinancialDashboard />
+        </TabsContent>
+
+        <TabsContent value="suppliers">
+          <SupplierManagement />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
 
   const totalRevenue = filteredAnalytics.reduce((sum, a) => sum + (a.total_sales || 0), 0);
   const totalOrders = filteredAnalytics.reduce((sum, a) => sum + (a.total_orders || 0), 0);
