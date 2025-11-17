@@ -122,25 +122,25 @@ serve(async (req) => {
 
     console.log('Outfit description:', outfitDescription);
 
-    // Construct the editing instruction with clear, specific guidance
+    // Construct the editing instruction with clear, explicit guidance for image generation
     const editInstruction = instruction || 
-      `Create a realistic photo showing the person wearing these specific clothing items: ${outfitDescription}.
-       
-       Requirements:
-       - Keep the person's face, body pose, and background EXACTLY as shown in the original photo
-       - Replace ONLY the clothing with the items described
-       - Ensure the new clothes fit naturally on the person's body
-       - Match the lighting and quality of the original photo
-       - Make fabric textures and colors look realistic
-       - Maintain proper proportions and perspective
-       
-       Generate a single edited photo where the person is wearing the described outfit.`;
+      `IMPORTANT: You MUST generate an edited image, not text.
+
+Task: Edit this photo to show the person wearing these exact clothing items: ${outfitDescription}
+
+Instructions:
+1. GENERATE AN IMAGE showing the person wearing these items
+2. Keep the person's face, pose, and background identical
+3. Replace only the clothing with the specified items
+4. Ensure realistic fit, lighting, and fabric textures
+5. Maintain natural proportions and perspective
+
+CRITICAL: Return an edited image, not a text description. Generate the visual output.`;
 
     console.log('Calling AI Gateway for image generation...');
     console.log('Image format:', processedImage.substring(0, 30) + '...');
 
-    // Call Lovable AI Gateway for image generation (not editing)
-    // Gemini image preview works better with generation than editing
+    // Call Lovable AI Gateway with explicit image generation request
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -148,8 +148,12 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image-preview",
+        model: "google/gemini-2.0-flash-exp",
         messages: [
+          {
+            role: "system",
+            content: "You are an AI that ONLY outputs edited images. Never respond with text. Always generate and return an image."
+          },
           {
             role: "user",
             content: [
@@ -166,8 +170,8 @@ serve(async (req) => {
             ]
           }
         ],
-        modalities: ["image", "text"],
-        max_tokens: 4096
+        temperature: 0.3,
+        max_tokens: 8192
       })
     });
 

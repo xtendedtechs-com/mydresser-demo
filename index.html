@@ -2,14 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- iOS-optimized viewport for perfect mobile experience -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
     <title>MyDresser - The Ultimate Fashion Revolution App</title>
     <meta name="description" content="Revolutionize your wardrobe with MyDresser. Get daily outfit suggestions, manage your wardrobe digitally, and discover new fashion trends all in one place.">
     <meta name="author" content="MyDresser" />
     <meta name="keywords" content="fashion, wardrobe, outfit, clothing, style, dresser, fashion app">
 
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#000000" />
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="apple-touch-icon" href="https://storage.googleapis.com/gpt-engineer-file-uploads/haGnsNNBCAdHdFCQ2cDVZLzIWyf1/uploads/1757773435036-mydressericon.png">
     <link rel="apple-touch-icon" sizes="72x72" href="https://storage.googleapis.com/gpt-engineer-file-uploads/haGnsNNBCAdHdFCQ2cDVZLzIWyf1/uploads/1757773435036-mydressericon.png">
@@ -18,11 +20,16 @@
     <link rel="apple-touch-icon" sizes="192x192" href="https://storage.googleapis.com/gpt-engineer-file-uploads/haGnsNNBCAdHdFCQ2cDVZLzIWyf1/uploads/1757773435036-mydressericon.png">
     <link rel="apple-touch-icon" sizes="512x512" href="https://storage.googleapis.com/gpt-engineer-file-uploads/haGnsNNBCAdHdFCQ2cDVZLzIWyf1/uploads/1757773435036-mydressericon.png">
     
-    <!-- iOS PWA -->
+    <!-- iOS PWA Optimization -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="MyDresser" />
     <meta name="mobile-web-app-capable" content="yes" />
+    
+    <!-- Performance & Mobile Optimization -->
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="MobileOptimized" content="width" />
 
     <meta property="og:title" content="MyDresser - The Ultimate Fashion Revolution App" />
     <meta property="og:description" content="Revolutionize your wardrobe with MyDresser. Get daily outfit suggestions, manage your wardrobe digitally, and discover new fashion trends." />
