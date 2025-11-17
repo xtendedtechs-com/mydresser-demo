@@ -54,37 +54,39 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
 
   return (
     <>
-      {/* Top Header with Menu and Notifications */}
-      <div className="fixed top-0 left-0 right-0 bg-card/95 backdrop-blur-sm border-b border-border z-50 safe-area-inset-top">
-        <div className="flex justify-between items-center px-4 py-3">
+      {/* Top Header with Menu and Notifications - iOS Glass Effect */}
+      <div className="fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-[var(--backdrop-blur)] border-b border-border/50 z-50 safe-area-inset-top shadow-[var(--shadow-sm)]">
+        <div className="flex justify-between items-center px-4 py-3 animate-fade-in">
           <MainSideMenu />
           <EnhancedNotificationBell />
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 safe-area-inset">
-        <div className="flex justify-around items-center max-w-md mx-auto px-2 py-2">
-          {navItems.map(({ name, href, icon: Icon, id }) => {
-            const isActive = location.pathname === href || 
-                            (href !== "/" && location.pathname.startsWith(href));
-            
-            return (
-              <Link
-                key={id}
-                to={href}
-                className={cn(
-                  "flex flex-col items-center gap-0.5 py-1.5 px-2 rounded-lg transition-all duration-200 flex-1 min-w-0",
-                  isActive
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <Icon size={18} className="flex-shrink-0" />
-                <span className="text-xs font-medium truncate w-full text-center">{name}</span>
-              </Link>
-            );
-          })}
+      {/* Bottom Navigation - iOS Floating Style */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 safe-area-inset px-4 pb-4 pointer-events-none">
+        <div className="bg-card/95 backdrop-blur-[var(--backdrop-blur)] border border-border/50 rounded-[20px] shadow-[var(--shadow-lg)] max-w-md mx-auto pointer-events-auto">
+          <div className="flex justify-around items-center px-2 py-3">
+            {navItems.map(({ name, href, icon: Icon, id }) => {
+              const isActive = location.pathname === href || 
+                              (href !== "/" && location.pathname.startsWith(href));
+              
+              return (
+                <Link
+                  key={id}
+                  to={href}
+                  className={cn(
+                    "flex flex-col items-center gap-1 py-2 px-3 rounded-[12px] transition-smooth flex-1 min-w-0 active:scale-95",
+                    isActive
+                      ? "text-primary bg-primary/10"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                  )}
+                >
+                  <Icon size={20} className="flex-shrink-0" />
+                  <span className="text-xs font-semibold truncate w-full text-center">{name}</span>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </nav>
     </>
