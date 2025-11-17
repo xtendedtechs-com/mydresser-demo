@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SmartListCreator } from '@/components/collections/SmartListCreator';
 import { SmartListViewer } from '@/components/collections/SmartListViewer';
+import { EmptyStateCard } from '@/components/EmptyStateCard';
 
 interface Collection {
   id: string;
@@ -289,13 +290,15 @@ export default function CollectionsPage() {
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
               </div>
             ) : collections.length === 0 ? (
-              <Card className="p-12 text-center">
-                <p className="text-muted-foreground mb-4">No collections yet</p>
-                <Button onClick={() => setIsCreateDialogOpen(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Your First Collection
-                </Button>
-              </Card>
+              <EmptyStateCard
+                icon={<Grid className="h-8 w-8 text-muted-foreground" />}
+                title="No collections yet"
+                description="Create your first collection to organize your wardrobe items and outfits"
+                action={{
+                  label: "Create Your First Collection",
+                  onClick: () => setIsCreateDialogOpen(true)
+                }}
+              />
             ) : (
               <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-4'}>
                 {collections.map((collection) => (
@@ -363,19 +366,15 @@ export default function CollectionsPage() {
             )}
 
             {dynamicLists.length === 0 && !isCreateSmartListOpen ? (
-              <Card className="p-12 text-center">
-                <Sparkles className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground mb-2">
-                  Smart Lists automatically organize your wardrobe based on rules you define
-                </p>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Create dynamic lists that update automatically when items match your criteria
-                </p>
-                <Button onClick={() => setIsCreateSmartListOpen(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Your First Smart List
-                </Button>
-              </Card>
+              <EmptyStateCard
+                icon={<Sparkles className="h-8 w-8 text-muted-foreground" />}
+                title="Smart Lists"
+                description="Smart Lists automatically organize your wardrobe based on rules you define. Create dynamic lists that update automatically when items match your criteria."
+                action={{
+                  label: "Create Your First Smart List",
+                  onClick: () => setIsCreateSmartListOpen(true)
+                }}
+              />
             ) : (
               !isCreateSmartListOpen && (
                 <div className="space-y-4">
