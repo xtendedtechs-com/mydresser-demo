@@ -93,14 +93,14 @@ const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-4">
-      {/* Hero Header with Gradient */}
-      <div className="bg-gradient-to-br from-primary/10 via-secondary/5 to-background border-b">
+    <div className="min-h-screen bg-gradient-to-b from-background via-secondary/20 to-background pb-20 md:pb-4">
+      {/* Hero Header - iOS Blur */}
+      <div className="glass-card border-b border-border/50 shadow-[var(--shadow-md)]">
         <div className="container max-w-7xl mx-auto px-4 py-6 lg:px-6">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start justify-between gap-4 animate-fade-in">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <Avatar className="h-12 w-12 border-2 border-primary/20">
+                <Avatar className="h-12 w-12 border-2 border-primary/20 shadow-[var(--shadow-sm)]">
                   <AvatarImage src={profile?.avatar_url || ''} />
                   <AvatarFallback>{profile?.full_name?.charAt(0) || 'U'}</AvatarFallback>
                 </Avatar>
@@ -140,64 +140,77 @@ const Home = () => {
       </div>
 
       <main className="container max-w-7xl mx-auto px-4 lg:px-6 py-6 space-y-6">
-        {/* Daily Outfit - Top Priority */}
-        <RealDailyOutfit />
+        {/* Daily Outfit - Top Priority with iOS Design */}
+        <div className="ios-card overflow-hidden animate-scale-in">
+          <RealDailyOutfit />
+        </div>
 
-        {/* Stats Dashboard */}
+        {/* Stats Dashboard - iOS Floating Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-          <Card className="hover:shadow-lg transition-all cursor-pointer" onClick={() => navigate('/wardrobe')}>
+          <div className="ios-card hover-lift transition-smooth cursor-pointer animate-fade-in" onClick={() => navigate('/wardrobe')}>
             <CardContent className="p-4 text-center">
-              <Shirt className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-primary" />
+              <div className="p-2 bg-primary/10 rounded-full w-fit mx-auto mb-2">
+                <Shirt className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+              </div>
               <p className="text-2xl sm:text-3xl font-bold">{stats.wardrobeItems}</p>
               <p className="text-xs text-muted-foreground">Wardrobe</p>
             </CardContent>
-          </Card>
+          </div>
           
-          <Card className="hover:shadow-lg transition-all">
+          <div className="ios-card hover-lift transition-smooth animate-fade-in" style={{ animationDelay: '0.1s' }}>
             <CardContent className="p-4 text-center">
-              <Heart className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-rose-500" />
+              <div className="p-2 bg-rose-500/10 rounded-full w-fit mx-auto mb-2">
+                <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-rose-500" />
+              </div>
               <p className="text-2xl sm:text-3xl font-bold">{stats.favoriteItems}</p>
               <p className="text-xs text-muted-foreground">Favorites</p>
             </CardContent>
-          </Card>
+          </div>
           
-          <Card className="hover:shadow-lg transition-all">
+          <div className="ios-card hover-lift transition-smooth animate-fade-in" style={{ animationDelay: '0.2s' }}>
             <CardContent className="p-4 text-center">
-              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-blue-500" />
+              <div className="p-2 bg-blue-500/10 rounded-full w-fit mx-auto mb-2">
+                <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-blue-500" />
+              </div>
               <p className="text-2xl sm:text-3xl font-bold">{stats.totalWears}</p>
               <p className="text-xs text-muted-foreground">Wears</p>
             </CardContent>
-          </Card>
+          </div>
           
-          <Card className="hover:shadow-lg transition-all">
+          <div className="ios-card hover-lift transition-smooth animate-fade-in" style={{ animationDelay: '0.3s' }}>
             <CardContent className="p-4 text-center">
-              <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-purple-500" />
+              <div className="p-2 bg-purple-500/10 rounded-full w-fit mx-auto mb-2">
+                <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-purple-500" />
+              </div>
               <p className="text-2xl sm:text-3xl font-bold">{stats.outfitsCreated}</p>
               <p className="text-xs text-muted-foreground">Outfits</p>
             </CardContent>
-          </Card>
+          </div>
           
-          <Card className="hover:shadow-lg transition-all col-span-2 sm:col-span-1">
+          <div className="ios-card hover-lift transition-smooth col-span-2 sm:col-span-1 animate-fade-in" style={{ animationDelay: '0.4s' }}>
             <CardContent className="p-4 text-center">
-              <Flame className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 text-orange-500" />
+              <div className="p-2 bg-orange-500/10 rounded-full w-fit mx-auto mb-2">
+                <Flame className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500" />
+              </div>
               <p className="text-2xl sm:text-3xl font-bold">{Math.floor(stats.styleScore / 10)}</p>
               <p className="text-xs text-muted-foreground">Streak Days</p>
             </CardContent>
-          </Card>
+          </div>
         </div>
 
-        {/* Trending Actions - Eye-catching Cards */}
+        {/* Trending Actions - iOS Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {trendingActions.map((action) => (
-            <Card 
+          {trendingActions.map((action, index) => (
+            <div 
               key={action.title}
-              className="group hover:shadow-xl transition-all cursor-pointer overflow-hidden border-2 hover:border-primary/50"
+              className="glass-card group hover-lift transition-smooth cursor-pointer overflow-hidden animate-scale-in"
+              style={{ animationDelay: `${index * 0.1}s` }}
               onClick={() => action.href.startsWith('#') ? setActiveTab('today') : navigate(action.href)}
             >
               <div className={`h-2 bg-gradient-to-r ${action.color}`} />
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-3">
-                  <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color} bg-opacity-10`}>
+                  <div className={`p-2 rounded-full bg-gradient-to-br ${action.color} bg-opacity-10`}>
                     <action.icon className="w-5 h-5 text-primary" />
                   </div>
                   {action.badge && (
@@ -209,24 +222,25 @@ const Home = () => {
                 <h3 className="font-semibold mb-1">{action.title}</h3>
                 <p className="text-sm text-muted-foreground">{action.description}</p>
               </CardContent>
-            </Card>
+            </div>
           ))}
         </div>
 
-        {/* Quick Links */}
-        <Card>
+        {/* Quick Links - iOS Design */}
+        <div className="ios-card animate-fade-in">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg">Quick Access</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              {quickLinks.map((link) => (
+              {quickLinks.map((link, index) => (
                 <Button
                   key={link.label}
-                  variant="outline"
+                  variant="secondary"
                   size="sm"
                   onClick={() => navigate(link.href)}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 transition-smooth animate-scale-in"
+                  style={{ animationDelay: `${index * 0.05}s` }}
                 >
                   <link.icon className="w-4 h-4" />
                   {link.label}
@@ -234,16 +248,16 @@ const Home = () => {
               ))}
             </div>
           </CardContent>
-        </Card>
+        </div>
 
-        {/* Main Content */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
-            <TabsTrigger value="discover" className="flex items-center gap-2">
+        {/* Main Content with iOS Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6 animate-fade-in">
+          <TabsList className="glass-card grid w-full grid-cols-2 sm:grid-cols-4 h-auto p-1 shadow-[var(--shadow-sm)]">
+            <TabsTrigger value="discover" className="flex items-center gap-2 rounded-[12px]">
               <Eye className="w-4 h-4" />
               Discover
             </TabsTrigger>
-            <TabsTrigger value="recommendations" className="flex items-center gap-2">
+            <TabsTrigger value="recommendations" className="flex items-center gap-2 rounded-[12px]">
               <Sparkles className="w-4 h-4" />
               For You
             </TabsTrigger>
