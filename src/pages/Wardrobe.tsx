@@ -21,54 +21,54 @@ const Wardrobe = () => {
   const [showSettings, setShowSettings] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-4">
-      <header className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border z-10">
+    <div className="min-h-screen bg-gradient-to-b from-background via-secondary/20 to-background pb-20 md:pb-4">
+      <header className="sticky top-0 glass-card border-b border-border/50 z-10 shadow-[var(--shadow-md)]">
         <div className="container max-w-7xl mx-auto px-4 py-4 lg:px-6">
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold fashion-text-gradient mb-3 sm:mb-4">{t('wardrobe.title')}</h1>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold fashion-text-gradient mb-3 sm:mb-4 animate-fade-in">{t('wardrobe.title')}</h1>
           
           <div className="flex justify-between items-center gap-2">
             <div className="flex gap-1 flex-wrap">
               <Button
-                variant={viewMode === "grid" ? "default" : "outline"}
+                variant={viewMode === "grid" ? "default" : "secondary"}
                 size="sm"
                 onClick={() => setViewMode("grid")}
-                className="px-2 sm:px-3"
+                className="px-2 sm:px-3 transition-smooth"
               >
                 <Grid3X3 size={16} />
                 <span className="sr-only sm:not-sr-only sm:ml-1 text-xs">{t('common.view')}</span>
               </Button>
               <Button
-                variant={viewMode === "vector" ? "default" : "outline"}
+                variant={viewMode === "vector" ? "default" : "secondary"}
                 size="sm"
                 onClick={() => setViewMode("vector")}
-                className="px-2 sm:px-3"
+                className="px-2 sm:px-3 transition-smooth"
               >
                 <Home size={16} />
                 <span className="sr-only sm:not-sr-only sm:ml-1 text-xs">Vector</span>
               </Button>
               <Button
-                variant={viewMode === "search" ? "default" : "outline"}
+                variant={viewMode === "search" ? "default" : "secondary"}
                 size="sm"
                 onClick={() => setViewMode("search")}
-                className="px-2 sm:px-3"
+                className="px-2 sm:px-3 transition-smooth"
               >
                 <Search size={16} />
                 <span className="sr-only sm:not-sr-only sm:ml-1 text-xs">{t('common.search')}</span>
               </Button>
               <Button
-                variant={viewMode === "outfits" ? "default" : "outline"}
+                variant={viewMode === "outfits" ? "default" : "secondary"}
                 size="sm"
                 onClick={() => setViewMode("outfits")}
-                className="px-2 sm:px-3"
+                className="px-2 sm:px-3 transition-smooth"
               >
                 <Zap size={16} />
                 <span className="sr-only lg:not-sr-only lg:ml-1 text-xs">{t('nav.outfits')}</span>
               </Button>
               <Button
-                variant={viewMode === "laundry" ? "default" : "outline"}
+                variant={viewMode === "laundry" ? "default" : "secondary"}
                 size="sm"
                 onClick={() => setViewMode("laundry")}
-                className="px-2 sm:px-3"
+                className="px-2 sm:px-3 transition-smooth"
               >
                 <List size={16} />
                 <span className="sr-only lg:not-sr-only lg:ml-1 text-xs">Laundry</span>
