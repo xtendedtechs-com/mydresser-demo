@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { MerchantNavigation } from "@/components/MerchantNavigation";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { useProfile } from "@/hooks/useProfile";
+import { PageTransition } from "@/components/PageTransition";
 
 // Merchant Pages
 import MerchantLanding from "@/pages/MerchantLanding";
@@ -39,19 +40,21 @@ const TerminalApp = () => {
     <>
         {!isAuthenticated ? (
           <Routes>
-            <Route path="/" element={<MerchantLanding />} />
-            <Route path="/auth" element={<MerchantAuth />} />
+            <Route path="/" element={<PageTransition><MerchantLanding /></PageTransition>} />
+            <Route path="/auth" element={<PageTransition><MerchantAuth /></PageTransition>} />
             <Route path="*" element={<Navigate to="/terminal" replace />} />
           </Routes>
         ) : !isMerchant ? (
           <Routes>
             <Route path="*" element={
-              <div className="min-h-screen bg-background flex items-center justify-center">
-                <div className="text-center space-y-4">
-                  <h2 className="text-2xl font-bold">Access Denied</h2>
-                  <p className="text-muted-foreground">This terminal is for merchants only.</p>
+              <PageTransition>
+                <div className="min-h-screen bg-background flex items-center justify-center">
+                  <div className="text-center space-y-4">
+                    <h2 className="text-2xl font-bold">Access Denied</h2>
+                    <p className="text-muted-foreground">This terminal is for merchants only.</p>
+                  </div>
                 </div>
-              </div>
+              </PageTransition>
             } />
           </Routes>
         ) : (
@@ -59,23 +62,23 @@ const TerminalApp = () => {
             <MerchantNavigation />
             <main className="md:pl-64 min-h-screen bg-background">
               <Routes>
-                <Route path="/" element={<MerchantTerminalDashboard />} />
-                <Route path="/register" element={<MerchantTerminalRegister />} />
-                <Route path="/inventory" element={<MerchantTerminalInventory />} />
-                <Route path="/orders" element={<MerchantOrders />} />
-                <Route path="/customers" element={<MerchantTerminalCustomers />} />
-                <Route path="/reports" element={<MerchantReports />} />
-                <Route path="/notifications" element={<Notifications />} />
-                <Route path="/marketing" element={<Marketing />} />
-                <Route path="/financial" element={<MerchantTerminalFinancial />} />
-                <Route path="/partnerships" element={<MerchantTerminalPartners />} />
-                <Route path="/analytics" element={<MerchantTerminalAnalytics />} />
-                <Route path="/page" element={<MerchantTerminalPage />} />
-                <Route path="/settings" element={<MerchantTerminalSettings />} />
-                <Route path="/support" element={<MerchantTerminalSupport />} />
-                <Route path="/tools" element={<MerchantToolsPage />} />
-                <Route path="/multi-store" element={<MultiStoreManagementPage />} />
-                <Route path="*" element={<NotFound />} />
+                <Route path="/" element={<PageTransition><MerchantTerminalDashboard /></PageTransition>} />
+                <Route path="/register" element={<PageTransition><MerchantTerminalRegister /></PageTransition>} />
+                <Route path="/inventory" element={<PageTransition><MerchantTerminalInventory /></PageTransition>} />
+                <Route path="/orders" element={<PageTransition><MerchantOrders /></PageTransition>} />
+                <Route path="/customers" element={<PageTransition><MerchantTerminalCustomers /></PageTransition>} />
+                <Route path="/reports" element={<PageTransition><MerchantReports /></PageTransition>} />
+                <Route path="/notifications" element={<PageTransition><Notifications /></PageTransition>} />
+                <Route path="/marketing" element={<PageTransition><Marketing /></PageTransition>} />
+                <Route path="/financial" element={<PageTransition><MerchantTerminalFinancial /></PageTransition>} />
+                <Route path="/partnerships" element={<PageTransition><MerchantTerminalPartners /></PageTransition>} />
+                <Route path="/analytics" element={<PageTransition><MerchantTerminalAnalytics /></PageTransition>} />
+                <Route path="/page" element={<PageTransition><MerchantTerminalPage /></PageTransition>} />
+                <Route path="/settings" element={<PageTransition><MerchantTerminalSettings /></PageTransition>} />
+                <Route path="/support" element={<PageTransition><MerchantTerminalSupport /></PageTransition>} />
+                <Route path="/tools" element={<PageTransition><MerchantToolsPage /></PageTransition>} />
+                <Route path="/multi-store" element={<PageTransition><MultiStoreManagementPage /></PageTransition>} />
+                <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
               </Routes>
             </main>
           </>

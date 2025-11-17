@@ -12,6 +12,7 @@ import { QuickActionsMenu } from "@/components/QuickActionsMenu";
 import { KeyboardShortcutsHelper } from "@/components/KeyboardShortcutsHelper";
 import { useSecurityHeaders } from "@/hooks/useSecurityHeaders";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { PageTransition } from "@/components/PageTransition";
 
 // Lazy load pages for code splitting
 const Index = lazy(() => import("@/pages/Index"));
@@ -125,11 +126,11 @@ export const AuthWrapper = () => {
       {!isAuthenticated ? (
         <Suspense fallback={<LoadingScreen />}>
           <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="*" element={<Landing />} />
+            <Route path="/" element={<PageTransition><Landing /></PageTransition>} />
+            <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
+            <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
+            <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
+            <Route path="*" element={<PageTransition><Landing /></PageTransition>} />
           </Routes>
         </Suspense>
       ) : (
@@ -141,99 +142,99 @@ export const AuthWrapper = () => {
           <KeyboardShortcutsHelper />
           <Suspense fallback={<LoadingScreen />}>
             <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/wardrobe" element={<Wardrobe />} />
-            <Route path="/market" element={<Market />} />
-            <Route path="/market/item/:id" element={<MarketItemDetail />} />
-            <Route path="/merchant/:merchantId" element={<MerchantPage />} />
-            <Route path="/add" element={<Add />} />
-            <Route path="/outfit-generator" element={<DailyOutfitGenerator />} />
-            <Route path="/dresser" element={<DresserPage />} />
-            <Route path="/collections" element={<CollectionsPage />} />
-            <Route path="/social" element={<SocialPage />} />
-            <Route path="/social/feed" element={<SocialFeed />} />
-            <Route path="/profile/:userId" element={<UserProfile />} />
-            <Route path="/tryon" element={<VirtualTryOn />} />
-            <Route path="/ai-assistant" element={<AIAssistantPage />} />
-            <Route path="/wardrobe-insights" element={<WardrobeInsightsPage />} />
-            <Route path="/wardrobe-insights/advanced" element={<AdvancedWardrobeInsights />} />
-            <Route path="/2nddresser" element={<SecondDresserPage />} />
-            <Route path="/transactions" element={<TransactionsPage />} />
-            <Route path="/messages" element={<MessagesPage />} />
-            <Route path="/virtual-tryon" element={<VirtualTryOnPage />} />
-            <Route path="/mymirror" element={<MyMirrorPage />} />
-            <Route path="/wardrobe-builder" element={<WardrobeBuilder />} />
-            <Route path="/settings" element={<ComprehensiveSettingsPage />} />
-            <Route path="/settings/authentication" element={<AuthenticationSettings />} />
-            <Route path="/integrations" element={<IntegrationsPage />} />
-            <Route path="/discovery" element={<DiscoveryPage />} />
-            <Route path="/discover" element={<DiscoverPage />} />
-            <Route path="/community" element={<CommunityPage />} />
-            <Route path="/international" element={<InternationalSettingsPage />} />
-            <Route path="/support" element={<SupportsResources />} />
-            <Route path="/reports" element={<ReportsAnalyticsPage />} />
-            <Route path="/analytics" element={<UserAnalyticsPage />} />
-          <Route path="/analytics/advanced" element={<AdvancedAnalyticsPage />} />
-          <Route path="/personalization" element={<PersonalizationHub />} />
-            <Route path="/merchant-analytics" element={<MerchantAnalyticsPage />} />
-            <Route path="/outfit-history" element={<OutfitHistoryPage />} />
-            <Route path="/weather" element={<WeatherPage />} />
-            <Route path="/account" element={<Account />} />
-            <Route path="/profile-setup" element={<ProfileSetup />} />
-            <Route path="/data-export" element={<DataExportPage />} />
+            <Route path="/" element={<PageTransition><Index /></PageTransition>} />
+            <Route path="/wardrobe" element={<PageTransition><Wardrobe /></PageTransition>} />
+            <Route path="/market" element={<PageTransition><Market /></PageTransition>} />
+            <Route path="/market/item/:id" element={<PageTransition><MarketItemDetail /></PageTransition>} />
+            <Route path="/merchant/:merchantId" element={<PageTransition><MerchantPage /></PageTransition>} />
+            <Route path="/add" element={<PageTransition><Add /></PageTransition>} />
+            <Route path="/outfit-generator" element={<PageTransition><DailyOutfitGenerator /></PageTransition>} />
+            <Route path="/dresser" element={<PageTransition><DresserPage /></PageTransition>} />
+            <Route path="/collections" element={<PageTransition><CollectionsPage /></PageTransition>} />
+            <Route path="/social" element={<PageTransition><SocialPage /></PageTransition>} />
+            <Route path="/social/feed" element={<PageTransition><SocialFeed /></PageTransition>} />
+            <Route path="/profile/:userId" element={<PageTransition><UserProfile /></PageTransition>} />
+            <Route path="/tryon" element={<PageTransition><VirtualTryOn /></PageTransition>} />
+            <Route path="/ai-assistant" element={<PageTransition><AIAssistantPage /></PageTransition>} />
+            <Route path="/wardrobe-insights" element={<PageTransition><WardrobeInsightsPage /></PageTransition>} />
+            <Route path="/wardrobe-insights/advanced" element={<PageTransition><AdvancedWardrobeInsights /></PageTransition>} />
+            <Route path="/2nddresser" element={<PageTransition><SecondDresserPage /></PageTransition>} />
+            <Route path="/transactions" element={<PageTransition><TransactionsPage /></PageTransition>} />
+            <Route path="/messages" element={<PageTransition><MessagesPage /></PageTransition>} />
+            <Route path="/virtual-tryon" element={<PageTransition><VirtualTryOnPage /></PageTransition>} />
+            <Route path="/mymirror" element={<PageTransition><MyMirrorPage /></PageTransition>} />
+            <Route path="/wardrobe-builder" element={<PageTransition><WardrobeBuilder /></PageTransition>} />
+            <Route path="/settings" element={<PageTransition><ComprehensiveSettingsPage /></PageTransition>} />
+            <Route path="/settings/authentication" element={<PageTransition><AuthenticationSettings /></PageTransition>} />
+            <Route path="/integrations" element={<PageTransition><IntegrationsPage /></PageTransition>} />
+            <Route path="/discovery" element={<PageTransition><DiscoveryPage /></PageTransition>} />
+            <Route path="/discover" element={<PageTransition><DiscoverPage /></PageTransition>} />
+            <Route path="/community" element={<PageTransition><CommunityPage /></PageTransition>} />
+            <Route path="/international" element={<PageTransition><InternationalSettingsPage /></PageTransition>} />
+            <Route path="/support" element={<PageTransition><SupportsResources /></PageTransition>} />
+            <Route path="/reports" element={<PageTransition><ReportsAnalyticsPage /></PageTransition>} />
+            <Route path="/analytics" element={<PageTransition><UserAnalyticsPage /></PageTransition>} />
+          <Route path="/analytics/advanced" element={<PageTransition><AdvancedAnalyticsPage /></PageTransition>} />
+          <Route path="/personalization" element={<PageTransition><PersonalizationHub /></PageTransition>} />
+            <Route path="/merchant-analytics" element={<PageTransition><MerchantAnalyticsPage /></PageTransition>} />
+            <Route path="/outfit-history" element={<PageTransition><OutfitHistoryPage /></PageTransition>} />
+            <Route path="/weather" element={<PageTransition><WeatherPage /></PageTransition>} />
+            <Route path="/account" element={<PageTransition><Account /></PageTransition>} />
+            <Route path="/profile-setup" element={<PageTransition><ProfileSetup /></PageTransition>} />
+            <Route path="/data-export" element={<PageTransition><DataExportPage /></PageTransition>} />
             
             {/* Settings Pages */}
-            <Route path="/settings/account" element={<AccountSettings />} />
-            <Route path="/settings/app" element={<AppSettings />} />
-            <Route path="/settings/general" element={<GeneralSettings />} />
-            <Route path="/settings/privacy" element={<PrivacySettingsPage />} />
-            <Route path="/settings/notifications" element={<NotificationsSettingsPage />} />
-            <Route path="/settings/wardrobe" element={<WardrobeSettingsPage />} />
-            <Route path="/settings/outfit" element={<OutfitSettingsPage />} />
-            <Route path="/settings/ai" element={<AISettingsPage />} />
-            <Route path="/settings/marketplace" element={<MarketplaceSettingsPage />} />
-            <Route path="/settings/pwa" element={<PWASettingsPage />} />
-            <Route path="/settings/mystyle" element={<MyStyleSettingsPage />} />
-            <Route path="/settings/vto-photos" element={<VTOPhotoSettingsPage />} />
-            <Route path="/settings/theme" element={<ThemeSettingsPage />} />
-            <Route path="/settings/social" element={<SocialSettingsPage />} />
-            <Route path="/settings/accessibility" element={<AccessibilitySettingsPage />} />
-            <Route path="/settings/challenges" element={<ChallengeSettingsPage />} />
-            <Route path="/settings/security" element={<SecuritySettings />} />
+            <Route path="/settings/account" element={<PageTransition><AccountSettings /></PageTransition>} />
+            <Route path="/settings/app" element={<PageTransition><AppSettings /></PageTransition>} />
+            <Route path="/settings/general" element={<PageTransition><GeneralSettings /></PageTransition>} />
+            <Route path="/settings/privacy" element={<PageTransition><PrivacySettingsPage /></PageTransition>} />
+            <Route path="/settings/notifications" element={<PageTransition><NotificationsSettingsPage /></PageTransition>} />
+            <Route path="/settings/wardrobe" element={<PageTransition><WardrobeSettingsPage /></PageTransition>} />
+            <Route path="/settings/outfit" element={<PageTransition><OutfitSettingsPage /></PageTransition>} />
+            <Route path="/settings/ai" element={<PageTransition><AISettingsPage /></PageTransition>} />
+            <Route path="/settings/marketplace" element={<PageTransition><MarketplaceSettingsPage /></PageTransition>} />
+            <Route path="/settings/pwa" element={<PageTransition><PWASettingsPage /></PageTransition>} />
+            <Route path="/settings/mystyle" element={<PageTransition><MyStyleSettingsPage /></PageTransition>} />
+            <Route path="/settings/vto-photos" element={<PageTransition><VTOPhotoSettingsPage /></PageTransition>} />
+            <Route path="/settings/theme" element={<PageTransition><ThemeSettingsPage /></PageTransition>} />
+            <Route path="/settings/social" element={<PageTransition><SocialSettingsPage /></PageTransition>} />
+            <Route path="/settings/accessibility" element={<PageTransition><AccessibilitySettingsPage /></PageTransition>} />
+            <Route path="/settings/challenges" element={<PageTransition><ChallengeSettingsPage /></PageTransition>} />
+            <Route path="/settings/security" element={<PageTransition><SecuritySettings /></PageTransition>} />
             
-            <Route path="/mystyle" element={<MyStyle />} />
-            <Route path="/service-settings/:service" element={<ServiceSettingsPage />} />
+            <Route path="/mystyle" element={<PageTransition><MyStyle /></PageTransition>} />
+            <Route path="/service-settings/:service" element={<PageTransition><ServiceSettingsPage /></PageTransition>} />
             
-            <Route path="/item/:id" element={<ItemDetail />} />
-            <Route path="/wardrobe/item/:id" element={<WardrobeItemDetail />} />
-            <Route path="/wardrobe/outfit/:id" element={<OutfitDetail />} />
-            <Route path="/security" element={<SecurityPage />} />
-            <Route path="/ai-hub" element={<UnifiedAIHub />} />
-            <Route path="/ai-style-hub" element={<AIStyleHub />} />
-            <Route path="/sustainability" element={<SustainabilityPage />} />
-            <Route path="/challenges" element={<StyleChallengesPage />} />
-            <Route path="/style-challenges" element={<StyleChallengesPage />} />
-            <Route path="/wardrobe/optimizer" element={<WardrobeOptimizerPage />} />
-            <Route path="/virtual-fitting" element={<VirtualFittingRoom />} />
-            <Route path="/advanced-ai" element={<AdvancedAIPage />} />
-            <Route path="/personal-shopping" element={<PersonalShoppingPage />} />
-            <Route path="/notifications" element={<NotificationsPage />} />
-            <Route path="/ai-insights" element={<AIInsightsPage />} />
-            <Route path="/ai-style-assistant" element={<AIStylingAssistantPage />} />
-            <Route path="/ai-style-insights" element={<AIStyleInsightsPage />} />
-            <Route path="/merchant/tools" element={<MerchantToolsPage />} />
-            <Route path="/collaborate" element={<CollaborationPage />} />
-            <Route path="/verification" element={<VerificationPage />} />
-            <Route path="/wardrobe-analytics" element={<WardrobeAnalyticsPage />} />
-            <Route path="/analytics/user" element={<UserInsights />} />
-            <Route path="/analytics/merchant" element={<MerchantDashboard />} />
-          <Route path="/subscription/pricing" element={<PricingPage />} />
-          <Route path="/subscription/manage" element={<ManageSubscription />} />
-          <Route path="/subscription/billing" element={<BillingHistory />} />
-          <Route path="/settings/payment" element={<Suspense fallback={<div>Loading...</div>}><PaymentSettingsPage /></Suspense>} />
-            <Route path="/merchant/pos-terminal" element={<POSTerminal />} />
-            <Route path="/merchant/locations" element={<StoreLocations />} />
-            <Route path="/profile-setup" element={<ProfileSetup />} />
+            <Route path="/item/:id" element={<PageTransition><ItemDetail /></PageTransition>} />
+            <Route path="/wardrobe/item/:id" element={<PageTransition><WardrobeItemDetail /></PageTransition>} />
+            <Route path="/wardrobe/outfit/:id" element={<PageTransition><OutfitDetail /></PageTransition>} />
+            <Route path="/security" element={<PageTransition><SecurityPage /></PageTransition>} />
+            <Route path="/ai-hub" element={<PageTransition><UnifiedAIHub /></PageTransition>} />
+            <Route path="/ai-style-hub" element={<PageTransition><AIStyleHub /></PageTransition>} />
+            <Route path="/sustainability" element={<PageTransition><SustainabilityPage /></PageTransition>} />
+            <Route path="/challenges" element={<PageTransition><StyleChallengesPage /></PageTransition>} />
+            <Route path="/style-challenges" element={<PageTransition><StyleChallengesPage /></PageTransition>} />
+            <Route path="/wardrobe/optimizer" element={<PageTransition><WardrobeOptimizerPage /></PageTransition>} />
+            <Route path="/virtual-fitting" element={<PageTransition><VirtualFittingRoom /></PageTransition>} />
+            <Route path="/advanced-ai" element={<PageTransition><AdvancedAIPage /></PageTransition>} />
+            <Route path="/personal-shopping" element={<PageTransition><PersonalShoppingPage /></PageTransition>} />
+            <Route path="/notifications" element={<PageTransition><NotificationsPage /></PageTransition>} />
+            <Route path="/ai-insights" element={<PageTransition><AIInsightsPage /></PageTransition>} />
+            <Route path="/ai-style-assistant" element={<PageTransition><AIStylingAssistantPage /></PageTransition>} />
+            <Route path="/ai-style-insights" element={<PageTransition><AIStyleInsightsPage /></PageTransition>} />
+            <Route path="/merchant/tools" element={<PageTransition><MerchantToolsPage /></PageTransition>} />
+            <Route path="/collaborate" element={<PageTransition><CollaborationPage /></PageTransition>} />
+            <Route path="/verification" element={<PageTransition><VerificationPage /></PageTransition>} />
+            <Route path="/wardrobe-analytics" element={<PageTransition><WardrobeAnalyticsPage /></PageTransition>} />
+            <Route path="/analytics/user" element={<PageTransition><UserInsights /></PageTransition>} />
+            <Route path="/analytics/merchant" element={<PageTransition><MerchantDashboard /></PageTransition>} />
+          <Route path="/subscription/pricing" element={<PageTransition><PricingPage /></PageTransition>} />
+          <Route path="/subscription/manage" element={<PageTransition><ManageSubscription /></PageTransition>} />
+          <Route path="/subscription/billing" element={<PageTransition><BillingHistory /></PageTransition>} />
+          <Route path="/settings/payment" element={<PageTransition><Suspense fallback={<div>Loading...</div>}><PaymentSettingsPage /></Suspense></PageTransition>} />
+            <Route path="/merchant/pos-terminal" element={<PageTransition><POSTerminal /></PageTransition>} />
+            <Route path="/merchant/locations" element={<PageTransition><StoreLocations /></PageTransition>} />
+            <Route path="/profile-setup" element={<PageTransition><ProfileSetup /></PageTransition>} />
             <Route path="/auth" element={<Navigate to="/" replace />} />
           </Routes>
           </Suspense>
