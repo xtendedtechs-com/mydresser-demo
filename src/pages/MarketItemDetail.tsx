@@ -13,6 +13,8 @@ import { PurchaseDialog } from '@/components/PurchaseDialog';
 import { MessagingDialog } from '@/components/MessagingDialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { VTOStudio } from '@/components/VTOStudio';
+import { ErrorState } from '@/components/ErrorState';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const MarketItemDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -205,10 +207,18 @@ const MarketItemDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-muted-foreground">Loading item...</p>
+      <div className="min-h-screen bg-background p-4">
+        <div className="container max-w-6xl mx-auto">
+          <Skeleton className="h-8 w-32 mb-6" />
+          <div className="grid lg:grid-cols-2 gap-8">
+            <Skeleton className="h-[500px] w-full rounded-[var(--radius)]" />
+            <div className="space-y-4">
+              <Skeleton className="h-10 w-3/4" />
+              <Skeleton className="h-6 w-1/4" />
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -216,14 +226,12 @@ const MarketItemDetail = () => {
 
   if (!item) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <h1 className="text-2xl font-bold">Item not found</h1>
-          <Button onClick={() => navigate('/market')}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Market
-          </Button>
-        </div>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <ErrorState
+          title="Item not found"
+          message="This item may have been removed or doesn't exist. Please check the marketplace for other items."
+          onRetry={() => navigate('/market')}
+        />
       </div>
     );
   }

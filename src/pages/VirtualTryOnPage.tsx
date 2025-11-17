@@ -7,6 +7,8 @@ import { VTOStudio } from '@/components/VTOStudio';
 import { supabase } from '@/integrations/supabase/client';
 import { Sparkles, TrendingUp, ShoppingBag, History } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { EmptyStateCard } from '@/components/EmptyStateCard';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function VirtualTryOnPage() {
   const [wardrobeItems, setWardrobeItems] = useState<any[]>([]);
@@ -59,10 +61,26 @@ export default function VirtualTryOnPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-muted-foreground">Loading Virtual Try-On...</p>
+      <div className="min-h-screen bg-background p-4">
+        <div className="container py-8">
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-3">
+              <Skeleton className="w-12 h-12 rounded-full" />
+              <div className="space-y-2">
+                <Skeleton className="h-8 w-48" />
+                <Skeleton className="h-4 w-64" />
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              {[1, 2, 3].map((i) => (
+                <Card key={i}>
+                  <CardContent className="pt-6">
+                    <Skeleton className="h-16 w-full" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     );

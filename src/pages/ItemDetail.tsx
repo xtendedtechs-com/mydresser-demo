@@ -8,6 +8,8 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useMerchantItems, MerchantItem } from '@/hooks/useMerchantItems';
 import ProductCard from '@/components/ProductCard';
+import { ErrorState } from '@/components/ErrorState';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const ItemDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -96,21 +98,31 @@ const ItemDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      <div className="min-h-screen bg-background p-4">
+        <div className="container max-w-6xl mx-auto">
+          <Skeleton className="h-8 w-32 mb-6" />
+          <div className="grid lg:grid-cols-2 gap-8">
+            <Skeleton className="h-[500px] w-full rounded-[var(--radius)]" />
+            <div className="space-y-4">
+              <Skeleton className="h-10 w-3/4" />
+              <Skeleton className="h-6 w-1/4" />
+              <Skeleton className="h-20 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!item) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-foreground mb-4">Item not found</h2>
-          <Button onClick={() => navigate('/marketplace')}>
-            Back to Marketplace
-          </Button>
-        </div>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <ErrorState
+          title="Item not found"
+          message="The requested item could not be found or is no longer available."
+          onRetry={() => navigate('/market')}
+        />
       </div>
     );
   }
