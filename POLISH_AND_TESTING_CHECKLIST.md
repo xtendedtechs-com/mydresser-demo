@@ -160,7 +160,8 @@
 1. VTO feature requires user testing to verify the improvements work
 2. Some animations may need timing adjustments based on user feedback
 3. Edge function deployment is automatic - monitor logs
-4. ✅ EmptyStateCard integrated into CollectionsPage and DresserPage
+4. ✅ EmptyStateCard integrated into CollectionsPage, DresserPage
+5. ✅ ErrorState and Skeleton integrated into ItemDetail, MarketItemDetail, VirtualTryOnPage
 
 ### Improvements for Future
 1. Add haptic feedback for iOS
