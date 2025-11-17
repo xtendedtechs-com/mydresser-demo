@@ -145,9 +145,28 @@
   .ios-badge { @apply inline-flex items-center rounded-full px-3 py-1 bg-secondary text-xs font-medium; }
   .search-bar { @apply flex items-center gap-3 bg-secondary/50 rounded-[16px] px-4 py-3 focus-within:ring-2 focus-within:ring-primary/20 transition-smooth; }
   .skeleton { @apply animate-pulse bg-secondary/50 rounded-[16px]; }
+  
+  /* Touch feedback for mobile interactions */
+  @media (hover: none) and (pointer: coarse) {
+    button:not(:disabled):active, 
+    a:active, 
+    [role="button"]:not([aria-disabled="true"]):active,
+    .interactive:active {
+      @apply scale-95 transition-transform duration-100 ease-out;
+    }
+  }
+  
+  /* Safe area utilities for iOS devices */
+  .safe-area-inset { padding-bottom: env(safe-area-inset-bottom); }
+  .safe-area-inset-top { padding-top: env(safe-area-inset-top); }
+  .safe-area-inset-bottom { padding-bottom: env(safe-area-inset-bottom); }
+  .safe-area-inset-left { padding-left: env(safe-area-inset-left); }
+  .safe-area-inset-right { padding-right: env(safe-area-inset-right); }
+  
+  /* iOS-style scrollbars */
   .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
   .custom-scrollbar::-webkit-scrollbar-track { @apply bg-transparent; }
-  .custom-scrollbar::-webkit-scrollbar-thumb { @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/30; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/30 transition-colors; }
 }
 
 @media print {
@@ -162,9 +181,20 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-scale-in,
+  .animate-pulse,
+  .hover-lift {
+    animation: none !important;
   }
 }
