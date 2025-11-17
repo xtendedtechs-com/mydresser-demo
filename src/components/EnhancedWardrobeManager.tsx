@@ -31,6 +31,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useWardrobe, WardrobeItem } from "@/hooks/useWardrobe";
 import WardrobeItemCard from "./WardrobeItemCard";
 import { SmartItemMatcher } from './SmartItemMatcher';
+import { EmptyStateCard } from './EmptyStateCard';
+import { ItemCardSkeletonGrid } from './skeletons/ItemCardSkeleton';
 
 interface WardrobeAnalytics {
   totalItems: number;
@@ -205,8 +207,14 @@ export const EnhancedWardrobeManager = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-8 h-8 animate-spin text-primary" />
+      <div className="space-y-6 p-6">
+        <div className="flex justify-between items-center">
+          <div className="space-y-2">
+            <div className="h-8 w-48 bg-muted rounded animate-pulse" />
+            <div className="h-4 w-32 bg-muted rounded animate-pulse" />
+          </div>
+        </div>
+        <ItemCardSkeletonGrid count={8} />
       </div>
     );
   }
@@ -483,17 +491,11 @@ export const EnhancedWardrobeManager = () => {
       </div>
 
       {filteredItems.length === 0 && (
-        <Card className="p-8 text-center">
-          <div className="space-y-4">
-            <Shirt className="w-12 h-12 mx-auto text-muted-foreground" />
-            <div>
-              <h3 className="font-semibold">No items found</h3>
-              <p className="text-muted-foreground">
-                Try adjusting your search or filter criteria
-              </p>
-            </div>
-          </div>
-        </Card>
+        <EmptyStateCard
+          icon={<Shirt className="w-8 h-8 text-muted-foreground" />}
+          title="No items found"
+          description="Try adjusting your search or filter criteria, or add new items to your wardrobe"
+        />
       )}
     </div>
   );

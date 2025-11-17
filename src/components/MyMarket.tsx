@@ -19,6 +19,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useMarketItems } from "@/hooks/useMarketItems";
 import { getPrimaryPhotoUrl } from "@/utils/photoHelpers";
+import { EmptyStateCard } from './EmptyStateCard';
+import { ItemCardSkeletonGrid } from './skeletons/ItemCardSkeleton';
 
 const MyMarket = () => {
   const navigate = useNavigate();
@@ -86,6 +88,18 @@ const MyMarket = () => {
     filteredProducts.some(fp => fp.id === item.id)
   );
   const regularProducts = filteredProducts.filter((item: any) => !item.is_featured);
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <div className="h-10 w-64 bg-muted rounded animate-pulse" />
+          <div className="h-4 w-48 bg-muted rounded animate-pulse" />
+        </div>
+        <ItemCardSkeletonGrid count={12} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -277,15 +291,11 @@ const MyMarket = () => {
         <h2 className="text-xl font-semibold">All Products</h2>
         
         {filteredProducts.length === 0 ? (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <Eye className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No products found</h3>
-              <p className="text-muted-foreground">
-                Try adjusting your search or filters
-              </p>
-            </CardContent>
-          </Card>
+          <EmptyStateCard
+            icon={<Eye className="w-8 h-8 text-muted-foreground" />}
+            title="No products found"
+            description="Try adjusting your search or filters to find more items"
+          />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {regularProducts.map((item: any) => {
