@@ -9,6 +9,7 @@ import { DailyOutfitCard } from '@/components/dresser/DailyOutfitCard';
 import { outfitSuggestionService } from '@/services/outfitSuggestionService';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { EmptyStateCard } from '@/components/EmptyStateCard';
 
 const DresserPage = () => {
   const { t } = useTranslation();
@@ -197,19 +198,15 @@ const DresserPage = () => {
             ))}
           </div>
         ) : suggestions.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <Sparkles className="h-16 w-16 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No Suggestions Yet</h3>
-              <p className="text-sm text-muted-foreground text-center mb-4">
-                Generate your first AI-powered outfit suggestion
-              </p>
-              <Button onClick={handleGenerateNew} disabled={generating}>
-                <Sparkles className="mr-2 h-4 w-4" />
-                Generate Outfit
-              </Button>
-            </CardContent>
-          </Card>
+          <EmptyStateCard
+            icon={<Sparkles className="h-8 w-8 text-muted-foreground" />}
+            title="No Suggestions Yet"
+            description="Generate your first AI-powered outfit suggestion tailored to your wardrobe and occasion"
+            action={{
+              label: "Generate Outfit",
+              onClick: handleGenerateNew
+            }}
+          />
         ) : (
           <div className="grid gap-6 md:grid-cols-2">
             {suggestions.map((suggestion) => (
