@@ -116,7 +116,7 @@
 - [ ] Update user documentation
 - [ ] Create onboarding flow
 - [ ] Document known limitations
-- [ ] Update changelog
+- [x] Update changelog - Version 1.0.4-beta documented
 
 ### Marketing Assets
 - [ ] Screenshots for app stores
