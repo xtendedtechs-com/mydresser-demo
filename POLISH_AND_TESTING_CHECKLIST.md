@@ -76,11 +76,11 @@
 - [ ] Social features - needs user testing
 
 ### Dark Mode Testing
-- [ ] All pages render correctly in dark mode
-- [ ] Glass effects work in dark mode
-- [ ] Text is readable (sufficient contrast)
-- [ ] Icons and images adapt properly
-- [ ] Transitions between modes are smooth
+- [ ] All pages render correctly in dark mode - **Requires manual user testing (auth-protected)**
+- [ ] Glass effects work in dark mode - **Requires manual user testing (auth-protected)**
+- [ ] Text is readable (sufficient contrast) - **Requires manual user testing (auth-protected)**
+- [ ] Icons and images adapt properly - **Requires manual user testing (auth-protected)**
+- [ ] Transitions between modes are smooth - **Requires manual user testing (auth-protected)**
 
 ### Accessibility Testing
 - [ ] Tab through all interactive elements
