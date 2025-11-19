@@ -107,10 +107,10 @@
 ## 🚀 Pre-Launch Tasks
 
 ### Deployment
-- [ ] Update production build
-- [ ] Test published app
-- [ ] Verify edge functions are working
-- [ ] Check environment variables
+- [ ] Update production build - **Click "Update" in Publish dialog**
+- [ ] Test published app - **After clicking Update**
+- [x] Verify edge functions are working - **VTO and AI features operational**
+- [x] Check environment variables - **All secrets configured**
 
 ### Documentation
 - [ ] Update user documentation
@@ -133,10 +133,19 @@
 - Mobile Performance: > 85
 
 ### Current Status
-- [ ] Run Lighthouse audit
-- [ ] Measure Core Web Vitals
-- [ ] Test on 3G connection
-- [ ] Profile memory usage
+- [ ] Run Lighthouse audit - **Ready for manual testing**
+- [ ] Measure Core Web Vitals - **Ready for manual testing**
+- [ ] Test on 3G connection - **Ready for manual testing**
+- [ ] Profile memory usage - **Ready for manual testing**
+
+### Optimization Notes
+- ✅ Lazy loading implemented for all routes
+- ✅ Code splitting with React.lazy()
+- ✅ Image optimization with OptimizedImage component
+- ✅ Loading states with Skeleton components
+- ✅ Error boundaries for graceful failures
+- ✅ PWA caching configured
+- ✅ iOS performance optimizations applied
 
 ## 🔍 Quality Assurance
 
@@ -180,15 +189,23 @@
 ### Priority: User Testing Required
 1. **Sign in** to the app to test auth-protected pages
 2. **Dark mode testing** - Toggle dark mode and verify all pages
-3. **Mobile testing** - Test on actual iOS/Android devices
+3. **Mobile testing** - Test on actual iOS/Android devices (use device icons above preview)
 4. **Feature flows** - Test wardrobe, dresser, market, social features
-5. **Performance** - Monitor load times and interactions
+5. **Performance** - Run Lighthouse audit for metrics
 6. **Accessibility** - Test with screen readers and keyboard navigation
 
 ### Ready for Beta Launch
 - ✅ All polish improvements implemented
-- ✅ All components integrated
-- ✅ Page transitions working
+- ✅ All components integrated (loading/error/empty states)
+- ✅ Page transitions working across all routes
+- ✅ First-time user onboarding tour created
 - ✅ Changelog updated (v1.0.4-beta)
-- ✅ Code quality verified (no console errors)
+- ✅ Code quality verified (no console errors, proper error handling)
+- ✅ iOS design system applied with glass morphism
+- ✅ PWA optimizations in place
 - ⏳ Manual testing needed for final validation
+- ⏳ Performance benchmarks require Lighthouse audit
+- ⏳ Dark mode requires authenticated testing
+
+### To Deploy Updates:
+Click the **Publish** button (top-right) → Click **Update** to push v1.0.4-beta live
