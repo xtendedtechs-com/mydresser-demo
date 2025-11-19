@@ -114,7 +114,7 @@
 
 ### Documentation
 - [ ] Update user documentation
-- [ ] Create onboarding flow
+- [x] Create onboarding flow - **Interactive first-time user tutorial added**
 - [ ] Document known limitations
 - [x] Update changelog - Version 1.0.4-beta documented
 

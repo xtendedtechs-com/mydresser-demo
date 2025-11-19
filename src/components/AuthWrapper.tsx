@@ -13,6 +13,7 @@ import { KeyboardShortcutsHelper } from "@/components/KeyboardShortcutsHelper";
 import { useSecurityHeaders } from "@/hooks/useSecurityHeaders";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageTransition } from "@/components/PageTransition";
+import { OnboardingTour } from "@/components/OnboardingTour";
 
 // Lazy load pages for code splitting
 const Index = lazy(() => import("@/pages/Index"));
@@ -135,6 +136,7 @@ export const AuthWrapper = () => {
         </Suspense>
       ) : (
         <>
+          <OnboardingTour />
           <PWAInstallPrompt />
           <CommandPalette />
           <QuickAccessMenu />
