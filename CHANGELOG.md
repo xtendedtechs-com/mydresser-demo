@@ -6,6 +6,14 @@ All notable changes to the MyDresser Beta application are documented here.
 
 ## [1.0.4-beta] - 2025-11-19
 
+### 🐛 Critical Bug Fixes
+
+#### Virtual Try-On (VTO) Fixed
+- **Fixed invalid AI model error** - Changed from non-existent `google/gemini-2.0-flash-exp` to correct `google/gemini-2.5-flash-image`
+- **Added proper image editing support** - Included `modalities: ["image", "text"]` parameter
+- **Removed unsupported parameters** - Eliminated `temperature` and `max_tokens` which aren't supported for image models
+- **Impact:** VTO now fully operational with Lovable AI fallback when SD endpoint unavailable
+
 ### 🎨 Polish & UX Improvements
 
 #### Enhanced Loading & Error States
