@@ -5,8 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useWardrobe, WardrobeItem } from '@/hooks/useWardrobe';
 import { useToast } from '@/hooks/use-toast';
+import { useFileUpload } from '@/hooks/useFileUpload';
+import { getAllPhotoUrls } from '@/utils/photoHelpers';
+import { supabase } from '@/integrations/supabase/client';
+import RealImageUpload from './RealImageUpload';
+import { X } from 'lucide-react';
 
 interface EditWardrobeItemDialogProps {
   open: boolean;
@@ -22,6 +28,7 @@ const conditions = ['excellent','good','fair','poor'];
 const EditWardrobeItemDialog = ({ open, onOpenChange, item }: EditWardrobeItemDialogProps) => {
   const { updateItem, deleteItem } = useWardrobe();
   const { toast } = useToast();
+  const { uploadWardrobePhotos } = useFileUpload();
   const [form, setForm] = useState({
     name: '',
     category: '',
@@ -37,6 +44,8 @@ const EditWardrobeItemDialog = ({ open, onOpenChange, item }: EditWardrobeItemDi
     notes: '',
     tags: [] as string[]
   });
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
+  const [existingPhotos, setExistingPhotos] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
@@ -57,6 +66,8 @@ const EditWardrobeItemDialog = ({ open, onOpenChange, item }: EditWardrobeItemDi
         notes: item.notes || '',
         tags: item.tags || []
       });
+      setExistingPhotos(getAllPhotoUrls(item.photos || {}));
+      setPhotoFiles([]);
     }
   }, [item]);
 
@@ -68,6 +79,19 @@ const EditWardrobeItemDialog = ({ open, onOpenChange, item }: EditWardrobeItemDi
     if (!item) return;
     setSaving(true);
     try {
+      // Upload new photos if any
+      let newPhotoUrls: string[] = [];
+      if (photoFiles.length > 0) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const uploadResults = await uploadWardrobePhotos(photoFiles, user.id, item.id);
+          newPhotoUrls = uploadResults.filter(r => r.url).map(r => r.url!);
+        }
+      }
+
+      // Merge existing and new photos
+      const allPhotos = [...existingPhotos, ...newPhotoUrls];
+      
       await updateItem(item.id, {
         name: form.name,
         category: form.category?.toLowerCase(),
@@ -81,7 +105,8 @@ const EditWardrobeItemDialog = ({ open, onOpenChange, item }: EditWardrobeItemDi
         purchase_price: form.purchase_price === '' ? null as any : Number(form.purchase_price),
         location_in_wardrobe: form.location_in_wardrobe || null as any,
         notes: form.notes || null as any,
-        tags: form.tags
+        tags: form.tags,
+        photos: allPhotos.length > 0 ? { urls: allPhotos } : item.photos
       });
       toast({ title: 'Item updated', description: 'Your changes were saved.' });
       onOpenChange(false);
@@ -90,6 +115,10 @@ const EditWardrobeItemDialog = ({ open, onOpenChange, item }: EditWardrobeItemDi
     } finally {
       setSaving(false);
     }
+  };
+
+  const removeExistingPhoto = (photoUrl: string) => {
+    setExistingPhotos(prev => prev.filter(p => p !== photoUrl));
   };
 
   const onDelete = async () => {
@@ -107,15 +136,16 @@ const EditWardrobeItemDialog = ({ open, onOpenChange, item }: EditWardrobeItemDi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0">
+        <DialogHeader className="px-6 pt-6 pb-0">
           <DialogTitle>Edit Item</DialogTitle>
         </DialogHeader>
 
         {!item ? (
-          <div className="text-sm text-muted-foreground">Item not found.</div>
+          <div className="text-sm text-muted-foreground px-6 pb-6">Item not found.</div>
         ) : (
-          <div className="space-y-4">
+          <ScrollArea className="flex-1 px-6">
+            <div className="space-y-4 pb-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="name">Name</Label>
@@ -184,6 +214,36 @@ const EditWardrobeItemDialog = ({ open, onOpenChange, item }: EditWardrobeItemDi
               <Textarea id="notes" rows={3} value={form.notes} onChange={e => handleChange('notes', e.target.value)} />
             </div>
 
+            {/* Photo Management */}
+            <div>
+              <Label>Photos</Label>
+              {existingPhotos.length > 0 && (
+                <div className="mb-3">
+                  <p className="text-sm text-muted-foreground mb-2">Current photos:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {existingPhotos.map((url, idx) => (
+                      <div key={idx} className="relative w-24 h-24 rounded-md overflow-hidden border">
+                        <img src={url} alt={`Photo ${idx + 1}`} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => removeExistingPhoto(url)}
+                          className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 hover:bg-destructive/90"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <RealImageUpload
+                onFilesSelected={setPhotoFiles}
+                type="photo"
+                maxFiles={5}
+                existingFiles={photoFiles}
+              />
+            </div>
+
             <div className="flex gap-2 justify-between">
               <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
               <div className="flex gap-2">
@@ -198,7 +258,8 @@ const EditWardrobeItemDialog = ({ open, onOpenChange, item }: EditWardrobeItemDi
                 <Button onClick={onSave} disabled={saving}>{saving ? 'Saving...' : 'Save Changes'}</Button>
               </div>
             </div>
-          </div>
+            </div>
+          </ScrollArea>
         )}
       </DialogContent>
     </Dialog>
