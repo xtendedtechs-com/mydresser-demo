@@ -81,29 +81,38 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
       const clothingItems = await Promise.all(clothingItemsPromises);
       console.log('Clothing items prepared for VTO:', clothingItems.length);
       
-      // Try Canvas AI VTO first (skip MediaPipe due to sandbox limitations)
+      // Try Cloud AI VTO first, then fall back to Canvas overlay
       let result: { imageUrl: string; sizeRecommendations: SizeRecommendation[]; bodyShape: BodyShape; processingTime: number };
       try {
-        const { aiVTO } = await import('@/services/aiVTO');
-        result = await aiVTO.generateVTO({
-          userImage: userImageUrl,
-          clothingItems
-        });
-        console.log('VTO generated successfully with Canvas AI');
-      } catch (aiError) {
-        console.warn('Canvas AI VTO failed, trying Remote AI:', aiError);
         const { tryRemoteVTO } = await import('@/services/aiVTORemote');
         const remote = await tryRemoteVTO({
           userImage: userImageUrl,
           clothingItems: clothingItems.map(item => ({ id: item.id, name: item.name, category: item.category }))
         });
+        console.log('VTO generated successfully with Cloud AI');
         result = {
           imageUrl: remote.imageUrl,
           sizeRecommendations: [],
-          bodyShape: { type: 'rectangle', shoulderWidth: 0, waistWidth: 0, hipWidth: 0, torsoLength: 0, legLength: 0, bustToWaistRatio: 1, waistToHipRatio: 1 },
+          bodyShape: {
+            type: 'rectangle',
+            shoulderWidth: 0,
+            waistWidth: 0,
+            hipWidth: 0,
+            torsoLength: 0,
+            legLength: 0,
+            bustToWaistRatio: 1,
+            waistToHipRatio: 1
+          },
           processingTime: remote.processingTime ?? 0
         };
-        toast({ title: 'Using Cloud VTO', description: 'Generated via remote AI fallback' });
+      } catch (remoteError) {
+        console.warn('Cloud AI VTO failed, falling back to Canvas AI:', remoteError);
+        const { aiVTO } = await import('@/services/aiVTO');
+        result = await aiVTO.generateVTO({
+          userImage: userImageUrl,
+          clothingItems
+        });
+        toast({ title: 'Using Local VTO', description: 'Generated via on-device canvas fallback' });
       }
 
       setVtoImage(result.imageUrl);
