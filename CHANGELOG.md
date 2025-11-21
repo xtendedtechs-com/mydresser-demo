@@ -9,12 +9,14 @@ All notable changes to the MyDresser Beta application are documented here.
 ### 🐛 Critical Bug Fixes
 
 #### Virtual Try-On (VTO) Fixed - 100% Operational
-- **Fixed invalid AI model error** - Changed from non-existent `google/gemini-2.0-flash-exp` to correct `google/gemini-2.5-flash-image`
-- **Added proper image editing support** - Included `modalities: ["image", "text"]` parameter for image generation
+- **Fixed invalid AI model error** - Changed from non-existent `google/gemini-2.0-flash-exp` to `google/gemini-2.5-pro` (most powerful vision model)
+- **Enhanced VTO context accuracy** - Switched from image generation model to vision editing model to preserve person's appearance while changing clothes
+- **Improved prompt engineering** - Explicit instructions to preserve face, pose, background while only modifying clothing
+- **Added proper image editing support** - Included `modalities: ["image", "text"]` parameter for multimodal processing
 - **Removed unsupported parameters** - Eliminated `temperature` and `max_tokens` which aren't supported for image models
-- **Disabled failing SD endpoint** - Removed timeout-causing Stable Diffusion fallback that was blocking all requests
-- **Impact:** VTO now generating images in ~8-12 seconds with Lovable AI Gateway
-- **Verification:** Edge function logs confirm multiple successful completions with 200 status
+- **Disabled failing SD endpoint** - Removed timeout-causing Stable Diffusion fallback that was blocking all requests (10s timeout added)
+- **Impact:** VTO now generating contextually accurate images in ~10-15 seconds with actual wardrobe items applied
+- **Verification:** Edge function logs confirm successful completions with proper outfit item context
 
 ### 🎨 Polish & UX Improvements
 

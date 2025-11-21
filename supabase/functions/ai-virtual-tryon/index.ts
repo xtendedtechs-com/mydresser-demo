@@ -103,25 +103,23 @@ serve(async (req) => {
 
     console.log('Outfit description:', outfitDescription);
 
-    // Construct the editing instruction with clear, explicit guidance for image generation
+    // Construct detailed VTO instruction with explicit preservation requirements
     const editInstruction = instruction || 
-      `IMPORTANT: You MUST generate an edited image, not text.
+      `You are a virtual try-on AI. Your task is to edit this photo to show the person wearing specific clothing items.
 
-Task: Edit this photo to show the person wearing these exact clothing items: ${outfitDescription}
+CRITICAL REQUIREMENTS:
+1. PRESERVE EXACTLY: The person's face, facial features, hair, skin tone, body pose, and background
+2. ONLY MODIFY: The clothing items worn by the person
+3. APPLY THESE EXACT ITEMS: ${outfitDescription}
+4. MAINTAIN: Realistic lighting, shadows, fabric textures, and proper fit
+5. ENSURE: Natural proportions and perspective matching the original photo
 
-Instructions:
-1. GENERATE AN IMAGE showing the person wearing these items
-2. Keep the person's face, pose, and background identical
-3. Replace only the clothing with the specified items
-4. Ensure realistic fit, lighting, and fabric textures
-5. Maintain natural proportions and perspective
+Generate a photorealistic edited image where ONLY the clothing has changed to match the specified items. Everything else must remain identical to the original photo.`;
 
-CRITICAL: Return an edited image, not a text description. Generate the visual output.`;
-
-    console.log('Calling AI Gateway for image generation...');
+    console.log('Calling AI Gateway for virtual try-on...');
     console.log('Image format:', processedImage.substring(0, 30) + '...');
 
-    // Call Lovable AI Gateway for image editing with Nano banana model
+    // Use Gemini 2.5 Pro for high-quality image editing with vision capabilities
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -129,7 +127,7 @@ CRITICAL: Return an edited image, not a text description. Generate the visual ou
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image",
+        model: "google/gemini-2.5-pro",
         messages: [
           {
             role: "user",
