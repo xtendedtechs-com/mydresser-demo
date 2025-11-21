@@ -87,6 +87,13 @@ const AddItemWithMatching = ({ open, onOpenChange, initialData }: AddItemWithMat
     return 'Good';
   };
 
+  const dataUrlToFile = async (dataUrl: string, filename: string): Promise<File> => {
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    const type = blob.type || 'image/jpeg';
+    return new File([blob], filename, { type });
+  };
+
   useEffect(() => {
     if (open) {
       // Reset form and photos when dialog opens
@@ -124,6 +131,22 @@ const AddItemWithMatching = ({ open, onOpenChange, initialData }: AddItemWithMat
       }
       // Always reset photos when opening
       setPhotoFiles([]);
+
+      // If scan data included photos, pre-populate the photo pool
+      if (initialData?.photos && Array.isArray(initialData.photos) && initialData.photos.length > 0) {
+        (async () => {
+          try {
+            const files = await Promise.all(
+              initialData.photos.slice(0, 5).map((url, index) =>
+                dataUrlToFile(url, `scan-photo-${index + 1}.jpg`)
+              )
+            );
+            setPhotoFiles(files);
+          } catch (error) {
+            console.error('Failed to prepare scan photos:', error);
+          }
+        })();
+      }
     }
   }, [open, initialData]);
 

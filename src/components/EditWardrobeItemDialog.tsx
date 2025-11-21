@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useWardrobe, WardrobeItem } from '@/hooks/useWardrobe';
 import { useToast } from '@/hooks/use-toast';
 import { useFileUpload } from '@/hooks/useFileUpload';
@@ -136,7 +135,7 @@ const EditWardrobeItemDialog = ({ open, onOpenChange, item }: EditWardrobeItemDi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
+      <DialogContent className="max-w-2xl max-h-[90vh] p-0 overflow-y-auto">
         <DialogHeader className="px-6 pt-6 pb-0 flex-shrink-0">
           <DialogTitle>Edit Item</DialogTitle>
         </DialogHeader>
@@ -144,8 +143,7 @@ const EditWardrobeItemDialog = ({ open, onOpenChange, item }: EditWardrobeItemDi
         {!item ? (
           <div className="text-sm text-muted-foreground px-6 pb-6">Item not found.</div>
         ) : (
-          <ScrollArea className="flex-1 px-6">
-            <div className="space-y-4 pb-6">
+          <div className="px-6 pb-6 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="name">Name</Label>
@@ -258,8 +256,7 @@ const EditWardrobeItemDialog = ({ open, onOpenChange, item }: EditWardrobeItemDi
                 <Button onClick={onSave} disabled={saving}>{saving ? 'Saving...' : 'Save Changes'}</Button>
               </div>
             </div>
-            </div>
-          </ScrollArea>
+          </div>
         )}
       </DialogContent>
     </Dialog>
