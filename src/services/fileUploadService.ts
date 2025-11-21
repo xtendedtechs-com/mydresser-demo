@@ -31,7 +31,7 @@ class FileUploadService {
       const fileName = `${userId}/${itemId}-${Date.now()}.${fileExt}`;
       
       const { data, error } = await supabase.storage
-        .from('wardrobe-items')
+        .from('wardrobe')
         .upload(fileName, file, {
           cacheControl: '3600',
           upsert: false
@@ -40,7 +40,7 @@ class FileUploadService {
       if (error) throw error;
 
       const { data: { publicUrl } } = supabase.storage
-        .from('wardrobe-items')
+        .from('wardrobe')
         .getPublicUrl(data.path);
 
       return {
@@ -71,7 +71,7 @@ class FileUploadService {
   async deleteWardrobePhoto(path: string): Promise<boolean> {
     try {
       const { error } = await supabase.storage
-        .from('wardrobe-items')
+        .from('wardrobe')
         .remove([path]);
 
       if (error) throw error;
