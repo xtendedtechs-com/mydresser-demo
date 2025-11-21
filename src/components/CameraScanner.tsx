@@ -117,15 +117,16 @@ export const CameraScanner = ({ onScanComplete, onClose }: CameraScannerProps) =
   });
 
   return (
-    <div className="fixed inset-0 z-50 bg-black">
+    <div className="fixed inset-0 z-[100] bg-black">
       <div className="relative h-full w-full flex flex-col">
         {/* Header */}
-        <div className="absolute top-0 left-0 right-0 z-10 p-4 bg-gradient-to-b from-black/70 to-transparent">
+        <div className="absolute top-0 left-0 right-0 z-10 p-4 safe-area-inset-top bg-gradient-to-b from-black/70 to-transparent">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-white">Scan Clothing Item</h3>
             <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-white/20">
               <X className="h-6 w-6" />
             </Button>
+            <h3 className="text-lg font-semibold text-white">Scan Clothing Item</h3>
+            <div className="w-10"></div>
           </div>
         </div>
 
