@@ -88,23 +88,44 @@ const AddItemWithMatching = ({ open, onOpenChange, initialData }: AddItemWithMat
   };
 
   useEffect(() => {
-    if (!initialData) return;
-    setFormData(prev => ({
-      ...prev,
-      name: initialData.name ?? prev.name,
-      category: initialData.category ?? prev.category,
-      brand: initialData.brand ?? prev.brand,
-      color: initialData.color ?? prev.color,
-      material: initialData.material ?? prev.material,
-      season: initialData.season ? (titleCase(initialData.season) as string) : prev.season,
-      occasion: initialData.occasion ? (titleCase(initialData.occasion) as string) : prev.occasion,
-      condition: mapCondition(initialData.condition) ?? prev.condition,
-      notes: initialData.description ?? prev.notes,
-      tags: Array.from(new Set([...(prev.tags || []), ...(((initialData.style_tags as string[]) || []))]))
-    }));
-    // Note: initialData.photo (string URL from scan) won't be handled by File-based upload
-    // Users will need to re-upload if they want to use scanned item photo
-  }, [initialData]);
+    if (open) {
+      // Reset form and photos when dialog opens
+      if (initialData) {
+        setFormData(prev => ({
+          ...prev,
+          name: initialData.name ?? '',
+          category: initialData.category ?? '',
+          brand: initialData.brand ?? '',
+          color: initialData.color ?? '',
+          material: initialData.material ?? '',
+          season: initialData.season ? (titleCase(initialData.season) as string) : '',
+          occasion: initialData.occasion ? (titleCase(initialData.occasion) as string) : '',
+          condition: mapCondition(initialData.condition) ?? 'excellent',
+          notes: initialData.description ?? '',
+          tags: (initialData.style_tags as string[]) || []
+        }));
+      } else {
+        // Reset to empty form
+        setFormData({
+          name: '',
+          category: '',
+          brand: '',
+          color: '',
+          size: '',
+          material: '',
+          season: '',
+          occasion: '',
+          condition: 'excellent',
+          purchase_price: '',
+          location_in_wardrobe: '',
+          notes: '',
+          tags: []
+        });
+      }
+      // Always reset photos when opening
+      setPhotoFiles([]);
+    }
+  }, [open, initialData]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
