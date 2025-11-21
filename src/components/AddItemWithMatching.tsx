@@ -29,7 +29,7 @@ interface AddItemWithMatchingProps {
     condition: string;
     description: string;
     style_tags: string[];
-    photo: string;
+    photos: string[];
   }>;
 }
 
