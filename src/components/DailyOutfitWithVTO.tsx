@@ -198,7 +198,7 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
         </div>
       </div>
 
-      <div className="p-4 space-y-3">
+      <div className="p-4 pb-24 space-y-3">
         <div className="flex items-center justify-between">
           <Badge variant="outline">{outfit.confidence}% Match</Badge>
           <div className="flex gap-2">
