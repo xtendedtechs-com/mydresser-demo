@@ -107,6 +107,7 @@
 ## 🚀 Pre-Launch Tasks
 
 ### Deployment
+- [x] Update app version to 1.0.4-beta in database - **Migration applied**
 - [ ] Update production build - **Click "Update" in Publish dialog**
 - [ ] Test published app - **After clicking Update**
 - [x] Verify edge functions are working - **VTO and AI features operational**
