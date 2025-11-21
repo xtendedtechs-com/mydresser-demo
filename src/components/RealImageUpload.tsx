@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +25,18 @@ const RealImageUpload = ({
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (!existingFiles || existingFiles.length === 0) {
+      setSelectedFiles([]);
+      setPreviewUrls([]);
+      return;
+    }
+
+    setSelectedFiles(existingFiles);
+    const urls = existingFiles.map((file) => URL.createObjectURL(file));
+    setPreviewUrls(urls);
+  }, [existingFiles]);
 
   const handleFileSelect = async (files: FileList) => {
     if (disabled || uploading) return;
