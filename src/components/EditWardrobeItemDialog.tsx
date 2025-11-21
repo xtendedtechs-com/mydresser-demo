@@ -136,8 +136,8 @@ const EditWardrobeItemDialog = ({ open, onOpenChange, item }: EditWardrobeItemDi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0">
-        <DialogHeader className="px-6 pt-6 pb-0">
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
+        <DialogHeader className="px-6 pt-6 pb-0 flex-shrink-0">
           <DialogTitle>Edit Item</DialogTitle>
         </DialogHeader>
 

@@ -366,6 +366,7 @@ const AddItemWithMatching = ({ open, onOpenChange, initialData }: AddItemWithMat
             <div>
               <Label>Photos</Label>
               <RealImageUpload
+                key={open ? 'open' : 'closed'}
                 onFilesSelected={setPhotoFiles}
                 type="photo"
                 maxFiles={5}
