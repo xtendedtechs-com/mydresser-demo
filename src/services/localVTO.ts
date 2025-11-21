@@ -234,10 +234,10 @@ export class LocalVTOEngine {
       height *= manualAdjustment.scale;
     }
 
-    // Apply enhanced blending with lighting
+    // Apply realistic blending
     ctx.save();
     ctx.globalAlpha = opacity;
-    ctx.globalCompositeOperation = 'multiply';
+    ctx.globalCompositeOperation = 'source-over';
     
     // Apply color adjustments for realistic lighting
     colorMatching.applyColorAdjustment(ctx, colorAdjustment);
