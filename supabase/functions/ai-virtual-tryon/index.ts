@@ -15,31 +15,12 @@ serve(async (req) => {
     const startTime = Date.now();
     const { userImage, clothingItems, instruction } = await req.json();
     
-    // Check for custom SD endpoint first (user will configure this)
-    const SD_ENDPOINT = Deno.env.get('SD_ENDPOINT_URL');
     
     if (!userImage || !clothingItems || clothingItems.length === 0) {
       throw new Error('Missing required parameters: userImage and clothingItems are required');
     }
 
-    // Try custom SD endpoint if configured
-    if (SD_ENDPOINT) {
-      try {
-        console.log('Using custom SD endpoint:', SD_ENDPOINT);
-        const sdResult = await callCustomSD(SD_ENDPOINT, userImage, clothingItems);
-        return new Response(
-          JSON.stringify({
-            imageUrl: sdResult.imageUrl,
-            processingTime: Date.now() - startTime
-          }),
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      } catch (sdError) {
-        console.error('SD endpoint failed, falling back to Lovable AI:', sdError);
-      }
-    }
-
-    // Fallback to Lovable AI
+    // Lovable AI Gateway
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       console.error('No AI services configured');
