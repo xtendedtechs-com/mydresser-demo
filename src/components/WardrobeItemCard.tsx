@@ -45,14 +45,13 @@ const WardrobeItemCard = ({
     }
   };
 
-  const primaryPhotoUrl = getPrimaryPhotoUrl(item.photos, item.category);
-
   const daysSinceWorn = item.last_worn 
     ? Math.floor((new Date().getTime() - new Date(item.last_worn).getTime()) / (1000 * 3600 * 24))
     : null;
 
   const initialUrl = getPrimaryPhotoUrl(item.photos, item.category);
   const [imgSrc, setImgSrc] = useState<string>(initialUrl);
+  const [imageError, setImageError] = useState(false);
 
   const deriveStoragePath = (url: string): { bucket: string; path: string } | null => {
     if (!url) return null;
@@ -93,6 +92,13 @@ const WardrobeItemCard = ({
   };
 
   useEffect(() => {
+    setImageError(false);
+    // Reset to placeholder if blob URL
+    if (initialUrl.startsWith('blob:')) {
+      setImgSrc(getCategoryPlaceholderImage(item.category));
+      setImageError(true);
+      return;
+    }
     const parsed = deriveStoragePath(initialUrl);
     if (parsed) {
       trySignUrl(initialUrl);
@@ -111,11 +117,17 @@ const WardrobeItemCard = ({
           decoding="async"
           className="w-full h-full object-cover"
           onError={() => {
-            // Fall back to placeholder immediately; attempt signing in background
+            console.error('Image load error for:', item.name);
+            setImageError(true);
             setImgSrc(getCategoryPlaceholderImage(item.category));
-            trySignUrl(initialUrl);
           }}
         />
+        {imageError && imgSrc === getCategoryPlaceholderImage(item.category) && (
+          <div className="absolute inset-0 bg-muted/80 flex flex-col items-center justify-center text-muted-foreground text-xs p-2 text-center">
+            <span className="font-semibold">Photo unavailable</span>
+            <span className="text-[10px] mt-1">Edit item to re-upload</span>
+          </div>
+        )}
         
         {/* Overlay Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1">

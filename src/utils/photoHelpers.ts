@@ -49,16 +49,21 @@ const resolvePublicUrl = async (input: string): Promise<string> => {
   if (!input) return '';
   const trimmed = input.trim();
   
-  // Keep http(s), data URIs, blob URLs, and local paths as-is
+  // Keep http(s), data URIs, and local paths as-is
+  // FILTER OUT blob URLs - they're temporary and won't work
   if (trimmed.startsWith('http') || 
       trimmed.startsWith('data:image/') || 
-      trimmed.startsWith('blob:') ||
       trimmed.startsWith('/src/') ||
       trimmed.startsWith('/assets/') ||
       trimmed.startsWith('/public/') ||
       trimmed === '/placeholder.svg' ||
       trimmed.includes('/placeholder')) {
     return trimmed;
+  }
+  
+  // Return empty for blob URLs
+  if (trimmed.startsWith('blob:')) {
+    return '';
   }
 
   // Decode URI-encoded strings if present

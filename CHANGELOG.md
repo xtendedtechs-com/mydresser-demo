@@ -8,6 +8,14 @@ All notable changes to the MyDresser Beta application are documented here.
 
 ### 🐛 Critical Bug Fixes
 
+#### Wardrobe Item Images Fixed - 100% Operational
+- **Fixed bucket name mismatch** - Changed from `'wardrobe-items'` to `'wardrobe'` in fileUploadService
+- **Added blob URL filtering** - Blob URLs (temporary browser URLs) now properly detected and rejected with placeholder fallback
+- **Enhanced error handling** - WardrobeItemCard now shows "Photo unavailable - Edit item to re-upload" overlay for invalid images
+- **Improved photo resolution** - photoHelpers now filters blob URLs early to prevent signed URL attempts on invalid data
+- **Impact:** New wardrobe item uploads now save correctly; legacy items with blob URLs show placeholder with re-upload prompt
+- **Verification:** Bucket operations now target correct 'wardrobe' bucket; image display works for properly uploaded items
+
 #### Virtual Try-On (VTO) Fixed - 100% Operational
 - **Fixed invalid AI model error** - Changed from non-existent `google/gemini-2.0-flash-exp` to `google/gemini-2.5-pro` (most powerful vision model)
 - **Enhanced VTO context accuracy** - Switched from image generation model to vision editing model to preserve person's appearance while changing clothes
