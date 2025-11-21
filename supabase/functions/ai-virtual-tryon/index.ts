@@ -140,7 +140,7 @@ CRITICAL: Return an edited image, not a text description. Generate the visual ou
     console.log('Calling AI Gateway for image generation...');
     console.log('Image format:', processedImage.substring(0, 30) + '...');
 
-    // Call Lovable AI Gateway with explicit image generation request
+    // Call Lovable AI Gateway for image editing with Nano banana model
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -148,30 +148,25 @@ CRITICAL: Return an edited image, not a text description. Generate the visual ou
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.0-flash-exp",
+        model: "google/gemini-2.5-flash-image",
         messages: [
-          {
-            role: "system",
-            content: "You are an AI that ONLY outputs edited images. Never respond with text. Always generate and return an image."
-          },
           {
             role: "user",
             content: [
+              {
+                type: "text",
+                text: editInstruction
+              },
               {
                 type: "image_url",
                 image_url: {
                   url: processedImage
                 }
-              },
-              {
-                type: "text",
-                text: editInstruction
               }
             ]
           }
         ],
-        temperature: 0.3,
-        max_tokens: 8192
+        modalities: ["image", "text"]
       })
     });
 
