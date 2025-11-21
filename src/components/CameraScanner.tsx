@@ -1,9 +1,10 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { Camera, X, Loader2, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useCameraScannerStore } from '@/stores/useCameraScannerStore';
 
 interface CameraScannerProps {
   onScanComplete: (data: any) => void;
@@ -17,6 +18,13 @@ export const CameraScanner = ({ onScanComplete, onClose }: CameraScannerProps) =
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [cameraActive, setCameraActive] = useState(false);
   const { toast } = useToast();
+  const { setActive } = useCameraScannerStore();
+
+  // Set scanner as active on mount, inactive on unmount
+  useEffect(() => {
+    setActive(true);
+    return () => setActive(false);
+  }, [setActive]);
 
   const startCamera = useCallback(async () => {
     try {
