@@ -14,6 +14,7 @@ import { useSecurityHeaders } from "@/hooks/useSecurityHeaders";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PageTransition } from "@/components/PageTransition";
 import { OnboardingTour } from "@/components/OnboardingTour";
+import { useCameraScannerStore } from "@/stores/useCameraScannerStore";
 
 // Lazy load pages for code splitting
 const Index = lazy(() => import("@/pages/Index"));
@@ -115,6 +116,7 @@ const SecuritySettings = lazy(() => import("@/pages/settings/SecuritySettings"))
 
 export const AuthWrapper = () => {
   const { isAuthenticated, loading } = useProfile();
+  const { isActive: isScannerActive } = useCameraScannerStore();
   useSecurityHeaders();
 
   if (loading) {
@@ -240,7 +242,7 @@ export const AuthWrapper = () => {
             <Route path="/auth" element={<Navigate to="/" replace />} />
           </Routes>
           </Suspense>
-          <Navigation />
+          {!isScannerActive && <Navigation />}
         </>
       )}
     </ErrorBoundary>

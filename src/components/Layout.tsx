@@ -3,6 +3,7 @@ import { Navigate, Outlet } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import { MobileNavigation } from "@/components/MobileNavigation";
 import { Loader2 } from "lucide-react";
+import { useCameraScannerStore } from "@/stores/useCameraScannerStore";
 
 interface LayoutProps {
   requireAuth?: boolean;
@@ -11,6 +12,7 @@ interface LayoutProps {
 
 export default function Layout({ requireAuth = false, requireRole }: LayoutProps) {
   const { user, profile, loading } = useProfile();
+  const { isActive: isScannerActive } = useCameraScannerStore();
 
   if (loading) {
     return (
@@ -40,11 +42,11 @@ export default function Layout({ requireAuth = false, requireRole }: LayoutProps
 
   return (
     <div className="min-h-screen bg-background">
-      {user && <Navigation />}
+      {user && !isScannerActive && <Navigation />}
       <main className={user ? "pt-16 pb-16 md:pb-0" : ""}>
         <Outlet />
       </main>
-      {user && <MobileNavigation />}
+      {user && !isScannerActive && <MobileNavigation />}
     </div>
   );
 }
