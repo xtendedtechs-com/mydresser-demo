@@ -15,16 +15,15 @@ serve(async (req) => {
     const startTime = Date.now();
     const { userImage, clothingItems, instruction } = await req.json();
     
-    
     if (!userImage || !clothingItems || clothingItems.length === 0) {
       throw new Error('Missing required parameters: userImage and clothingItems are required');
     }
 
-    // Lovable AI Gateway
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      console.error('No AI services configured');
-      throw new Error('AI service not configured. Please contact support.');
+    // OpenAI API Key
+    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+    if (!OPENAI_API_KEY) {
+      console.error('No OpenAI API key configured');
+      throw new Error('OpenAI API key not configured. Please add OPENAI_API_KEY secret.');
     }
 
     // Validate and process user image
@@ -40,7 +39,7 @@ serve(async (req) => {
           throw new Error('Unsupported image format. Please use JPEG, PNG, or WebP.');
         }
         
-        // Check data URL size (max ~4MB for Gemini)
+        // Check data URL size (max ~4MB for OpenAI)
         const base64Data = src.split(',')[1];
         const sizeInBytes = (base64Data.length * 3) / 4;
         const sizeInMB = sizeInBytes / (1024 * 1024);
@@ -103,53 +102,32 @@ serve(async (req) => {
 
     console.log('Outfit description:', outfitDescription);
 
-    // Construct detailed VTO instruction with explicit preservation requirements
-    const editInstruction = instruction || 
-      `You are a virtual try-on AI. Your task is to edit this photo to show the person wearing specific clothing items.
+    // Construct detailed VTO prompt for image generation
+    const vtoPrompt = instruction || 
+      `Create a photorealistic virtual try-on image. Edit the person in the provided image to be wearing these exact clothing items: ${outfitDescription}. 
+      
+IMPORTANT: Preserve the person's face, facial features, hair, skin tone, body pose, and background exactly as they appear in the original photo. Only modify the clothing to match the specified items. Ensure realistic lighting, shadows, fabric textures, proper fit, natural proportions, and perspective matching the original photo.`;
 
-CRITICAL REQUIREMENTS:
-1. PRESERVE EXACTLY: The person's face, facial features, hair, skin tone, body pose, and background
-2. ONLY MODIFY: The clothing items worn by the person
-3. APPLY THESE EXACT ITEMS: ${outfitDescription}
-4. MAINTAIN: Realistic lighting, shadows, fabric textures, and proper fit
-5. ENSURE: Natural proportions and perspective matching the original photo
+    console.log('Calling OpenAI gpt-image-1 for virtual try-on...');
 
-Generate a photorealistic edited image where ONLY the clothing has changed to match the specified items. Everything else must remain identical to the original photo.`;
-
-    console.log('Calling AI Gateway for virtual try-on...');
-    console.log('Image format:', processedImage.substring(0, 30) + '...');
-
-    // Use Gemini 2.5 Pro for high-quality image editing with vision capabilities
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    // Call OpenAI image generation API with gpt-image-1
+    const response = await fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: editInstruction
-              },
-              {
-                type: "image_url",
-                image_url: {
-                  url: processedImage
-                }
-              }
-            ]
-          }
-        ],
-        modalities: ["image", "text"]
+        model: "gpt-image-1",
+        prompt: `${vtoPrompt}\n\nBase image to edit: ${processedImage}`,
+        n: 1,
+        size: "1024x1024",
+        quality: "high",
+        output_format: "png"
       })
     });
 
-    console.log('AI Gateway response status:', response.status);
+    console.log('OpenAI response status:', response.status);
 
     if (response.status === 429) {
       return new Response(
@@ -160,49 +138,35 @@ Generate a photorealistic edited image where ONLY the clothing has changed to ma
 
     if (response.status === 402) {
       return new Response(
-        JSON.stringify({ error: "AI credits depleted. Please add credits to continue." }),
+        JSON.stringify({ error: "Insufficient credits. Please add credits to your OpenAI account." }),
         { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('AI Gateway error:', response.status, errorText);
-      throw new Error(`AI service returned error ${response.status}. Please try again.`);
+      console.error('OpenAI error:', response.status, errorText);
+      throw new Error(`OpenAI returned error ${response.status}. Please check your API key and try again.`);
     }
 
     const data = await response.json();
-    console.log('AI Gateway response structure:', JSON.stringify(data, null, 2).slice(0, 500));
+    console.log('OpenAI response structure:', JSON.stringify(data, null, 2).slice(0, 500));
 
-    // Try multiple paths to get the image
+    // Extract the generated image URL or base64
     let editedImage = null;
     
-    // Try direct image paths first
-    if (data.choices?.[0]?.message?.images?.[0]?.image_url?.url) {
-      editedImage = data.choices[0].message.images[0].image_url.url;
-    } else if (data.data?.[0]?.url) {
+    if (data.data?.[0]?.url) {
       editedImage = data.data[0].url;
-    } else if (data.image_url) {
-      editedImage = data.image_url;
-    } else if (data.choices?.[0]?.message?.content) {
-      // Handle content array or string
-      const content = data.choices[0].message.content;
-      if (Array.isArray(content)) {
-        const imageContent = content.find((c: any) => c.type === 'image_url');
-        if (imageContent?.image_url?.url) {
-          editedImage = imageContent.image_url.url;
-        }
-      } else if (typeof content === 'string' && content.startsWith('http')) {
-        editedImage = content;
-      }
+    } else if (data.data?.[0]?.b64_json) {
+      editedImage = `data:image/png;base64,${data.data[0].b64_json}`;
     }
 
     if (!editedImage) {
-      console.error('No image in response. Full response:', JSON.stringify(data, null, 2));
-      throw new Error('AI did not generate an image. This feature may require additional setup. Please try again or contact support.');
+      console.error('No image in OpenAI response. Full response:', JSON.stringify(data, null, 2));
+      throw new Error('OpenAI did not generate an image. Please try again.');
     }
 
-    console.log('Virtual try-on completed successfully');
+    console.log('Virtual try-on completed successfully with OpenAI');
 
     return new Response(
       JSON.stringify({ 
@@ -230,37 +194,3 @@ Generate a photorealistic edited image where ONLY the clothing has changed to ma
     );
   }
 });
-
-// Custom SD endpoint integration
-async function callCustomSD(endpoint: string, userImage: string, clothingItems: any[]): Promise<any> {
-  console.log('[SD] Calling custom endpoint with', clothingItems.length, 'items');
-  
-  // Build prompt from clothing items
-  const prompt = clothingItems.map((item: any) => 
-    `${item.category} ${item.name}${item.color ? ` in ${item.color}` : ''}`
-  ).join(', ');
-
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      init_images: [userImage],
-      prompt: `person wearing ${prompt}, photorealistic, high quality, natural lighting`,
-      negative_prompt: 'blurry, low quality, distorted, unrealistic',
-      steps: 20,
-      cfg_scale: 7,
-      denoising_strength: 0.6
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error(`SD endpoint returned ${response.status}`);
-  }
-
-  const data = await response.json();
-  
-  // Handle different SD API response formats
-  return {
-    imageUrl: data.images?.[0] || data.image || data.output?.[0]
-  };
-}
