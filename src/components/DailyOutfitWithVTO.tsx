@@ -2,19 +2,18 @@ import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Camera, Sparkles, Settings2, History, ArrowLeftRight, Share2, Maximize2 } from "lucide-react";
+import { Loader2, Camera, Sparkles, History, ArrowLeftRight, Share2, Maximize2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { WardrobeItem } from "@/hooks/useWardrobe";
 import { getPrimaryPhotoUrl } from "@/utils/photoHelpers";
-import { localVTO, VTOConfig } from "@/services/localVTO";
 import { SizeRecommendation } from "@/services/sizeRecommendation";
 import { BodyShape } from "@/services/bodyShapeAnalysis";
 import { useVTOHistory } from "@/hooks/useVTOHistory";
 import WebcamVTO from "./vto/WebcamVTO";
 import VTOShareDialog from "./vto/VTOShareDialog";
 import VTO3DControls from "./vto/VTO3DControls";
+import { tryRemoteVTO } from "@/services/aiVTORemote";
 
 interface DailyOutfitWithVTOProps {
   outfit: {
@@ -33,11 +32,9 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
   const [sizeRecommendations, setSizeRecommendations] = useState<SizeRecommendation[]>([]);
   const [bodyShape, setBodyShape] = useState<BodyShape | null>(null);
   const [processingTime, setProcessingTime] = useState<number>(0);
-  const [showAdjustments, setShowAdjustments] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [show3DView, setShow3DView] = useState(false);
-  const [adjustments, setAdjustments] = useState<VTOConfig['manualAdjustments']>({});
   const { toast } = useToast();
   const vtoHistory = useVTOHistory();
 
@@ -81,39 +78,28 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
       const clothingItems = await Promise.all(clothingItemsPromises);
       console.log('Clothing items prepared for VTO:', clothingItems.length);
       
-      // Try Cloud AI VTO first, then fall back to Canvas overlay
-      let result: { imageUrl: string; sizeRecommendations: SizeRecommendation[]; bodyShape: BodyShape; processingTime: number };
-      try {
-        const { tryRemoteVTO } = await import('@/services/aiVTORemote');
-        const remote = await tryRemoteVTO({
-          userImage: userImageUrl,
-          clothingItems: clothingItems.map(item => ({ id: item.id, name: item.name, category: item.category }))
-        });
-        console.log('VTO generated successfully with Cloud AI');
-        result = {
-          imageUrl: remote.imageUrl,
-          sizeRecommendations: [],
-          bodyShape: {
-            type: 'rectangle',
-            shoulderWidth: 0,
-            waistWidth: 0,
-            hipWidth: 0,
-            torsoLength: 0,
-            legLength: 0,
-            bustToWaistRatio: 1,
-            waistToHipRatio: 1
-          },
-          processingTime: remote.processingTime ?? 0
-        };
-      } catch (remoteError) {
-        console.warn('Cloud AI VTO failed, falling back to Canvas AI:', remoteError);
-        const { aiVTO } = await import('@/services/aiVTO');
-        result = await aiVTO.generateVTO({
-          userImage: userImageUrl,
-          clothingItems
-        });
-        toast({ title: 'Using Local VTO', description: 'Generated via on-device canvas fallback' });
-      }
+      // Use Gemini AI VTO via edge function
+      const remote = await tryRemoteVTO({
+        userImage: userImageUrl,
+        clothingItems: clothingItems.map(item => ({ id: item.id, name: item.name, category: item.category }))
+      });
+      console.log('VTO generated successfully with Gemini AI');
+      
+      const result = {
+        imageUrl: remote.imageUrl,
+        sizeRecommendations: [],
+        bodyShape: {
+          type: 'rectangle' as const,
+          shoulderWidth: 0,
+          waistWidth: 0,
+          hipWidth: 0,
+          torsoLength: 0,
+          legLength: 0,
+          bustToWaistRatio: 1,
+          waistToHipRatio: 1
+        },
+        processingTime: remote.processingTime ?? 0
+      };
 
       setVtoImage(result.imageUrl);
       setSizeRecommendations(result.sizeRecommendations);
@@ -251,14 +237,6 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
             <Button 
               size="sm" 
               variant="outline"
-              onClick={() => setShowAdjustments(!showAdjustments)}
-              title="Adjustments"
-            >
-              <Settings2 className="w-4 h-4" />
-            </Button>
-            <Button 
-              size="sm" 
-              variant="outline"
               onClick={generateVTO}
               disabled={isGenerating}
             >
@@ -341,31 +319,6 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
           </div>
         )}
 
-        {showAdjustments && outfit.items.length > 0 && (
-          <div className="space-y-3 pt-3 border-t">
-            <p className="text-sm font-medium">Manual Adjustments:</p>
-            {outfit.items.map((item) => (
-              <div key={item.id} className="space-y-2">
-                <p className="text-xs text-muted-foreground">{item.name}</p>
-                <div className="space-y-1">
-                  <label className="text-xs">Scale</label>
-                  <Slider
-                    value={[adjustments[item.id]?.scale ?? 1]}
-                    min={0.5}
-                    max={1.5}
-                    step={0.1}
-                    onValueChange={(value) => {
-                      setAdjustments(prev => ({
-                        ...prev,
-                        [item.id]: { x: prev[item.id]?.x ?? 0, y: prev[item.id]?.y ?? 0, scale: value[0] }
-                      }));
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
             </div>
           </Card>
         </TabsContent>
