@@ -5,8 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Camera, CameraOff, Loader2, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { WardrobeItem } from "@/hooks/useWardrobe";
-import { getPrimaryPhotoUrl } from "@/utils/photoHelpers";
-import { localVTO } from "@/services/localVTO";
+import { tryRemoteVTO } from "@/services/aiVTORemote";
 
 interface WebcamVTOProps {
   outfit: {
@@ -92,21 +91,22 @@ const WebcamVTO = ({ outfit }: WebcamVTOProps) => {
     setCapturedImage(imageData);
 
     try {
-      const result = await localVTO.generateVTO({
+      const result = await tryRemoteVTO({
         userImage: imageData,
         clothingItems: outfit.items.map(item => ({
           id: item.id,
           name: item.name,
-          category: item.category,
-          photo: getPrimaryPhotoUrl(item.photos, item.category)
+          category: item.category
         }))
       });
 
       setVtoResult(result.imageUrl);
-      
+
+      const processingSeconds = result.processingTime ? (result.processingTime / 1000).toFixed(1) : "N/A";
+
       toast({
         title: "Try-On Complete",
-        description: `Processed in ${(result.processingTime / 1000).toFixed(1)}s`
+        description: `Processed in ${processingSeconds}s`
       });
     } catch (error: any) {
       console.error('VTO error:', error);
