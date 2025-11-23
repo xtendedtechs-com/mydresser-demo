@@ -50,6 +50,7 @@ class BackupService {
       const { data, error } = await supabase
         .from('wardrobe_backups')
         .insert({
+          user_id: user.id,
           backup_name: name,
           backup_type: type,
           backup_data: backupData as any,
