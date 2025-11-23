@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { WardrobeSettingsPanel } from "@/components/settings/WardrobeSettingsPanel";
+import { BackupManager } from "@/components/wardrobe/BackupManager";
 
 const WardrobeSettingsPage = () => {
   const navigate = useNavigate();
@@ -26,6 +27,8 @@ const WardrobeSettingsPage = () => {
           </div>
 
           <WardrobeSettingsPanel />
+          
+          <BackupManager />
         </div>
       </div>
     </div>

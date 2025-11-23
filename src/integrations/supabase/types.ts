@@ -6415,6 +6415,39 @@ export type Database = {
         }
         Relationships: []
       }
+      wardrobe_backups: {
+        Row: {
+          backup_data: Json
+          backup_name: string
+          backup_type: string
+          created_at: string
+          id: string
+          item_count: number
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          backup_data: Json
+          backup_name: string
+          backup_type?: string
+          created_at?: string
+          id?: string
+          item_count?: number
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          backup_data?: Json
+          backup_name?: string
+          backup_type?: string
+          created_at?: string
+          id?: string
+          item_count?: number
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       wardrobe_collection_items: {
         Row: {
           added_at: string
