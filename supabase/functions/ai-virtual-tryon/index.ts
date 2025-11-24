@@ -19,11 +19,13 @@ serve(async (req) => {
       throw new Error('Missing required parameters: userImage and clothingItems are required');
     }
 
-    // OpenAI API Key
-    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
-    if (!OPENAI_API_KEY) {
-      console.error('No OpenAI API key configured');
-      throw new Error('OpenAI API key not configured. Please add OPENAI_API_KEY secret.');
+    // Google Cloud API credentials
+    const PROJECT_ID = Deno.env.get('GOOGLE_CLOUD_PROJECT_ID');
+    const API_KEY = Deno.env.get('GOOGLE_CLOUD_API_KEY');
+    
+    if (!PROJECT_ID || !API_KEY) {
+      console.error('No Google Cloud credentials configured');
+      throw new Error('Google Cloud credentials not configured. Please add GOOGLE_CLOUD_PROJECT_ID and GOOGLE_CLOUD_API_KEY secrets.');
     }
 
     // Validate and process user image
@@ -39,7 +41,7 @@ serve(async (req) => {
           throw new Error('Unsupported image format. Please use JPEG, PNG, or WebP.');
         }
         
-        // Check data URL size (max ~4MB for OpenAI)
+        // Check data URL size (max ~4MB)
         const base64Data = src.split(',')[1];
         const sizeInBytes = (base64Data.length * 3) / 4;
         const sizeInMB = sizeInBytes / (1024 * 1024);
@@ -49,7 +51,7 @@ serve(async (req) => {
         }
         
         console.log(`Image size: ${sizeInMB.toFixed(2)}MB`);
-        return src;
+        return base64Data; // Return just the base64 data without the data URL prefix
       }
       
       // For HTTP(S) URLs, fetch and convert
@@ -80,15 +82,14 @@ serve(async (req) => {
         for (let i = 0; i < bytes.length; i++) {
           binary += String.fromCharCode(bytes[i]);
         }
-        const base64 = btoa(binary);
-        return `data:${contentType};base64,${base64}`;
+        return btoa(binary);
       } catch (e) {
         console.error('Image processing failed:', e);
         throw new Error(`Failed to process image: ${e instanceof Error ? e.message : 'Unknown error'}`);
       }
     };
 
-    const processedImage = await processImage(userImage);
+    const processedImageBase64 = await processImage(userImage);
 
     console.log('Processing virtual try-on request with', clothingItems.length, 'items...');
 
@@ -102,32 +103,50 @@ serve(async (req) => {
 
     console.log('Outfit description:', outfitDescription);
 
-    // Construct detailed VTO prompt for image generation
+    // Construct detailed VTO prompt for Vertex AI Imagen
     const vtoPrompt = instruction || 
-      `Create a photorealistic virtual try-on image. Edit the person in the provided image to be wearing these exact clothing items: ${outfitDescription}. 
+      `Create a photorealistic virtual try-on image by editing the person in the provided reference image to be wearing these exact clothing items: ${outfitDescription}. 
       
-IMPORTANT: Preserve the person's face, facial features, hair, skin tone, body pose, and background exactly as they appear in the original photo. Only modify the clothing to match the specified items. Ensure realistic lighting, shadows, fabric textures, proper fit, natural proportions, and perspective matching the original photo.`;
+CRITICAL REQUIREMENTS:
+- Preserve the person's face, facial features, hair, skin tone, body pose, and background exactly as shown in the reference image
+- Only modify the clothing to match the specified items
+- Ensure realistic lighting, shadows, fabric textures, proper fit, and natural proportions
+- Match the perspective and style of the original photo
+- Do not alter anything except the clothing`;
 
-    console.log('Calling OpenAI gpt-image-1 for virtual try-on...');
+    console.log('Calling Google Vertex AI Imagen for virtual try-on...');
 
-    // Call OpenAI image generation API with gpt-image-1
-    const response = await fetch("https://api.openai.com/v1/images/generations", {
+    // Vertex AI Imagen API endpoint
+    const location = 'us-central1';
+    const model = 'imagegeneration@006';
+    const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/${location}/publishers/google/models/${model}:predict`;
+
+    // Call Vertex AI Imagen API
+    const response = await fetch(endpoint, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        "Authorization": `Bearer ${API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-image-1",
-        prompt: `${vtoPrompt}\n\nBase image to edit: ${processedImage}`,
-        n: 1,
-        size: "1024x1024",
-        quality: "high",
-        output_format: "png"
+        instances: [
+          {
+            prompt: vtoPrompt,
+            image: {
+              bytesBase64Encoded: processedImageBase64
+            }
+          }
+        ],
+        parameters: {
+          sampleCount: 1,
+          aspectRatio: "1:1",
+          compressionQuality: 90,
+          mode: "edit-image"
+        }
       })
     });
 
-    console.log('OpenAI response status:', response.status);
+    console.log('Vertex AI response status:', response.status);
 
     if (response.status === 429) {
       return new Response(
@@ -136,37 +155,35 @@ IMPORTANT: Preserve the person's face, facial features, hair, skin tone, body po
       );
     }
 
-    if (response.status === 402) {
+    if (response.status === 403) {
       return new Response(
-        JSON.stringify({ error: "Insufficient credits. Please add credits to your OpenAI account." }),
-        { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "API key invalid or insufficient permissions. Please check your Google Cloud credentials." }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenAI error:', response.status, errorText);
-      throw new Error(`OpenAI returned error ${response.status}. Please check your API key and try again.`);
+      console.error('Vertex AI error:', response.status, errorText);
+      throw new Error(`Vertex AI returned error ${response.status}. Please check your credentials and try again.`);
     }
 
     const data = await response.json();
-    console.log('OpenAI response structure:', JSON.stringify(data, null, 2).slice(0, 500));
+    console.log('Vertex AI response structure:', JSON.stringify(data, null, 2).slice(0, 500));
 
-    // Extract the generated image URL or base64
+    // Extract the generated image from Vertex AI response
     let editedImage = null;
     
-    if (data.data?.[0]?.url) {
-      editedImage = data.data[0].url;
-    } else if (data.data?.[0]?.b64_json) {
-      editedImage = `data:image/png;base64,${data.data[0].b64_json}`;
+    if (data.predictions?.[0]?.bytesBase64Encoded) {
+      editedImage = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
     }
 
     if (!editedImage) {
-      console.error('No image in OpenAI response. Full response:', JSON.stringify(data, null, 2));
-      throw new Error('OpenAI did not generate an image. Please try again.');
+      console.error('No image in Vertex AI response. Full response:', JSON.stringify(data, null, 2));
+      throw new Error('Vertex AI did not generate an image. Please try again.');
     }
 
-    console.log('Virtual try-on completed successfully with OpenAI');
+    console.log('Virtual try-on completed successfully with Vertex AI Imagen');
 
     return new Response(
       JSON.stringify({ 
