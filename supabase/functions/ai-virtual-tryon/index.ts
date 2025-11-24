@@ -1,10 +1,68 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { create, getNumericDate } from "https://deno.land/x/djwt@v2.8/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Generate OAuth2 access token from service account
+async function getAccessToken(serviceAccount: any): Promise<string> {
+  const header = {
+    alg: "RS256" as const,
+    typ: "JWT"
+  };
+
+  const now = Math.floor(Date.now() / 1000);
+  const payload = {
+    iss: serviceAccount.client_email,
+    scope: "https://www.googleapis.com/auth/cloud-platform",
+    aud: "https://oauth2.googleapis.com/token",
+    exp: now + 3600,
+    iat: now
+  };
+
+  // Import the private key for signing
+  const privateKey = await crypto.subtle.importKey(
+    "pkcs8",
+    new TextEncoder().encode(
+      serviceAccount.private_key
+        .replace(/-----BEGIN PRIVATE KEY-----/, "")
+        .replace(/-----END PRIVATE KEY-----/, "")
+        .replace(/\\n/g, "\n")
+        .trim()
+    ).buffer,
+    {
+      name: "RSASSA-PKCS1-v1_5",
+      hash: "SHA-256",
+    },
+    true,
+    ["sign"]
+  );
+
+  const jwt = await create(header, payload, privateKey);
+
+  // Exchange JWT for access token
+  const response = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+      assertion: jwt,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to get access token: ${error}`);
+  }
+
+  const data = await response.json();
+  return data.access_token;
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -19,14 +77,19 @@ serve(async (req) => {
       throw new Error('Missing required parameters: userImage and clothingItems are required');
     }
 
-    // Google Cloud API credentials
+    // Google Cloud credentials
+    const SERVICE_ACCOUNT_JSON = Deno.env.get('GOOGLE_CLOUD_SERVICE_ACCOUNT_JSON');
     const PROJECT_ID = Deno.env.get('GOOGLE_CLOUD_PROJECT_ID');
-    const API_KEY = Deno.env.get('GOOGLE_CLOUD_API_KEY');
     
-    if (!PROJECT_ID || !API_KEY) {
+    if (!SERVICE_ACCOUNT_JSON || !PROJECT_ID) {
       console.error('No Google Cloud credentials configured');
-      throw new Error('Google Cloud credentials not configured. Please add GOOGLE_CLOUD_PROJECT_ID and GOOGLE_CLOUD_API_KEY secrets.');
+      throw new Error('Google Cloud credentials not configured. Please add service account JSON and project ID.');
     }
+
+    const serviceAccount = JSON.parse(SERVICE_ACCOUNT_JSON);
+    
+    console.log('Generating OAuth2 access token...');
+    const accessToken = await getAccessToken(serviceAccount);
 
     // Validate and process user image
     const processImage = async (src: string): Promise<string> => {
@@ -121,11 +184,11 @@ CRITICAL REQUIREMENTS:
     const model = 'imagegeneration@006';
     const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${PROJECT_ID}/locations/${location}/publishers/google/models/${model}:predict`;
 
-    // Call Vertex AI Imagen API
+    // Call Vertex AI Imagen API with OAuth2 token
     const response = await fetch(endpoint, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${API_KEY}`,
+        "Authorization": `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
