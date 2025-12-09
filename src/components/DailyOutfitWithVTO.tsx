@@ -78,10 +78,10 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
       const clothingItems = await Promise.all(clothingItemsPromises);
       console.log('Clothing items prepared for VTO:', clothingItems.length);
       
-      // Use Gemini AI VTO via edge function
+      // Use Gemini AI VTO via edge function - include photos for realistic dressing
       const remote = await tryRemoteVTO({
         userImage: userImageUrl,
-        clothingItems: clothingItems.map(item => ({ id: item.id, name: item.name, category: item.category }))
+        clothingItems: clothingItems
       });
       console.log('VTO generated successfully with Gemini AI');
       
