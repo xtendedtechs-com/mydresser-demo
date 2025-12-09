@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,9 +37,16 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
   const [show3DView, setShow3DView] = useState(false);
   const { toast } = useToast();
   const vtoHistory = useVTOHistory();
+  
+  // Track if we've already generated for this outfit to prevent duplicate calls
+  const generatedForRef = useRef<string | null>(null);
+  const isGeneratingRef = useRef(false);
 
   useEffect(() => {
-    if (userPhoto && outfit.items.length > 0) {
+    // Only auto-generate once per outfit, prevent duplicate calls
+    const key = `${outfit.id}-${userPhoto?.slice(0, 50)}`;
+    if (userPhoto && outfit.items.length > 0 && generatedForRef.current !== key && !isGeneratingRef.current) {
+      generatedForRef.current = key;
       generateVTO();
     }
   }, [outfit.id, userPhoto]);
@@ -51,8 +58,9 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
   };
 
   const generateVTO = async () => {
-    if (!userPhoto) return;
+    if (!userPhoto || isGeneratingRef.current) return;
 
+    isGeneratingRef.current = true;
     setIsGenerating(true);
     try {
       console.log('Starting VTO generation...');
@@ -126,6 +134,7 @@ const DailyOutfitWithVTO = ({ outfit, userPhoto }: DailyOutfitWithVTOProps) => {
       });
     } finally {
       setIsGenerating(false);
+      isGeneratingRef.current = false;
     }
   };
 
