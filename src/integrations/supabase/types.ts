@@ -6939,7 +6939,7 @@ export type Database = {
       }
       get_merchant_profile_safe:
         | {
-            Args: { profile_user_id: string }
+            Args: never
             Returns: {
               business_name: string
               business_type: string
@@ -6951,7 +6951,7 @@ export type Database = {
             }[]
           }
         | {
-            Args: never
+            Args: { profile_user_id: string }
             Returns: {
               business_name: string
               business_type: string

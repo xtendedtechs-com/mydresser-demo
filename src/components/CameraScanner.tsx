@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useCameraScannerStore } from '@/stores/useCameraScannerStore';
+import { removeBackground, loadImage } from '@/utils/backgroundRemoval';
 
 interface CameraScannerProps {
   onScanComplete: (data: any) => void;
@@ -15,7 +16,9 @@ export const CameraScanner = ({ onScanComplete, onClose }: CameraScannerProps) =
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [isScanning, setIsScanning] = useState(false);
+  const [isRemovingBg, setIsRemovingBg] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [processedImage, setProcessedImage] = useState<string | null>(null);
   const [cameraActive, setCameraActive] = useState(false);
   const { toast } = useToast();
   const { setActive } = useCameraScannerStore();
@@ -59,7 +62,7 @@ export const CameraScanner = ({ onScanComplete, onClose }: CameraScannerProps) =
     }
   }, []);
 
-  const capturePhoto = useCallback(() => {
+  const capturePhoto = useCallback(async () => {
     if (!videoRef.current) return;
 
     const canvas = document.createElement('canvas');
@@ -74,13 +77,48 @@ export const CameraScanner = ({ onScanComplete, onClose }: CameraScannerProps) =
     
     setCapturedImage(imageData);
     stopCamera();
-  }, [stopCamera]);
+    
+    // Start background removal
+    setIsRemovingBg(true);
+    try {
+      // Convert data URL to blob then to image element
+      const response = await fetch(imageData);
+      const blob = await response.blob();
+      const imgElement = await loadImage(blob);
+      
+      // Remove background
+      const processedBlob = await removeBackground(imgElement);
+      
+      // Convert back to data URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProcessedImage(reader.result as string);
+        setIsRemovingBg(false);
+        toast({
+          title: 'Background Removed',
+          description: 'Image processed successfully',
+        });
+      };
+      reader.readAsDataURL(processedBlob);
+    } catch (error) {
+      console.error('Background removal failed:', error);
+      // Fall back to original image
+      setProcessedImage(imageData);
+      setIsRemovingBg(false);
+      toast({
+        title: 'Background removal skipped',
+        description: 'Using original image',
+        variant: 'default'
+      });
+    }
+  }, [stopCamera, toast]);
 
   const analyzeCapturedImage = useCallback(async () => {
     if (!capturedImage) return;
 
     setIsScanning(true);
     try {
+      // Use original image for analysis (better for AI recognition)
       const { data, error } = await supabase.functions.invoke('ai-clothing-scanner', {
         body: { imageData: capturedImage }
       });
@@ -93,9 +131,10 @@ export const CameraScanner = ({ onScanComplete, onClose }: CameraScannerProps) =
           description: `Detected: ${data.analysis.name}`,
         });
         
+        // Use processed (bg removed) image for the item, fallback to original
         onScanComplete({
           ...data.analysis,
-          photo: capturedImage
+          photo: processedImage || capturedImage
         });
         onClose();
       } else {
@@ -111,10 +150,11 @@ export const CameraScanner = ({ onScanComplete, onClose }: CameraScannerProps) =
     } finally {
       setIsScanning(false);
     }
-  }, [capturedImage, onScanComplete, onClose, toast]);
+  }, [capturedImage, processedImage, onScanComplete, onClose, toast]);
 
   const retakePhoto = useCallback(() => {
     setCapturedImage(null);
+    setProcessedImage(null);
     startCamera();
   }, [startCamera]);
 
@@ -139,13 +179,23 @@ export const CameraScanner = ({ onScanComplete, onClose }: CameraScannerProps) =
         </div>
 
         {/* Camera/Image View */}
-        <div className="flex-1 relative">
+        <div className="flex-1 relative bg-neutral-900">
           {capturedImage ? (
-            <img 
-              src={capturedImage} 
-              alt="Captured" 
-              className="w-full h-full object-contain"
-            />
+            <div className="relative w-full h-full">
+              {/* Show processed image if available, otherwise original */}
+              <img 
+                src={processedImage || capturedImage} 
+                alt="Captured" 
+                className="w-full h-full object-contain"
+              />
+              {/* Loading overlay during background removal */}
+              {isRemovingBg && (
+                <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
+                  <Loader2 className="h-10 w-10 text-white animate-spin mb-3" />
+                  <p className="text-white text-sm">Removing background...</p>
+                </div>
+              )}
+            </div>
           ) : (
             <video
               ref={videoRef}
@@ -209,7 +259,7 @@ export const CameraScanner = ({ onScanComplete, onClose }: CameraScannerProps) =
                     variant="outline" 
                     size="lg"
                     className="flex-1 h-14 bg-white/10 text-white border-white/20 hover:bg-white/20"
-                    disabled={isScanning}
+                    disabled={isScanning || isRemovingBg}
                   >
                     <RotateCcw className="mr-2 h-5 w-5" />
                     Retake
@@ -219,7 +269,7 @@ export const CameraScanner = ({ onScanComplete, onClose }: CameraScannerProps) =
                     onClick={analyzeCapturedImage} 
                     size="lg" 
                     className="flex-[2] h-14 bg-white text-black hover:bg-white/90"
-                    disabled={isScanning}
+                    disabled={isScanning || isRemovingBg}
                   >
                     {isScanning ? (
                       <>
