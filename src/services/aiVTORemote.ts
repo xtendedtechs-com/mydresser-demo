@@ -5,6 +5,8 @@ export interface RemoteClothingItem {
   name: string;
   category: string;
   photo?: string;
+  color?: string;
+  brand?: string;
 }
 
 export interface RemoteVTORequest {
@@ -21,6 +23,10 @@ export interface RemoteVTOResponse {
 async function ensureDataUrl(input: string): Promise<string> {
   // If it's already a data URL, return as-is
   if (input.startsWith('data:')) return input;
+  // Skip if empty or invalid
+  if (!input || input === 'undefined' || input === 'null') {
+    return '';
+  }
 
   // Try to load into an <img> and convert to data URL
   return new Promise<string>((resolve, reject) => {
@@ -54,7 +60,8 @@ async function ensureDataUrl(input: string): Promise<string> {
 
     img.onerror = () => {
       cleanup();
-      reject(new Error(`Failed to normalize image to data URL: ${input}`));
+      // Return empty string instead of rejecting for clothing items
+      resolve('');
     };
 
     img.src = input;
@@ -63,13 +70,28 @@ async function ensureDataUrl(input: string): Promise<string> {
 
 export async function tryRemoteVTO(req: RemoteVTORequest): Promise<RemoteVTOResponse> {
   const start = performance.now();
-  // Ensure user image is a data URL; AI function handles this best
+  // Ensure user image is a data URL
   const safeUserImage = await ensureDataUrl(req.userImage);
+
+  // Process clothing items - include photos as data URLs
+  const clothingItemsWithPhotos = await Promise.all(
+    req.clothingItems.map(async (item) => {
+      const photoDataUrl = item.photo ? await ensureDataUrl(item.photo) : undefined;
+      return {
+        id: item.id,
+        name: item.name,
+        category: item.category,
+        photo: photoDataUrl || undefined,
+        color: item.color,
+        brand: item.brand
+      };
+    })
+  );
 
   const body = {
     userImage: safeUserImage,
-    clothingItems: req.clothingItems.map(({ id, name, category }) => ({ id, name, category })),
-    instruction: req.instruction ?? 'Apply the listed garments realistically with correct scale and alignment.'
+    clothingItems: clothingItemsWithPhotos,
+    instruction: req.instruction ?? 'Dress the person in the provided clothing items realistically.'
   };
 
   const { data: funcData, error } = await supabase.functions.invoke('ai-virtual-tryon', {

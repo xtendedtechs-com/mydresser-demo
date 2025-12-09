@@ -36,8 +36,30 @@ serve(async (req) => {
       return parts.join(' ');
     }).join('\n');
 
-    // Build the VTO prompt
-    const vtoPrompt = instruction || `You are a virtual try-on assistant. Edit this image of a person to show them wearing the following clothing items naturally and realistically:
+    // Check if we have clothing images to include
+    const clothingWithPhotos = clothingItems.filter((item: any) => item.photo && item.photo.startsWith('data:'));
+    const hasClothingImages = clothingWithPhotos.length > 0;
+    
+    console.log(`Found ${clothingWithPhotos.length} clothing items with photos`);
+
+    // Build the VTO prompt - different based on whether we have clothing images
+    const vtoPrompt = instruction || (hasClothingImages 
+      ? `You are a virtual try-on assistant. I'm providing images of specific clothing items that need to be applied to the person in the first image.
+
+CLOTHING ITEMS TO APPLY:
+${clothingDescription}
+
+The clothing item images are provided after the person's photo. Apply EXACTLY these clothes to the person.
+
+CRITICAL REQUIREMENTS:
+- Keep the person's face, hair, skin tone, and body pose exactly the same
+- Replace/add ONLY the clothing items shown in the reference images
+- Match the exact colors, patterns, and style of the provided clothing images
+- Make the clothing fit naturally on the body with proper proportions
+- Maintain realistic lighting, shadows, and fabric textures matching the scene
+- The result should look like a natural photograph
+- Do NOT change the background or anything other than the clothing`
+      : `You are a virtual try-on assistant. Edit this image of a person to show them wearing the following clothing items naturally and realistically:
 
 ${clothingDescription}
 
@@ -47,9 +69,39 @@ CRITICAL REQUIREMENTS:
 - Make the clothing fit naturally on the body with proper proportions
 - Maintain realistic lighting, shadows, and fabric textures
 - The result should look like a natural photograph
-- Do NOT change the background or anything other than the clothing`;
+- Do NOT change the background or anything other than the clothing`);
 
     console.log('Calling Lovable AI Gateway (Nano Banana) for VTO...');
+
+    // Build content array with user image first, then clothing images
+    const contentArray: any[] = [
+      {
+        type: "text",
+        text: vtoPrompt
+      },
+      {
+        type: "image_url",
+        image_url: {
+          url: userImage
+        }
+      }
+    ];
+
+    // Add clothing item images if available
+    if (hasClothingImages) {
+      for (const item of clothingWithPhotos) {
+        contentArray.push({
+          type: "text",
+          text: `[${item.name} - ${item.category}]:`
+        });
+        contentArray.push({
+          type: "image_url",
+          image_url: {
+            url: item.photo
+          }
+        });
+      }
+    }
 
     // Call Lovable AI Gateway with image editing capability
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -63,18 +115,7 @@ CRITICAL REQUIREMENTS:
         messages: [
           {
             role: "user",
-            content: [
-              {
-                type: "text",
-                text: vtoPrompt
-              },
-              {
-                type: "image_url",
-                image_url: {
-                  url: userImage
-                }
-              }
-            ]
+            content: contentArray
           }
         ],
         modalities: ["image", "text"]
